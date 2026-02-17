@@ -1,0 +1,59 @@
+import { CheckCircle2 } from "lucide-react";
+
+const highlights = [
+  "Ph.D. in Human Resource Management",
+  "10+ years of academic teaching experience",
+  "Published researcher in peer-reviewed journals",
+  "UGC NET qualified & subject matter expert",
+  "Mentor to 500+ MBA & BBA students",
+];
+
+const About = () => {
+  return (
+    <section id="about" className="bg-muted px-6 py-20">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          {/* Avatar placeholder */}
+          <div className="flex justify-center lg:justify-start">
+            <div className="relative">
+              <div className="h-72 w-72 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <span className="text-6xl font-bold text-primary/20" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  HR
+                </span>
+              </div>
+              <div className="absolute -bottom-3 -right-3 rounded-lg bg-accent px-4 py-2">
+                <span className="text-sm font-bold text-accent-foreground">Educator</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.15em] text-accent">
+              About
+            </p>
+            <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
+              Dedicated to Academic Excellence
+            </h2>
+            <p className="mb-6 leading-relaxed text-muted-foreground">
+              With a passion for Human Resource Management and organizational sciences, 
+              this platform bridges the gap between rigorous academic research and 
+              practical HR knowledge. Our mission is to empower the next generation 
+              of HR professionals and researchers.
+            </p>
+
+            <div className="space-y-3">
+              {highlights.map((item) => (
+                <div key={item} className="flex items-center gap-3">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
+                  <span className="text-sm font-medium text-foreground">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default About;
