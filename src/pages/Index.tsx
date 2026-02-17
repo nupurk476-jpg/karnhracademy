@@ -1,9 +1,8 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import AudienceCards from "@/components/AudienceCards";
-import ResearchAreas from "@/components/ResearchAreas";
-import Resources from "@/components/Resources";
-import About from "@/components/About";
+import AboutPreview from "@/components/AboutPreview";
+import FeaturedSection from "@/components/FeaturedSection";
+import NewsletterSignup from "@/components/NewsletterSignup";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -11,10 +10,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <AudienceCards />
-      <ResearchAreas />
-      <Resources />
-      <About />
+      <AboutPreview />
+      <FeaturedSection />
+      <NewsletterSignup />
       <Footer />
     </div>
   );

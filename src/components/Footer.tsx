@@ -1,8 +1,9 @@
-import { BookOpen, Mail, MapPin } from "lucide-react";
+import { BookOpen, Mail, Linkedin, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer id="contact" className="border-t border-border bg-primary px-6 py-16">
+    <footer className="border-t border-border bg-primary px-6 py-16">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
@@ -12,59 +13,45 @@ const Footer = () => {
                 HR & Management
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-primary-foreground/60">
-              Advancing knowledge in Human Resource Management through research, 
-              teaching, and academic collaboration.
+            <p className="mb-4 text-sm leading-relaxed text-primary-foreground/60">
+              Advancing knowledge in Human Resource Management through research, teaching, and academic collaboration.
             </p>
+            <div className="flex gap-3">
+              <a href="#" className="text-primary-foreground/50 transition-colors hover:text-accent"><Linkedin className="h-5 w-5" /></a>
+              <a href="#" className="text-primary-foreground/50 transition-colors hover:text-accent"><Youtube className="h-5 w-5" /></a>
+            </div>
           </div>
 
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">
-              Quick Links
-            </h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">Quick Links</h4>
             <div className="space-y-2">
-              {["Home", "Research", "Resources", "About"].map((link) => (
-                <a
-                  key={link}
-                  href={`#${link.toLowerCase()}`}
-                  className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent"
-                >
-                  {link}
-                </a>
+              {[
+                { label: "Home", to: "/" },
+                { label: "Blogs", to: "/blogs" },
+                { label: "Notes", to: "/notes" },
+                { label: "Quizzes", to: "/quizzes" },
+                { label: "Books", to: "/books" },
+              ].map((link) => (
+                <Link key={link.label} to={link.to} className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">
+                  {link.label}
+                </Link>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">
-              For Students
-            </h4>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">About</h4>
             <div className="space-y-2">
-              {["MBA Resources", "BBA Notes", "UGC NET Prep", "Research Guidance"].map((link) => (
-                <a
-                  key={link}
-                  href="#resources"
-                  className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent"
-                >
-                  {link}
-                </a>
-              ))}
+              <Link to="/about" className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">About Us</Link>
+              <Link to="/contact" className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">Contact</Link>
             </div>
           </div>
 
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">
-              Contact
-            </h4>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-accent" />
-                <span className="text-sm text-primary-foreground/60">contact@hrresearchhub.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-accent" />
-                <span className="text-sm text-primary-foreground/60">India</span>
-              </div>
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">Contact</h4>
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-accent" />
+              <span className="text-sm text-primary-foreground/60">contact@hrresearchhub.com</span>
             </div>
           </div>
         </div>
