@@ -57,6 +57,7 @@ const BlogPost = () => {
         </Link>
         <span className="mb-3 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">{post.category}</span>
         <h1 className="mb-4 text-4xl font-bold text-foreground">{post.title}</h1>
+        {post.cover_image && <img src={post.cover_image} alt={post.title} className="mb-6 w-full rounded-lg object-cover max-h-96" />}
         <div className="mb-8 flex items-center gap-3 text-sm text-muted-foreground">
           <span>By {post.author_name}</span>
           <span>·</span>

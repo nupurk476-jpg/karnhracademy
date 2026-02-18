@@ -8,7 +8,9 @@ const categories = ["HRM Basics", "Organizational Behaviour", "Research Methodol
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false });
+  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const load = () => {
@@ -19,13 +21,25 @@ const AdminBlogs = () => {
 
   const resetForm = () => {
     setEditing(null);
-    setForm({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false });
+    setForm({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
+    setImageFile(null);
   };
 
   const handleSave = async () => {
     if (!form.title || !form.content) return;
+    setUploading(true);
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const data = { ...form, slug };
+    let cover_image = form.cover_image;
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop();
+      const path = `${slug}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("blog-images").upload(path, imageFile);
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
+        cover_image = urlData.publicUrl;
+      }
+    }
+    const data = { ...form, slug, cover_image };
     if (editing) {
       await supabase.from("blog_posts").update(data).eq("id", editing.id);
       toast({ title: "Post updated" });
@@ -33,6 +47,7 @@ const AdminBlogs = () => {
       await supabase.from("blog_posts").insert(data);
       toast({ title: "Post created" });
     }
+    setUploading(false);
     resetForm();
     load();
   };
@@ -45,7 +60,8 @@ const AdminBlogs = () => {
 
   const startEdit = (post: any) => {
     setEditing(post);
-    setForm({ title: post.title, slug: post.slug, excerpt: post.excerpt || "", content: post.content, category: post.category, author_name: post.author_name, published: post.published });
+    setForm({ title: post.title, slug: post.slug, excerpt: post.excerpt || "", content: post.content, category: post.category, author_name: post.author_name, published: post.published, cover_image: post.cover_image || "" });
+    setImageFile(null);
   };
 
   return (
@@ -63,13 +79,18 @@ const AdminBlogs = () => {
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <input placeholder="Author Name" value={form.author_name} onChange={e => setForm({ ...form, author_name: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Cover Image</label>
+          {form.cover_image && <img src={form.cover_image} alt="Cover" className="mb-2 h-32 w-auto rounded-md object-cover" />}
+          <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="text-sm text-muted-foreground" />
+        </div>
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })} />
           Published
         </label>
         <div className="flex gap-2">
-          <button onClick={handleSave} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
-            {editing ? "Update" : "Create"}
+          <button onClick={handleSave} disabled={uploading} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+            {uploading ? "Uploading..." : editing ? "Update" : "Create"}
           </button>
           {editing && <button onClick={resetForm} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">Cancel</button>}
         </div>
