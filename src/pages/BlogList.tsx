@@ -47,7 +47,9 @@ const BlogList = () => {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <Link key={post.id} to={`/blogs/${post.slug}`} className="group rounded-lg border border-border bg-card p-6 transition-shadow hover:shadow-md">
+              <Link key={post.id} to={`/blogs/${post.slug}`} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
+                {post.cover_image && <img src={post.cover_image} alt={post.title} className="h-44 w-full object-cover" />}
+                <div className="p-6">
                 <span className="mb-2 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">{post.category}</span>
                 <h2 className="mb-2 text-xl font-semibold text-foreground group-hover:text-accent">{post.title}</h2>
                 <p className="mb-3 text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
@@ -56,6 +58,7 @@ const BlogList = () => {
                   <span>·</span>
                   <span>{new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
+              </div>
               </Link>
             ))}
           </div>
