@@ -1,4 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const highlights = [
   "UGC NET Qualified",
@@ -7,16 +9,29 @@ const highlights = [
 ];
 
 const AboutPreview = () => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const { data } = supabase.storage.from("educator").getPublicUrl("profile.jpg");
+    fetch(data.publicUrl, { method: "HEAD" }).then((res) => {
+      if (res.ok) setImageUrl(data.publicUrl + "?t=" + Date.now());
+    }).catch(() => {});
+  }, []);
+
   return (
     <section className="bg-muted px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="flex justify-center lg:justify-start">
             <div className="relative">
-              <div className="h-72 w-72 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <span className="text-6xl font-bold text-primary/20" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  HR
-                </span>
+              <div className="h-72 w-72 rounded-2xl bg-primary/10 flex items-center justify-center overflow-hidden">
+                {imageUrl ? (
+                  <img src={imageUrl} alt="Educator" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-6xl font-bold text-primary/20" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    HR
+                  </span>
+                )}
               </div>
               <div className="absolute -bottom-3 -right-3 rounded-lg bg-accent px-4 py-2">
                 <span className="text-sm font-bold text-accent-foreground">Educator</span>
