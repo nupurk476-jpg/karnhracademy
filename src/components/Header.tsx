@@ -11,6 +11,7 @@ const Header = () => {
     { label: "Notes", to: "/notes" },
     { label: "Quizzes", to: "/quizzes" },
     { label: "Books", to: "/books" },
+    { label: "Newspaper", to: "/newspaper" },
     { label: "About", to: "/about" },
     { label: "Contact", to: "/contact" },
   ];
