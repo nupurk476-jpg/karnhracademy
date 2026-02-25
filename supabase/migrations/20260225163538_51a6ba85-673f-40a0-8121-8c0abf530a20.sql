@@ -1,0 +1,1 @@
+ALTER TABLE public.newspaper_highlights ADD COLUMN section text NOT NULL DEFAULT 'general';

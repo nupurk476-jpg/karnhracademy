@@ -3,14 +3,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Plus, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+
+const SECTIONS = ["Business", "International", "Sports", "General", "Editorial"] as const;
 
 interface Highlight {
   id: string;
   title: string;
   summary: string | null;
   image_url: string | null;
+  section: string;
   created_at: string;
 }
 
@@ -18,6 +23,7 @@ const AdminNewspaperHighlights = () => {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
+  const [section, setSection] = useState("general");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -27,7 +33,7 @@ const AdminNewspaperHighlights = () => {
       .from("newspaper_highlights")
       .select("*")
       .order("created_at", { ascending: false });
-    if (data) setHighlights(data);
+    if (data) setHighlights(data as Highlight[]);
   };
 
   useEffect(() => { fetchHighlights(); }, []);
@@ -55,7 +61,7 @@ const AdminNewspaperHighlights = () => {
 
     const { error } = await supabase
       .from("newspaper_highlights")
-      .insert({ title: title.trim(), summary: summary.trim() || null, image_url });
+      .insert({ title: title.trim(), summary: summary.trim() || null, image_url, section: section.toLowerCase() });
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -63,6 +69,7 @@ const AdminNewspaperHighlights = () => {
       toast({ title: "Added!" });
       setTitle("");
       setSummary("");
+      setSection("general");
       setImageFile(null);
       fetchHighlights();
     }
@@ -83,6 +90,19 @@ const AdminNewspaperHighlights = () => {
         <Input placeholder="Headline / Title" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Textarea placeholder="Summary (optional)" value={summary} onChange={(e) => setSummary(e.target.value)} />
         <div>
+          <label className="mb-1 block text-sm font-medium text-muted-foreground">Section</label>
+          <Select value={section} onValueChange={setSection}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select section" />
+            </SelectTrigger>
+            <SelectContent>
+              {SECTIONS.map((s) => (
+                <SelectItem key={s} value={s.toLowerCase()}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
           <label className="mb-1 block text-sm font-medium text-muted-foreground">Image (optional)</label>
           <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
         </div>
@@ -102,7 +122,10 @@ const AdminNewspaperHighlights = () => {
               </div>
             )}
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground">{h.title}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground">{h.title}</h3>
+                <Badge variant="secondary" className="capitalize">{h.section}</Badge>
+              </div>
               {h.summary && <p className="mt-1 text-sm text-muted-foreground">{h.summary}</p>}
               <p className="mt-1 text-xs text-muted-foreground">{new Date(h.created_at).toLocaleDateString()}</p>
             </div>
