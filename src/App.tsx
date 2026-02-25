@@ -21,6 +21,7 @@ import AdminBooks from "./pages/admin/AdminBooks";
 import AdminComments from "./pages/admin/AdminComments";
 import AdminSubscribers from "./pages/admin/AdminSubscribers";
 import AdminNewspaperHighlights from "./pages/admin/AdminNewspaperHighlights";
+import NewspaperPage from "./pages/NewspaperPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/quizzes" element={<QuizList />} />
           <Route path="/quizzes/:id" element={<QuizTake />} />
           <Route path="/books" element={<BooksPage />} />
+          <Route path="/newspaper" element={<NewspaperPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/admin" element={<AdminLayout />}>
