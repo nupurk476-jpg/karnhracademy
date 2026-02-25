@@ -20,6 +20,7 @@ import AdminQuizzes from "./pages/admin/AdminQuizzes";
 import AdminBooks from "./pages/admin/AdminBooks";
 import AdminComments from "./pages/admin/AdminComments";
 import AdminSubscribers from "./pages/admin/AdminSubscribers";
+import AdminNewspaperHighlights from "./pages/admin/AdminNewspaperHighlights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="books" element={<AdminBooks />} />
             <Route path="comments" element={<AdminComments />} />
             <Route path="subscribers" element={<AdminSubscribers />} />
+            <Route path="newspaper" element={<AdminNewspaperHighlights />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

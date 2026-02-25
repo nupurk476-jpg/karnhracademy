@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper } from "lucide-react";
 
 const adminLinks = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
@@ -9,6 +9,7 @@ const adminLinks = [
   { label: "Books", to: "/admin/books", icon: BookMarked },
   { label: "Comments", to: "/admin/comments", icon: MessageSquare },
   { label: "Subscribers", to: "/admin/subscribers", icon: Mail },
+  { label: "Newspaper", to: "/admin/newspaper", icon: Newspaper },
 ];
 
 const AdminLayout = () => {

@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import AboutPreview from "@/components/AboutPreview";
 import FeaturedSection from "@/components/FeaturedSection";
+import NewspaperHighlights from "@/components/NewspaperHighlights";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import Footer from "@/components/Footer";
 
@@ -12,6 +13,7 @@ const Index = () => {
       <Hero />
       <AboutPreview />
       <FeaturedSection />
+      <NewspaperHighlights />
       <NewsletterSignup />
       <Footer />
     </div>

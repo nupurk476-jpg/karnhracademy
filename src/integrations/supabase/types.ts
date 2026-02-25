@@ -139,6 +139,30 @@ export type Database = {
         }
         Relationships: []
       }
+      newspaper_highlights: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           created_at: string
