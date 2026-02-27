@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { BookOpen, ExternalLink } from "lucide-react";
+import { BookOpen, ExternalLink, FileDown } from "lucide-react";
 
 const BooksPage = () => {
   const [books, setBooks] = useState<any[]>([]);
@@ -28,11 +28,18 @@ const BooksPage = () => {
                 <h3 className="mb-1 text-lg font-semibold text-foreground">{book.title}</h3>
                 <p className="mb-2 text-sm font-medium text-accent">by {book.author}</p>
                 <p className="mb-4 flex-1 text-sm text-muted-foreground">{book.description}</p>
-                {book.buy_link && (
-                  <a href={book.buy_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
-                    Buy Now <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  {book.pdf_url && (
+                    <a href={book.pdf_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 self-start rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+                      Download PDF <FileDown className="h-4 w-4" />
+                    </a>
+                  )}
+                  {book.buy_link && (
+                    <a href={book.buy_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
+                      Buy Now <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>

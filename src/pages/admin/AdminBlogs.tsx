@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
-const categories = ["HRM Basics", "Organizational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting"];
+const categories = ["HRM Basics", "Organizational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
 
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
