@@ -83,6 +83,11 @@ const QuizTake = () => {
                         );
                       })}
                     </div>
+                    {submitted && q.explanation && (
+                      <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
+                        <span className="font-semibold text-accent">Explanation:</span> {q.explanation}
+                      </div>
+                    )}
                   </div>
                 );
               })}

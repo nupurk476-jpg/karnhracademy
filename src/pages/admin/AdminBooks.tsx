@@ -6,6 +6,8 @@ import { Trash2 } from "lucide-react";
 const AdminBooks = () => {
   const [books, setBooks] = useState<any[]>([]);
   const [form, setForm] = useState({ title: "", author: "", description: "", buy_link: "" });
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const load = () => {
@@ -16,9 +18,21 @@ const AdminBooks = () => {
 
   const handleCreate = async () => {
     if (!form.title || !form.author) return;
-    await supabase.from("book_recommendations").insert(form);
+    setUploading(true);
+    let pdf_url: string | null = null;
+    if (pdfFile) {
+      const path = `${form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}.pdf`;
+      const { error } = await supabase.storage.from("educator").upload(path, pdfFile);
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("educator").getPublicUrl(path);
+        pdf_url = urlData.publicUrl;
+      }
+    }
+    await supabase.from("book_recommendations").insert({ ...form, pdf_url });
     toast({ title: "Book added" });
     setForm({ title: "", author: "", description: "", buy_link: "" });
+    setPdfFile(null);
+    setUploading(false);
     load();
   };
 
@@ -37,7 +51,13 @@ const AdminBooks = () => {
         <input placeholder="Author" value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Buy Link (affiliate URL)" value={form.buy_link} onChange={e => setForm({ ...form, buy_link: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <button onClick={handleCreate} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">Add Book</button>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Upload PDF (optional)</label>
+          <input type="file" accept=".pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} className="text-sm text-muted-foreground" />
+        </div>
+        <button onClick={handleCreate} disabled={uploading} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+          {uploading ? "Uploading..." : "Add Book"}
+        </button>
       </div>
       <div className="space-y-2">
         {books.map((b) => (

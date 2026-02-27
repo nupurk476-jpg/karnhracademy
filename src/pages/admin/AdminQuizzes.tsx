@@ -9,7 +9,7 @@ const AdminQuizzes = () => {
   const [topic, setTopic] = useState("");
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   const [questions, setQuestions] = useState<any[]>([]);
-  const [qForm, setQForm] = useState({ question: "", options: ["", "", "", ""], correct_answer: 0 });
+  const [qForm, setQForm] = useState({ question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "" });
   const { toast } = useToast();
 
   const loadQuizzes = () => {
@@ -45,8 +45,9 @@ const AdminQuizzes = () => {
       question: qForm.question,
       options: qForm.options,
       correct_answer: qForm.correct_answer,
+      explanation: qForm.explanation || null,
     });
-    setQForm({ question: "", options: ["", "", "", ""], correct_answer: 0 });
+    setQForm({ question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "" });
     toast({ title: "Question added" });
     loadQuestions(selectedQuiz);
   };
@@ -98,6 +99,7 @@ const AdminQuizzes = () => {
                   <input placeholder={`Option ${i + 1}`} value={opt} onChange={e => { const o = [...qForm.options]; o[i] = e.target.value; setQForm({ ...qForm, options: o }); }} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
                 </div>
               ))}
+              <input placeholder="Explanation (shown after answer)" value={qForm.explanation} onChange={e => setQForm({ ...qForm, explanation: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
               <button onClick={addQuestion} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">Add Question</button>
             </div>
             <div className="space-y-2">
