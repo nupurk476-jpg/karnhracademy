@@ -22,6 +22,7 @@ import AdminComments from "./pages/admin/AdminComments";
 import AdminSubscribers from "./pages/admin/AdminSubscribers";
 import AdminNewspaperHighlights from "./pages/admin/AdminNewspaperHighlights";
 import NewspaperPage from "./pages/NewspaperPage";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,7 +44,7 @@ const App = () => (
           <Route path="/newspaper" element={<NewspaperPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
             <Route index element={<AdminDashboard />} />
             <Route path="blogs" element={<AdminBlogs />} />
             <Route path="notes" element={<AdminNotes />} />
