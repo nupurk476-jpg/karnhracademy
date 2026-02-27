@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const adminLinks = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
@@ -39,6 +40,12 @@ const AdminLayout = () => {
             );
           })}
         </nav>
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="mt-8 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <LogOut className="h-4 w-4" /> Sign Out
+        </button>
       </aside>
       <main className="flex-1 p-8">
         <Outlet />
