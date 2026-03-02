@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Upload, Loader2 } from "lucide-react";
 
 const AdminQuizzes = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
@@ -10,6 +10,8 @@ const AdminQuizzes = () => {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [qForm, setQForm] = useState({ question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "" });
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const loadQuizzes = () => {
@@ -57,6 +59,62 @@ const AdminQuizzes = () => {
     if (selectedQuiz) loadQuestions(selectedQuiz);
   };
 
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedQuiz) return;
+    if (file.type !== "application/pdf") {
+      toast({ title: "Please upload a PDF file", variant: "destructive" });
+      return;
+    }
+
+    setPdfLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("pdf", file);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-quiz-pdf`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to parse PDF");
+
+      const parsed = result.questions;
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        toast({ title: "No questions found in PDF", variant: "destructive" });
+        return;
+      }
+
+      // Insert all parsed questions
+      const inserts = parsed.map((q: any) => ({
+        quiz_id: selectedQuiz,
+        question: q.question,
+        options: Array.isArray(q.options) ? q.options.slice(0, 4) : ["", "", "", ""],
+        correct_answer: typeof q.correct_answer === "number" ? q.correct_answer : 0,
+        explanation: q.explanation || null,
+      }));
+
+      const { error } = await supabase.from("quiz_questions").insert(inserts);
+      if (error) throw error;
+
+      toast({ title: `${inserts.length} questions added from PDF` });
+      loadQuestions(selectedQuiz);
+    } catch (err: any) {
+      toast({ title: "PDF parsing failed", description: err.message, variant: "destructive" });
+    } finally {
+      setPdfLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Quizzes</h1>
@@ -90,7 +148,26 @@ const AdminQuizzes = () => {
         {/* Questions */}
         {selectedQuiz && (
           <div>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">Questions</h2>
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+              <div>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  ref={fileInputRef}
+                  onChange={handlePdfUpload}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={pdfLoading}
+                  className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                >
+                  {pdfLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  {pdfLoading ? "Parsing PDF..." : "Upload PDF"}
+                </button>
+              </div>
+            </div>
             <div className="mb-4 space-y-3 rounded-lg border border-border bg-card p-4">
               <input placeholder="Question" value={qForm.question} onChange={e => setQForm({ ...qForm, question: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
               {qForm.options.map((opt, i) => (
