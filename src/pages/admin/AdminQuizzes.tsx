@@ -89,16 +89,30 @@ const AdminQuizzes = () => {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // Step 1: Upload file to storage (handles any size)
+      const fileName = `${crypto.randomUUID()}${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("quiz-uploads")
+        .upload(fileName, file);
 
+      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+
+      // Step 2: Get public URL
+      const { data: urlData } = supabase.storage
+        .from("quiz-uploads")
+        .getPublicUrl(fileName);
+
+      // Step 3: Send URL to edge function (no file in memory)
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-quiz-pdf`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${session?.access_token}` },
-          body: formData,
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ fileUrl: urlData.publicUrl }),
         }
       );
 
@@ -112,6 +126,9 @@ const AdminQuizzes = () => {
       }
 
       await insertParsedQuestions(parsed);
+
+      // Clean up uploaded file
+      await supabase.storage.from("quiz-uploads").remove([fileName]);
     } catch (err: any) {
       toast({ title: "File parsing failed", description: err.message, variant: "destructive" });
     } finally {
