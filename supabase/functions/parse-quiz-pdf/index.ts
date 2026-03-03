@@ -53,13 +53,13 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `Extract all multiple-choice questions from this PDF document. Return a JSON array where each element has:
+                text: `Extract ALL multiple-choice questions from this PDF document. Return a JSON array where each element has:
 - "question": the question text
 - "options": an array of exactly 4 option strings
 - "correct_answer": the index (0-3) of the correct option
 - "explanation": a brief explanation of why the correct answer is right
 
-If the document contains study material but no explicit questions, generate 10 relevant MCQ questions from the content.
+If the document contains study material but no explicit questions, generate as many relevant MCQ questions as possible from ALL the content — cover every topic, concept, definition, and key point thoroughly. Do not limit yourself to a small number; aim for comprehensive coverage of the entire document.
 
 Return ONLY valid JSON array, no markdown, no extra text.`,
               },
