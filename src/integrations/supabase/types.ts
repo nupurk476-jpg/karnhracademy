@@ -193,6 +193,62 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          quiz_id: string
+          score: number
+          time_taken_seconds: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quiz_id: string
+          score?: number
+          time_taken_seconds?: number
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          time_taken_seconds?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_questions: {
         Row: {
           correct_answer: number
