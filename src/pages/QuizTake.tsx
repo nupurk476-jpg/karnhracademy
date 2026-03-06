@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock } from "lucide-react";
+import QuizLeaderboard from "@/components/QuizLeaderboard";
+import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/hooks/use-toast";
 
-const SECONDS_PER_QUESTION = 60; // 1 minute per question
+const SECONDS_PER_QUESTION = 60;
 
 const formatTime = (s: number) => {
   const m = Math.floor(s / 60);
@@ -16,13 +18,26 @@ const formatTime = (s: number) => {
 
 const QuizTake = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [started, setStarted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [user, setUser] = useState<any>(null);
+  const [attemptSaved, setAttemptSaved] = useState(false);
+  const [leaderboardKey, setLeaderboardKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -35,10 +50,30 @@ const QuizTake = () => {
     });
   }, [id]);
 
+  const saveAttempt = useCallback(async (finalScore: number, totalQ: number, timeTaken: number) => {
+    if (!user || !id || attemptSaved) return;
+    const { error } = await supabase.from("quiz_attempts").insert({
+      quiz_id: id,
+      user_id: user.id,
+      score: finalScore,
+      total_questions: totalQ,
+      time_taken_seconds: timeTaken,
+    });
+    if (error) {
+      toast({ title: "Could not save score", description: error.message, variant: "destructive" });
+    } else {
+      setAttemptSaved(true);
+      setLeaderboardKey(k => k + 1);
+    }
+  }, [user, id, attemptSaved]);
+
   const handleSubmit = useCallback(() => {
     setSubmitted(true);
     if (timerRef.current) clearInterval(timerRef.current);
-  }, []);
+    const timeTaken = Math.round((Date.now() - startTimeRef.current) / 1000);
+    const finalScore = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
+    saveAttempt(finalScore, questions.length, timeTaken);
+  }, [questions, answers, saveAttempt]);
 
   useEffect(() => {
     if (!started || submitted || questions.length === 0) return;
@@ -62,10 +97,18 @@ const QuizTake = () => {
     setAnswers({});
     setSubmitted(false);
     setStarted(false);
+    setAttemptSaved(false);
     setTimeLeft(questions.length * SECONDS_PER_QUESTION);
   };
 
-  const handleStart = () => setStarted(true);
+  const handleStart = () => {
+    if (!user) {
+      navigate("/auth", { state: { from: `/quizzes/${id}` } });
+      return;
+    }
+    setStarted(true);
+    startTimeRef.current = Date.now();
+  };
 
   if (!quiz) return (
     <div className="min-h-screen bg-background">
@@ -95,16 +138,20 @@ const QuizTake = () => {
             <p className="mb-6 text-muted-foreground">
               Time limit: <span className="font-semibold text-foreground">{formatTime(totalTime)}</span>
             </p>
+            {!user && (
+              <p className="mb-4 flex items-center justify-center gap-1 text-sm text-accent">
+                <LogIn className="h-4 w-4" /> You'll need to sign in to save your score
+              </p>
+            )}
             <button
               onClick={handleStart}
               className="rounded-md bg-accent px-8 py-3 text-sm font-semibold text-accent-foreground hover:brightness-110"
             >
-              Start Quiz
+              {user ? "Start Quiz" : "Sign In & Start"}
             </button>
           </div>
         ) : (
           <>
-            {/* Timer bar */}
             {!submitted && (
               <div className="sticky top-0 z-10 mb-6 rounded-lg border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
@@ -197,6 +244,9 @@ const QuizTake = () => {
             </div>
           </>
         )}
+
+        {/* Leaderboard always visible */}
+        {id && <QuizLeaderboard key={leaderboardKey} quizId={id} />}
       </main>
       <Footer />
     </div>

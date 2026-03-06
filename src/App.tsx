@@ -11,6 +11,7 @@ import NotesPage from "./pages/NotesPage";
 import QuizList from "./pages/QuizList";
 import QuizTake from "./pages/QuizTake";
 import BooksPage from "./pages/BooksPage";
+import AuthPage from "./pages/AuthPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import AdminLayout from "./pages/admin/AdminLayout";
