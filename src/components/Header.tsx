@@ -1,13 +1,25 @@
-import { BookOpen, Menu, X, ChevronDown } from "lucide-react";
+import { BookOpen, Menu, X, ChevronDown, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { hrTopics } from "@/components/HRTopicsSection";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hrOpen, setHrOpen] = useState(false);
   const [mobileHrOpen, setMobileHrOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -16,6 +28,11 @@ const Header = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   const navItems = [
     { label: "Home", to: "/" },
@@ -78,6 +95,24 @@ const Header = () => {
               {item.label}
             </Link>
           ))}
+
+          {/* Auth Buttons - Desktop */}
+          <div className="flex items-center gap-2">
+            {user ? (
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4" /> Sign Out
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/auth"><LogIn className="h-4 w-4" /> Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/auth"><UserPlus className="h-4 w-4" /> Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </nav>
 
         <button
@@ -123,6 +158,24 @@ const Header = () => {
               {item.label}
             </Link>
           ))}
+
+          {/* Mobile Auth */}
+          <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+            {user ? (
+              <Button variant="ghost" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
+                <LogOut className="h-4 w-4" /> Sign Out
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}><LogIn className="h-4 w-4" /> Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}><UserPlus className="h-4 w-4" /> Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </nav>
       )}
     </header>
