@@ -6,10 +6,15 @@ import { BookOpen, ExternalLink, FileDown } from "lucide-react";
 
 const BooksPage = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setBooks(data));
   }, []);
+
+  const filtered = books.filter(b =>
+    !search || b.title?.toLowerCase().includes(search.toLowerCase()) || b.author?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
