@@ -54,11 +54,11 @@ const BlogList = () => {
           ))}
         </div>
 
-        {posts.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-muted-foreground">No posts found.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
+            {filtered.map((post) => (
               <Link key={post.id} to={`/blogs/${post.slug}`} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {post.cover_image && <img src={post.cover_image} alt={post.title} className="h-44 w-full object-cover" />}
                 <div className="p-6">
