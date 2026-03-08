@@ -122,7 +122,8 @@ const NewspaperPage = () => {
               </div>
             ))}
           </div>
-        )}
+        );
+        })()}
 
         {totalPages > 1 && (
           <div className="mt-10 flex items-center justify-center gap-2">
