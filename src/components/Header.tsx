@@ -99,9 +99,14 @@ const Header = () => {
           {/* Auth Buttons - Desktop */}
           <div className="flex items-center gap-2">
             {user ? (
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4" /> Sign Out
-              </Button>
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/profile"><User className="h-4 w-4" /> Profile</Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" /> Sign Out
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
