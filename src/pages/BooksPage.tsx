@@ -21,9 +21,16 @@ const BooksPage = () => {
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Book Recommendations</h1>
-        <p className="mb-10 text-muted-foreground">Curated reading list for HR students and researchers.</p>
+        <p className="mb-6 text-muted-foreground">Curated reading list for HR students and researchers.</p>
+        <input
+          type="text"
+          placeholder="Search books..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-8 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
 
-        {books.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-muted-foreground">No book recommendations yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
