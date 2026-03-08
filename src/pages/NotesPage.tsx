@@ -43,9 +43,16 @@ const NotesPage = () => {
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Study Notes</h1>
-        <p className="mb-10 text-muted-foreground">Downloadable notes for MBA, BBA, and UGC NET preparation.</p>
+        <p className="mb-6 text-muted-foreground">Downloadable notes for MBA, BBA, and UGC NET preparation.</p>
+        <input
+          type="text"
+          placeholder="Search notes..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-8 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
 
-        {notes.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-muted-foreground">No notes available yet. Check back soon!</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
