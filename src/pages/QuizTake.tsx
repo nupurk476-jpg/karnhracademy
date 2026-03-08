@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
-import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 
@@ -28,6 +28,11 @@ const QuizTake = () => {
   const [user, setUser] = useState<any>(null);
   const [attemptSaved, setAttemptSaved] = useState(false);
   const [leaderboardKey, setLeaderboardKey] = useState(0);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [avgRating, setAvgRating] = useState<number>(0);
+  const [totalRatings, setTotalRatings] = useState<number>(0);
+  const [ratingSaved, setRatingSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
 
@@ -49,6 +54,41 @@ const QuizTake = () => {
       }
     });
   }, [id]);
+
+  // Load ratings
+  const loadRatings = useCallback(async () => {
+    if (!id) return;
+    const { data } = await supabase.from("quiz_ratings").select("rating").eq("quiz_id", id);
+    if (data && data.length > 0) {
+      setTotalRatings(data.length);
+      setAvgRating(data.reduce((sum, r) => sum + r.rating, 0) / data.length);
+    }
+    if (user) {
+      const { data: mine } = await supabase.from("quiz_ratings").select("rating").eq("quiz_id", id).eq("user_id", user.id).maybeSingle();
+      if (mine) {
+        setUserRating(mine.rating);
+        setRatingSaved(true);
+      }
+    }
+  }, [id, user]);
+
+  useEffect(() => { loadRatings(); }, [loadRatings]);
+
+  const submitRating = async (rating: number) => {
+    if (!user || !id) return;
+    setUserRating(rating);
+    const { error } = await supabase.from("quiz_ratings").upsert(
+      { quiz_id: id, user_id: user.id, rating },
+      { onConflict: "quiz_id,user_id" }
+    );
+    if (error) {
+      toast({ title: "Could not save rating", description: error.message, variant: "destructive" });
+    } else {
+      setRatingSaved(true);
+      loadRatings();
+      toast({ title: "Thanks for rating!" });
+    }
+  };
 
   const saveAttempt = useCallback(async (finalScore: number, totalQ: number, timeTaken: number) => {
     if (!user || !id || attemptSaved) return;
@@ -135,9 +175,16 @@ const QuizTake = () => {
             <Clock className="mx-auto mb-4 h-12 w-12 text-accent" />
             <h2 className="mb-2 text-xl font-bold text-foreground">Ready to begin?</h2>
             <p className="mb-1 text-muted-foreground">{questions.length} questions</p>
-            <p className="mb-6 text-muted-foreground">
+            <p className="mb-2 text-muted-foreground">
               Time limit: <span className="font-semibold text-foreground">{formatTime(totalTime)}</span>
             </p>
+            {totalRatings > 0 && (
+              <p className="mb-6 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                {avgRating.toFixed(1)}/5 ({totalRatings} {totalRatings === 1 ? "rating" : "ratings"})
+              </p>
+            )}
+            {totalRatings === 0 && <div className="mb-6" />}
             {!user && (
               <p className="mb-4 flex items-center justify-center gap-1 text-sm text-accent">
                 <LogIn className="h-4 w-4" /> You'll need to sign in to save your score
@@ -242,6 +289,43 @@ const QuizTake = () => {
                 </>
               )}
             </div>
+
+            {/* Rating section after submission */}
+            {submitted && (
+              <div className="mt-6 rounded-lg border border-border bg-card p-6">
+                <h3 className="mb-3 text-lg font-semibold text-foreground">Rate this Quiz</h3>
+                <div className="flex items-center gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => submitRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          (hoverRating || userRating) >= star
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  {userRating > 0 && (
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {ratingSaved ? "Your rating saved!" : ""}
+                    </span>
+                  )}
+                </div>
+                {totalRatings > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Average: <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>/5
+                    <span className="ml-1">({totalRatings} {totalRatings === 1 ? "rating" : "ratings"})</span>
+                  </p>
+                )}
+              </div>
+            )}
           </>
         )}
 
