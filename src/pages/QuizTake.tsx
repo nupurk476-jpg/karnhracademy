@@ -55,6 +55,41 @@ const QuizTake = () => {
     });
   }, [id]);
 
+  // Load ratings
+  const loadRatings = useCallback(async () => {
+    if (!id) return;
+    const { data } = await supabase.from("quiz_ratings").select("rating").eq("quiz_id", id);
+    if (data && data.length > 0) {
+      setTotalRatings(data.length);
+      setAvgRating(data.reduce((sum, r) => sum + r.rating, 0) / data.length);
+    }
+    if (user) {
+      const { data: mine } = await supabase.from("quiz_ratings").select("rating").eq("quiz_id", id).eq("user_id", user.id).maybeSingle();
+      if (mine) {
+        setUserRating(mine.rating);
+        setRatingSaved(true);
+      }
+    }
+  }, [id, user]);
+
+  useEffect(() => { loadRatings(); }, [loadRatings]);
+
+  const submitRating = async (rating: number) => {
+    if (!user || !id) return;
+    setUserRating(rating);
+    const { error } = await supabase.from("quiz_ratings").upsert(
+      { quiz_id: id, user_id: user.id, rating },
+      { onConflict: "quiz_id,user_id" }
+    );
+    if (error) {
+      toast({ title: "Could not save rating", description: error.message, variant: "destructive" });
+    } else {
+      setRatingSaved(true);
+      loadRatings();
+      toast({ title: "Thanks for rating!" });
+    }
+  };
+
   const saveAttempt = useCallback(async (finalScore: number, totalQ: number, timeTaken: number) => {
     if (!user || !id || attemptSaved) return;
     const { error } = await supabase.from("quiz_attempts").insert({
