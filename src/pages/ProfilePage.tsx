@@ -91,23 +91,40 @@ const ProfilePage = () => {
       return;
     }
     setSaving(true);
-    const { error } = await supabase
+
+    // Ensure we have an active session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setSaving(false);
+      toast({ title: "Session expired", description: "Please sign in again.", variant: "destructive" });
+      navigate("/auth", { state: { from: "/profile" } });
+      return;
+    }
+
+    const updateData = {
+      display_name: form.display_name.trim().slice(0, 100),
+      bio: form.bio.trim().slice(0, 500),
+      phone: form.phone.trim().slice(0, 20),
+      location: form.location.trim().slice(0, 100),
+    };
+
+    const { data, error } = await supabase
       .from("profiles")
-      .update({
-        display_name: form.display_name.trim().slice(0, 100),
-        bio: form.bio.trim().slice(0, 500),
-        phone: form.phone.trim().slice(0, 20),
-        location: form.location.trim().slice(0, 100),
-      })
-      .eq("id", profile.id);
+      .update(updateData)
+      .eq("id", profile.id)
+      .select()
+      .single();
 
     setSaving(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setProfile({ ...profile, ...form });
+      console.error("Profile save error:", error);
+      toast({ title: "Error saving profile", description: error.message, variant: "destructive" });
+    } else if (data) {
+      setProfile(data as Profile);
       setEditing(false);
       toast({ title: "Profile updated!" });
+    } else {
+      toast({ title: "No changes saved", description: "Please try again.", variant: "destructive" });
     }
   };
 
