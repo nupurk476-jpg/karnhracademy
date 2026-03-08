@@ -137,19 +137,10 @@ const ProfilePage = () => {
             <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
               My Profile
             </h1>
-            {!editing ? (
+            {!editing && (
               <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
                 <Pencil className="h-4 w-4" /> Edit
               </Button>
-            ) : (
-              <div className="flex gap-2">
-                <Button size="sm" onClick={handleSave} disabled={saving}>
-                  <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                  <X className="h-4 w-4" /> Cancel
-                </Button>
-              </div>
             )}
           </div>
 
@@ -241,6 +232,17 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
+
+          {editing && (
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                <X className="h-4 w-4" /> Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Quiz Activity */}
