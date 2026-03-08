@@ -142,6 +142,33 @@ export type Database = {
         }
         Relationships: []
       }
+      hr_resources: {
+        Row: {
+          created_at: string
+          file_type: string
+          file_url: string
+          id: string
+          title: string
+          topic_slug: string
+        }
+        Insert: {
+          created_at?: string
+          file_type?: string
+          file_url: string
+          id?: string
+          title: string
+          topic_slug: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          title?: string
+          topic_slug?: string
+        }
+        Relationships: []
+      }
       newspaper_highlights: {
         Row: {
           created_at: string
