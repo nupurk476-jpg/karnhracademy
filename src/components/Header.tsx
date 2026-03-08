@@ -9,7 +9,17 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hrOpen, setHrOpen] = useState(false);
   const [mobileHrOpen, setMobileHrOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -18,6 +28,11 @@ const Header = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
   const navItems = [
     { label: "Home", to: "/" },
