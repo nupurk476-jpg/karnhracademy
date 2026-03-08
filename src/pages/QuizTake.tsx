@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
-import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 
