@@ -12,6 +12,7 @@ import QuizList from "./pages/QuizList";
 import QuizTake from "./pages/QuizTake";
 import BooksPage from "./pages/BooksPage";
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfilePage from "./pages/ProfilePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/quizzes/:id" element={<QuizTake />} />
           <Route path="/books" element={<BooksPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/newspaper" element={<NewspaperPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           <Route path="/about" element={<AboutPage />} />
