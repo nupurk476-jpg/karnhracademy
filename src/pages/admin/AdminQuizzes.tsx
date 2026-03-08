@@ -102,22 +102,13 @@ const AdminQuizzes = () => {
         .from("quiz-uploads")
         .getPublicUrl(fileName);
 
-      // Step 3: Send URL to edge function (no file in memory)
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-quiz-pdf`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ fileUrl: urlData.publicUrl }),
-        }
-      );
+      // Step 3: Send URL to edge function
+      const { data: result, error: fnError } = await supabase.functions.invoke('parse-quiz-pdf', {
+        body: { fileUrl: urlData.publicUrl },
+      });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to parse file");
+      if (fnError) throw new Error(fnError.message || "Failed to parse file");
+      if (!result) throw new Error("No response from parser");
 
       const parsed = result.questions;
       if (!Array.isArray(parsed) || parsed.length === 0) {
