@@ -232,7 +232,17 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-        </div>
+
+          {editing && (
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                <X className="h-4 w-4" /> Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          )}
 
         {/* Quiz Activity */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8">
