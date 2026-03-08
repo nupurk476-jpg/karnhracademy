@@ -47,11 +47,24 @@ const ProfilePage = () => {
       }
       setEmail(session.user.email || "");
 
-      const { data: p } = await supabase
+      let { data: p } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
+
+      // If no profile exists, create one
+      if (!p) {
+        const { data: newProfile } = await supabase
+          .from("profiles")
+          .insert({
+            id: session.user.id,
+            display_name: session.user.user_metadata?.display_name || session.user.email?.split("@")[0] || "User",
+          })
+          .select()
+          .single();
+        p = newProfile;
+      }
 
       if (p) {
         const prof = p as Profile;
