@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -24,6 +24,7 @@ const NewspaperPage = () => {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const activeSection = searchParams.get("section") || "all";
   const page = parseInt(searchParams.get("page") || "1", 10);
@@ -66,6 +67,13 @@ const NewspaperPage = () => {
           <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Newspaper Highlights
           </h1>
+          <input
+            type="text"
+            placeholder="Search highlights..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="mt-4 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
 
         <Tabs
@@ -86,11 +94,15 @@ const NewspaperPage = () => {
               <div key={i} className="h-72 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
-        ) : highlights.length === 0 ? (
-          <p className="py-12 text-center text-muted-foreground">No highlights found in this section.</p>
+        ) : (() => {
+          const filtered = highlights.filter(h =>
+            !search || h.title?.toLowerCase().includes(search.toLowerCase()) || h.summary?.toLowerCase().includes(search.toLowerCase())
+          );
+          return filtered.length === 0 ? (
+          <p className="py-12 text-center text-muted-foreground">No highlights found.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {highlights.map((h) => (
+            {filtered.map((h) => (
               <div key={h.id} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {h.image_url ? (
                   <img src={h.image_url} alt={h.title} className="h-48 w-full object-cover" />
@@ -110,7 +122,8 @@ const NewspaperPage = () => {
               </div>
             ))}
           </div>
-        )}
+        );
+        })()}
 
         {totalPages > 1 && (
           <div className="mt-10 flex items-center justify-center gap-2">

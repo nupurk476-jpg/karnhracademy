@@ -9,6 +9,7 @@ const categories = ["All", "HRM Basics", "Organizational Behaviour", "Research M
 const BlogList = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [category, setCategory] = useState("All");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const q = supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false });
@@ -19,12 +20,23 @@ const BlogList = () => {
     }
   }, [category]);
 
+  const filtered = posts.filter(p =>
+    !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.excerpt?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Blog</h1>
-        <p className="mb-8 text-muted-foreground">Insights on HR, management, and academic research.</p>
+        <p className="mb-6 text-muted-foreground">Insights on HR, management, and academic research.</p>
+        <input
+          type="text"
+          placeholder="Search posts..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-6 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
 
         <div className="mb-8 flex flex-wrap gap-2">
           {categories.map((cat) => (
@@ -42,11 +54,11 @@ const BlogList = () => {
           ))}
         </div>
 
-        {posts.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-muted-foreground">No posts found.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
+            {filtered.map((post) => (
               <Link key={post.id} to={`/blogs/${post.slug}`} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {post.cover_image && <img src={post.cover_image} alt={post.title} className="h-44 w-full object-cover" />}
                 <div className="p-6">

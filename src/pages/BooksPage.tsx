@@ -6,23 +6,35 @@ import { BookOpen, ExternalLink, FileDown } from "lucide-react";
 
 const BooksPage = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setBooks(data));
   }, []);
+
+  const filtered = books.filter(b =>
+    !search || b.title?.toLowerCase().includes(search.toLowerCase()) || b.author?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Book Recommendations</h1>
-        <p className="mb-10 text-muted-foreground">Curated reading list for HR students and researchers.</p>
+        <p className="mb-6 text-muted-foreground">Curated reading list for HR students and researchers.</p>
+        <input
+          type="text"
+          placeholder="Search books..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-8 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
 
-        {books.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="text-muted-foreground">No book recommendations yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {books.map((book) => (
+            {filtered.map((book) => (
               <div key={book.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
                 <BookOpen className="mb-3 h-10 w-10 text-accent" />
                 <h3 className="mb-1 text-lg font-semibold text-foreground">{book.title}</h3>
