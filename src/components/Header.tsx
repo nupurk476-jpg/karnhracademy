@@ -1,7 +1,9 @@
-import { BookOpen, Menu, X, ChevronDown } from "lucide-react";
+import { BookOpen, Menu, X, ChevronDown, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { hrTopics } from "@/components/HRTopicsSection";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
