@@ -167,9 +167,14 @@ const Header = () => {
           {/* Mobile Auth */}
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
             {user ? (
-              <Button variant="ghost" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
-                <LogOut className="h-4 w-4" /> Sign Out
-              </Button>
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/profile" onClick={() => setMobileOpen(false)}><User className="h-4 w-4" /> Profile</Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
+                  <LogOut className="h-4 w-4" /> Sign Out
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild>
