@@ -282,6 +282,43 @@ const QuizTake = () => {
                 </>
               )}
             </div>
+
+            {/* Rating section after submission */}
+            {submitted && (
+              <div className="mt-6 rounded-lg border border-border bg-card p-6">
+                <h3 className="mb-3 text-lg font-semibold text-foreground">Rate this Quiz</h3>
+                <div className="flex items-center gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => submitRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          (hoverRating || userRating) >= star
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  {userRating > 0 && (
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {ratingSaved ? "Your rating saved!" : ""}
+                    </span>
+                  )}
+                </div>
+                {totalRatings > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    Average: <span className="font-semibold text-foreground">{avgRating.toFixed(1)}</span>/5
+                    <span className="ml-1">({totalRatings} {totalRatings === 1 ? "rating" : "ratings"})</span>
+                  </p>
+                )}
+              </div>
+            )}
           </>
         )}
 
