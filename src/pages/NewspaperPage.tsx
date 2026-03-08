@@ -67,6 +67,13 @@ const NewspaperPage = () => {
           <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Newspaper Highlights
           </h1>
+          <input
+            type="text"
+            placeholder="Search highlights..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="mt-4 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
 
         <Tabs

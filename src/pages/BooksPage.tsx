@@ -34,7 +34,7 @@ const BooksPage = () => {
           <p className="text-muted-foreground">No book recommendations yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {books.map((book) => (
+            {filtered.map((book) => (
               <div key={book.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
                 <BookOpen className="mb-3 h-10 w-10 text-accent" />
                 <h3 className="mb-1 text-lg font-semibold text-foreground">{book.title}</h3>

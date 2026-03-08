@@ -56,7 +56,7 @@ const NotesPage = () => {
           <p className="text-muted-foreground">No notes available yet. Check back soon!</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {notes.map((note) => (
+            {filtered.map((note) => (
               <div key={note.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
                 <FileText className="mb-3 h-10 w-10 text-accent" />
                 <h3 className="mb-2 text-lg font-semibold text-foreground">{note.title}</h3>
