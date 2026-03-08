@@ -133,21 +133,12 @@ const AdminQuizzes = () => {
 
     setUploading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/parse-quiz-pdf`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text: pasteText }),
-        }
-      );
+      const { data: result, error: fnError } = await supabase.functions.invoke('parse-quiz-pdf', {
+        body: { text: pasteText },
+      });
 
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Failed to generate questions");
+      if (fnError) throw new Error(fnError.message || "Failed to generate questions");
+      if (!result) throw new Error("No response from parser");
 
       const parsed = result.questions;
       if (!Array.isArray(parsed) || parsed.length === 0) {
