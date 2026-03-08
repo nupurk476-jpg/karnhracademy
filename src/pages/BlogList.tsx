@@ -9,6 +9,7 @@ const categories = ["All", "HRM Basics", "Organizational Behaviour", "Research M
 const BlogList = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [category, setCategory] = useState("All");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const q = supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false });
@@ -18,6 +19,10 @@ const BlogList = () => {
       q.then(({ data }) => data && setPosts(data));
     }
   }, [category]);
+
+  const filtered = posts.filter(p =>
+    !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.excerpt?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
