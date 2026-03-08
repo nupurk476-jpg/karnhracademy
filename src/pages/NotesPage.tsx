@@ -10,11 +10,16 @@ const NotesPage = () => {
   const [emailModal, setEmailModal] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setNotes(data));
   }, []);
+
+  const filtered = notes.filter(n =>
+    !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
