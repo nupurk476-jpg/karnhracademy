@@ -24,6 +24,7 @@ const NewspaperPage = () => {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const activeSection = searchParams.get("section") || "all";
   const page = parseInt(searchParams.get("page") || "1", 10);
