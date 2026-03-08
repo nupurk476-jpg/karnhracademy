@@ -175,9 +175,16 @@ const QuizTake = () => {
             <Clock className="mx-auto mb-4 h-12 w-12 text-accent" />
             <h2 className="mb-2 text-xl font-bold text-foreground">Ready to begin?</h2>
             <p className="mb-1 text-muted-foreground">{questions.length} questions</p>
-            <p className="mb-6 text-muted-foreground">
+            <p className="mb-2 text-muted-foreground">
               Time limit: <span className="font-semibold text-foreground">{formatTime(totalTime)}</span>
             </p>
+            {totalRatings > 0 && (
+              <p className="mb-6 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                {avgRating.toFixed(1)}/5 ({totalRatings} {totalRatings === 1 ? "rating" : "ratings"})
+              </p>
+            )}
+            {totalRatings === 0 && <div className="mb-6" />}
             {!user && (
               <p className="mb-4 flex items-center justify-center gap-1 text-sm text-accent">
                 <LogIn className="h-4 w-4" /> You'll need to sign in to save your score
