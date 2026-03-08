@@ -28,6 +28,11 @@ const QuizTake = () => {
   const [user, setUser] = useState<any>(null);
   const [attemptSaved, setAttemptSaved] = useState(false);
   const [leaderboardKey, setLeaderboardKey] = useState(0);
+  const [userRating, setUserRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [avgRating, setAvgRating] = useState<number>(0);
+  const [totalRatings, setTotalRatings] = useState<number>(0);
+  const [ratingSaved, setRatingSaved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
 
