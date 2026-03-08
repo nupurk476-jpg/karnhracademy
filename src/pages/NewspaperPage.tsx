@@ -94,11 +94,15 @@ const NewspaperPage = () => {
               <div key={i} className="h-72 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
-        ) : highlights.length === 0 ? (
-          <p className="py-12 text-center text-muted-foreground">No highlights found in this section.</p>
+        ) : (() => {
+          const filtered = highlights.filter(h =>
+            !search || h.title?.toLowerCase().includes(search.toLowerCase()) || h.summary?.toLowerCase().includes(search.toLowerCase())
+          );
+          return filtered.length === 0 ? (
+          <p className="py-12 text-center text-muted-foreground">No highlights found.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {highlights.map((h) => (
+            {filtered.map((h) => (
               <div key={h.id} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {h.image_url ? (
                   <img src={h.image_url} alt={h.title} className="h-48 w-full object-cover" />
