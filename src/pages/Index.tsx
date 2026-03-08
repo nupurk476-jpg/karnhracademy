@@ -4,6 +4,7 @@ import AboutPreview from "@/components/AboutPreview";
 import FeaturedSection from "@/components/FeaturedSection";
 import HRTopicsSection from "@/components/HRTopicsSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import Footer from "@/components/Footer";
 
@@ -18,6 +19,7 @@ const Index = () => {
         <HRTopicsSection />
       </div>
       <NewspaperHighlights />
+      <TestimonialsSection />
       <NewsletterSignup />
       <Footer />
     </div>
