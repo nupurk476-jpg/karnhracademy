@@ -33,16 +33,45 @@ Deno.serve(async (req) => {
     let messages: any[];
 
     if (body.fileUrl) {
-      // File was uploaded to storage — pass the public URL to AI
+      // Fetch the file and convert to base64 for the AI
+      const fileResponse = await fetch(body.fileUrl);
+      if (!fileResponse.ok) {
+        return new Response(JSON.stringify({ error: 'Failed to fetch uploaded file' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const fileBuffer = await fileResponse.arrayBuffer();
+      const uint8 = new Uint8Array(fileBuffer);
+      let binary = '';
+      for (let i = 0; i < uint8.length; i++) {
+        binary += String.fromCharCode(uint8[i]);
+      }
+      const base64Data = btoa(binary);
+
+      // Determine MIME type from URL
+      const url = body.fileUrl.toLowerCase();
+      let mimeType = 'application/pdf';
+      if (url.includes('.pptx')) mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      else if (url.includes('.ppt')) mimeType = 'application/vnd.ms-powerpoint';
+      else if (url.includes('.docx')) mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      else if (url.includes('.doc')) mimeType = 'application/msword';
+
+      // Use inline_data format for Gemini to handle documents
       messages = [{
         role: 'user',
         content: [
           { type: 'text', text: QUIZ_PROMPT },
-          { type: 'image_url', image_url: { url: body.fileUrl } },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:${mimeType};base64,${base64Data}`,
+            },
+          },
         ],
       }];
     } else if (body.text) {
-      // Pasted text
       if (typeof body.text !== 'string' || body.text.trim().length === 0) {
         return new Response(JSON.stringify({ error: 'No text provided' }), {
           status: 400,
