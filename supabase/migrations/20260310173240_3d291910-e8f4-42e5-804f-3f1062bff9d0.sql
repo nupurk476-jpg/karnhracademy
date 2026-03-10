@@ -1,0 +1,1 @@
+ALTER TABLE public.notes ADD COLUMN topic_slug text DEFAULT NULL;

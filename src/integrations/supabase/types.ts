@@ -203,6 +203,7 @@ export type Database = {
           file_url: string | null
           id: string
           title: string
+          topic_slug: string | null
         }
         Insert: {
           created_at?: string
@@ -210,6 +211,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           title: string
+          topic_slug?: string | null
         }
         Update: {
           created_at?: string
@@ -217,6 +219,7 @@ export type Database = {
           file_url?: string | null
           id?: string
           title?: string
+          topic_slug?: string | null
         }
         Relationships: []
       }
