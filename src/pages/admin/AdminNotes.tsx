@@ -3,10 +3,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload } from "lucide-react";
 
+const hrTopicOptions = [
+  { label: "Compensation & Benefits", slug: "compensation-and-benefits" },
+  { label: "Performance Management", slug: "performance-management" },
+  { label: "Recruitment & Selection", slug: "recruitment-and-selection" },
+  { label: "Functions of HR", slug: "functions-of-hr" },
+  { label: "Industrial Relations", slug: "industrial-relations" },
+  { label: "HRIS & SHRM", slug: "hris-and-shrm" },
+  { label: "HR Analytics", slug: "hr-analytics" },
+  { label: "HR Planning", slug: "human-resource-planning" },
+  { label: "Evolution of HRM", slug: "evolution-of-hrm" },
+];
+
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [topicSlug, setTopicSlug] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -35,9 +48,9 @@ const AdminNotes = () => {
       file_url = urlData.publicUrl;
     }
 
-    await supabase.from("notes").insert({ title, description, file_url });
+    await supabase.from("notes").insert({ title, description, file_url, topic_slug: topicSlug || null } as any);
     toast({ title: "Note created" });
-    setTitle(""); setDescription(""); setFile(null);
+    setTitle(""); setDescription(""); setFile(null); setTopicSlug("");
     setUploading(false);
     load();
   };
@@ -48,6 +61,8 @@ const AdminNotes = () => {
     load();
   };
 
+  const getTopicLabel = (slug: string) => hrTopicOptions.find(t => t.slug === slug)?.label || slug;
+
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Notes</h1>
@@ -55,6 +70,12 @@ const AdminNotes = () => {
         <h2 className="text-lg font-semibold text-foreground">Upload New Note</h2>
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
+          <option value="">-- Select HR Topic (optional) --</option>
+          {hrTopicOptions.map(t => (
+            <option key={t.slug} value={t.slug}>{t.label}</option>
+          ))}
+        </select>
         <div className="flex items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
             <Upload className="h-4 w-4" /> {file ? file.name : "Choose PDF / PPT"}
@@ -71,7 +92,8 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.file_url && <span className="ml-2 text-xs text-accent">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"} attached</span>}
+              {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
+              {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
             </div>
             <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
           </div>
