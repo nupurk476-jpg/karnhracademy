@@ -3,7 +3,19 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, BookOpen, Languages } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+const englishSubcategories = [
+  { label: "All", value: "all" },
+  { label: "Vocabulary", value: "vocabulary" },
+  { label: "Grammar", value: "grammar" },
+  { label: "Reading Comprehension", value: "reading-comprehension" },
+  { label: "Writing Skills", value: "writing-skills" },
+  { label: "Verbal Ability", value: "verbal-ability" },
+  { label: "Synonyms & Antonyms", value: "synonyms-antonyms" },
+  { label: "Idioms & Phrases", value: "idioms-phrases" },
+];
 
 const NotesPage = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -11,15 +23,26 @@ const NotesPage = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
+  const [activeSubject, setActiveSubject] = useState("hrm");
+  const [englishSub, setEnglishSub] = useState("all");
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setNotes(data));
   }, []);
 
-  const filtered = notes.filter(n =>
-    !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = notes.filter(n => {
+    const matchesSearch = !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+
+    if (activeSubject === "english") {
+      if (n.subject !== "english") return false;
+      if (englishSub !== "all" && n.topic_slug !== englishSub) return false;
+      return true;
+    }
+    // HRM tab: notes without subject or subject=hrm
+    return !n.subject || n.subject === "hrm";
+  });
 
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +52,6 @@ const NotesPage = () => {
     setSubmitting(false);
     setEmailModal(null);
     setEmail("");
-    // Open the file URL
     const note = notes.find(n => n.id === emailModal);
     if (note?.file_url) {
       window.open(note.file_url, "_blank");
@@ -37,6 +59,20 @@ const NotesPage = () => {
       toast({ title: "Download unavailable", description: "No file attached to this note." });
     }
   };
+
+  const NoteCard = ({ note }: { note: any }) => (
+    <div className="flex flex-col rounded-lg border border-border bg-card p-6">
+      <FileText className="mb-3 h-10 w-10 text-accent" />
+      <h3 className="mb-2 text-lg font-semibold text-foreground">{note.title}</h3>
+      <p className="mb-4 flex-1 text-sm text-muted-foreground">{note.description}</p>
+      <button
+        onClick={() => setEmailModal(note.id)}
+        className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
+      >
+        <Download className="h-4 w-4" /> Download
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,25 +88,53 @@ const NotesPage = () => {
           className="mb-8 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
 
-        {filtered.length === 0 ? (
-          <p className="text-muted-foreground">No notes available yet. Check back soon!</p>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((note) => (
-              <div key={note.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
-                <FileText className="mb-3 h-10 w-10 text-accent" />
-                <h3 className="mb-2 text-lg font-semibold text-foreground">{note.title}</h3>
-                <p className="mb-4 flex-1 text-sm text-muted-foreground">{note.description}</p>
-                <button
-                  onClick={() => setEmailModal(note.id)}
-                  className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
-                >
-                  <Download className="h-4 w-4" /> Download
-                </button>
+        <Tabs value={activeSubject} onValueChange={setActiveSubject} className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="hrm" className="gap-2">
+              <BookOpen className="h-4 w-4" /> HRM
+            </TabsTrigger>
+            <TabsTrigger value="english" className="gap-2">
+              <Languages className="h-4 w-4" /> English
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="hrm">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No HRM notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
               </div>
-            ))}
-          </div>
-        )}
+            )}
+          </TabsContent>
+
+          <TabsContent value="english">
+            {/* English subcategory pills */}
+            <div className="mb-6 flex flex-wrap gap-2">
+              {englishSubcategories.map(sub => (
+                <button
+                  key={sub.value}
+                  onClick={() => setEnglishSub(sub.value)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    englishSub === sub.value
+                      ? "bg-accent text-accent-foreground"
+                      : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {sub.label}
+                </button>
+              ))}
+            </div>
+
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No English notes available yet for this category.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Email capture modal */}

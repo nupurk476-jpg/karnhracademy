@@ -3,6 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload } from "lucide-react";
 
+const subjectOptions = [
+  { label: "HRM", value: "hrm" },
+  { label: "English", value: "english" },
+];
+
 const hrTopicOptions = [
   { label: "Compensation & Benefits", slug: "compensation-and-benefits" },
   { label: "Performance Management", slug: "performance-management" },
@@ -15,6 +20,15 @@ const hrTopicOptions = [
   { label: "Evolution of HRM", slug: "evolution-of-hrm" },
 ];
 
+const englishTopicOptions = [
+  { label: "Vocabulary", slug: "vocabulary" },
+  { label: "Grammar", slug: "grammar" },
+  { label: "Reading Comprehension", slug: "reading-comprehension" },
+  { label: "Writing Skills", slug: "writing-skills" },
+  { label: "Verbal Ability", slug: "verbal-ability" },
+  { label: "Synonyms & Antonyms", slug: "synonyms-antonyms" },
+  { label: "Idioms & Phrases", slug: "idioms-phrases" },
+];
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
