@@ -202,6 +202,7 @@ export type Database = {
           description: string | null
           file_url: string | null
           id: string
+          subject: string | null
           title: string
           topic_slug: string | null
         }
@@ -210,6 +211,7 @@ export type Database = {
           description?: string | null
           file_url?: string | null
           id?: string
+          subject?: string | null
           title: string
           topic_slug?: string | null
         }
@@ -218,6 +220,7 @@ export type Database = {
           description?: string | null
           file_url?: string | null
           id?: string
+          subject?: string | null
           title?: string
           topic_slug?: string | null
         }
