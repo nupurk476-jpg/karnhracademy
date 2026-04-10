@@ -34,6 +34,7 @@ const AdminNotes = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [topicSlug, setTopicSlug] = useState("");
+  const [subject, setSubject] = useState("hrm");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -62,9 +63,9 @@ const AdminNotes = () => {
       file_url = urlData.publicUrl;
     }
 
-    await supabase.from("notes").insert({ title, description, file_url, topic_slug: topicSlug || null } as any);
+    await supabase.from("notes").insert({ title, description, file_url, topic_slug: topicSlug || null, subject } as any);
     toast({ title: "Note created" });
-    setTitle(""); setDescription(""); setFile(null); setTopicSlug("");
+    setTitle(""); setDescription(""); setFile(null); setTopicSlug(""); setSubject("hrm");
     setUploading(false);
     load();
   };
@@ -75,7 +76,10 @@ const AdminNotes = () => {
     load();
   };
 
-  const getTopicLabel = (slug: string) => hrTopicOptions.find(t => t.slug === slug)?.label || slug;
+  const getTopicLabel = (slug: string) => {
+    const all = [...hrTopicOptions, ...englishTopicOptions];
+    return all.find(t => t.slug === slug)?.label || slug;
+  };
 
   return (
     <div>
@@ -84,9 +88,14 @@ const AdminNotes = () => {
         <h2 className="text-lg font-semibold text-foreground">Upload New Note</h2>
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <select value={subject} onChange={e => { setSubject(e.target.value); setTopicSlug(""); }} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
+          {subjectOptions.map(s => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
-          <option value="">-- Select HR Topic (optional) --</option>
-          {hrTopicOptions.map(t => (
+          <option value="">-- Select Topic (optional) --</option>
+          {(subject === "english" ? englishTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
@@ -106,6 +115,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
             </div>
