@@ -5,13 +5,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const QUIZ_PROMPT = `Extract ALL multiple-choice questions from this content. Return a JSON array where each element has:
+const QUIZ_PROMPT = `You are a quiz generator. Your job is to generate a LARGE number of multiple-choice questions (MCQs) from the provided content.
+
+CRITICAL RULES:
+1. Generate AT LEAST 25-50 questions. If the content is long or detailed, generate even more (up to 100+).
+2. Cover EVERY section, paragraph, concept, definition, example, fact, and detail in the document.
+3. Create questions at different difficulty levels: easy (recall), medium (understanding), and hard (application/analysis).
+4. For each topic/section, create multiple questions from different angles.
+5. Do NOT skip any part of the document. Go through it systematically from start to end.
+
+Return a JSON array where each element has:
 - "question": the question text
-- "options": an array of exactly 4 option strings
+- "options": an array of exactly 4 option strings (make distractors plausible)
 - "correct_answer": the index (0-3) of the correct option
 - "explanation": a brief explanation of why the correct answer is right
-
-If the content contains study material but no explicit questions, generate as many relevant MCQ questions as possible from ALL the content — cover every topic, concept, definition, and key point thoroughly. Do not limit yourself to a small number; aim for comprehensive coverage of the entire document.
 
 Return ONLY valid JSON array, no markdown, no extra text.`;
 
