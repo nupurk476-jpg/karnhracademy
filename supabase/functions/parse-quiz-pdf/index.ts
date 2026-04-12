@@ -70,27 +70,95 @@ const extractTextFromAiContent = (content: unknown): string => {
 };
 
 const parseQuestionsFromContent = (content: string): unknown[] => {
-  const trimmedContent = content.trim();
-  const candidates: string[] = [];
+  const cleanedContent = content
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '');
 
-  const arrayMatch = trimmedContent.match(/\[[\s\S]*\]/);
-  if (arrayMatch) candidates.push(arrayMatch[0]);
-
-  const objectMatch = trimmedContent.match(/\{[\s\S]*\}/);
-  if (objectMatch) candidates.push(objectMatch[0]);
-
-  candidates.push(trimmedContent);
-
-  for (const candidate of candidates) {
+  const tryParsePayload = (candidate: string): unknown[] | null => {
     try {
-      const parsed = JSON.parse(candidate);
+      const repairedCandidate = candidate
+        .replace(/,\s*([}\]])/g, '$1')
+        .trim();
+
+      const parsed = JSON.parse(repairedCandidate);
       if (Array.isArray(parsed)) return parsed;
       if (parsed && typeof parsed === 'object' && Array.isArray((parsed as { questions?: unknown[] }).questions)) {
         return (parsed as { questions: unknown[] }).questions;
       }
     } catch {
+      return null;
+    }
+
+    return null;
+  };
+
+  const directCandidates: string[] = [];
+  const arrayMatch = cleanedContent.match(/\[[\s\S]*\]/);
+  if (arrayMatch) directCandidates.push(arrayMatch[0]);
+
+  const objectMatch = cleanedContent.match(/\{[\s\S]*\}/);
+  if (objectMatch) directCandidates.push(objectMatch[0]);
+
+  directCandidates.push(cleanedContent);
+
+  for (const candidate of directCandidates) {
+    const parsed = tryParsePayload(candidate);
+    if (parsed) return parsed;
+  }
+
+  const recoveredQuestions: unknown[] = [];
+  let inString = false;
+  let isEscaped = false;
+  let braceDepth = 0;
+  let objectStart = -1;
+
+  for (let i = 0; i < cleanedContent.length; i++) {
+    const char = cleanedContent[i];
+
+    if (inString) {
+      if (isEscaped) {
+        isEscaped = false;
+      } else if (char === '\\') {
+        isEscaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
       continue;
     }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      if (braceDepth === 0) objectStart = i;
+      braceDepth += 1;
+      continue;
+    }
+
+    if (char === '}') {
+      if (braceDepth > 0) braceDepth -= 1;
+
+      if (braceDepth === 0 && objectStart !== -1) {
+        const objectSource = cleanedContent.slice(objectStart, i + 1);
+        try {
+          const repairedObject = objectSource.replace(/,\s*([}\]])/g, '$1');
+          const parsedObject = JSON.parse(repairedObject);
+          if (parsedObject && typeof parsedObject === 'object') {
+            recoveredQuestions.push(parsedObject);
+          }
+        } catch {
+          // ignore malformed partial objects and keep recovering valid ones
+        }
+        objectStart = -1;
+      }
+    }
+  }
+
+  if (recoveredQuestions.length > 0) {
+    return recoveredQuestions;
   }
 
   throw new Error('Failed to parse questions');
