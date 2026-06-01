@@ -1,0 +1,26 @@
+# HR & Management Research Hub
+
+> Academic resource hub for MBA, BBA, UGC NET HR aspirants, and research scholars in Human Resource Management. Focus on Ethical HRM and Quiet Quitting.
+
+## Pages
+
+- [Home](/): Overview of the academic platform.
+- [About](/about): About the educator and the mission.
+- [Contact](/contact): Get in touch.
+- [Blogs](/blogs): Articles on HR, management, and academic research.
+- [Notes](/notes): Downloadable HRM, English, and exam-preparation notes.
+- [Quizzes](/quizzes): Practice quizzes for MBA/BBA & UGC NET HR.
+- [Books](/books): Curated book recommendations for HR students.
+- [Newspaper Highlights](/newspaper): Daily news highlights for aspirants.
+
+## HR Topics
+
+- [Compensation & Benefits](/hr/compensation-and-benefits)
+- [Performance Management](/hr/performance-management)
+- [Recruitment & Selection](/hr/recruitment-and-selection)
+- [Functions of HR](/hr/functions-of-hr)
+- [Industrial Relations](/hr/industrial-relations)
+- [HRIS & SHRM](/hr/hris-and-shrm)
+- [HR Analytics](/hr/hr-analytics)
+- [HR Planning](/hr/human-resource-planning)
+- [Evolution of HRM](/hr/evolution-of-hrm)
