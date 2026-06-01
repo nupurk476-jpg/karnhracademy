@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Upload } from "lucide-react";
+import { Trash2, Upload, Video } from "lucide-react";
 
 const subjectOptions = [
   { label: "HRM", value: "hrm" },
@@ -36,6 +36,7 @@ const AdminNotes = () => {
   const [topicSlug, setTopicSlug] = useState("");
   const [subject, setSubject] = useState("hrm");
   const [file, setFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -49,6 +50,7 @@ const AdminNotes = () => {
     if (!title) return;
     setUploading(true);
     let file_url: string | null = null;
+    let video_url: string | null = null;
 
     if (file) {
       const ext = file.name.split(".").pop();
@@ -63,9 +65,22 @@ const AdminNotes = () => {
       file_url = urlData.publicUrl;
     }
 
-    await supabase.from("notes").insert({ title, description, file_url, topic_slug: topicSlug || null, subject } as any);
+    if (videoFile) {
+      const ext = videoFile.name.split(".").pop();
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("note-videos").upload(path, videoFile);
+      if (error) {
+        toast({ title: "Video upload failed", description: error.message, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("note-videos").getPublicUrl(path);
+      video_url = urlData.publicUrl;
+    }
+
+    await supabase.from("notes").insert({ title, description, file_url, video_url, topic_slug: topicSlug || null, subject } as any);
     toast({ title: "Note created" });
-    setTitle(""); setDescription(""); setFile(null); setTopicSlug(""); setSubject("hrm");
+    setTitle(""); setDescription(""); setFile(null); setVideoFile(null); setTopicSlug(""); setSubject("hrm");
     setUploading(false);
     load();
   };
@@ -105,6 +120,12 @@ const AdminNotes = () => {
             <input type="file" accept=".pdf,.ppt,.pptx" onChange={e => setFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
         </div>
+        <div className="flex items-center gap-3">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
+            <Video className="h-4 w-4" /> {videoFile ? videoFile.name : "Choose Video (MP4, MOV, WebM)"}
+            <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="hidden" />
+          </label>
+        </div>
         <button onClick={handleCreate} disabled={uploading || !title} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
           {uploading ? "Uploading..." : "Create Note"}
         </button>
@@ -118,6 +139,7 @@ const AdminNotes = () => {
               {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
+              {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
             </div>
             <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
           </div>
