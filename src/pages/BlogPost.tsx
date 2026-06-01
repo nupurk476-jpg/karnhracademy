@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
 import { Share2, Linkedin, Twitter, Facebook, ArrowLeft } from "lucide-react";
 
@@ -51,6 +52,25 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {post && (
+        <SEO
+          title={post.title}
+          description={post.excerpt || (post.content || "").replace(/\s+/g, " ").slice(0, 160)}
+          path={`/blogs/${post.slug}`}
+          type="article"
+          image={post.cover_image || undefined}
+          jsonLd={{
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: post.title,
+            description: post.excerpt || undefined,
+            image: post.cover_image || undefined,
+            author: { "@type": "Person", name: post.author_name },
+            datePublished: post.created_at,
+            mainEntityOfPage: `https://karnhracademy.lovable.app/blogs/${post.slug}`,
+          }}
+        />
+      )}
       <Header />
       <article className="mx-auto max-w-3xl px-6 py-16">
         <Link to="/blogs" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Newspaper } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,11 @@ const NewspaperPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Newspaper Highlights"
+        description="Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants."
+        path="/newspaper"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-8">

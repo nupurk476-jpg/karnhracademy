@@ -13,12 +13,12 @@ const Footer = () => {
                 HR & Management
               </span>
             </div>
-            <p className="mb-4 text-sm leading-relaxed text-primary-foreground/60">
+            <p className="mb-4 text-sm leading-relaxed text-primary-foreground/80">
               Advancing knowledge in Human Resource Management through research, teaching, and academic collaboration.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="text-primary-foreground/50 transition-colors hover:text-accent"><Linkedin className="h-5 w-5" /></a>
-              <a href="#" className="text-primary-foreground/50 transition-colors hover:text-accent"><Youtube className="h-5 w-5" /></a>
+              <a href="#" aria-label="LinkedIn profile" className="text-primary-foreground/70 transition-colors hover:text-accent"><Linkedin className="h-5 w-5" /></a>
+              <a href="#" aria-label="YouTube channel" className="text-primary-foreground/70 transition-colors hover:text-accent"><Youtube className="h-5 w-5" /></a>
             </div>
           </div>
 
@@ -32,7 +32,7 @@ const Footer = () => {
                 { label: "Quizzes", to: "/quizzes" },
                 { label: "Books", to: "/books" },
               ].map((link) => (
-                <Link key={link.label} to={link.to} className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">
+                <Link key={link.label} to={link.to} className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">
                   {link.label}
                 </Link>
               ))}
@@ -42,8 +42,8 @@ const Footer = () => {
           <div>
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">About</h4>
             <div className="space-y-2">
-              <Link to="/about" className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">About Us</Link>
-              <Link to="/contact" className="block text-sm text-primary-foreground/60 transition-colors hover:text-accent">Contact</Link>
+              <Link to="/about" className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">About Us</Link>
+              <Link to="/contact" className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">Contact</Link>
             </div>
           </div>
 
@@ -51,13 +51,13 @@ const Footer = () => {
             <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">Contact</h4>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-accent" />
-              <span className="text-sm text-primary-foreground/60">contact@hrresearchhub.com</span>
+              <span className="text-sm text-primary-foreground/80">contact@hrresearchhub.com</span>
             </div>
           </div>
         </div>
 
         <div className="mt-12 border-t border-primary-foreground/10 pt-6 text-center">
-          <p className="text-xs text-primary-foreground/40">
+          <p className="text-xs text-primary-foreground/70">
             © {new Date().getFullYear()} HR & Management Research Hub. All rights reserved.
           </p>
         </div>

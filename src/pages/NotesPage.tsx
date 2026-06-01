@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, BookOpen, Languages } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -82,6 +83,11 @@ const NotesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Notes"
+        description="Downloadable HRM, English, and exam-preparation notes for MBA, BBA, and UGC NET HR aspirants."
+        path="/notes"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Study Notes</h1>

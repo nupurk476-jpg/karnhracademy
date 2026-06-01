@@ -26,7 +26,7 @@ const AboutPreview = () => {
             <div className="relative">
               <div className="h-72 w-72 rounded-2xl bg-primary/10 flex items-center justify-center overflow-hidden">
                 {imageUrl ? (
-                  <img src={imageUrl} alt="Educator" className="h-full w-full object-cover" />
+                  <img src={imageUrl} alt="HR Educator Portrait" className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-6xl font-bold text-primary/20" style={{ fontFamily: "'Playfair Display', serif" }}>
                     HR

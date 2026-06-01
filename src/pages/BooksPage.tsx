@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { BookOpen, ExternalLink, FileDown } from "lucide-react";
 
 const BooksPage = () => {
@@ -18,6 +19,11 @@ const BooksPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Book Recommendations"
+        description="Curated book recommendations on Human Resource Management for students, scholars, and HR researchers."
+        path="/books"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Book Recommendations</h1>

@@ -81,7 +81,7 @@ const HRTopicsSection = () => {
                         <li key={note.id} className="flex items-center justify-between gap-2">
                           <span className="truncate text-xs text-muted-foreground">{note.title}</span>
                           {note.file_url && (
-                            <a href={note.file_url} target="_blank" rel="noopener noreferrer" className="shrink-0 text-accent hover:text-accent/80">
+                            <a href={note.file_url} target="_blank" rel="noopener noreferrer" aria-label={`Download ${note.title}`} className="shrink-0 text-accent hover:text-accent/80">
                               <Download className="h-3.5 w-3.5" />
                             </a>
                           )}

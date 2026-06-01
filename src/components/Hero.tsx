@@ -16,7 +16,7 @@ const Hero = () => {
           Learn HR & Management{" "}
           <span className="italic">the Right Way</span>
         </h1>
-        <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-primary-foreground/75">
+        <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-primary-foreground/90">
           Research-driven insights, notes, quizzes & structured learning for MBA & NET aspirants.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
