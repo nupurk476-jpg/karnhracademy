@@ -19,6 +19,11 @@ const BooksPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Book Recommendations"
+        description="Curated book recommendations on Human Resource Management for students, scholars, and HR researchers."
+        path="/books"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Book Recommendations</h1>

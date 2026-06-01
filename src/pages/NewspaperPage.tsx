@@ -61,6 +61,11 @@ const NewspaperPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Newspaper Highlights"
+        description="Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants."
+        path="/newspaper"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-8">

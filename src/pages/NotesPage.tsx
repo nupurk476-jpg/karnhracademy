@@ -83,6 +83,11 @@ const NotesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Notes"
+        description="Downloadable HRM, English, and exam-preparation notes for MBA, BBA, and UGC NET HR aspirants."
+        path="/notes"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Study Notes</h1>

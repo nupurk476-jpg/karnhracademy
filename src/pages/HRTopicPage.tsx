@@ -99,6 +99,13 @@ const HRTopicPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {topic && (
+        <SEO
+          title={topic.label}
+          description={topic.desc}
+          path={`/hr/${topic.slug}`}
+        />
+      )}
       <Header />
       <main className="mx-auto max-w-4xl px-6 py-16">
         <Link to="/#hr-topics" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
