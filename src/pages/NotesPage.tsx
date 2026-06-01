@@ -62,15 +62,21 @@ const NotesPage = () => {
 
   const NoteCard = ({ note }: { note: any }) => (
     <div className="flex flex-col rounded-lg border border-border bg-card p-6">
-      <FileText className="mb-3 h-10 w-10 text-accent" />
+      {note.video_url ? (
+        <video src={note.video_url} controls className="mb-3 w-full rounded-md bg-black aspect-video" />
+      ) : (
+        <FileText className="mb-3 h-10 w-10 text-accent" />
+      )}
       <h3 className="mb-2 text-lg font-semibold text-foreground">{note.title}</h3>
       <p className="mb-4 flex-1 text-sm text-muted-foreground">{note.description}</p>
-      <button
-        onClick={() => setEmailModal(note.id)}
-        className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
-      >
-        <Download className="h-4 w-4" /> Download
-      </button>
+      {note.file_url && (
+        <button
+          onClick={() => setEmailModal(note.id)}
+          className="inline-flex items-center gap-2 self-start rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
+        >
+          <Download className="h-4 w-4" /> Download
+        </button>
+      )}
     </div>
   );
 
