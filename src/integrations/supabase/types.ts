@@ -205,6 +205,7 @@ export type Database = {
           subject: string | null
           title: string
           topic_slug: string | null
+          video_url: string | null
         }
         Insert: {
           created_at?: string
@@ -214,6 +215,7 @@ export type Database = {
           subject?: string | null
           title: string
           topic_slug?: string | null
+          video_url?: string | null
         }
         Update: {
           created_at?: string
@@ -223,6 +225,7 @@ export type Database = {
           subject?: string | null
           title?: string
           topic_slug?: string | null
+          video_url?: string | null
         }
         Relationships: []
       }
