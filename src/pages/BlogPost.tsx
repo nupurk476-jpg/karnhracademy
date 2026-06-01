@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +65,12 @@ const BlogPost = () => {
           <span>{new Date(post.created_at).toLocaleDateString()}</span>
         </div>
 
-        <div className="prose prose-lg max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, "<br/>") }} />
+        <div
+          className="prose prose-lg max-w-none text-foreground"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(post.content.replace(/\n/g, "<br/>")),
+          }}
+        />
 
         {/* Share */}
         <div className="mt-10 flex items-center gap-4 border-t border-border pt-6">

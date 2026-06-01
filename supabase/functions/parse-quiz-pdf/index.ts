@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,7 @@ const MIN_QUESTION_COUNT = 30;
 const MAX_QUESTION_HINT = 80;
 const MAX_AI_TOKENS = 16000;
 const MAX_GENERATION_ATTEMPTS = 3;
+const MAX_TEXT_LENGTH = 50000;
 
 const QUIZ_PROMPT = `You are a quiz generator.
 Generate a LARGE, thorough bank of multiple-choice questions from the provided material.
@@ -248,6 +250,40 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Require authenticated admin caller
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: roleRow } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', claimsData.claims.sub)
+      .eq('role', 'admin')
+      .maybeSingle();
+    if (!roleRow) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
     let baseMessages: ChatMessage[];
 
@@ -284,6 +320,12 @@ Deno.serve(async (req) => {
     } else if (body.text) {
       if (typeof body.text !== 'string' || body.text.trim().length === 0) {
         return new Response(JSON.stringify({ error: 'No text provided' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (body.text.length > MAX_TEXT_LENGTH) {
+        return new Response(JSON.stringify({ error: `Text exceeds ${MAX_TEXT_LENGTH} character limit` }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
