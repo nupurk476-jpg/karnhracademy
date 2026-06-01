@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +26,11 @@ const AboutPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="About"
+        description="About the educator behind HR & Management Research Hub — UGC NET qualified, PhD scholar specialising in Ethical HRM and Quiet Quitting."
+        path="/about"
+      />
       <Header />
       <main className="mx-auto max-w-4xl px-6 py-16">
         <h1 className="mb-8 text-4xl font-bold text-foreground">About</h1>

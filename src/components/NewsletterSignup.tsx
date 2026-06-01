@@ -35,13 +35,16 @@ const NewsletterSignup = () => {
           Join the HR Learning Community for latest notes, blogs, and quizzes.
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+          <label htmlFor="newsletter-email" className="sr-only">Email address</label>
           <input
+            id="newsletter-email"
             type="email"
             required
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent"
+            aria-label="Email address"
+            className="flex-1 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent"
           />
           <button
             type="submit"

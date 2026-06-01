@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { hrTopics } from "@/components/HRTopicsSection";
 import { ArrowLeft, FileText, Upload, Trash2, Loader2, FileSpreadsheet, Presentation } from "lucide-react";
 import { toast } from "@/hooks/use-toast";

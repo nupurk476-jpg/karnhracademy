@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const categories = ["All", "HRM Basics", "Organizational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting"];
 
@@ -26,6 +27,11 @@ const BlogList = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Blog"
+        description="Articles and insights on Human Resource Management, organisational behaviour, ethical HRM, and academic research."
+        path="/blogs"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Blog</h1>
