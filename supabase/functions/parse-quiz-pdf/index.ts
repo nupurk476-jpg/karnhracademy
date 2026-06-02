@@ -12,6 +12,7 @@ const MAX_QUESTION_HINT = 80;
 const MAX_AI_TOKENS = 16000;
 const MAX_GENERATION_ATTEMPTS = 3;
 const MAX_TEXT_LENGTH = 50000;
+const MAX_FILE_URL_LENGTH = 2048;
 
 const QUIZ_PROMPT = `You are a quiz generator.
 Generate a LARGE, thorough bank of multiple-choice questions from the provided material.
@@ -50,6 +51,21 @@ const getMimeTypeFromUrl = (fileUrl: string) => {
   if (url.includes('.docx')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   if (url.includes('.doc')) return 'application/msword';
   return 'application/pdf';
+};
+
+const isAllowedStorageFileUrl = (fileUrl: string, backendUrl: string): boolean => {
+  try {
+    const parsedFileUrl = new URL(fileUrl);
+    const parsedBackendUrl = new URL(backendUrl);
+
+    const isTrustedOrigin = parsedFileUrl.origin === parsedBackendUrl.origin;
+    const isHttps = parsedFileUrl.protocol === 'https:';
+    const isPublicStoragePath = parsedFileUrl.pathname.startsWith('/storage/v1/object/public/');
+
+    return isTrustedOrigin && isHttps && isPublicStoragePath;
+  } catch {
+    return false;
+  }
 };
 
 const extractTextFromAiContent = (content: unknown): string => {
@@ -285,10 +301,31 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return new Response(JSON.stringify({ error: 'Invalid request payload' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     let baseMessages: ChatMessage[];
 
     if (body.fileUrl) {
-      const fileResponse = await fetch(body.fileUrl);
+      if (typeof body.fileUrl !== 'string' || body.fileUrl.length === 0 || body.fileUrl.length > MAX_FILE_URL_LENGTH) {
+        return new Response(JSON.stringify({ error: 'Invalid file URL' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (!isAllowedStorageFileUrl(body.fileUrl, SUPABASE_URL)) {
+        return new Response(JSON.stringify({ error: 'File URL must point to a trusted storage file' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const fileResponse = await fetch(body.fileUrl, { redirect: 'error' });
       if (!fileResponse.ok) {
         return new Response(JSON.stringify({ error: 'Failed to fetch uploaded file' }), {
           status: 400,
@@ -373,7 +410,9 @@ Deno.serve(async (req) => {
     }
 
     if (allQuestions.length === 0) {
-      return new Response(JSON.stringify({ error: 'No questions found in file', raw: lastRawContent }), {
+      console.error('No questions generated from AI response', { rawPreview: lastRawContent.slice(0, 500) });
+
+      return new Response(JSON.stringify({ error: 'No questions found in the provided content' }), {
         status: 422,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -384,7 +423,12 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     const err = error as Error & { status?: number; details?: string };
-    console.error('Edge function error:', err);
+    console.error('Edge function error:', {
+      message: err.message,
+      status: err.status,
+      details: err.details,
+      stack: err.stack,
+    });
 
     if (err.status === 429) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded, please try again later.' }), {
@@ -400,7 +444,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ error: err.message, details: err.details }), {
+    return new Response(JSON.stringify({ error: 'Quiz generation failed. Please try again.' }), {
       status: err.status ?? 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
