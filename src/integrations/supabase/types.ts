@@ -169,6 +169,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lectures: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          subject: string | null
+          thumbnail_url: string | null
+          title: string
+          topic_slug: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          subject?: string | null
+          thumbnail_url?: string | null
+          title: string
+          topic_slug?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          subject?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          topic_slug?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       newspaper_highlights: {
         Row: {
           created_at: string
