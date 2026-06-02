@@ -1,11 +1,12 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const adminLinks = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
   { label: "Blog Posts", to: "/admin/blogs", icon: BookOpen },
   { label: "Notes", to: "/admin/notes", icon: FileText },
+  { label: "Lectures", to: "/admin/lectures", icon: Video },
   { label: "Quizzes", to: "/admin/quizzes", icon: HelpCircle },
   { label: "Books", to: "/admin/books", icon: BookMarked },
   { label: "Comments", to: "/admin/comments", icon: MessageSquare },
