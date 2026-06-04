@@ -39,6 +39,7 @@ const Header = () => {
     { label: "Blogs", to: "/blogs" },
     { label: "Notes", to: "/notes" },
     { label: "Lectures", to: "/lectures" },
+    { label: "Live", to: "/live-lectures" },
     { label: "Quizzes", to: "/quizzes" },
     { label: "Books", to: "/books" },
     { label: "Newspaper", to: "/newspaper" },

@@ -9,6 +9,7 @@ import BlogList from "./pages/BlogList";
 import BlogPost from "./pages/BlogPost";
 import NotesPage from "./pages/NotesPage";
 import LecturesPage from "./pages/LecturesPage";
+import LiveLecturesPage from "./pages/LiveLecturesPage";
 import QuizList from "./pages/QuizList";
 import QuizTake from "./pages/QuizTake";
 import BooksPage from "./pages/BooksPage";
@@ -27,6 +28,7 @@ import AdminComments from "./pages/admin/AdminComments";
 import AdminSubscribers from "./pages/admin/AdminSubscribers";
 import AdminNewspaperHighlights from "./pages/admin/AdminNewspaperHighlights";
 import AdminLectures from "./pages/admin/AdminLectures";
+import AdminLiveLectures from "./pages/admin/AdminLiveLectures";
 import NewspaperPage from "./pages/NewspaperPage";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import NotFound from "./pages/NotFound";
@@ -45,6 +47,7 @@ const App = () => (
           <Route path="/blogs/:slug" element={<BlogPost />} />
           <Route path="/notes" element={<NotesPage />} />
           <Route path="/lectures" element={<LecturesPage />} />
+          <Route path="/live-lectures" element={<LiveLecturesPage />} />
           <Route path="/quizzes" element={<QuizList />} />
           <Route path="/quizzes/:id" element={<QuizTake />} />
           <Route path="/books" element={<BooksPage />} />
@@ -65,6 +68,7 @@ const App = () => (
             <Route path="subscribers" element={<AdminSubscribers />} />
             <Route path="newspaper" element={<AdminNewspaperHighlights />} />
             <Route path="lectures" element={<AdminLectures />} />
+            <Route path="live-lectures" element={<AdminLiveLectures />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
