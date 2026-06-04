@@ -205,6 +205,48 @@ export type Database = {
         }
         Relationships: []
       }
+      live_lectures: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          meeting_url: string | null
+          platform: string | null
+          scheduled_at: string
+          status: string
+          subject: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_url?: string | null
+          platform?: string | null
+          scheduled_at: string
+          status?: string
+          subject?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_url?: string | null
+          platform?: string | null
+          scheduled_at?: string
+          status?: string
+          subject?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newspaper_highlights: {
         Row: {
           created_at: string
