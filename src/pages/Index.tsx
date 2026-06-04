@@ -22,6 +22,7 @@ const Index = () => {
       <main>
         <Hero />
         <AboutPreview />
+        <BBAStudentsSection />
         <FeaturedSection />
         <div id="hr-topics">
           <HRTopicsSection />
