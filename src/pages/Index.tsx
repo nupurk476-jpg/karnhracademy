@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import AboutPreview from "@/components/AboutPreview";
+import BBAStudentsSection from "@/components/BBAStudentsSection";
 import FeaturedSection from "@/components/FeaturedSection";
 import HRTopicsSection from "@/components/HRTopicsSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
