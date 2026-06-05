@@ -52,11 +52,9 @@ const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
 
       const userIds = Array.from(bestByUser.keys());
       const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, display_name")
-        .in("id", userIds);
+        .rpc("get_public_profiles", { _user_ids: userIds });
 
-      const profileMap = new Map((profiles || []).map(p => [p.id, p.display_name]));
+      const profileMap = new Map(((profiles as { id: string; display_name: string }[]) || []).map(p => [p.id, p.display_name]));
 
       const sorted = Array.from(bestByUser.values())
         .sort((a, b) => b.score - a.score || a.time_taken_seconds - b.time_taken_seconds)
