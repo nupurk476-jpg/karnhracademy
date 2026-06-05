@@ -36,6 +36,7 @@ const AdminLectures = () => {
   const [subject, setSubject] = useState("hrm");
   const [duration, setDuration] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUrlInput, setVideoUrlInput] = useState("");
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -54,13 +55,15 @@ const AdminLectures = () => {
   };
 
   const handleCreate = async () => {
-    if (!title || !videoFile) {
-      toast({ title: "Title and video are required", variant: "destructive" });
+    if (!title || (!videoFile && !videoUrlInput.trim())) {
+      toast({ title: "Title and a video (file or URL) are required", variant: "destructive" });
       return;
     }
     setUploading(true);
     try {
-      const video_url = await upload("note-videos", videoFile);
+      const video_url = videoFile
+        ? await upload("note-videos", videoFile)
+        : videoUrlInput.trim();
       let thumbnail_url: string | null = null;
       if (thumbFile) thumbnail_url = await upload("blog-images", thumbFile);
       await supabase.from("lectures" as any).insert({
@@ -73,7 +76,7 @@ const AdminLectures = () => {
         duration_minutes: duration ? parseInt(duration) : null,
       } as any);
       toast({ title: "Lecture uploaded" });
-      setTitle(""); setDescription(""); setVideoFile(null); setThumbFile(null); setTopicSlug(""); setSubject("hrm"); setDuration("");
+      setTitle(""); setDescription(""); setVideoFile(null); setVideoUrlInput(""); setThumbFile(null); setTopicSlug(""); setSubject("hrm"); setDuration("");
       load();
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -117,7 +120,17 @@ const AdminLectures = () => {
             <input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
         </div>
-        <button onClick={handleCreate} disabled={uploading || !title || !videoFile} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+        <div>
+          <label className="mb-1 block text-xs text-muted-foreground">Or paste a Zoom / YouTube recording URL (recommended for large Zoom recordings)</label>
+          <input
+            type="url"
+            placeholder="https://zoom.us/rec/share/... or https://youtu.be/..."
+            value={videoUrlInput}
+            onChange={e => setVideoUrlInput(e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+        </div>
+        <button onClick={handleCreate} disabled={uploading || !title || (!videoFile && !videoUrlInput.trim())} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
           {uploading ? "Uploading..." : "Upload Lecture"}
         </button>
       </div>
