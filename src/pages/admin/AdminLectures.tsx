@@ -110,25 +110,33 @@ const AdminLectures = () => {
           </select>
           <input type="number" placeholder="Duration (min)" value={duration} onChange={e => setDuration(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
         </div>
+        <div className="rounded-md border border-accent/40 bg-accent/5 p-3">
+          <label className="mb-1 block text-sm font-semibold text-foreground">
+            Recommended: paste a YouTube or Zoom recording URL
+          </label>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Best for large files (over ~500 MB / Zoom sessions / 2 GB+ recordings). Upload the video to YouTube (Unlisted) or keep it in Zoom Cloud, then paste the share link here. The player will embed it automatically.
+          </p>
+          <input
+            type="url"
+            placeholder="https://youtu.be/... or https://zoom.us/rec/share/..."
+            value={videoUrlInput}
+            onChange={e => setVideoUrlInput(e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+        </div>
+
+        <div className="text-center text-xs uppercase tracking-wider text-muted-foreground">— or upload a small file directly —</div>
+
         <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
-            <Video className="h-4 w-4" /> {videoFile ? videoFile.name : "Choose video file"}
+            <Video className="h-4 w-4" /> {videoFile ? videoFile.name : "Choose video file (under ~200 MB)"}
             <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
             <ImageIcon className="h-4 w-4" /> {thumbFile ? thumbFile.name : "Thumbnail (optional)"}
             <input type="file" accept="image/*" onChange={e => setThumbFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Or paste a Zoom / YouTube recording URL (recommended for large Zoom recordings)</label>
-          <input
-            type="url"
-            placeholder="https://zoom.us/rec/share/... or https://youtu.be/..."
-            value={videoUrlInput}
-            onChange={e => setVideoUrlInput(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          />
         </div>
         <button onClick={handleCreate} disabled={uploading || !title || (!videoFile && !videoUrlInput.trim())} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
           {uploading ? "Uploading..." : "Upload Lecture"}
