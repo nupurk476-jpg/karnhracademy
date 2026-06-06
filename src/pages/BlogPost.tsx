@@ -23,7 +23,7 @@ const BlogPost = () => {
     supabase.from("blog_posts").select("*").eq("slug", slug).eq("published", true).single().then(({ data }) => {
       setPost(data);
       if (data) {
-        supabase.from("blog_comments").select("*").eq("blog_post_id", data.id).eq("approved", true).order("created_at", { ascending: true }).then(({ data: c }) => c && setComments(c));
+        supabase.from("blog_comments").select("id, blog_post_id, name, content, approved, created_at").eq("blog_post_id", data.id).eq("approved", true).order("created_at", { ascending: true }).then(({ data: c }) => c && setComments(c));
       }
     });
   }, [slug]);
