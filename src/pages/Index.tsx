@@ -4,6 +4,7 @@ import AboutPreview from "@/components/AboutPreview";
 import BBAStudentsSection from "@/components/BBAStudentsSection";
 import FeaturedSection from "@/components/FeaturedSection";
 import HRTopicsSection from "@/components/HRTopicsSection";
+import PrinciplesOfManagementSection from "@/components/PrinciplesOfManagementSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -26,6 +27,9 @@ const Index = () => {
         <FeaturedSection />
         <div id="hr-topics">
           <HRTopicsSection />
+        </div>
+        <div id="pom">
+          <PrinciplesOfManagementSection />
         </div>
         <NewspaperHighlights />
         <TestimonialsSection />
