@@ -5,6 +5,7 @@ import BBAStudentsSection from "@/components/BBAStudentsSection";
 import FeaturedSection from "@/components/FeaturedSection";
 import HRTopicsSection from "@/components/HRTopicsSection";
 import PrinciplesOfManagementSection from "@/components/PrinciplesOfManagementSection";
+import OrganizationalBehaviourSection from "@/components/OrganizationalBehaviourSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -30,6 +31,9 @@ const Index = () => {
         </div>
         <div id="pom">
           <PrinciplesOfManagementSection />
+        </div>
+        <div id="ob">
+          <OrganizationalBehaviourSection />
         </div>
         <NewspaperHighlights />
         <TestimonialsSection />
