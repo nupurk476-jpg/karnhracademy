@@ -31,39 +31,9 @@ const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
 
     const fetchLeaderboard = async () => {
-      // Get all attempts for this quiz
-      const { data: attempts } = await supabase
-        .from("quiz_attempts")
-        .select("user_id, score, total_questions, time_taken_seconds, created_at")
-        .eq("quiz_id", quizId)
-        .order("score", { ascending: false })
-        .order("time_taken_seconds", { ascending: true });
-
-      if (!attempts || attempts.length === 0) { setEntries([]); return; }
-
-      // Get best attempt per user (highest score, then fastest time)
-      const bestByUser = new Map<string, typeof attempts[0]>();
-      for (const a of attempts) {
-        const existing = bestByUser.get(a.user_id);
-        if (!existing || a.score > existing.score || (a.score === existing.score && a.time_taken_seconds < existing.time_taken_seconds)) {
-          bestByUser.set(a.user_id, a);
-        }
-      }
-
-      const userIds = Array.from(bestByUser.keys());
-      const { data: profiles } = await supabase
-        .rpc("get_public_profiles", { _user_ids: userIds });
-
-      const profileMap = new Map(((profiles as { id: string; display_name: string }[]) || []).map(p => [p.id, p.display_name]));
-
-      const sorted = Array.from(bestByUser.values())
-        .sort((a, b) => b.score - a.score || a.time_taken_seconds - b.time_taken_seconds)
-        .map(a => ({
-          ...a,
-          display_name: profileMap.get(a.user_id) || "Anonymous",
-        }));
-
-      setEntries(sorted);
+      // Server-side aggregated leaderboard (SECURITY DEFINER RPC).
+      const { data } = await supabase.rpc("get_quiz_leaderboard", { _quiz_id: quizId });
+      setEntries(((data as LeaderboardEntry[]) || []));
     };
 
     fetchLeaderboard();

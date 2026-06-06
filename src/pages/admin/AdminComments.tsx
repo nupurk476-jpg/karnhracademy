@@ -8,7 +8,13 @@ const AdminComments = () => {
   const { toast } = useToast();
 
   const load = () => {
-    supabase.from("blog_comments").select("*, blog_posts(title)").order("created_at", { ascending: false }).then(({ data }) => data && setComments(data));
+    supabase.rpc("get_admin_blog_comments").then(({ data }) => {
+      if (data) {
+        setComments(
+          (data as any[]).map((c) => ({ ...c, blog_posts: { title: c.blog_post_title } }))
+        );
+      }
+    });
   };
 
   useEffect(() => { load(); }, []);

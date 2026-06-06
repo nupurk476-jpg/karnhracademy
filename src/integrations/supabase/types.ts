@@ -489,12 +489,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_admin_blog_comments: {
+        Args: never
+        Returns: {
+          approved: boolean
+          blog_post_id: string
+          blog_post_title: string
+          content: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+        }[]
+      }
       get_public_profiles: {
         Args: { _user_ids: string[] }
         Returns: {
           avatar_url: string
           display_name: string
           id: string
+        }[]
+      }
+      get_quiz_leaderboard: {
+        Args: { _quiz_id: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          score: number
+          time_taken_seconds: number
+          total_questions: number
+          user_id: string
         }[]
       }
       has_role: {
