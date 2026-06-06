@@ -6,6 +6,7 @@ import { Trash2, Upload, Video } from "lucide-react";
 const subjectOptions = [
   { label: "HRM", value: "hrm" },
   { label: "English", value: "english" },
+  { label: "Principles of Management", value: "pom" },
 ];
 
 const hrTopicOptions = [
@@ -28,6 +29,18 @@ const englishTopicOptions = [
   { label: "Verbal Ability", slug: "verbal-ability" },
   { label: "Synonyms & Antonyms", slug: "synonyms-antonyms" },
   { label: "Idioms & Phrases", slug: "idioms-phrases" },
+];
+
+const pomTopicOptions = [
+  { label: "Planning", slug: "planning" },
+  { label: "Organizing", slug: "organizing" },
+  { label: "Staffing", slug: "staffing" },
+  { label: "Directing", slug: "directing" },
+  { label: "Controlling", slug: "controlling" },
+  { label: "Coordination", slug: "coordination" },
+  { label: "Decision Making", slug: "decision-making" },
+  { label: "Principles of Fayol & Taylor", slug: "fayol-taylor" },
+  { label: "Business Ethics", slug: "business-ethics" },
 ];
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -92,7 +105,7 @@ const AdminNotes = () => {
   };
 
   const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions];
+    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions];
     return all.find(t => t.slug === slug)?.label || slug;
   };
 
@@ -110,7 +123,7 @@ const AdminNotes = () => {
         </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : hrTopicOptions).map(t => (
+          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
@@ -136,7 +149,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : "HRM"}</span>}
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
