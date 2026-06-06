@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import HRTopicPage from "./pages/HRTopicPage";
 import POMTopicPage from "./pages/POMTopicPage";
+import OBTopicPage from "./pages/OBTopicPage";
 import BlogList from "./pages/BlogList";
 import BlogPost from "./pages/BlogPost";
 import NotesPage from "./pages/NotesPage";
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/hr/:slug" element={<HRTopicPage />} />
           <Route path="/pom/:slug" element={<POMTopicPage />} />
+          <Route path="/ob/:slug" element={<OBTopicPage />} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
             <Route index element={<AdminDashboard />} />
             <Route path="blogs" element={<AdminBlogs />} />
