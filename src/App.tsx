@@ -8,6 +8,8 @@ import HRTopicPage from "./pages/HRTopicPage";
 import POMTopicPage from "./pages/POMTopicPage";
 import OBTopicPage from "./pages/OBTopicPage";
 import SMTopicPage from "./pages/SMTopicPage";
+import BCTopicPage from "./pages/BCTopicPage";
+import CGBETopicPage from "./pages/CGBETopicPage";
 import BlogList from "./pages/BlogList";
 import BlogPost from "./pages/BlogPost";
 import NotesPage from "./pages/NotesPage";
@@ -64,6 +66,8 @@ const App = () => (
           <Route path="/pom/:slug" element={<POMTopicPage />} />
           <Route path="/ob/:slug" element={<OBTopicPage />} />
           <Route path="/sm/:slug" element={<SMTopicPage />} />
+          <Route path="/bc/:slug" element={<BCTopicPage />} />
+          <Route path="/cgbe/:slug" element={<CGBETopicPage />} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
             <Route index element={<AdminDashboard />} />
             <Route path="blogs" element={<AdminBlogs />} />

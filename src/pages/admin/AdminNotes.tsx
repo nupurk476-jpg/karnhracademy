@@ -9,6 +9,8 @@ const subjectOptions = [
   { label: "Principles of Management", value: "pom" },
   { label: "Organizational Behaviour", value: "ob" },
   { label: "Strategic Management", value: "sm" },
+  { label: "Business Communication", value: "bc" },
+  { label: "Corporate Governance & Business Ethics", value: "cgbe" },
 ];
 
 const hrTopicOptions = [
@@ -55,6 +57,30 @@ const smTopicOptions = [
   { label: "Strategy Evaluation & Control", slug: "strategy-evaluation" },
   { label: "Corporate Governance", slug: "corporate-governance" },
   { label: "Competitive Strategies", slug: "competitive-strategies" },
+];
+
+const bcTopicOptions = [
+  { label: "Introduction to Business Communication", slug: "introduction-to-bc" },
+  { label: "Communication Process & Barriers", slug: "communication-process-barriers" },
+  { label: "Types of Communication", slug: "types-of-communication" },
+  { label: "Business Letters & Reports", slug: "business-letters-reports" },
+  { label: "Email & Digital Communication", slug: "email-digital-communication" },
+  { label: "Presentation Skills", slug: "presentation-skills" },
+  { label: "Negotiation & Persuasion", slug: "negotiation-persuasion" },
+  { label: "Cross-cultural Communication", slug: "cross-cultural-communication" },
+  { label: "Corporate Communication", slug: "corporate-communication" },
+];
+
+const cgbeTopicOptions = [
+  { label: "Introduction to Corporate Governance", slug: "introduction-to-cg" },
+  { label: "Board of Directors & Committees", slug: "board-of-directors" },
+  { label: "Shareholders & Stakeholders", slug: "shareholders-stakeholders" },
+  { label: "Governance Codes & Regulations", slug: "governance-codes" },
+  { label: "Business Ethics & CSR", slug: "business-ethics-csr" },
+  { label: "Ethical Decision Making", slug: "ethical-decision-making" },
+  { label: "Corporate Social Responsibility", slug: "corporate-social-responsibility" },
+  { label: "Sustainability & ESG", slug: "sustainability-esg" },
+  { label: "Insider Trading & Fraud", slug: "insider-trading-fraud" },
 ];
 
 const obTopicOptions = [
@@ -133,7 +159,7 @@ const AdminNotes = () => {
   };
 
   const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions];
+    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions, ...bcTopicOptions, ...cgbeTopicOptions];
     return all.find(t => t.slug === slug)?.label || slug;
   };
 
@@ -151,7 +177,7 @@ const AdminNotes = () => {
         </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : hrTopicOptions).map(t => (
+          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : subject === "bc" ? bcTopicOptions : subject === "cgbe" ? cgbeTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
@@ -177,7 +203,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : "HRM"}</span>}
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : note.subject === "bc" ? "BC" : note.subject === "cgbe" ? "CG & BE" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}

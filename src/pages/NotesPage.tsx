@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, BookOpen, Languages, Briefcase, Users, Target } from "lucide-react";
+import { FileText, Download, BookOpen, Languages, Briefcase, Users, Target, MessageSquare, Scale } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const englishSubcategories = [
@@ -49,6 +49,12 @@ const NotesPage = () => {
     }
     if (activeSubject === "sm") {
       return n.subject === "sm";
+    }
+    if (activeSubject === "bc") {
+      return n.subject === "bc";
+    }
+    if (activeSubject === "cgbe") {
+      return n.subject === "cgbe";
     }
     // HRM tab: notes without subject or subject=hrm
     return !n.subject || n.subject === "hrm";
@@ -126,6 +132,12 @@ const NotesPage = () => {
             <TabsTrigger value="sm" className="gap-2">
               <Target className="h-4 w-4" /> SM
             </TabsTrigger>
+            <TabsTrigger value="bc" className="gap-2">
+              <MessageSquare className="h-4 w-4" /> BC
+            </TabsTrigger>
+            <TabsTrigger value="cgbe" className="gap-2">
+              <Scale className="h-4 w-4" /> CG & BE
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="hrm">
@@ -188,6 +200,26 @@ const NotesPage = () => {
           <TabsContent value="sm">
             {filtered.length === 0 ? (
               <p className="text-muted-foreground">No Strategic Management notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="bc">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No Business Communication notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="cgbe">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No Corporate Governance & Business Ethics notes available yet.</p>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map(note => <NoteCard key={note.id} note={note} />)}
