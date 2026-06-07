@@ -9,7 +9,7 @@ const smTopics = [
   { label: "Strategic Intent", slug: "strategic-intent", icon: Crosshair, desc: "Vision, mission, goals & objectives of an organization" },
   { label: "Environmental Scanning", slug: "environmental-scanning", icon: BarChart3, desc: "SWOT, PESTLE & industry analysis techniques" },
   { label: "Strategic Analysis", slug: "strategic-analysis", icon: FileSliders, desc: "Portfolio, value chain & competitive advantage analysis" },
-  { label: "Strategy Formulation", slug: "strategy-formulation", icon: Sitemap, desc: "Corporate, business & functional level strategies" },
+  { label: "Strategy Formulation", slug: "strategy-formulation", icon: TrendingUp, desc: "Corporate, business & functional level strategies" },
   { label: "Strategy Implementation", slug: "strategy-implementation", icon: Layers, desc: "Resource allocation, change management & execution" },
   { label: "Strategy Evaluation & Control", slug: "strategy-evaluation", icon: ShieldCheck, desc: "Monitoring, benchmarking & corrective actions" },
   { label: "Corporate Governance", slug: "corporate-governance", icon: Landmark, desc: "Board structures, ethics & stakeholder management" },
