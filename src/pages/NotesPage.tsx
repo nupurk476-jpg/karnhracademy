@@ -206,6 +206,26 @@ const NotesPage = () => {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="bc">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No Business Communication notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="cgbe">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No Corporate Governance & Business Ethics notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </main>
 
