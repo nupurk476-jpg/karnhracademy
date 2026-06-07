@@ -50,6 +50,12 @@ const NotesPage = () => {
     if (activeSubject === "sm") {
       return n.subject === "sm";
     }
+    if (activeSubject === "bc") {
+      return n.subject === "bc";
+    }
+    if (activeSubject === "cgbe") {
+      return n.subject === "cgbe";
+    }
     // HRM tab: notes without subject or subject=hrm
     return !n.subject || n.subject === "hrm";
   });
@@ -125,6 +131,12 @@ const NotesPage = () => {
             </TabsTrigger>
             <TabsTrigger value="sm" className="gap-2">
               <Target className="h-4 w-4" /> SM
+            </TabsTrigger>
+            <TabsTrigger value="bc" className="gap-2">
+              <MessageSquare className="h-4 w-4" /> BC
+            </TabsTrigger>
+            <TabsTrigger value="cgbe" className="gap-2">
+              <Scale className="h-4 w-4" /> CG & BE
             </TabsTrigger>
           </TabsList>
 
