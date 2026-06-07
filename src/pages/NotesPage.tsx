@@ -123,6 +123,9 @@ const NotesPage = () => {
             <TabsTrigger value="ob" className="gap-2">
               <Users className="h-4 w-4" /> OB
             </TabsTrigger>
+            <TabsTrigger value="sm" className="gap-2">
+              <Target className="h-4 w-4" /> SM
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="hrm">
