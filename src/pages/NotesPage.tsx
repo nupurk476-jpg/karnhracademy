@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, BookOpen, Languages, Briefcase, Users, Target } from "lucide-react";
+import { FileText, Download, BookOpen, Languages, Briefcase, Users, Target, MessageSquare, Scale } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const englishSubcategories = [
