@@ -59,6 +59,30 @@ const smTopicOptions = [
   { label: "Competitive Strategies", slug: "competitive-strategies" },
 ];
 
+const bcTopicOptions = [
+  { label: "Introduction to Business Communication", slug: "introduction-to-bc" },
+  { label: "Communication Process & Barriers", slug: "communication-process-barriers" },
+  { label: "Types of Communication", slug: "types-of-communication" },
+  { label: "Business Letters & Reports", slug: "business-letters-reports" },
+  { label: "Email & Digital Communication", slug: "email-digital-communication" },
+  { label: "Presentation Skills", slug: "presentation-skills" },
+  { label: "Negotiation & Persuasion", slug: "negotiation-persuasion" },
+  { label: "Cross-cultural Communication", slug: "cross-cultural-communication" },
+  { label: "Corporate Communication", slug: "corporate-communication" },
+];
+
+const cgbeTopicOptions = [
+  { label: "Introduction to Corporate Governance", slug: "introduction-to-cg" },
+  { label: "Board of Directors & Committees", slug: "board-of-directors" },
+  { label: "Shareholders & Stakeholders", slug: "shareholders-stakeholders" },
+  { label: "Governance Codes & Regulations", slug: "governance-codes" },
+  { label: "Business Ethics & CSR", slug: "business-ethics-csr" },
+  { label: "Ethical Decision Making", slug: "ethical-decision-making" },
+  { label: "Corporate Social Responsibility", slug: "corporate-social-responsibility" },
+  { label: "Sustainability & ESG", slug: "sustainability-esg" },
+  { label: "Insider Trading & Fraud", slug: "insider-trading-fraud" },
+];
+
 const obTopicOptions = [
   { label: "Foundations of OB", slug: "foundations-of-ob" },
   { label: "Individual Behaviour", slug: "individual-behaviour" },
