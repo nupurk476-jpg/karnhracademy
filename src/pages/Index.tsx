@@ -41,6 +41,12 @@ const Index = () => {
         <div id="sm">
           <StrategicManagementSection />
         </div>
+        <div id="bc">
+          <BusinessCommunicationSection />
+        </div>
+        <div id="cgbe">
+          <CorporateGovernanceEthicsSection />
+        </div>
         <NewspaperHighlights />
         <TestimonialsSection />
         <NewsletterSignup />
