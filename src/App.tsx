@@ -8,6 +8,8 @@ import HRTopicPage from "./pages/HRTopicPage";
 import POMTopicPage from "./pages/POMTopicPage";
 import OBTopicPage from "./pages/OBTopicPage";
 import SMTopicPage from "./pages/SMTopicPage";
+import BCTopicPage from "./pages/BCTopicPage";
+import CGBETopicPage from "./pages/CGBETopicPage";
 import BlogList from "./pages/BlogList";
 import BlogPost from "./pages/BlogPost";
 import NotesPage from "./pages/NotesPage";
