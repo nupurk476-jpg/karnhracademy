@@ -151,7 +151,7 @@ const AdminNotes = () => {
         </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : hrTopicOptions).map(t => (
+          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
