@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, BookOpen, Languages, Briefcase, Users } from "lucide-react";
+import { FileText, Download, BookOpen, Languages, Briefcase, Users, Target } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const englishSubcategories = [
@@ -46,6 +46,9 @@ const NotesPage = () => {
     }
     if (activeSubject === "ob") {
       return n.subject === "ob";
+    }
+    if (activeSubject === "sm") {
+      return n.subject === "sm";
     }
     // HRM tab: notes without subject or subject=hrm
     return !n.subject || n.subject === "hrm";
@@ -120,6 +123,9 @@ const NotesPage = () => {
             <TabsTrigger value="ob" className="gap-2">
               <Users className="h-4 w-4" /> OB
             </TabsTrigger>
+            <TabsTrigger value="sm" className="gap-2">
+              <Target className="h-4 w-4" /> SM
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="hrm">
@@ -172,6 +178,16 @@ const NotesPage = () => {
           <TabsContent value="ob">
             {filtered.length === 0 ? (
               <p className="text-muted-foreground">No Organizational Behaviour notes available yet.</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => <NoteCard key={note.id} note={note} />)}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="sm">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground">No Strategic Management notes available yet.</p>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map(note => <NoteCard key={note.id} note={note} />)}

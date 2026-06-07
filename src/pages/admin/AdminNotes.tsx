@@ -8,6 +8,7 @@ const subjectOptions = [
   { label: "English", value: "english" },
   { label: "Principles of Management", value: "pom" },
   { label: "Organizational Behaviour", value: "ob" },
+  { label: "Strategic Management", value: "sm" },
 ];
 
 const hrTopicOptions = [
@@ -42,6 +43,18 @@ const pomTopicOptions = [
   { label: "Decision Making", slug: "decision-making" },
   { label: "Principles of Fayol & Taylor", slug: "fayol-taylor" },
   { label: "Business Ethics", slug: "business-ethics" },
+];
+
+const smTopicOptions = [
+  { label: "Nature & Scope of SM", slug: "nature-and-scope-of-sm" },
+  { label: "Strategic Intent", slug: "strategic-intent" },
+  { label: "Environmental Scanning", slug: "environmental-scanning" },
+  { label: "Strategic Analysis", slug: "strategic-analysis" },
+  { label: "Strategy Formulation", slug: "strategy-formulation" },
+  { label: "Strategy Implementation", slug: "strategy-implementation" },
+  { label: "Strategy Evaluation & Control", slug: "strategy-evaluation" },
+  { label: "Corporate Governance", slug: "corporate-governance" },
+  { label: "Competitive Strategies", slug: "competitive-strategies" },
 ];
 
 const obTopicOptions = [
@@ -120,7 +133,7 @@ const AdminNotes = () => {
   };
 
   const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions];
+    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions];
     return all.find(t => t.slug === slug)?.label || slug;
   };
 
@@ -138,7 +151,7 @@ const AdminNotes = () => {
         </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : hrTopicOptions).map(t => (
+          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
@@ -164,7 +177,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : "HRM"}</span>}
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
