@@ -47,6 +47,9 @@ const NotesPage = () => {
     if (activeSubject === "ob") {
       return n.subject === "ob";
     }
+    if (activeSubject === "sm") {
+      return n.subject === "sm";
+    }
     // HRM tab: notes without subject or subject=hrm
     return !n.subject || n.subject === "hrm";
   });
