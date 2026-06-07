@@ -66,6 +66,8 @@ const App = () => (
           <Route path="/pom/:slug" element={<POMTopicPage />} />
           <Route path="/ob/:slug" element={<OBTopicPage />} />
           <Route path="/sm/:slug" element={<SMTopicPage />} />
+          <Route path="/bc/:slug" element={<BCTopicPage />} />
+          <Route path="/cgbe/:slug" element={<CGBETopicPage />} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
             <Route index element={<AdminDashboard />} />
             <Route path="blogs" element={<AdminBlogs />} />
