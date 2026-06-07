@@ -203,7 +203,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : "HRM"}</span>}
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : note.subject === "bc" ? "BC" : note.subject === "cgbe" ? "CG & BE" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
