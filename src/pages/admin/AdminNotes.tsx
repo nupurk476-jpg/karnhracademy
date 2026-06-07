@@ -159,7 +159,7 @@ const AdminNotes = () => {
   };
 
   const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions];
+    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions, ...bcTopicOptions, ...cgbeTopicOptions];
     return all.find(t => t.slug === slug)?.label || slug;
   };
 
