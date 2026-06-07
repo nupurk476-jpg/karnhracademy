@@ -7,6 +7,8 @@ import HRTopicsSection from "@/components/HRTopicsSection";
 import PrinciplesOfManagementSection from "@/components/PrinciplesOfManagementSection";
 import OrganizationalBehaviourSection from "@/components/OrganizationalBehaviourSection";
 import StrategicManagementSection from "@/components/StrategicManagementSection";
+import BusinessCommunicationSection from "@/components/BusinessCommunicationSection";
+import CorporateGovernanceEthicsSection from "@/components/CorporateGovernanceEthicsSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import NewsletterSignup from "@/components/NewsletterSignup";
