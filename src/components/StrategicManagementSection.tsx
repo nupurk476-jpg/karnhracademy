@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   Target, BarChart3, Crosshair, Landmark, ShieldCheck,
-  FileSliders, Sitemap, Globe, Layers,
+  FileSliders, TrendingUp, Globe, Layers,
 } from "lucide-react";
 
 const smTopics = [
