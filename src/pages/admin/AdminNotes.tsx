@@ -8,6 +8,7 @@ const subjectOptions = [
   { label: "English", value: "english" },
   { label: "Principles of Management", value: "pom" },
   { label: "Organizational Behaviour", value: "ob" },
+  { label: "Strategic Management", value: "sm" },
 ];
 
 const hrTopicOptions = [
@@ -44,9 +45,17 @@ const pomTopicOptions = [
   { label: "Business Ethics", slug: "business-ethics" },
 ];
 
-const obTopicOptions = [
-  { label: "Foundations of OB", slug: "foundations-of-ob" },
-  { label: "Individual Behaviour", slug: "individual-behaviour" },
+const smTopicOptions = [
+  { label: "Nature & Scope of SM", slug: "nature-and-scope-of-sm" },
+  { label: "Strategic Intent", slug: "strategic-intent" },
+  { label: "Environmental Scanning", slug: "environmental-scanning" },
+  { label: "Strategic Analysis", slug: "strategic-analysis" },
+  { label: "Strategy Formulation", slug: "strategy-formulation" },
+  { label: "Strategy Implementation", slug: "strategy-implementation" },
+  { label: "Strategy Evaluation & Control", slug: "strategy-evaluation" },
+  { label: "Corporate Governance", slug: "corporate-governance" },
+  { label: "Competitive Strategies", slug: "competitive-strategies" },
+];
   { label: "Personality", slug: "personality" },
   { label: "Perception", slug: "perception" },
   { label: "Motivation", slug: "motivation" },
