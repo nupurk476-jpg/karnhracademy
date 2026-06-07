@@ -56,6 +56,10 @@ const smTopicOptions = [
   { label: "Corporate Governance", slug: "corporate-governance" },
   { label: "Competitive Strategies", slug: "competitive-strategies" },
 ];
+
+const obTopicOptions = [
+  { label: "Foundations of OB", slug: "foundations-of-ob" },
+  { label: "Individual Behaviour", slug: "individual-behaviour" },
   { label: "Personality", slug: "personality" },
   { label: "Perception", slug: "perception" },
   { label: "Motivation", slug: "motivation" },
