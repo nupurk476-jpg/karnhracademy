@@ -9,6 +9,8 @@ const subjectOptions = [
   { label: "Principles of Management", value: "pom" },
   { label: "Organizational Behaviour", value: "ob" },
   { label: "Strategic Management", value: "sm" },
+  { label: "Business Communication", value: "bc" },
+  { label: "Corporate Governance & Business Ethics", value: "cgbe" },
 ];
 
 const hrTopicOptions = [
