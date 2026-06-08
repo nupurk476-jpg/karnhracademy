@@ -9,6 +9,8 @@ import OrganizationalBehaviourSection from "@/components/OrganizationalBehaviour
 import StrategicManagementSection from "@/components/StrategicManagementSection";
 import BusinessCommunicationSection from "@/components/BusinessCommunicationSection";
 import CorporateGovernanceEthicsSection from "@/components/CorporateGovernanceEthicsSection";
+import OrgDevChangeMgmtSection from "@/components/OrgDevChangeMgmtSection";
+import GlobalHRPracticesSection from "@/components/GlobalHRPracticesSection";
 import NewspaperHighlights from "@/components/NewspaperHighlights";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -46,6 +48,12 @@ const Index = () => {
         </div>
         <div id="cgbe">
           <CorporateGovernanceEthicsSection />
+        </div>
+        <div id="odcm">
+          <OrgDevChangeMgmtSection />
+        </div>
+        <div id="ghr">
+          <GlobalHRPracticesSection />
         </div>
         <NewspaperHighlights />
         <TestimonialsSection />
