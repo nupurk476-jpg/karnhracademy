@@ -11,6 +11,8 @@ const subjectOptions = [
   { label: "Strategic Management", value: "sm" },
   { label: "Business Communication", value: "bc" },
   { label: "Corporate Governance & Business Ethics", value: "cgbe" },
+  { label: "OD & Change Management", value: "odcm" },
+  { label: "Global HR Practices", value: "ghr" },
 ];
 
 const hrTopicOptions = [
@@ -81,6 +83,30 @@ const cgbeTopicOptions = [
   { label: "Corporate Social Responsibility", slug: "corporate-social-responsibility" },
   { label: "Sustainability & ESG", slug: "sustainability-esg" },
   { label: "Insider Trading & Fraud", slug: "insider-trading-fraud" },
+];
+
+const odcmTopicOptions = [
+  { label: "Introduction to OD", slug: "introduction-to-od" },
+  { label: "OD Interventions", slug: "od-interventions" },
+  { label: "Action Research Model", slug: "action-research-model" },
+  { label: "Change Management Models", slug: "change-management-models" },
+  { label: "Managing Resistance to Change", slug: "managing-resistance" },
+  { label: "Planned vs Emergent Change", slug: "planned-vs-emergent" },
+  { label: "Organizational Transformation", slug: "organizational-transformation" },
+  { label: "Team & Group Interventions", slug: "team-group-interventions" },
+  { label: "Future of OD & Change", slug: "future-of-od" },
+];
+
+const ghrTopicOptions = [
+  { label: "Introduction to Global HRM", slug: "introduction-to-ghrm" },
+  { label: "International Staffing", slug: "international-staffing" },
+  { label: "Expatriate Management", slug: "expatriate-management" },
+  { label: "Cross-Cultural Management", slug: "cross-cultural-management" },
+  { label: "Global Compensation", slug: "global-compensation" },
+  { label: "International Training & Development", slug: "international-training" },
+  { label: "International Labour Standards", slug: "international-labour-standards" },
+  { label: "MNCs & HR Practices", slug: "mncs-hr-practices" },
+  { label: "Global Workforce Diversity", slug: "global-workforce-diversity" },
 ];
 
 const obTopicOptions = [
@@ -159,7 +185,7 @@ const AdminNotes = () => {
   };
 
   const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions, ...bcTopicOptions, ...cgbeTopicOptions];
+    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions, ...bcTopicOptions, ...cgbeTopicOptions, ...odcmTopicOptions, ...ghrTopicOptions];
     return all.find(t => t.slug === slug)?.label || slug;
   };
 
@@ -177,7 +203,7 @@ const AdminNotes = () => {
         </select>
         <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
           <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : subject === "bc" ? bcTopicOptions : subject === "cgbe" ? cgbeTopicOptions : hrTopicOptions).map(t => (
+          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : subject === "bc" ? bcTopicOptions : subject === "cgbe" ? cgbeTopicOptions : subject === "odcm" ? odcmTopicOptions : subject === "ghr" ? ghrTopicOptions : hrTopicOptions).map(t => (
             <option key={t.slug} value={t.slug}>{t.label}</option>
           ))}
         </select>
@@ -203,7 +229,7 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : note.subject === "bc" ? "BC" : note.subject === "cgbe" ? "CG & BE" : "HRM"}</span>}
+              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : note.subject === "bc" ? "BC" : note.subject === "cgbe" ? "CG & BE" : note.subject === "odcm" ? "OD & CM" : note.subject === "ghr" ? "GHR" : "HRM"}</span>}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
