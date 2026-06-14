@@ -1,4 +1,4 @@
-import { BookOpen, Menu, X, ChevronDown, LogIn, UserPlus, LogOut, User } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn, UserPlus, LogOut, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { hrTopics } from "@/components/HRTopicsSection";
@@ -50,15 +50,14 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-3">
-          <BookOpen className="h-7 w-7 text-accent" />
+        <Link to="/" className="flex items-center gap-4">
+          {/* KARNHR bracket mark logo */}
+          <div style={{ width: 5, height: 42, background: "#c79a4b", borderRadius: 3, flexShrink: 0 }} />
           <div>
-            <span className="text-lg font-semibold tracking-tight text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-              HR & Management
-            </span>
-            <span className="block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              Research Hub
-            </span>
+            <div style={{ lineHeight: 1 }}>
+              <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 300, fontSize: 26, letterSpacing: -1, color: "hsl(var(--foreground))" }}>KARN</span><span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 26, letterSpacing: -1, color: "hsl(var(--foreground))" }}>HR</span>
+            </div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 500, fontSize: 9, letterSpacing: 4, color: "hsl(var(--muted-foreground))", marginTop: 4 }}>ACADEMY</div>
           </div>
         </Link>
 

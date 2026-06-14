@@ -4,117 +4,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
-import {
-  FileText, Download, BookOpen, Languages, Briefcase,
-  Users, Target, MessageSquare, Scale, Repeat, Globe, ChevronRight
-} from "lucide-react";
-
-// ── Discipline definitions ────────────────────────────────────────────────────
-const disciplines = [
-  {
-    value: "hrm",
-    label: "Human Resource Management",
-    short: "HRM",
-    icon: BookOpen,
-    color: "bg-blue-50 border-blue-200 text-blue-700",
-    activeColor: "bg-blue-700 border-blue-700 text-white",
-    iconColor: "text-blue-500",
-    description: "Recruitment, compensation, SHRM, HR analytics, labour law",
-  },
-  {
-    value: "ob",
-    label: "Organizational Behaviour",
-    short: "OB",
-    icon: Users,
-    color: "bg-violet-50 border-violet-200 text-violet-700",
-    activeColor: "bg-violet-700 border-violet-700 text-white",
-    iconColor: "text-violet-500",
-    description: "Individual behaviour, motivation, leadership, group dynamics",
-  },
-  {
-    value: "sm",
-    label: "Strategic Management",
-    short: "SM",
-    icon: Target,
-    color: "bg-emerald-50 border-emerald-200 text-emerald-700",
-    activeColor: "bg-emerald-700 border-emerald-700 text-white",
-    iconColor: "text-emerald-500",
-    description: "SWOT, Porter's five forces, strategy formulation & evaluation",
-  },
-  {
-    value: "pom",
-    label: "Principles of Management",
-    short: "POM",
-    icon: Briefcase,
-    color: "bg-amber-50 border-amber-200 text-amber-700",
-    activeColor: "bg-amber-700 border-amber-700 text-white",
-    iconColor: "text-amber-500",
-    description: "Planning, organising, directing, controlling, Fayol & Taylor",
-  },
-  {
-    value: "bc",
-    label: "Business Communication",
-    short: "BC",
-    icon: MessageSquare,
-    color: "bg-cyan-50 border-cyan-200 text-cyan-700",
-    activeColor: "bg-cyan-700 border-cyan-700 text-white",
-    iconColor: "text-cyan-500",
-    description: "Written, verbal, cross-cultural & digital business communication",
-  },
-  {
-    value: "cgbe",
-    label: "Corporate Governance & Business Ethics",
-    short: "CG & BE",
-    icon: Scale,
-    color: "bg-rose-50 border-rose-200 text-rose-700",
-    activeColor: "bg-rose-700 border-rose-700 text-white",
-    iconColor: "text-rose-500",
-    description: "Board governance, CSR, ESG, ethical decision-making",
-  },
-  {
-    value: "odcm",
-    label: "OD & Change Management",
-    short: "OD & CM",
-    icon: Repeat,
-    color: "bg-orange-50 border-orange-200 text-orange-700",
-    activeColor: "bg-orange-700 border-orange-700 text-white",
-    iconColor: "text-orange-500",
-    description: "OD interventions, change models, managing resistance",
-  },
-  {
-    value: "ghr",
-    label: "Global HR Practices",
-    short: "Global HR",
-    icon: Globe,
-    color: "bg-teal-50 border-teal-200 text-teal-700",
-    activeColor: "bg-teal-700 border-teal-700 text-white",
-    iconColor: "text-teal-500",
-    description: "Expatriate management, international staffing, MNCs & diversity",
-  },
-  {
-    value: "english",
-    label: "English for Management",
-    short: "English",
-    icon: Languages,
-    color: "bg-indigo-50 border-indigo-200 text-indigo-700",
-    activeColor: "bg-indigo-700 border-indigo-700 text-white",
-    iconColor: "text-indigo-500",
-    description: "Vocabulary, grammar, reading comprehension, writing skills",
-  },
-];
-
-const englishSubcategories = [
-  { label: "All", value: "all" },
-  { label: "Vocabulary", value: "vocabulary" },
-  { label: "Grammar", value: "grammar" },
-  { label: "Reading Comprehension", value: "reading-comprehension" },
-  { label: "Writing Skills", value: "writing-skills" },
-  { label: "Verbal Ability", value: "verbal-ability" },
-  { label: "Synonyms & Antonyms", value: "synonyms-antonyms" },
-  { label: "Idioms & Phrases", value: "idioms-phrases" },
-];
-
-// ─────────────────────────────────────────────────────────────────────────────
+import { FileText, Download, BookOpen, ChevronRight } from "lucide-react";
+import { DISCIPLINES } from "@/lib/disciplines";
 
 const NotesPage = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -123,32 +14,26 @@ const NotesPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
-  const [englishSub, setEnglishSub] = useState("all");
+  const [activeTopic, setActiveTopic] = useState("all");
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setNotes(data));
   }, []);
 
-  // Count notes per discipline
   const countFor = (value: string) =>
     notes.filter(n => value === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject === value).length;
 
-  // Filter notes for the selected discipline
   const filtered = notes.filter(n => {
     if (!activeSubject) return false;
     const matchesSearch = !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase());
     if (!matchesSearch) return false;
-    if (activeSubject === "english") {
-      if (n.subject !== "english") return false;
-      if (englishSub !== "all" && n.topic_slug !== englishSub) return false;
-      return true;
-    }
-    if (activeSubject === "hrm") return !n.subject || n.subject === "hrm";
-    return n.subject === activeSubject;
+    if (activeSubject === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject !== activeSubject) return false;
+    if (activeTopic !== "all" && n.topic_slug !== activeTopic) return false;
+    return true;
   });
 
-  const activeDiscipline = disciplines.find(d => d.value === activeSubject);
+  const activeDiscipline = DISCIPLINES.find(d => d.value === activeSubject);
 
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,13 +81,11 @@ const NotesPage = () => {
       <Header />
 
       <main className="mx-auto max-w-6xl px-6 py-16">
-        {/* Page header */}
         <h1 className="mb-2 text-4xl font-bold text-foreground">Study Notes</h1>
         <p className="mb-8 text-muted-foreground">
           Downloadable notes organised by MBA discipline. Select a subject below to explore.
         </p>
 
-        {/* Search */}
         <input
           type="text"
           placeholder="Search notes..."
@@ -211,9 +94,9 @@ const NotesPage = () => {
           className="mb-10 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
 
-        {/* ── Discipline blocks ─────────────────────────────────────────── */}
+        {/* Discipline blocks */}
         <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {disciplines.map(d => {
+          {DISCIPLINES.map(d => {
             const Icon = d.icon;
             const count = countFor(d.value);
             const isActive = activeSubject === d.value;
@@ -222,7 +105,7 @@ const NotesPage = () => {
                 key={d.value}
                 onClick={() => {
                   setActiveSubject(isActive ? null : d.value);
-                  setEnglishSub("all");
+                  setActiveTopic("all");
                   setSearch("");
                 }}
                 className={`group relative flex items-start gap-4 rounded-xl border-2 p-5 text-left transition-all duration-150 hover:shadow-md ${
@@ -234,7 +117,7 @@ const NotesPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-700 leading-snug font-bold">{d.short}</span>
+                    <span className="text-sm font-bold leading-snug">{d.short}</span>
                     <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-white/25 text-white" : "bg-white/70"}`}>
                       {count} {count === 1 ? "note" : "notes"}
                     </span>
@@ -248,10 +131,9 @@ const NotesPage = () => {
           })}
         </div>
 
-        {/* ── Notes panel ───────────────────────────────────────────────── */}
+        {/* Notes panel */}
         {activeSubject && activeDiscipline && (
           <section>
-            {/* Section header */}
             <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
               <div className={`rounded-lg p-2 ${activeDiscipline.color}`}>
                 <activeDiscipline.icon className={`h-5 w-5 ${activeDiscipline.iconColor}`} />
@@ -262,26 +144,29 @@ const NotesPage = () => {
               </div>
             </div>
 
-            {/* English subcategory pills */}
-            {activeSubject === "english" && (
-              <div className="mb-6 flex flex-wrap gap-2">
-                {englishSubcategories.map(sub => (
-                  <button
-                    key={sub.value}
-                    onClick={() => setEnglishSub(sub.value)}
-                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                      englishSub === sub.value
-                        ? "bg-accent text-accent-foreground"
-                        : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {sub.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            {/* Topic pills for all disciplines */}
+            <div className="mb-6 flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveTopic("all")}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  activeTopic === "all" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                All
+              </button>
+              {activeDiscipline.topics.map(t => (
+                <button
+                  key={t.slug}
+                  onClick={() => setActiveTopic(t.slug)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    activeTopic === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-            {/* Notes grid */}
             {filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
@@ -296,7 +181,6 @@ const NotesPage = () => {
           </section>
         )}
 
-        {/* Prompt to select when nothing is active */}
         {!activeSubject && (
           <div className="rounded-lg border border-dashed border-border bg-muted/20 py-16 text-center">
             <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
@@ -305,7 +189,6 @@ const NotesPage = () => {
         )}
       </main>
 
-      {/* Email capture modal */}
       {emailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4">
           <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">

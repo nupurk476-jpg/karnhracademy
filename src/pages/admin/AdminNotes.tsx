@@ -2,126 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Video } from "lucide-react";
+import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 
-const subjectOptions = [
-  { label: "HRM", value: "hrm" },
-  { label: "English", value: "english" },
-  { label: "Principles of Management", value: "pom" },
-  { label: "Organizational Behaviour", value: "ob" },
-  { label: "Strategic Management", value: "sm" },
-  { label: "Business Communication", value: "bc" },
-  { label: "Corporate Governance & Business Ethics", value: "cgbe" },
-  { label: "OD & Change Management", value: "odcm" },
-  { label: "Global HR Practices", value: "ghr" },
-];
-
-const hrTopicOptions = [
-  { label: "Compensation & Benefits", slug: "compensation-and-benefits" },
-  { label: "Performance Management", slug: "performance-management" },
-  { label: "Recruitment & Selection", slug: "recruitment-and-selection" },
-  { label: "Functions of HR", slug: "functions-of-hr" },
-  { label: "Industrial Relations", slug: "industrial-relations" },
-  { label: "HRIS & SHRM", slug: "hris-and-shrm" },
-  { label: "HR Analytics", slug: "hr-analytics" },
-  { label: "HR Planning", slug: "human-resource-planning" },
-  { label: "Evolution of HRM", slug: "evolution-of-hrm" },
-];
-
-const englishTopicOptions = [
-  { label: "Vocabulary", slug: "vocabulary" },
-  { label: "Grammar", slug: "grammar" },
-  { label: "Reading Comprehension", slug: "reading-comprehension" },
-  { label: "Writing Skills", slug: "writing-skills" },
-  { label: "Verbal Ability", slug: "verbal-ability" },
-  { label: "Synonyms & Antonyms", slug: "synonyms-antonyms" },
-  { label: "Idioms & Phrases", slug: "idioms-phrases" },
-];
-
-const pomTopicOptions = [
-  { label: "Planning", slug: "planning" },
-  { label: "Organizing", slug: "organizing" },
-  { label: "Staffing", slug: "staffing" },
-  { label: "Directing", slug: "directing" },
-  { label: "Controlling", slug: "controlling" },
-  { label: "Coordination", slug: "coordination" },
-  { label: "Decision Making", slug: "decision-making" },
-  { label: "Principles of Fayol & Taylor", slug: "fayol-taylor" },
-  { label: "Business Ethics", slug: "business-ethics" },
-];
-
-const smTopicOptions = [
-  { label: "Nature & Scope of SM", slug: "nature-and-scope-of-sm" },
-  { label: "Strategic Intent", slug: "strategic-intent" },
-  { label: "Environmental Scanning", slug: "environmental-scanning" },
-  { label: "Strategic Analysis", slug: "strategic-analysis" },
-  { label: "Strategy Formulation", slug: "strategy-formulation" },
-  { label: "Strategy Implementation", slug: "strategy-implementation" },
-  { label: "Strategy Evaluation & Control", slug: "strategy-evaluation" },
-  { label: "Corporate Governance", slug: "corporate-governance" },
-  { label: "Competitive Strategies", slug: "competitive-strategies" },
-];
-
-const bcTopicOptions = [
-  { label: "Introduction to Business Communication", slug: "introduction-to-bc" },
-  { label: "Communication Process & Barriers", slug: "communication-process-barriers" },
-  { label: "Types of Communication", slug: "types-of-communication" },
-  { label: "Business Letters & Reports", slug: "business-letters-reports" },
-  { label: "Email & Digital Communication", slug: "email-digital-communication" },
-  { label: "Presentation Skills", slug: "presentation-skills" },
-  { label: "Negotiation & Persuasion", slug: "negotiation-persuasion" },
-  { label: "Cross-cultural Communication", slug: "cross-cultural-communication" },
-  { label: "Corporate Communication", slug: "corporate-communication" },
-];
-
-const cgbeTopicOptions = [
-  { label: "Introduction to Corporate Governance", slug: "introduction-to-cg" },
-  { label: "Board of Directors & Committees", slug: "board-of-directors" },
-  { label: "Shareholders & Stakeholders", slug: "shareholders-stakeholders" },
-  { label: "Governance Codes & Regulations", slug: "governance-codes" },
-  { label: "Business Ethics & CSR", slug: "business-ethics-csr" },
-  { label: "Ethical Decision Making", slug: "ethical-decision-making" },
-  { label: "Corporate Social Responsibility", slug: "corporate-social-responsibility" },
-  { label: "Sustainability & ESG", slug: "sustainability-esg" },
-  { label: "Insider Trading & Fraud", slug: "insider-trading-fraud" },
-];
-
-const odcmTopicOptions = [
-  { label: "Introduction to OD", slug: "introduction-to-od" },
-  { label: "OD Interventions", slug: "od-interventions" },
-  { label: "Action Research Model", slug: "action-research-model" },
-  { label: "Change Management Models", slug: "change-management-models" },
-  { label: "Managing Resistance to Change", slug: "managing-resistance" },
-  { label: "Planned vs Emergent Change", slug: "planned-vs-emergent" },
-  { label: "Organizational Transformation", slug: "organizational-transformation" },
-  { label: "Team & Group Interventions", slug: "team-group-interventions" },
-  { label: "Future of OD & Change", slug: "future-of-od" },
-];
-
-const ghrTopicOptions = [
-  { label: "Introduction to Global HRM", slug: "introduction-to-ghrm" },
-  { label: "International Staffing", slug: "international-staffing" },
-  { label: "Expatriate Management", slug: "expatriate-management" },
-  { label: "Cross-Cultural Management", slug: "cross-cultural-management" },
-  { label: "Global Compensation", slug: "global-compensation" },
-  { label: "International Training & Development", slug: "international-training" },
-  { label: "International Labour Standards", slug: "international-labour-standards" },
-  { label: "MNCs & HR Practices", slug: "mncs-hr-practices" },
-  { label: "Global Workforce Diversity", slug: "global-workforce-diversity" },
-];
-
-const obTopicOptions = [
-  { label: "Foundations of OB", slug: "foundations-of-ob" },
-  { label: "Individual Behaviour", slug: "individual-behaviour" },
-  { label: "Personality", slug: "personality" },
-  { label: "Perception", slug: "perception" },
-  { label: "Motivation", slug: "motivation" },
-  { label: "Learning", slug: "learning" },
-  { label: "Group Dynamics", slug: "group-dynamics" },
-  { label: "Leadership", slug: "leadership" },
-  { label: "Organizational Culture", slug: "organizational-culture" },
-  { label: "Change Management", slug: "change-management" },
-  { label: "Conflict & Stress", slug: "conflict-and-stress" },
-];
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
@@ -184,29 +66,73 @@ const AdminNotes = () => {
     load();
   };
 
-  const getTopicLabel = (slug: string) => {
-    const all = [...hrTopicOptions, ...englishTopicOptions, ...pomTopicOptions, ...obTopicOptions, ...smTopicOptions, ...bcTopicOptions, ...cgbeTopicOptions, ...odcmTopicOptions, ...ghrTopicOptions];
-    return all.find(t => t.slug === slug)?.label || slug;
-  };
+  const activeDiscipline = getDiscipline(subject);
+  const topics = activeDiscipline ? [...activeDiscipline.topics] : [];
 
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Notes</h1>
-      <div className="mb-8 space-y-3 rounded-lg border border-border bg-card p-6">
+      <div className="mb-8 space-y-4 rounded-lg border border-border bg-card p-6">
         <h2 className="text-lg font-semibold text-foreground">Upload New Note</h2>
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <select value={subject} onChange={e => { setSubject(e.target.value); setTopicSlug(""); }} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
-          {subjectOptions.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-        <select value={topicSlug} onChange={e => setTopicSlug(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
-          <option value="">-- Select Topic (optional) --</option>
-          {(subject === "english" ? englishTopicOptions : subject === "pom" ? pomTopicOptions : subject === "ob" ? obTopicOptions : subject === "sm" ? smTopicOptions : subject === "bc" ? bcTopicOptions : subject === "cgbe" ? cgbeTopicOptions : subject === "odcm" ? odcmTopicOptions : subject === "ghr" ? ghrTopicOptions : hrTopicOptions).map(t => (
-            <option key={t.slug} value={t.slug}>{t.label}</option>
-          ))}
-        </select>
+
+        {/* Discipline selector */}
+        <div>
+          <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Discipline</p>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {DISCIPLINES.map(d => {
+              const Icon = d.icon;
+              const isActive = subject === d.value;
+              return (
+                <button
+                  key={d.value}
+                  type="button"
+                  onClick={() => { setSubject(d.value); setTopicSlug(""); }}
+                  className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-left text-sm transition-all ${
+                    isActive ? d.activeColor : d.color + " hover:brightness-95"
+                  }`}
+                >
+                  <div className={`flex-shrink-0 rounded p-1 ${isActive ? "bg-white/20" : "bg-white"}`}>
+                    <Icon className={`h-4 w-4 ${isActive ? "text-white" : d.iconColor}`} />
+                  </div>
+                  <span className="font-semibold leading-tight">{d.short}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Topic chips */}
+        {topics.length > 0 && (
+          <div>
+            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setTopicSlug("")}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  topicSlug === "" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                All Topics
+              </button>
+              {topics.map(t => (
+                <button
+                  key={t.slug}
+                  type="button"
+                  onClick={() => setTopicSlug(t.slug)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
             <Upload className="h-4 w-4" /> {file ? file.name : "Choose PDF / PPT"}
@@ -229,7 +155,11 @@ const AdminNotes = () => {
           <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div>
               <span className="font-medium text-foreground">{note.title}</span>
-              {note.subject && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{note.subject === "english" ? "English" : note.subject === "pom" ? "POM" : note.subject === "ob" ? "OB" : note.subject === "sm" ? "SM" : note.subject === "bc" ? "BC" : note.subject === "cgbe" ? "CG & BE" : note.subject === "odcm" ? "OD & CM" : note.subject === "ghr" ? "GHR" : "HRM"}</span>}
+              {note.subject && (
+                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                  {getDiscipline(note.subject)?.short ?? note.subject.toUpperCase()}
+                </span>
+              )}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
