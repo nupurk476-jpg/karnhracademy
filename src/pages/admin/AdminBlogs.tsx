@@ -1,9 +1,124 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileUp } from "lucide-react";
 
 const categories = ["HRM Basics", "Organizational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
+
+// ── HTML blog import logic (mirrors publish-blog.mjs) ────────────────────────
+function parseHtmlBlog(html: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  function textOf(el: Element | null) {
+    if (!el) return "";
+    const clone = el.cloneNode(true) as Element;
+    clone.querySelectorAll("br,p,div,h1,h2,h3,h4").forEach(b => {
+      b.textContent = " " + b.textContent + " ";
+    });
+    return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  // Title
+  const heroH1 = doc.querySelector(".hero h1");
+  const title = heroH1
+    ? textOf(heroH1)
+    : (doc.querySelector("title")?.textContent ?? "").split("|")[0].replace(/\s+/g, " ").trim();
+
+  // Author
+  const heroMetaText = textOf(doc.querySelector(".hero-meta"));
+  const authorMatch = heroMetaText.match(/[✍✏✐]\s*([^,|·\n]+)/);
+  const author_name = authorMatch ? authorMatch[1].trim().replace(/MBA.*$/, "").trim() : "Nupur Karn";
+
+  // Excerpt
+  const excerpt = textOf(doc.querySelector(".hero-sub")).slice(0, 300);
+
+  // Category
+  const eyebrow = textOf(doc.querySelector(".hero-eyebrow"));
+  const combined = (eyebrow + " " + heroMetaText).toLowerCase();
+  let category = "HRM Basics";
+  if (/organizational.behav|org.behav/i.test(combined))  category = "Organizational Behaviour";
+  else if (/research.method/i.test(combined))             category = "Research Methodology";
+  else if (/ethical.hrm|ethics/i.test(combined))         category = "Ethical HRM";
+  else if (/quiet.quitting/i.test(combined))              category = "Quiet Quitting";
+  else if (/current.affairs/i.test(combined))             category = "Current Affairs";
+  else if (/general.studies/i.test(combined))             category = "General Studies";
+
+  // Slug
+  const slug = title
+    .toLowerCase()
+    .replace(/['''"":]/g, "")
+    .replace(/[^\w\s-]/g, " ")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
+
+  // Transform accordions → <details>/<summary>
+  doc.querySelectorAll(".acc-item").forEach(item => {
+    const trigger = item.querySelector(".acc-trigger");
+    const body = item.querySelector(".acc-body");
+    if (!trigger || !body) return;
+    trigger.querySelector(".acc-arrow")?.remove();
+    const details = doc.createElement("details");
+    details.className = "acc-item";
+    const summary = doc.createElement("summary");
+    summary.className = "acc-trigger";
+    summary.innerHTML = trigger.innerHTML.trim();
+    const bodyDiv = doc.createElement("div");
+    bodyDiv.className = "acc-body";
+    bodyDiv.innerHTML = body.innerHTML;
+    details.appendChild(summary);
+    details.appendChild(bodyDiv);
+    item.replaceWith(details);
+  });
+
+  // Transform lifecycle tabs → stacked <details>
+  doc.querySelectorAll(".lifecycle").forEach(lifecycle => {
+    const tabs   = [...lifecycle.querySelectorAll(".lc-tab")];
+    const panels = [...lifecycle.querySelectorAll(".lc-panel")];
+    if (!panels.length) return;
+    const newEl = doc.createElement("div");
+    newEl.className = "lifecycle";
+    panels.forEach((panel, i) => {
+      const details = doc.createElement("details");
+      details.className = "lc-stage";
+      if (i === 0) details.setAttribute("open", "");
+      const summary = doc.createElement("summary");
+      summary.className = "lc-tab";
+      summary.innerHTML = tabs[i] ? tabs[i].innerHTML : `<span class="lc-tab-label">Stage ${i + 1}</span>`;
+      const content = doc.createElement("div");
+      content.className = "lc-panel";
+      content.innerHTML = panel.innerHTML;
+      details.appendChild(summary);
+      details.appendChild(content);
+      newEl.appendChild(details);
+    });
+    lifecycle.replaceWith(newEl);
+  });
+
+  // Strip event handlers
+  const eventAttrs = ["onclick","onchange","oninput","onsubmit","onkeyup","onkeydown","onfocus","onblur"];
+  doc.querySelectorAll("*").forEach(el => eventAttrs.forEach(a => el.removeAttribute(a)));
+
+  // Build content
+  let content = "";
+  const heroStats = doc.querySelector(".hero-stats");
+  if (heroStats) content += heroStats.outerHTML + "\n";
+  const contentEl = doc.querySelector(".content");
+  if (contentEl) {
+    content += contentEl.innerHTML.trim() + "\n";
+  }
+  const footerEl = doc.querySelector(".footer");
+  if (footerEl) {
+    content += `<div class="blog-footer">\n${footerEl.innerHTML.trim()}\n</div>\n`;
+  }
+  content = content.replace(/<!--[\s\S]*?-->/g, "").replace(/\n{3,}/g, "\n\n").trim();
+
+  return { title, slug, excerpt, content, category, author_name };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -11,6 +126,8 @@ const AdminBlogs = () => {
   const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const htmlInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const load = () => {
@@ -23,6 +140,36 @@ const AdminBlogs = () => {
     setEditing(null);
     setForm({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
     setImageFile(null);
+  };
+
+  const handleHtmlImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const html = ev.target?.result as string;
+        const parsed = parseHtmlBlog(html);
+        setForm(prev => ({
+          ...prev,
+          title: parsed.title,
+          slug: parsed.slug,
+          excerpt: parsed.excerpt,
+          content: parsed.content,
+          category: parsed.category,
+          author_name: parsed.author_name,
+        }));
+        toast({ title: "HTML imported", description: "Review the fields below, then click Create." });
+      } catch {
+        toast({ title: "Import failed", description: "Could not parse the HTML file.", variant: "destructive" });
+      } finally {
+        setImporting(false);
+        // Reset the file input so the same file can be re-imported if needed
+        if (htmlInputRef.current) htmlInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleSave = async () => {
@@ -70,11 +217,35 @@ const AdminBlogs = () => {
 
       {/* Form */}
       <div className="mb-8 space-y-3 rounded-lg border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold text-foreground">{editing ? "Edit Post" : "New Post"}</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-foreground">{editing ? "Edit Post" : "New Post"}</h2>
+
+          {/* HTML Import button */}
+          {!editing && (
+            <div>
+              <input
+                ref={htmlInputRef}
+                type="file"
+                accept=".html,text/html"
+                className="hidden"
+                onChange={handleHtmlImport}
+              />
+              <button
+                onClick={() => htmlInputRef.current?.click()}
+                disabled={importing}
+                className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+              >
+                <FileUp className="h-4 w-4" />
+                {importing ? "Importing…" : "Import from HTML"}
+              </button>
+            </div>
+          )}
+        </div>
+
         <input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Slug (auto-generated if empty)" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Excerpt" value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <textarea placeholder="Content" value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} rows={8} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <textarea placeholder="Content" value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} rows={8} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono text-xs" />
         <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
           {categories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
