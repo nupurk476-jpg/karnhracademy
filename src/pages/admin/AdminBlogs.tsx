@@ -188,11 +188,21 @@ const AdminBlogs = () => {
     }
     const data = { ...form, slug, cover_image };
     if (editing) {
-      await supabase.from("blog_posts").update(data).eq("id", editing.id);
-      toast({ title: "Post updated" });
+      const { error } = await supabase.from("blog_posts").update(data).eq("id", editing.id);
+      if (error) {
+        toast({ title: "Update failed", description: error.message, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+      toast({ title: "Post updated", description: data.published ? "Post is live." : "Saved as draft." });
     } else {
-      await supabase.from("blog_posts").insert(data);
-      toast({ title: "Post created" });
+      const { error } = await supabase.from("blog_posts").insert(data);
+      if (error) {
+        toast({ title: "Create failed", description: error.message, variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+      toast({ title: "Post created", description: data.published ? "Post is live." : "Saved as draft — toggle Published to go live." });
     }
     setUploading(false);
     resetForm();
@@ -242,6 +252,12 @@ const AdminBlogs = () => {
           )}
         </div>
 
+        {/* Published toggle — prominent, at the top so it's never missed */}
+        <label className={`flex items-center gap-3 rounded-md border px-4 py-2.5 cursor-pointer select-none transition-colors ${form.published ? "border-green-400 bg-green-50 text-green-800" : "border-border bg-muted text-muted-foreground"}`}>
+          <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })} className="h-4 w-4 accent-green-600" />
+          <span className="text-sm font-medium">{form.published ? "✓ Published — will be visible on the site" : "Draft — not visible on the site"}</span>
+        </label>
+
         <input placeholder="Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Slug (auto-generated if empty)" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Excerpt" value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
@@ -255,13 +271,9 @@ const AdminBlogs = () => {
           {form.cover_image && <img src={form.cover_image} alt="Cover" className="mb-2 h-32 w-auto rounded-md object-cover" />}
           <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="text-sm text-muted-foreground" />
         </div>
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input type="checkbox" checked={form.published} onChange={e => setForm({ ...form, published: e.target.checked })} />
-          Published
-        </label>
         <div className="flex gap-2">
           <button onClick={handleSave} disabled={uploading} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
-            {uploading ? "Uploading..." : editing ? "Update" : "Create"}
+            {uploading ? "Saving..." : editing ? "Update" : form.published ? "Publish" : "Save as Draft"}
           </button>
           {editing && <button onClick={resetForm} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">Cancel</button>}
         </div>
@@ -271,13 +283,24 @@ const AdminBlogs = () => {
       <div className="space-y-2">
         {posts.map((post) => (
           <div key={post.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
-            <div>
+            <div className="flex-1 min-w-0 mr-4">
               <span className="font-medium text-foreground">{post.title}</span>
-              <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${post.published ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"}`}>
-                {post.published ? "Published" : "Draft"}
-              </span>
+              <span className="ml-2 text-xs text-muted-foreground">{post.category}</span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Quick publish toggle */}
+              <button
+                onClick={async () => {
+                  const { error } = await supabase.from("blog_posts").update({ published: !post.published }).eq("id", post.id);
+                  if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+                  else toast({ title: post.published ? "Set to draft" : "Published!" });
+                  load();
+                }}
+                className={`rounded-full px-3 py-0.5 text-xs font-medium transition-colors ${post.published ? "bg-green-100 text-green-800 hover:bg-red-100 hover:text-red-700" : "bg-muted text-muted-foreground hover:bg-green-100 hover:text-green-800"}`}
+                title={post.published ? "Click to unpublish" : "Click to publish"}
+              >
+                {post.published ? "Published" : "Draft"}
+              </button>
               <button onClick={() => startEdit(post)} className="text-muted-foreground hover:text-foreground"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => handleDelete(post.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
