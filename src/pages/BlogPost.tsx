@@ -85,12 +85,26 @@ const BlogPost = () => {
           <span>{new Date(post.created_at).toLocaleDateString()}</span>
         </div>
 
-        <div
-          className="prose prose-lg max-w-none text-foreground"
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(post.content.replace(/\n/g, "<br/>")),
-          }}
-        />
+        {/* HTML blog posts (from publish-blog pipeline) get blog-content class;
+            plain-text posts get simple prose-like styling */}
+        {post.content?.trimStart().startsWith("<") ? (
+          <div
+            className="blog-content"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content, {
+                ADD_TAGS: ["details", "summary"],
+                ADD_ATTR: ["open"],
+              }),
+            }}
+          />
+        ) : (
+          <div
+            className="prose prose-lg max-w-none text-foreground"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content?.replace(/\n/g, "<br/>") ?? ""),
+            }}
+          />
+        )}
 
         {/* Share */}
         <div className="mt-10 flex items-center gap-4 border-t border-border pt-6">
