@@ -53,7 +53,12 @@ const AdminNotes = () => {
       video_url = urlData.publicUrl;
     }
 
-    await supabase.from("notes").insert({ title, description, file_url, video_url, topic_slug: topicSlug || null, subject } as any);
+    const { error: insertError } = await supabase.from("notes").insert({ title, description, file_url, video_url, topic_slug: topicSlug || null, subject } as any);
+    if (insertError) {
+      toast({ title: "Failed to save note", description: insertError.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
     toast({ title: "Note created" });
     setTitle(""); setDescription(""); setFile(null); setVideoFile(null); setTopicSlug(""); setSubject("hrm");
     setUploading(false);
