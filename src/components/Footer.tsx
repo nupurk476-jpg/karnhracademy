@@ -1,65 +1,164 @@
-import { BookOpen, Mail, Linkedin, Youtube } from "lucide-react";
+import { Mail, Linkedin, Youtube, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border bg-primary px-6 py-16">
-      <div className="mx-auto max-w-6xl">
+    <footer className="border-t border-border bg-primary">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Col 1: Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <div className="mb-4 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-accent" />
-              <span className="text-base font-semibold text-primary-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-                HR & Management
-              </span>
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                style={{
+                  width: 5,
+                  height: 42,
+                  background: "#c79a4b",
+                  borderRadius: 3,
+                  flexShrink: 0,
+                }}
+              />
+              <div>
+                <div style={{ lineHeight: 1 }}>
+                  <span
+                    style={{
+                      fontFamily: "'Sora', sans-serif",
+                      fontWeight: 300,
+                      fontSize: 22,
+                      letterSpacing: -1,
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    KARN
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "'Sora', sans-serif",
+                      fontWeight: 800,
+                      fontSize: 22,
+                      letterSpacing: -1,
+                      color: "hsl(var(--primary-foreground))",
+                    }}
+                  >
+                    HR
+                  </span>
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 500,
+                    fontSize: 8,
+                    letterSpacing: 4,
+                    color: "hsl(var(--primary-foreground) / 0.6)",
+                    marginTop: 4,
+                  }}
+                >
+                  ACADEMY
+                </div>
+              </div>
             </div>
-            <p className="mb-4 text-sm leading-relaxed text-primary-foreground/80">
-              Advancing knowledge in Human Resource Management through research, teaching, and academic collaboration.
+            <p className="text-sm leading-relaxed text-primary-foreground/70 mb-5 max-w-xs">
+              Academic resource hub for HR & Management — structured notes, video lectures,
+              MCQs and research content for MBA, BBA & UGC NET aspirants.
             </p>
-            <div className="flex gap-3">
-              <a href="#" aria-label="LinkedIn profile" className="text-primary-foreground/70 transition-colors hover:text-accent"><Linkedin className="h-5 w-5" /></a>
-              <a href="#" aria-label="YouTube channel" className="text-primary-foreground/70 transition-colors hover:text-accent"><Youtube className="h-5 w-5" /></a>
+            <div className="flex items-center gap-3">
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="text-primary-foreground/60 hover:text-accent transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="text-primary-foreground/60 hover:text-accent transition-colors"
+              >
+                <Youtube className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                aria-label="Twitter / X"
+                className="text-primary-foreground/60 hover:text-accent transition-colors"
+              >
+                <Twitter className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
+          {/* Col 2: Quick Links */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">Quick Links</h4>
-            <div className="space-y-2">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+              Quick Links
+            </h4>
+            <div className="space-y-2.5">
               {[
                 { label: "Home", to: "/" },
-                { label: "Blogs", to: "/blogs" },
                 { label: "Notes", to: "/notes" },
-                { label: "Quizzes", to: "/quizzes" },
-                { label: "Books", to: "/books" },
+                { label: "Video Lectures", to: "/lectures" },
+                { label: "Blogs", to: "/blogs" },
+                { label: "MCQs", to: "/quizzes" },
+                { label: "Downloads", to: "/downloads" },
               ].map((link) => (
-                <Link key={link.label} to={link.to} className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-accent"
+                >
                   {link.label}
                 </Link>
               ))}
             </div>
           </div>
 
+          {/* Col 3: Subjects */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">About</h4>
-            <div className="space-y-2">
-              <Link to="/about" className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">About Us</Link>
-              <Link to="/contact" className="block text-sm text-primary-foreground/80 transition-colors hover:text-accent">Contact</Link>
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+              Subjects
+            </h4>
+            <div className="space-y-2.5">
+              {[
+                { label: "Human Resource Management", to: "/notes?subject=hrm" },
+                { label: "Organisational Behaviour", to: "/notes?subject=ob" },
+                { label: "Strategic HRM", to: "/notes?subject=sm" },
+                { label: "HR Analytics", to: "/notes?subject=hrm" },
+                { label: "Performance Management", to: "/notes?subject=hrm" },
+                { label: "Training & Development", to: "/notes?subject=hrm" },
+              ].map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="block text-sm text-primary-foreground/70 transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
+          {/* Col 4: Contact */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-primary-foreground/80">Contact</h4>
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-accent" />
-              <span className="text-sm text-primary-foreground/80">contact@hrresearchhub.com</span>
-            </div>
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+              Contact
+            </h4>
+            <p className="text-sm text-primary-foreground/70 mb-3 leading-relaxed">
+              Have a question or suggestion? We'd love to hear from you.
+            </p>
+            <a
+              href="mailto:contact@karnhracademy.com"
+              className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+            >
+              <Mail className="h-4 w-4 shrink-0" style={{ color: "hsl(var(--accent))" }} />
+              contact@karnhracademy.com
+            </a>
           </div>
         </div>
 
-        <div className="mt-12 border-t border-primary-foreground/10 pt-6 text-center">
-          <p className="text-xs text-primary-foreground/70">
-            © {new Date().getFullYear()} HR & Management Research Hub. All rights reserved.
+        <div className="mt-12 border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-xs text-primary-foreground/50">
+            © {new Date().getFullYear()} Karn HR Academy. All rights reserved.
           </p>
+          <p className="text-xs text-primary-foreground/40">Academic Resource Hub</p>
         </div>
       </div>
     </footer>
