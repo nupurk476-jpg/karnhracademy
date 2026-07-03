@@ -91,11 +91,17 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
+// All 9 subjects shown in the card — no accidental cutoff
 const HERO_SUBJECTS = [
   { label: "Human Resource Management", value: "hrm",  color: "#3B5BDB" },
   { label: "Organisational Behaviour",  value: "ob",   color: "#7048E8" },
   { label: "Strategic Management",      value: "sm",   color: "#0CA678" },
-  { label: "HR Analytics",              value: "hra",  color: GOLD },
+  { label: "HR Analytics",              value: "hra",  color: "#0891B2" },
+  { label: "Principles of Management",  value: "pom",  color: "#E67E22" },
+  { label: "Performance Management",    value: "pm",   color: "#E53E3E" },
+  { label: "Compensation Management",   value: "cm",   color: "#319795" },
+  { label: "Corporate Governance",      value: "cgbe", color: "#6B7280" },
+  { label: "OD & Change Management",    value: "odcm", color: "#DD6B20" },
 ];
 
 const Hero = () => {
@@ -114,8 +120,6 @@ const Hero = () => {
       setCounts(map);
     });
   }, []);
-
-  const maxCount = Math.max(...HERO_SUBJECTS.map(s => counts[s.value] || 0), 1);
 
   return (
   <section className="relative overflow-hidden" style={{ background: NAVY }}>
@@ -167,44 +171,52 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Right: Live content snapshot */}
+        {/* Right: Live content snapshot — Option B layout (no bars) */}
         <div className="hidden lg:flex items-center justify-center">
-          <div className="relative w-full max-w-md">
-            {/* Main card */}
-            <div className="rounded-2xl p-6 shadow-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}>
-              <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>K</div>
+          <div className="w-full max-w-md">
+            {/* Card: no overflow:hidden so badge won't clip */}
+            <div className="rounded-2xl shadow-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}>
+
+              {/* Card header — no star rating */}
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>K</div>
                 <div>
                   <p className="text-sm font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Karn HR Academy</p>
                   <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Notes by subject — live from the library</p>
                 </div>
-                <div className="ml-auto flex gap-0.5">{[...Array(5)].map((_,i) => <svg key={i} className="h-3.5 w-3.5" fill={GOLD} viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}</div>
               </div>
-              {/* Live note counts per subject */}
-              {HERO_SUBJECTS.map(s => {
-                const c = counts[s.value] || 0;
-                const pct = maxCount > 0 ? Math.round((c / maxCount) * 100) : 0;
-                return (
-                  <div key={s.label} className="mb-4 last:mb-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-white/80">{s.label}</span>
-                      <span className="text-xs font-bold" style={{ color: s.color }}>
-                        {c > 0 ? `${c} note${c !== 1 ? "s" : ""}` : "Coming Soon"}
-                      </span>
+
+              {/* Subject rows — Option B: name + status label, no progress bars */}
+              <div className="px-6 py-4 space-y-2.5">
+                {HERO_SUBJECTS.map(s => {
+                  const c = counts[s.value] || 0;
+                  return (
+                    <div key={s.value} className="flex items-center justify-between gap-3">
+                      {/* Color dot */}
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: s.color }} />
+                      <span className="flex-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.80)" }}>{s.label}</span>
+                      {c > 0 ? (
+                        <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
+                          {c} {c === 1 ? "note" : "notes"}
+                        </span>
+                      ) : (
+                        /* Neutral gray — does not compete with gold CTA buttons */
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.45)" }}>
+                          Coming Soon
+                        </span>
+                      )}
                     </div>
-                    <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                      <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: c > 0 ? `${pct}%` : "0%", background: s.color }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Floating badge: total notes (live) */}
-            <div className="absolute -bottom-5 -left-5 rounded-xl px-4 py-3 shadow-xl" style={{ background: "#fff" }}>
-              <p className="text-xs text-slate-500">Study notes in library</p>
-              <p className="text-2xl font-extrabold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>
-                {totalNotes !== null ? `${totalNotes}+` : "…"}
-              </p>
+                  );
+                })}
+              </div>
+
+              {/* Total badge — inside the card at the bottom, no absolute overlap */}
+              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                <p className="text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>Study notes in library</p>
+                <p className="text-xl font-extrabold" style={{ color: "#fff", fontFamily: "'Sora',sans-serif" }}>
+                  {totalNotes !== null ? `${totalNotes}` : "…"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
