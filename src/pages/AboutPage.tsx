@@ -28,7 +28,7 @@ const AboutPage = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="About"
-        description="About the educator behind HR & Management Research Hub — UGC NET qualified, PhD scholar specialising in Ethical HRM and Quiet Quitting."
+        description="About the educator behind Karn HR Academy — UGC NET qualified, PhD scholar specialising in Ethical HRM and Quiet Quitting."
         path="/about"
       />
       <Header />

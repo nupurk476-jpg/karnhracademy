@@ -118,9 +118,15 @@ const NotesPage = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold leading-snug">{d.short}</span>
-                    <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-white/25 text-white" : "bg-white/70"}`}>
-                      {count} {count === 1 ? "note" : "notes"}
-                    </span>
+                    {count > 0 ? (
+                      <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-white/25 text-white" : "bg-white/70"}`}>
+                        {count} {count === 1 ? "note" : "notes"}
+                      </span>
+                    ) : (
+                      <span className="flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                        Coming Soon
+                      </span>
+                    )}
                   </div>
                   <p className="mt-0.5 text-xs leading-snug font-medium opacity-80 line-clamp-1">{d.label}</p>
                   <p className={`mt-1.5 text-xs leading-relaxed ${isActive ? "opacity-80" : "opacity-60"} line-clamp-2`}>{d.description}</p>

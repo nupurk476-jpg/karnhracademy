@@ -43,14 +43,14 @@ const SUBJECTS = [
 const WHY_CHOOSE = [
   { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: "#3B5BDB", bg: "#EDF2FF" },
   { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: "#7048E8", bg: "#F3F0FF" },
-  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "1000+ MCQs with instant feedback and expert explanations. Practice mode and timed exam mode.",            color: "#0CA678", bg: "#EBFBEE" },
+  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: "#0CA678", bg: "#EBFBEE" },
   { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,      bg: "#FFF9DB" },
   { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: "#0891B2", bg: "#ECFEFF" },
   { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: "#E53E3E", bg: "#FFF5F5" },
 ];
 
 const ROADMAP = [
-  { step: "01", icon: Search,        title: "Choose a Subject",  desc: "Pick from 10 major HR & Management disciplines." },
+  { step: "01", icon: Search,        title: "Choose a Subject",  desc: "Pick an HR & Management discipline — HRM and OB have full content now; more are being added." },
   { step: "02", icon: FileText,      title: "Study the Notes",   desc: "Read structured, exam-aligned study notes." },
   { step: "03", icon: PlayCircle,    title: "Watch Lectures",    desc: "Reinforce concepts with expert video lectures." },
   { step: "04", icon: HelpCircle,    title: "Practice MCQs",     desc: "Test yourself with topic-wise quizzes." },
@@ -91,7 +91,33 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-const Hero = () => (
+const HERO_SUBJECTS = [
+  { label: "Human Resource Management", value: "hrm",  color: "#3B5BDB" },
+  { label: "Organisational Behaviour",  value: "ob",   color: "#7048E8" },
+  { label: "Strategic Management",      value: "sm",   color: "#0CA678" },
+  { label: "HR Analytics",              value: "hra",  color: GOLD },
+];
+
+const Hero = () => {
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [totalNotes, setTotalNotes] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.from("notes").select("subject").then(({ data }) => {
+      if (!data) return;
+      setTotalNotes(data.length);
+      const map: Record<string, number> = {};
+      data.forEach((n: any) => {
+        const key = n.subject || "hrm";
+        map[key] = (map[key] || 0) + 1;
+      });
+      setCounts(map);
+    });
+  }, []);
+
+  const maxCount = Math.max(...HERO_SUBJECTS.map(s => counts[s.value] || 0), 1);
+
+  return (
   <section className="relative overflow-hidden" style={{ background: NAVY }}>
     {/* Dot grid */}
     <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "26px 26px" }} />
@@ -115,7 +141,7 @@ const Hero = () => (
           </h1>
 
           <p className="text-base md:text-lg leading-relaxed mb-7 max-w-lg" style={{ color: "rgba(255,255,255,0.72)" }}>
-            Structured notes, expert video lectures, 1000+ MCQs, curated books, and research resources — all aligned with MBA, BBA & UGC NET syllabi. Built by an educator, for serious learners.
+            Structured notes, expert video lectures, curated books, and research resources — all aligned with MBA, BBA & UGC NET syllabi. Built by an educator, for serious learners.
           </p>
 
           {/* Audience pills */}
@@ -141,60 +167,77 @@ const Hero = () => (
           </div>
         </div>
 
-        {/* Right: Educational illustration */}
+        {/* Right: Live content snapshot */}
         <div className="hidden lg:flex items-center justify-center">
           <div className="relative w-full max-w-md">
             {/* Main card */}
             <div className="rounded-2xl p-6 shadow-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}>
-              <div className="flex items-center gap-3 mb-5 pb-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="flex items-center gap-3 mb-4 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>K</div>
                 <div>
                   <p className="text-sm font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Karn HR Academy</p>
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Your complete HR study companion</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Notes by subject — live from the library</p>
                 </div>
                 <div className="ml-auto flex gap-0.5">{[...Array(5)].map((_,i) => <svg key={i} className="h-3.5 w-3.5" fill={GOLD} viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}</div>
               </div>
-              {/* Subject progress bars */}
-              {[
-                { label: "Human Resource Management", pct: 92, color: "#3B5BDB" },
-                { label: "Organisational Behaviour",  pct: 78, color: "#7048E8" },
-                { label: "Strategic Management",      pct: 85, color: "#0CA678" },
-                { label: "HR Analytics",              pct: 70, color: GOLD },
-              ].map(s => (
-                <div key={s.label} className="mb-4 last:mb-0">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium text-white/80">{s.label}</span>
-                    <span className="text-xs font-bold" style={{ color: s.color }}>{s.pct}%</span>
+              {/* Live note counts per subject */}
+              {HERO_SUBJECTS.map(s => {
+                const c = counts[s.value] || 0;
+                const pct = maxCount > 0 ? Math.round((c / maxCount) * 100) : 0;
+                return (
+                  <div key={s.label} className="mb-4 last:mb-0">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-medium text-white/80">{s.label}</span>
+                      <span className="text-xs font-bold" style={{ color: s.color }}>
+                        {c > 0 ? `${c} note${c !== 1 ? "s" : ""}` : "Coming Soon"}
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                      <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: c > 0 ? `${pct}%` : "0%", background: s.color }} />
+                    </div>
                   </div>
-                  <div className="h-1.5 w-full rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
-                    <div className="h-1.5 rounded-full transition-all" style={{ width: `${s.pct}%`, background: s.color }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            {/* Floating badges */}
-            <div className="absolute -top-5 -right-5 rounded-xl px-4 py-3 shadow-xl" style={{ background: "#fff" }}>
-              <p className="text-xs text-slate-500">Latest Added</p>
-              <p className="text-sm font-bold text-slate-800">HR Analytics Notes</p>
-              <div className="flex items-center gap-1 mt-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /><span className="text-xs text-emerald-600 font-medium">Just uploaded</span></div>
-            </div>
+            {/* Floating badge: total notes (live) */}
             <div className="absolute -bottom-5 -left-5 rounded-xl px-4 py-3 shadow-xl" style={{ background: "#fff" }}>
-              <p className="text-xs text-slate-500">Students this month</p>
-              <p className="text-2xl font-extrabold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>5,200+</p>
+              <p className="text-xs text-slate-500">Study notes in library</p>
+              <p className="text-2xl font-extrabold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>
+                {totalNotes !== null ? `${totalNotes}+` : "…"}
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
   </section>
-);
+  );
+};
 
 // ─────────────── Section: Stats bar ──────────────────────────────────────────
-const StatsBar = () => (
+const StatsBar = () => {
+  const [notesCount, setNotesCount] = useState<number | null>(null);
+  const [quizCount, setQuizCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.from("notes").select("id", { count: "exact", head: true }).then(({ count }) => setNotesCount(count ?? 0));
+    supabase.from("quizzes").select("id", { count: "exact", head: true }).then(({ count }) => setQuizCount(count ?? 0));
+  }, []);
+
+  const liveStats = [
+    { value: notesCount !== null ? String(notesCount) : "…",  label: "Study Notes",       icon: FileText  },
+    { value: quizCount  !== null ? String(quizCount)  : "…",  label: "Practice MCQs",     icon: HelpCircle },
+    { value: "50+",   label: "Video Lectures",    icon: Video      },
+    { value: "200+",  label: "Books Listed",      icon: BookMarked },
+    { value: "10",    label: "Subjects Covered",  icon: BookOpen   },
+    { value: "Free",  label: "Always",            icon: Users      },
+  ];
+
+  return (
   <section style={{ background: GOLD }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
       <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-        {STATS.map(s => {
+        {liveStats.map(s => {
           const Icon = s.icon;
           return (
             <div key={s.label} className="flex flex-col items-center text-center gap-1">
@@ -207,7 +250,8 @@ const StatsBar = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 // ─────────────── Section: Why Choose ─────────────────────────────────────────
 const WhyChoose = () => (
@@ -242,7 +286,7 @@ const Subjects = () => (
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
         <div>
           <GoldLabel text="Browse by Discipline" />
-          <SectionHeading title="10 Major Subjects. One Platform." sub="Comprehensive resources for every discipline in the MBA & HR curriculum." />
+          <SectionHeading title="HR & Management. One Platform." sub="Deep resources for HRM and OB now live — more disciplines actively being added. Check the Notes page for availability." />
         </div>
         <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
           View all notes <ArrowRight className="h-4 w-4" />
@@ -463,11 +507,16 @@ const BooksSection = () => {
     supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data }) => data && setBooks(data));
   }, []);
 
+  // OpenStax OB has a free open-access cover. Robbins, Dessler, Mello are
+  // commercially published — no free official cover image available online.
+  // Flag: add cover_image URLs via Supabase Admin for those three once you
+  // have permission to use the images (e.g. from Amazon product pages or
+  // publisher sites). The UI will automatically show them when present.
   const placeholders = [
-    { title: "Human Resource Management",           author: "Gary Dessler",           description: "The definitive textbook covering all HRM functions, processes, and practices." },
-    { title: "Organisational Behaviour",             author: "Stephen P. Robbins",     description: "Comprehensive coverage of OB concepts — motivation, leadership, group dynamics." },
-    { title: "Strategic Human Resource Management", author: "Jeffrey Mello",           description: "Connects HRM strategy to organisational goals and competitive advantage." },
-    { title: "HR Analytics",                        author: "Martin Edwards & Kirsten Edwards", description: "Practical guide to data-driven HR decision-making and workforce analytics." },
+    { title: "Human Resource Management",           author: "Gary Dessler",           description: "The definitive textbook covering all HRM functions, processes, and practices.",           cover_image: null },
+    { title: "Organisational Behaviour",             author: "Stephen P. Robbins",     description: "Comprehensive coverage of OB concepts — motivation, leadership, group dynamics.",          cover_image: "https://openstax.org/apps/image-cdn/v1/f=webp/apps/cms/images/OrganizationalBehavior-bookcover.jpg" },
+    { title: "Strategic Human Resource Management", author: "Jeffrey Mello",           description: "Connects HRM strategy to organisational goals and competitive advantage.",                 cover_image: null },
+    { title: "HR Analytics",                        author: "Martin Edwards & Kirsten Edwards", description: "Practical guide to data-driven HR decision-making and workforce analytics.",  cover_image: null },
   ];
 
   const items = books.length > 0 ? books : placeholders;
@@ -488,12 +537,22 @@ const BooksSection = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {items.map((book: any, i: number) => (
             <div key={book.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-              {/* Book spine */}
-              <div className="relative flex items-end justify-center pt-8 pb-6 px-6" style={{ background: `linear-gradient(160deg, ${bookColors[i % 4]}22, ${bookColors[i % 4]}08)` }}>
-                <div className="relative w-24 h-32 rounded-lg shadow-xl flex items-center justify-center" style={{ background: bookColors[i % 4] }}>
-                  <div className="absolute left-0 top-0 bottom-0 w-2 rounded-l-lg" style={{ background: "rgba(0,0,0,0.2)" }} />
-                  <BookMarked className="h-8 w-8 text-white/80" />
-                </div>
+              {/* Cover area: real image if available, styled fallback otherwise */}
+              <div className="relative flex items-center justify-center pt-6 pb-5 px-6 overflow-hidden" style={{ background: `linear-gradient(160deg, ${bookColors[i % 4]}18, ${bookColors[i % 4]}06)`, minHeight: "10rem" }}>
+                {book.cover_image ? (
+                  <img
+                    src={book.cover_image}
+                    alt={`Cover of ${book.title}`}
+                    className="h-36 w-auto max-w-[7rem] object-cover rounded shadow-xl ring-1 ring-black/10"
+                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                ) : (
+                  <div className="relative w-24 h-32 rounded-lg shadow-xl flex flex-col items-center justify-center gap-2 px-2" style={{ background: bookColors[i % 4] }}>
+                    <div className="absolute left-0 top-0 bottom-0 w-2 rounded-l-lg" style={{ background: "rgba(0,0,0,0.2)" }} />
+                    <BookMarked className="h-7 w-7 text-white/80" />
+                    <span className="text-[9px] text-center text-white/70 leading-tight px-1 line-clamp-3">{book.title}</span>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col flex-1 p-5">
                 <h3 className="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug" style={{ fontFamily: "'Sora',sans-serif" }}>{book.title}</h3>

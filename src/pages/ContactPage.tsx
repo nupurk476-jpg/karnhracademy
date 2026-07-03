@@ -8,7 +8,7 @@ const ContactPage = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Contact"
-        description="Have questions or want to collaborate? Reach out to the HR & Management Research Hub team."
+        description="Have questions or want to collaborate? Reach out to the Karn HR Academy team."
         path="/contact"
       />
       <Header />

@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://karnhracademy.lovable.app";
-const SITE_NAME = "HR & Management Research Hub";
+const SITE_URL = "https://karnhracademy.com";
+const SITE_NAME = "Karn HR Academy";
 
 interface SEOProps {
   title: string;
