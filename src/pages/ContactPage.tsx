@@ -20,7 +20,7 @@ const ContactPage = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-3">
             <Mail className="h-5 w-5 text-accent" />
-            <span className="text-foreground">contact@hrresearchhub.com</span>
+            <span className="text-foreground">contact@karnhracademy.com</span>
           </div>
           <div className="flex items-center justify-center gap-4">
             <a href="#" aria-label="LinkedIn profile" className="text-muted-foreground transition-colors hover:text-accent"><Linkedin className="h-6 w-6" /></a>
