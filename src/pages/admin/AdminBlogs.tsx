@@ -123,7 +123,7 @@ function parseHtmlBlog(html: string) {
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
+  const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "Nupur Karn", published: false, cover_image: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -138,7 +138,7 @@ const AdminBlogs = () => {
 
   const resetForm = () => {
     setEditing(null);
-    setForm({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "HR Research Hub", published: false, cover_image: "" });
+    setForm({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "Nupur Karn", published: false, cover_image: "" });
     setImageFile(null);
   };
 

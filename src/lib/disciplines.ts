@@ -31,7 +31,7 @@ export const DISCIPLINES = [
   },
   {
     value: "ob",
-    label: "Organizational Behaviour",
+    label: "Organisational Behaviour",
     short: "OB",
     icon: Users,
     color: "bg-violet-50 border-violet-200 text-violet-700",

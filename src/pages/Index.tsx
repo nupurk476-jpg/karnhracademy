@@ -5,10 +5,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import {
-  ArrowRight, BookOpen, Users, BarChart3, Target, TrendingUp,
-  GraduationCap, DollarSign, Scale, Repeat, Globe, Briefcase,
-  MessageSquare, Video, HelpCircle, Download, FileText, Star,
-  CheckCircle2, Mail, ChevronRight, Clock, Award, Lightbulb,
+  ArrowRight, BookOpen, Users, Target, Languages,
+  GraduationCap, Scale, Repeat, Globe, Briefcase,
+  MessageSquare, Video, HelpCircle, Download, FileText,
+  CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
   PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
 } from "lucide-react";
 
@@ -27,17 +27,17 @@ const STATS = [
   { value: "5K+",   label: "Students Helped",   icon: Users      },
 ];
 
+// Exactly mirrors disciplines.ts — same values, same order
 const SUBJECTS = [
-  { icon: BookOpen,      label: "Human Resource Management", short: "HRM",      color: "#3B5BDB", bg: "#EDF2FF", to: "/notes" },
-  { icon: Users,         label: "Organisational Behaviour",  short: "OB",       color: "#7048E8", bg: "#F3F0FF", to: "/notes" },
-  { icon: Target,        label: "Strategic Management",      short: "SM",       color: "#0CA678", bg: "#EBFBEE", to: "/notes" },
-  { icon: Briefcase,     label: "Principles of Management",  short: "POM",      color: "#E67E22", bg: "#FEF3E0", to: "/notes" },
-  { icon: BarChart3,     label: "HR Analytics",              short: "HRA",      color: GOLD,      bg: "#FFF9DB", to: "/notes" },
-  { icon: TrendingUp,    label: "Performance Management",    short: "PM",       color: "#E53E3E", bg: "#FFF5F5", to: "/notes" },
-  { icon: DollarSign,    label: "Compensation Management",   short: "CM",       color: "#0891B2", bg: "#ECFEFF", to: "/notes" },
-  { icon: Scale,         label: "Corporate Governance",      short: "CG & BE",  color: "#6B7280", bg: "#F9FAFB", to: "/notes" },
-  { icon: Repeat,        label: "OD & Change Management",    short: "OD & CM",  color: "#DD6B20", bg: "#FFFAF0", to: "/notes" },
-  { icon: Globe,         label: "Global HR Practices",       short: "GHR",      color: "#319795", bg: "#E6FFFA", to: "/notes" },
+  { icon: BookOpen,      label: "Human Resource Management",          short: "HRM",     value: "hrm",     color: "#3B5BDB", bg: "#EDF2FF" },
+  { icon: Users,         label: "Organisational Behaviour",           short: "OB",      value: "ob",      color: "#7048E8", bg: "#F3F0FF" },
+  { icon: Target,        label: "Strategic Management",               short: "SM",      value: "sm",      color: "#0CA678", bg: "#EBFBEE" },
+  { icon: Briefcase,     label: "Principles of Management",           short: "POM",     value: "pom",     color: "#E67E22", bg: "#FEF3E0" },
+  { icon: MessageSquare, label: "Business Communication",             short: "BC",      value: "bc",      color: "#0891B2", bg: "#ECFEFF" },
+  { icon: Scale,         label: "Corporate Governance & Business Ethics", short: "CG & BE", value: "cgbe", color: "#6B7280", bg: "#F9FAFB" },
+  { icon: Repeat,        label: "OD & Change Management",             short: "OD & CM", value: "odcm",    color: "#DD6B20", bg: "#FFFAF0" },
+  { icon: Globe,         label: "Global HR Practices",                short: "GHR",     value: "ghr",     color: "#319795", bg: "#E6FFFA" },
+  { icon: Languages,     label: "English for Management",             short: "English", value: "english", color: "#5B5EA6", bg: "#EEF0FF" },
 ];
 
 const WHY_CHOOSE = [
@@ -91,17 +91,17 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-// All 9 subjects shown in the card — no accidental cutoff
+// All 9 subjects — values exactly match disciplines.ts
 const HERO_SUBJECTS = [
-  { label: "Human Resource Management", value: "hrm",  color: "#3B5BDB" },
-  { label: "Organisational Behaviour",  value: "ob",   color: "#7048E8" },
-  { label: "Strategic Management",      value: "sm",   color: "#0CA678" },
-  { label: "HR Analytics",              value: "hra",  color: "#0891B2" },
-  { label: "Principles of Management",  value: "pom",  color: "#E67E22" },
-  { label: "Performance Management",    value: "pm",   color: "#E53E3E" },
-  { label: "Compensation Management",   value: "cm",   color: "#319795" },
-  { label: "Corporate Governance",      value: "cgbe", color: "#6B7280" },
-  { label: "OD & Change Management",    value: "odcm", color: "#DD6B20" },
+  { label: "Human Resource Management",          value: "hrm",     color: "#3B5BDB" },
+  { label: "Organisational Behaviour",           value: "ob",      color: "#7048E8" },
+  { label: "Strategic Management",               value: "sm",      color: "#0CA678" },
+  { label: "Principles of Management",           value: "pom",     color: "#E67E22" },
+  { label: "Business Communication",             value: "bc",      color: "#0891B2" },
+  { label: "Corporate Governance & Bus. Ethics", value: "cgbe",    color: "#6B7280" },
+  { label: "OD & Change Management",             value: "odcm",    color: "#DD6B20" },
+  { label: "Global HR Practices",                value: "ghr",     color: "#319795" },
+  { label: "English for Management",             value: "english", color: "#5B5EA6" },
 ];
 
 const Hero = () => {
@@ -308,7 +308,7 @@ const Subjects = () => (
         {SUBJECTS.map(s => {
           const Icon = s.icon;
           return (
-            <Link key={s.label} to={s.to} className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md" style={{ background: s.bg, borderColor: `${s.color}20` }}>
+            <Link key={s.label} to="/notes" className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md" style={{ background: s.bg, borderColor: `${s.color}20` }}>
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
                 <Icon className="h-5 w-5 text-white" />
               </div>
