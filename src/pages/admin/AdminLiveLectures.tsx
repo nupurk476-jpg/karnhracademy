@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Image as ImageIcon } from "lucide-react";
-
-const subjectOptions = [
-  { label: "HRM", value: "hrm" },
-  { label: "English", value: "english" },
-];
+import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
 
 const platformOptions = ["zoom", "google-meet", "youtube", "ms-teams", "other"];
 const statusOptions = ["upcoming", "live", "ended"];
@@ -95,7 +91,7 @@ const AdminLiveLectures = () => {
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <select value={subject} onChange={e => setSubject(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
-            {subjectOptions.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            {DISCIPLINES.map(d => <option key={d.value} value={d.value}>{d.short} — {d.label}</option>)}
           </select>
           <select value={platform} onChange={e => setPlatform(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
             {platformOptions.map(p => <option key={p} value={p}>{p}</option>)}
@@ -121,7 +117,7 @@ const AdminLiveLectures = () => {
             <div className="min-w-0">
               <div className="font-medium text-foreground">{l.title}</div>
               <div className="text-xs text-muted-foreground">
-                {new Date(l.scheduled_at).toLocaleString()} · {l.platform} · {l.subject === "english" ? "English" : "HRM"}
+                {new Date(l.scheduled_at).toLocaleString()} · {l.platform} · {getDiscipline(l.subject)?.short ?? l.subject?.toUpperCase() ?? "HRM"}
               </div>
             </div>
             <div className="flex items-center gap-2">

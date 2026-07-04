@@ -14,15 +14,16 @@ import {
 
 // ── Subject config ────────────────────────────────────────────────────────────
 const SUBJECTS = [
-  { value: "all",    label: "All Subjects",              icon: Layers },
-  { value: "hrm",   label: "Human Resource Management", icon: BookOpen },
-  { value: "ob",    label: "Organisational Behaviour",  icon: Brain },
-  { value: "sm",    label: "Strategic HRM",             icon: Target },
-  { value: "pom",   label: "Principles of Management",  icon: Briefcase },
-  { value: "bc",    label: "Business Communication",    icon: MessageSquare },
-  { value: "cgbe",  label: "Corporate Governance",      icon: Scale },
-  { value: "odcm",  label: "OD & Change Management",   icon: Repeat },
-  { value: "ghr",   label: "Global HR Practices",       icon: Globe },
+  { value: "all",     label: "All Subjects",                          icon: Layers },
+  { value: "hrm",    label: "Human Resource Management",             icon: BookOpen },
+  { value: "ob",     label: "Organisational Behaviour",              icon: Brain },
+  { value: "sm",     label: "Strategic Management",                  icon: Target },
+  { value: "pom",    label: "Principles of Management",              icon: Briefcase },
+  { value: "bc",     label: "Business Communication",                icon: MessageSquare },
+  { value: "cgbe",   label: "Corporate Governance & Business Ethics", icon: Scale },
+  { value: "odcm",   label: "OD & Change Management",               icon: Repeat },
+  { value: "ghr",    label: "Global HR Practices",                   icon: Globe },
+  { value: "english", label: "English for Management",              icon: GraduationCap },
 ];
 
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
@@ -68,15 +69,15 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 
 function getSubjectForTopic(topic: string) {
   const t = (topic || "").toLowerCase();
-  if (t.includes("behaviour") || t.includes("motivation") || t.includes("perception") || t.includes("personality") || t.includes("leadership")) return "ob";
+  if (t.includes("vocabulary") || t.includes("grammar") || t.includes("verbal") || t.includes("comprehension") || t.includes("idiom") || t.includes("synonym")) return "english";
+  if (t.includes("behaviour") || t.includes("motivation") || t.includes("perception") || t.includes("personality") || t.includes("leadership") || t.includes("group dynamics")) return "ob";
   if (t.includes("strateg")) return "sm";
-  if (t.includes("compensation") || t.includes("payroll")) return "hrm";
-  if (t.includes("training") || t.includes("development")) return "hrm";
-  if (t.includes("industrial") || t.includes("relation")) return "hrm";
-  if (t.includes("analytics") || t.includes("research")) return "sm";
-  if (t.includes("governance") || t.includes("ethics")) return "cgbe";
-  if (t.includes("global") || t.includes("international")) return "ghr";
-  if (t.includes("change") || t.includes("od ") || t.includes("organ")) return "odcm";
+  if (t.includes("governance") || t.includes("ethics") || t.includes("csr") || t.includes("esg")) return "cgbe";
+  if (t.includes("global") || t.includes("international") || t.includes("expatriate") || t.includes("mnc")) return "ghr";
+  if (t.includes("change") || t.includes(" od ") || t.includes("organisation development") || t.includes("organizational development")) return "odcm";
+  if (t.includes("planning") || t.includes("organiz") || t.includes("direct") || t.includes("control") || t.includes("fayol") || t.includes("taylor") || t.includes("management theor")) return "pom";
+  if (t.includes("communication") || t.includes("business letter") || t.includes("presentation") || t.includes("negotiation")) return "bc";
+  if (t.includes("compensation") || t.includes("payroll") || t.includes("recruitment") || t.includes("training") || t.includes("industrial") || t.includes("analytics") || t.includes("hrm") || t.includes("talent") || t.includes("employee")) return "hrm";
   return "hrm";
 }
 
