@@ -4,11 +4,18 @@
 -- hr_resources or the hr-resources storage bucket anymore.
 DROP TABLE IF EXISTS public.hr_resources CASCADE;
 
-DELETE FROM storage.objects WHERE bucket_id = 'hr-resources';
-DELETE FROM storage.buckets WHERE id = 'hr-resources';
-
--- quiz-uploads backed the AI "generate quiz from PDF/paste text" feature,
--- which depended on a Lovable-only edge function that no longer exists.
--- The upload/paste-text buttons were removed from Admin > Quizzes.
-DELETE FROM storage.objects WHERE bucket_id = 'quiz-uploads';
-DELETE FROM storage.buckets WHERE id = 'quiz-uploads';
+-- NOTE: this migration originally also deleted the orphaned hr-resources and
+-- quiz-uploads rows from storage.objects/storage.buckets, but Supabase's
+-- storage.protect_delete() trigger forbids direct SQL deletes on storage
+-- tables ("Use the Storage API instead"), which made this migration fail and
+-- blocked the GitHub auto-deploy pipeline for every migration after it. The
+-- empty buckets are harmless; remove them via the dashboard's Storage UI if
+-- desired. The attempt below is kept but made non-fatal for older projects
+-- where direct deletes are still permitted.
+DO $$
+BEGIN
+  DELETE FROM storage.objects WHERE bucket_id IN ('hr-resources', 'quiz-uploads');
+  DELETE FROM storage.buckets WHERE id IN ('hr-resources', 'quiz-uploads');
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'Skipping storage cleanup (%): remove hr-resources/quiz-uploads buckets via Storage UI instead', SQLERRM;
+END $$;
