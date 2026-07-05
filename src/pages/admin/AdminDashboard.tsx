@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, HelpCircle, CheckCircle2, FileQuestion, Users, Percent, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminDashboard = () => {
   const [counts, setCounts] = useState({ blogs: 0, notes: 0, quizzes: 0, books: 0, comments: 0, subscribers: 0 });
+  const [quizStats, setQuizStats] = useState<{
+    total: number; published: number; draft: number; questions: number;
+    attempts: number; avgScore: number | null;
+    topQuiz: { title: string; avg: number } | null;
+    latestQuiz: { title: string; created_at: string } | null;
+  } | null>(null);
   const [educatorUrl, setEducatorUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
@@ -23,6 +29,47 @@ const AdminDashboard = () => {
         books: bk.count || 0, comments: c.count || 0, subscribers: s.count || 0,
       });
     });
+
+    // Quiz analytics — computed from quizzes, questions and attempts.
+    Promise.all([
+      supabase.from("quizzes").select("id, title, published, created_at" as any).order("created_at", { ascending: false }),
+      supabase.from("quiz_questions").select("id", { count: "exact", head: true }),
+      supabase.from("quiz_attempts").select("quiz_id, score, total_questions"),
+    ]).then(([qz, qq, at]) => {
+      const quizList: any[] = qz.data || [];
+      const attempts: any[] = at.data || [];
+      const published = quizList.filter(x => x.published !== false).length;
+
+      let avgScore: number | null = null;
+      let topQuiz: { title: string; avg: number } | null = null;
+      if (attempts.length > 0) {
+        const pct = (a: any) => (a.total_questions > 0 ? (a.score / a.total_questions) * 100 : 0);
+        avgScore = Math.round(attempts.reduce((s2, a) => s2 + pct(a), 0) / attempts.length);
+        const byQuiz: Record<string, number[]> = {};
+        attempts.forEach(a => { (byQuiz[a.quiz_id] ||= []).push(pct(a)); });
+        let best: { id: string; avg: number } | null = null;
+        Object.entries(byQuiz).forEach(([qid, arr]) => {
+          const avg = arr.reduce((x, y) => x + y, 0) / arr.length;
+          if (!best || avg > best.avg) best = { id: qid, avg };
+        });
+        if (best) {
+          const bq = quizList.find(x => x.id === best!.id);
+          if (bq) topQuiz = { title: bq.title, avg: Math.round(best.avg) };
+        }
+      }
+
+      setQuizStats({
+        total: quizList.length,
+        published,
+        draft: quizList.length - published,
+        questions: qq.count || 0,
+        attempts: attempts.length,
+        avgScore,
+        topQuiz,
+        latestQuiz: quizList[0] ? { title: quizList[0].title, created_at: quizList[0].created_at } : null,
+      });
+    });
+
     loadEducatorImage();
   }, []);
 
@@ -104,6 +151,56 @@ const AdminDashboard = () => {
           </div>
         ))}
       </div>
+
+      {/* Quiz analytics */}
+      {quizStats && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Quiz Statistics</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: "Total Quizzes", value: quizStats.total, icon: HelpCircle },
+              { label: "Published", value: quizStats.published, icon: CheckCircle2 },
+              { label: "Drafts", value: quizStats.draft, icon: Clock },
+              { label: "Questions Uploaded", value: quizStats.questions, icon: FileQuestion },
+              { label: "Quiz Attempts", value: quizStats.attempts, icon: Users },
+              { label: "Average Score", value: quizStats.avgScore !== null ? `${quizStats.avgScore}%` : "—", icon: Percent },
+            ].map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className="rounded-lg border border-border bg-card p-5">
+                  <div className="mb-1 flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-accent" />
+                    <p className="text-sm text-muted-foreground">{s.label}</p>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border border-border bg-card p-5">
+              <div className="mb-1 flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-accent" />
+                <p className="text-sm text-muted-foreground">Top Performing Quiz</p>
+              </div>
+              <p className="font-semibold text-foreground">
+                {quizStats.topQuiz ? `${quizStats.topQuiz.title}` : "No attempts yet"}
+              </p>
+              {quizStats.topQuiz && <p className="text-xs text-muted-foreground">{quizStats.topQuiz.avg}% average score</p>}
+            </div>
+            <div className="rounded-lg border border-border bg-card p-5">
+              <div className="mb-1 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-accent" />
+                <p className="text-sm text-muted-foreground">Recently Added</p>
+              </div>
+              <p className="font-semibold text-foreground">{quizStats.latestQuiz?.title ?? "No quizzes yet"}</p>
+              {quizStats.latestQuiz && (
+                <p className="text-xs text-muted-foreground">{new Date(quizStats.latestQuiz.created_at).toLocaleDateString()}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -65,7 +65,9 @@ const AdminNotes = () => {
       if (file) file_url = await uploadFile("notes", file);
       if (videoFile) video_url = await uploadFile("note-videos", videoFile);
 
-      const row = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject };
+      const row: any = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject };
+      if (file) row.file_size = file.size;          // record size for new uploads
+      else if (!file_url) row.file_size = null;      // attachment removed
       const { error } = editingId
         ? await supabase.from("notes").update(row as any).eq("id", editingId)
         : await supabase.from("notes").insert(row as any);

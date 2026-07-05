@@ -251,6 +251,7 @@ const QuizList = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState("all");
+  const [topicSlug, setTopicSlug] = useState("all");
   const [difficulty, setDifficulty] = useState("All");
   const [duration, setDuration] = useState("any");
   const [showFilters, setShowFilters] = useState(false);
@@ -264,7 +265,8 @@ const QuizList = () => {
         supabase.from("quiz_ratings").select("quiz_id, rating"),
       ]);
 
-      if (quizData) setQuizzes(quizData);
+      // Drafts stay admin-only; rows predating the "published" column count as published.
+      if (quizData) setQuizzes(quizData.filter((q: any) => q.published !== false));
 
       if (questions) {
         const counts: Record<string, number> = {};
@@ -294,6 +296,7 @@ const QuizList = () => {
   const filtered = useMemo(() => quizzes.filter(q => {
     if (search && !q.title?.toLowerCase().includes(search.toLowerCase()) && !q.topic?.toLowerCase().includes(search.toLowerCase())) return false;
     if (subject !== "all" && resolveSubject(q) !== subject) return false;
+    if (topicSlug !== "all" && q.topic_slug !== topicSlug) return false;
     if (difficulty !== "All" && getDifficulty(q.topic || q.title) !== difficulty) return false;
     if (duration !== "any") {
       const mins = estimateMinutes(questionCounts[q.id] || 10);
@@ -302,7 +305,16 @@ const QuizList = () => {
       if (duration === "long" && mins <= 20) return false;
     }
     return true;
-  }), [quizzes, search, subject, difficulty, duration, questionCounts]);
+  }), [quizzes, search, subject, topicSlug, difficulty, duration, questionCounts]);
+
+  // Sub-topic chips for the selected subject — only topics that actually have quizzes.
+  const subTopics = useMemo(() => {
+    if (subject === "all") return [];
+    const d = DISCIPLINES.find(x => x.value === subject);
+    if (!d) return [];
+    const subjQuizzes = quizzes.filter(q => resolveSubject(q) === subject);
+    return d.topics.filter(t => subjQuizzes.some(q => q.topic_slug === t.slug));
+  }, [subject, quizzes]);
 
   const featured = filtered[0] ?? null;
   const rest = filtered.slice(1);
@@ -318,7 +330,7 @@ const QuizList = () => {
     return g;
   }, [rest]);
 
-  const activeFiltersCount = [subject !== "all", difficulty !== "All", duration !== "any"].filter(Boolean).length;
+  const activeFiltersCount = [subject !== "all", topicSlug !== "all", difficulty !== "All", duration !== "any"].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -420,7 +432,7 @@ const QuizList = () => {
               return (
                 <button
                   key={s.value}
-                  onClick={() => setSubject(s.value)}
+                  onClick={() => { setSubject(s.value); setTopicSlug("all"); }}
                   className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
                     active
                       ? "bg-accent text-accent-foreground shadow-sm"
@@ -433,6 +445,31 @@ const QuizList = () => {
               );
             })}
           </div>
+          {/* Sub-topic row — only when the selected subject has quizzes filed under topics */}
+          {subTopics.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none">
+              <span className="flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sub topic:</span>
+              <button
+                onClick={() => setTopicSlug("all")}
+                className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  topicSlug === "all" ? "bg-primary text-primary-foreground" : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                }`}
+              >
+                All
+              </button>
+              {subTopics.map(t => (
+                <button
+                  key={t.slug}
+                  onClick={() => setTopicSlug(t.slug)}
+                  className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    topicSlug === t.slug ? "bg-primary text-primary-foreground" : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -487,7 +524,7 @@ const QuizList = () => {
               </div>
               <div className="flex items-end">
                 <button
-                  onClick={() => { setDifficulty("All"); setDuration("any"); setSubject("all"); setSearch(""); }}
+                  onClick={() => { setDifficulty("All"); setDuration("any"); setSubject("all"); setTopicSlug("all"); setSearch(""); }}
                   className="text-sm text-accent hover:underline"
                 >
                   Clear all filters
@@ -510,7 +547,7 @@ const QuizList = () => {
             <p className="font-medium text-muted-foreground">No quizzes found</p>
             <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters or search term.</p>
             <button
-              onClick={() => { setSearch(""); setSubject("all"); setDifficulty("All"); setDuration("any"); }}
+              onClick={() => { setSearch(""); setSubject("all"); setTopicSlug("all"); setDifficulty("All"); setDuration("any"); }}
               className="mt-4 text-sm font-medium text-accent hover:underline"
             >
               Clear all filters
