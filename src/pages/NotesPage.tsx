@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Download, BookOpen, ChevronRight } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import { DISCIPLINES } from "@/lib/disciplines";
 
 const NotesPage = () => {
@@ -16,11 +16,11 @@ const NotesPage = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
-  const [activeSubject, setActiveSubject] = useState<string | null>(() => {
-    const requested = searchParams.get("subject");
-    return requested && DISCIPLINES.some(d => d.value === requested) ? requested : null;
-  });
+  const requestedSubject = searchParams.get("subject");
+  const hadUrlParam = !!(requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject));
+  const [activeSubject, setActiveSubject] = useState<string>(hadUrlParam ? requestedSubject! : "hrm");
   const [activeTopic, setActiveTopic] = useState("all");
+  const [touched, setTouched] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,20 +30,36 @@ const NotesPage = () => {
     });
   }, []);
 
-  const countFor = (value: string) =>
-    notes.filter(n => value === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject === value).length;
+  // Single source of truth for "does this note belong to this discipline?"
+  // (legacy HRM notes were saved with subject = null before the column existed).
+  const noteMatchesSubject = (n: any, value: string) =>
+    value === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject === value;
+
+  const countFor = (value: string) => notes.filter(n => noteMatchesSubject(n, value)).length;
+
+  // Content-first: if the visitor didn't request a subject and the default has no
+  // notes, auto-select the first discipline that does, so they land on content.
+  useEffect(() => {
+    if (touched || hadUrlParam || notes.length === 0) return;
+    if (countFor(activeSubject) > 0) return;
+    const firstWithContent = DISCIPLINES.find(d => notes.some(n => noteMatchesSubject(n, d.value)));
+    if (firstWithContent) setActiveSubject(firstWithContent.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes]);
 
   const filtered = notes.filter(n => {
-    if (!activeSubject) return false;
     const matchesSearch = !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase());
     if (!matchesSearch) return false;
-    const matchesSubject = activeSubject === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject === activeSubject;
-    if (!matchesSubject) return false;
+    if (!noteMatchesSubject(n, activeSubject)) return false;
     if (activeTopic !== "all" && n.topic_slug !== activeTopic) return false;
     return true;
   });
 
   const activeDiscipline = DISCIPLINES.find(d => d.value === activeSubject);
+  const subjectNotes = notes.filter(n => noteMatchesSubject(n, activeSubject));
+  const topicsWithNotes = activeDiscipline
+    ? activeDiscipline.topics.filter(t => subjectNotes.some(n => n.topic_slug === t.slug))
+    : [];
 
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,22 +110,23 @@ const NotesPage = () => {
       />
       <Header />
 
-      <main className="mx-auto max-w-6xl px-6 py-16">
-        <h1 className="mb-2 text-4xl font-bold text-foreground">Study Notes</h1>
-        <p className="mb-8 text-muted-foreground">
-          Downloadable notes organised by MBA discipline. Select a subject below to explore.
-        </p>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Study Notes</h1>
+            <p className="mt-1 text-muted-foreground">Pick your subject to browse downloadable, exam-aligned notes.</p>
+          </div>
+          <input
+            type="text"
+            placeholder="Search notes..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"
+          />
+        </div>
 
-        <input
-          type="text"
-          placeholder="Search notes..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="mb-10 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        />
-
-        {/* Discipline blocks */}
-        <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Compact discipline selector */}
+        <div className="mb-8 flex flex-wrap gap-2">
           {DISCIPLINES.map(d => {
             const Icon = d.icon;
             const count = countFor(d.value);
@@ -117,80 +134,70 @@ const NotesPage = () => {
             return (
               <button
                 key={d.value}
-                onClick={() => {
-                  setActiveSubject(isActive ? null : d.value);
-                  setActiveTopic("all");
-                  setSearch("");
-                }}
-                className={`group relative flex items-start gap-4 rounded-xl border-2 p-5 text-left transition-all duration-150 hover:shadow-md ${
-                  isActive ? d.activeColor : d.color + " hover:brightness-95"
+                onClick={() => { setActiveSubject(d.value); setActiveTopic("all"); setTouched(true); }}
+                aria-pressed={isActive}
+                className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-all ${
+                  isActive
+                    ? d.activeColor + " shadow-sm"
+                    : count > 0
+                      ? d.color + " hover:brightness-95"
+                      : "border-border bg-card text-muted-foreground/70 hover:bg-muted"
                 }`}
               >
-                <div className={`mt-0.5 flex-shrink-0 rounded-lg p-2 ${isActive ? "bg-white/20" : "bg-white"}`}>
-                  <Icon className={`h-5 w-5 ${isActive ? "text-white" : d.iconColor}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold leading-snug">{d.short}</span>
-                    {count > 0 ? (
-                      <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isActive ? "bg-white/25 text-white" : "bg-white/70"}`}>
-                        {count} {count === 1 ? "note" : "notes"}
-                      </span>
-                    ) : (
-                      <span className="flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-                        Coming Soon
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs leading-snug font-medium opacity-80 line-clamp-1">{d.label}</p>
-                  <p className={`mt-1.5 text-xs leading-relaxed ${isActive ? "opacity-80" : "opacity-60"} line-clamp-2`}>{d.description}</p>
-                </div>
-                <ChevronRight className={`absolute right-3 bottom-3 h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? "opacity-60 rotate-90" : ""}`} />
+                <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : count > 0 ? d.iconColor : ""}`} />
+                <span className="whitespace-nowrap">{d.short}</span>
+                {count > 0 && (
+                  <span className={`rounded-full px-1.5 text-xs font-semibold ${isActive ? "bg-white/25 text-white" : "bg-white/80 text-foreground"}`}>
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
         {/* Notes panel */}
-        {activeSubject && activeDiscipline && (
+        {activeDiscipline && (
           <section>
-            <div className="mb-6 flex items-center gap-3 border-b border-border pb-4">
+            <div className="mb-5 flex items-center gap-3 border-b border-border pb-4">
               <div className={`rounded-lg p-2 ${activeDiscipline.color}`}>
                 <activeDiscipline.icon className={`h-5 w-5 ${activeDiscipline.iconColor}`} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-foreground">{activeDiscipline.label}</h2>
+                <h2 className="text-lg font-bold text-foreground">{activeDiscipline.label}</h2>
                 <p className="text-sm text-muted-foreground">{activeDiscipline.description}</p>
               </div>
             </div>
 
-            {/* Topic pills for all disciplines */}
-            <div className="mb-6 flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveTopic("all")}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                  activeTopic === "all" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                All
-              </button>
-              {activeDiscipline.topics.map(t => (
+            {/* Topic filter — only surface topics that actually have notes */}
+            {topicsWithNotes.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-2">
                 <button
-                  key={t.slug}
-                  onClick={() => setActiveTopic(t.slug)}
+                  onClick={() => setActiveTopic("all")}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                    activeTopic === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                    activeTopic === "all" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  {t.label}
+                  All
                 </button>
-              ))}
-            </div>
+                {topicsWithNotes.map(t => (
+                  <button
+                    key={t.slug}
+                    onClick={() => setActiveTopic(t.slug)}
+                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                      activeTopic === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-                <p className="text-muted-foreground font-medium">No notes uploaded yet for this discipline.</p>
+                <p className="text-muted-foreground font-medium">No notes uploaded yet for {activeDiscipline.label}.</p>
                 <p className="mt-1 text-sm text-muted-foreground">Check back soon — new material is added regularly.</p>
               </div>
             ) : (
@@ -199,13 +206,6 @@ const NotesPage = () => {
               </div>
             )}
           </section>
-        )}
-
-        {!activeSubject && (
-          <div className="rounded-lg border border-dashed border-border bg-muted/20 py-16 text-center">
-            <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
-            <p className="text-muted-foreground font-medium">Select a discipline above to view its notes.</p>
-          </div>
         )}
       </main>
 
