@@ -1,84 +1,109 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Upload, Video } from "lucide-react";
+import { Trash2, Upload, Video, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [topicSlug, setTopicSlug] = useState("");
   const [subject, setSubject] = useState("hrm");
   const [file, setFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  // Existing attachments while editing; null = removed by the admin.
+  const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
+  const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const load = () => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setNotes(data));
+    supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
+      if (error) { toast({ title: "Failed to load notes", description: error.message, variant: "destructive" }); return; }
+      if (data) setNotes(data);
+    });
   };
 
   useEffect(() => { load(); }, []);
 
-  const handleCreate = async () => {
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle(""); setDescription(""); setFile(null); setVideoFile(null);
+    setTopicSlug(""); setSubject("hrm");
+    setExistingFileUrl(null); setExistingVideoUrl(null);
+  };
+
+  const startEdit = (note: any) => {
+    setEditingId(note.id);
+    setTitle(note.title ?? "");
+    setDescription(note.description ?? "");
+    setSubject(note.subject ?? "hrm");
+    setTopicSlug(note.topic_slug ?? "");
+    setExistingFileUrl(note.file_url ?? null);
+    setExistingVideoUrl(note.video_url ?? null);
+    setFile(null); setVideoFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const uploadFile = async (bucket: string, f: File) => {
+    const ext = f.name.split(".").pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from(bucket).upload(path, f);
+    if (error) throw new Error(error.message);
+    return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+  };
+
+  const handleSave = async () => {
     if (!title) return;
     setUploading(true);
-    let file_url: string | null = null;
-    let video_url: string | null = null;
+    try {
+      // New uploads replace whatever was there; otherwise keep (or drop) the existing URLs.
+      let file_url: string | null = existingFileUrl;
+      let video_url: string | null = existingVideoUrl;
+      if (file) file_url = await uploadFile("notes", file);
+      if (videoFile) video_url = await uploadFile("note-videos", videoFile);
 
-    if (file) {
-      const ext = file.name.split(".").pop();
-      const path = `${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("notes").upload(path, file);
-      if (error) {
-        toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-        setUploading(false);
-        return;
-      }
-      const { data: urlData } = supabase.storage.from("notes").getPublicUrl(path);
-      file_url = urlData.publicUrl;
-    }
+      const row = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject };
+      const { error } = editingId
+        ? await supabase.from("notes").update(row as any).eq("id", editingId)
+        : await supabase.from("notes").insert(row as any);
+      if (error) throw new Error(error.message);
 
-    if (videoFile) {
-      const ext = videoFile.name.split(".").pop();
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("note-videos").upload(path, videoFile);
-      if (error) {
-        toast({ title: "Video upload failed", description: error.message, variant: "destructive" });
-        setUploading(false);
-        return;
-      }
-      const { data: urlData } = supabase.storage.from("note-videos").getPublicUrl(path);
-      video_url = urlData.publicUrl;
-    }
-
-    const { error: insertError } = await supabase.from("notes").insert({ title, description, file_url, video_url, topic_slug: topicSlug || null, subject } as any);
-    if (insertError) {
-      toast({ title: "Failed to save note", description: insertError.message, variant: "destructive" });
+      toast({ title: editingId ? "Note updated" : "Note created" });
+      resetForm();
+      load();
+    } catch (err: any) {
+      toast({ title: editingId ? "Failed to update note" : "Failed to save note", description: err.message, variant: "destructive" });
+    } finally {
       setUploading(false);
-      return;
     }
-    toast({ title: "Note created" });
-    setTitle(""); setDescription(""); setFile(null); setVideoFile(null); setTopicSlug(""); setSubject("hrm");
-    setUploading(false);
-    load();
   };
 
   const handleDelete = async (id: string) => {
     await supabase.from("notes").delete().eq("id", id);
+    if (editingId === id) resetForm();
     toast({ title: "Note deleted" });
     load();
   };
 
   const activeDiscipline = getDiscipline(subject);
   const topics = activeDiscipline ? [...activeDiscipline.topics] : [];
+  const fileName = (url: string) => decodeURIComponent(url.split("/").pop() || "").slice(0, 40);
 
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Notes</h1>
-      <div className="mb-8 space-y-4 rounded-lg border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold text-foreground">Upload New Note</h2>
+      <div className={`mb-8 space-y-4 rounded-lg border bg-card p-6 ${editingId ? "border-accent" : "border-border"}`}>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-foreground">{editingId ? "Edit Note" : "Upload New Note"}</h2>
+          {editingId && (
+            <button onClick={resetForm} className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted">
+              <X className="h-3.5 w-3.5" /> Cancel Edit
+            </button>
+          )}
+        </div>
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
 
@@ -138,26 +163,48 @@ const AdminNotes = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        {/* PDF/PPT attachment */}
+        <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
-            <Upload className="h-4 w-4" /> {file ? file.name : "Choose PDF / PPT"}
+            <Upload className="h-4 w-4" />
+            {file ? file.name : existingFileUrl ? "Replace PDF / PPT" : "Choose PDF / PPT"}
             <input type="file" accept=".pdf,.ppt,.pptx" onChange={e => setFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
+          {!file && existingFileUrl && (
+            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              Current: <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{fileName(existingFileUrl)}</a>
+              <button type="button" onClick={() => setExistingFileUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached file">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Video attachment */}
+        <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
-            <Video className="h-4 w-4" /> {videoFile ? videoFile.name : "Choose Video (MP4, MOV, WebM)"}
+            <Video className="h-4 w-4" />
+            {videoFile ? videoFile.name : existingVideoUrl ? "Replace Video" : "Choose Video (MP4, MOV, WebM)"}
             <input type="file" accept="video/*" onChange={e => setVideoFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
+          {!videoFile && existingVideoUrl && (
+            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              Current: <a href={existingVideoUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{fileName(existingVideoUrl)}</a>
+              <button type="button" onClick={() => setExistingVideoUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached video">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          )}
         </div>
-        <button onClick={handleCreate} disabled={uploading || !title} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
-          {uploading ? "Uploading..." : "Create Note"}
+
+        <button onClick={handleSave} disabled={uploading || !title} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+          {uploading ? (editingId ? "Saving..." : "Uploading...") : editingId ? "Save Changes" : "Create Note"}
         </button>
       </div>
 
       <div className="space-y-2">
         {notes.map((note) => (
-          <div key={note.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-4 py-3">
+          <div key={note.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-md border bg-card px-4 py-3 ${editingId === note.id ? "border-accent" : "border-border"}`}>
             <div className="min-w-0">
               <span className="font-medium text-foreground">{note.title}</span>
               {note.subject && (
@@ -169,7 +216,14 @@ const AdminNotes = () => {
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
             </div>
-            <button onClick={() => handleDelete(note.id)} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+            <div className="flex shrink-0 items-center gap-3">
+              <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${note.title}`}>
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         ))}
       </div>
