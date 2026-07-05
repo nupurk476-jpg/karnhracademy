@@ -10,6 +10,7 @@ import {
   MessageSquare, Video, HelpCircle, Download, FileText,
   CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
   PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
+  Star, Mail,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
