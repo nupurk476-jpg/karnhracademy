@@ -2,11 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Upload, Loader2, FileText, Type } from "lucide-react";
+import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 
 const AdminQuizzes = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [topic, setTopic] = useState("");
+  const [subject, setSubject] = useState("hrm");
+  const [topicSlug, setTopicSlug] = useState("");
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [qForm, setQForm] = useState({ question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "" });
@@ -29,8 +32,8 @@ const AdminQuizzes = () => {
 
   const createQuiz = async () => {
     if (!title || !topic) return;
-    await supabase.from("quizzes").insert({ title, topic });
-    setTitle(""); setTopic("");
+    await supabase.from("quizzes").insert({ title, topic, subject, topic_slug: topicSlug || null } as any);
+    setTitle(""); setTopic(""); setTopicSlug("");
     toast({ title: "Quiz created" });
     loadQuizzes();
   };
@@ -161,12 +164,70 @@ const AdminQuizzes = () => {
       <h1 className="mb-6 text-3xl font-bold text-foreground">Quizzes</h1>
 
       {/* Create quiz */}
-      <div className="mb-8 flex gap-3 rounded-lg border border-border bg-card p-4">
-        <input placeholder="Quiz Title" value={title} onChange={e => setTitle(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <input placeholder="Topic" value={topic} onChange={e => setTopic(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <button onClick={createQuiz} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
-          <Plus className="h-4 w-4" />
-        </button>
+      <div className="mb-8 space-y-4 rounded-lg border border-border bg-card p-4">
+        <div className="flex gap-3">
+          <input placeholder="Quiz Title" value={title} onChange={e => setTitle(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Topic" value={topic} onChange={e => setTopic(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <button onClick={createQuiz} disabled={!title || !topic} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Discipline selector — same taxonomy as Notes, keeps admin in sync with the main site */}
+        <div>
+          <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Discipline</p>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {DISCIPLINES.map(d => {
+              const Icon = d.icon;
+              const isActive = subject === d.value;
+              return (
+                <button
+                  key={d.value}
+                  type="button"
+                  onClick={() => { setSubject(d.value); setTopicSlug(""); }}
+                  className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-left text-sm transition-all ${
+                    isActive ? d.activeColor : d.color + " hover:brightness-95"
+                  }`}
+                >
+                  <div className={`flex-shrink-0 rounded p-1 ${isActive ? "bg-white/20" : "bg-white"}`}>
+                    <Icon className={`h-4 w-4 ${isActive ? "text-white" : d.iconColor}`} />
+                  </div>
+                  <span className="font-semibold leading-tight">{d.short}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Topic chips */}
+        {(getDiscipline(subject)?.topics.length ?? 0) > 0 && (
+          <div>
+            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setTopicSlug("")}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  topicSlug === "" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                All Topics
+              </button>
+              {getDiscipline(subject)?.topics.map(t => (
+                <button
+                  key={t.slug}
+                  type="button"
+                  onClick={() => setTopicSlug(t.slug)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -178,6 +239,12 @@ const AdminQuizzes = () => {
               <div>
                 <span className="font-medium text-foreground">{q.title}</span>
                 <span className="ml-2 text-xs text-muted-foreground">{q.topic}</span>
+                {q.subject && (
+                  <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                    {getDiscipline(q.subject)?.short ?? q.subject.toUpperCase()}
+                  </span>
+                )}
+                {q.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(q.topic_slug)}</span>}
               </div>
               <button onClick={(e) => { e.stopPropagation(); deleteQuiz(q.id); }} className="text-muted-foreground hover:text-destructive">
                 <Trash2 className="h-4 w-4" />

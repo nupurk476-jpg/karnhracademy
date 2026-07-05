@@ -81,6 +81,13 @@ function getSubjectForTopic(topic: string) {
   return "hrm";
 }
 
+// Quizzes created after the "subject" column was added carry a real discipline value
+// (picked in Admin > Quizzes, same taxonomy as Notes). Older rows fall back to the
+// keyword heuristic above.
+function resolveSubject(quiz: any) {
+  return quiz.subject || getSubjectForTopic(quiz.topic || "");
+}
+
 // ── QuizCard ──────────────────────────────────────────────────────────────────
 const QuizCard = ({
   quiz,
@@ -95,7 +102,7 @@ const QuizCard = ({
 }) => {
   const mins = estimateMinutes(questionCount);
   const difficulty = getDifficulty(quiz.topic || quiz.title);
-  const subject = SUBJECTS.find(s => s.value === getSubjectForTopic(quiz.topic || "")) || SUBJECTS[1];
+  const subject = SUBJECTS.find(s => s.value === resolveSubject(quiz)) || SUBJECTS[1];
   const SubjectIcon = subject.icon;
 
   if (featured) {
@@ -289,11 +296,11 @@ const QuizList = () => {
   }, []);
 
   const totalQuestions = useMemo(() => Object.values(questionCounts).reduce((a, b) => a + b, 0), [questionCounts]);
-  const subjectsCovered = useMemo(() => new Set(quizzes.map(q => getSubjectForTopic(q.topic || ""))).size, [quizzes]);
+  const subjectsCovered = useMemo(() => new Set(quizzes.map(q => resolveSubject(q))).size, [quizzes]);
 
   const filtered = useMemo(() => quizzes.filter(q => {
     if (search && !q.title?.toLowerCase().includes(search.toLowerCase()) && !q.topic?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (subject !== "all" && getSubjectForTopic(q.topic || "") !== subject) return false;
+    if (subject !== "all" && resolveSubject(q) !== subject) return false;
     if (difficulty !== "All" && getDifficulty(q.topic || q.title) !== difficulty) return false;
     if (duration !== "any") {
       const mins = estimateMinutes(questionCounts[q.id] || 10);
@@ -311,7 +318,7 @@ const QuizList = () => {
   const grouped = useMemo(() => {
     const g: Record<string, any[]> = {};
     rest.forEach(q => {
-      const s = getSubjectForTopic(q.topic || "");
+      const s = resolveSubject(q);
       if (!g[s]) g[s] = [];
       g[s].push(q);
     });
