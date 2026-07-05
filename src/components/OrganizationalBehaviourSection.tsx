@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 
 const obTopics = [
-  { label: "Foundations of OB", slug: "foundations-of-ob", icon: Building2, desc: "Nature, scope & importance of organizational behaviour" },
+  { label: "Foundations of OB", slug: "foundations-of-ob", icon: Building2, desc: "Nature, scope & importance of organisational behaviour" },
   { label: "Individual Behaviour", slug: "individual-behaviour", icon: UserCircle, desc: "Determinants of individual behaviour at work" },
   { label: "Personality", slug: "personality", icon: Brain, desc: "Big Five, MBTI & personality theories in organizations" },
   { label: "Perception", slug: "perception", icon: Eye, desc: "Perceptual process, attribution & errors in judgement" },
@@ -13,7 +13,7 @@ const obTopics = [
   { label: "Learning", slug: "learning", icon: GraduationCap, desc: "Classical, operant & social learning in workplaces" },
   { label: "Group Dynamics", slug: "group-dynamics", icon: Users2, desc: "Group formation, teams, norms & cohesiveness" },
   { label: "Leadership", slug: "leadership", icon: Crown, desc: "Trait, behavioural & contingency theories of leadership" },
-  { label: "Organizational Culture", slug: "organizational-culture", icon: Users, desc: "Culture, climate, values & socialization" },
+  { label: "Organisational Culture", slug: "organizational-culture", icon: Users, desc: "Culture, climate, values & socialization" },
   { label: "Change Management", slug: "change-management", icon: Repeat, desc: "Lewin's model, resistance & organizational development" },
   { label: "Conflict & Stress", slug: "conflict-and-stress", icon: Activity, desc: "Sources, types & management of conflict and stress" },
 ];
@@ -30,10 +30,10 @@ const OrganizationalBehaviourSection = () => {
             className="mt-3 text-3xl font-bold text-foreground md:text-4xl"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Organizational Behaviour
+            Organisational Behaviour
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Explore how individuals, groups and structures shape behaviour within organizations — core for MBA, BBA & UGC NET HR aspirants.
+            Explore how individuals, groups and structures shape behaviour within organisations — core for MBA, BBA & UGC NET HR aspirants.
           </p>
         </div>
 

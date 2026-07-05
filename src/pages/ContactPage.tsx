@@ -1,7 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Mail, Linkedin, Youtube } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const ContactPage = () => {
   return (
@@ -20,11 +20,9 @@ const ContactPage = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-3">
             <Mail className="h-5 w-5 text-accent" />
-            <span className="text-foreground">contact@karnhracademy.com</span>
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <a href="#" aria-label="LinkedIn profile" className="text-muted-foreground transition-colors hover:text-accent"><Linkedin className="h-6 w-6" /></a>
-            <a href="#" aria-label="YouTube channel" className="text-muted-foreground transition-colors hover:text-accent"><Youtube className="h-6 w-6" /></a>
+            <a href="mailto:contact@karnhracademy.com" className="text-foreground hover:text-accent transition-colors">
+              contact@karnhracademy.com
+            </a>
           </div>
         </div>
       </main>

@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, BookOpen, ChevronRight } from "lucide-react";
 import { DISCIPLINES } from "@/lib/disciplines";
 
 const NotesPage = () => {
+  const [searchParams] = useSearchParams();
   const [notes, setNotes] = useState<any[]>([]);
   const [emailModal, setEmailModal] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
-  const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [activeSubject, setActiveSubject] = useState<string | null>(() => {
+    const requested = searchParams.get("subject");
+    return requested && DISCIPLINES.some(d => d.value === requested) ? requested : null;
+  });
   const [activeTopic, setActiveTopic] = useState("all");
   const { toast } = useToast();
 
@@ -39,15 +44,19 @@ const NotesPage = () => {
   const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !emailModal) return;
+    // Open the tab synchronously (within the click's call stack) so browsers
+    // don't treat it as an unrequested popup once the awaited call resolves.
+    const downloadWindow = window.open("", "_blank");
     setSubmitting(true);
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
     setSubmitting(false);
     setEmailModal(null);
     setEmail("");
     const note = notes.find(n => n.id === emailModal);
-    if (note?.file_url) {
-      window.open(note.file_url, "_blank");
+    if (note?.file_url && downloadWindow) {
+      downloadWindow.location.href = note.file_url;
     } else {
+      downloadWindow?.close();
       toast({ title: "Download unavailable", description: "No file attached to this note." });
     }
   };
@@ -196,36 +205,37 @@ const NotesPage = () => {
         )}
       </main>
 
-      {emailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
-            <h3 className="mb-2 text-lg font-bold text-foreground">Enter your email to download</h3>
-            <p className="mb-4 text-sm text-muted-foreground">We'll send you updates about new study materials.</p>
-            <form onSubmit={handleDownload} className="space-y-3">
-              <input
-                type="email"
-                required
-                placeholder="your@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <div className="flex gap-3">
-                <button type="submit" disabled={submitting} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
-                  {submitting ? "..." : "Download"}
-                </button>
-                <button type="button" onClick={() => setEmailModal(null)} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
-                  Cancel
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                By continuing, you agree to our{" "}
-                <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
-              </p>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={!!emailModal} onOpenChange={(open) => !open && setEmailModal(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter your email to download</DialogTitle>
+            <DialogDescription>We'll send you updates about new study materials.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDownload} className="space-y-3">
+            <input
+              type="email"
+              required
+              autoFocus
+              placeholder="your@email.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <div className="flex gap-3">
+              <button type="submit" disabled={submitting} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+                {submitting ? "..." : "Download"}
+              </button>
+              <button type="button" onClick={() => setEmailModal(null)} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
+                Cancel
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              By continuing, you agree to our{" "}
+              <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
+            </p>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

@@ -15,7 +15,7 @@ import {
 const CATEGORIES = [
   { label: "All",                     icon: Layers },
   { label: "HRM Basics",              icon: BookOpen },
-  { label: "Organizational Behaviour",icon: Brain },
+  { label: "Organisational Behaviour",icon: Brain },
   { label: "Research Methodology",    icon: BarChart3 },
   { label: "Ethical HRM",             icon: Heart },
   { label: "Quiet Quitting",          icon: MessageSquare },

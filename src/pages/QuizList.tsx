@@ -4,26 +4,19 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { DISCIPLINES } from "@/lib/disciplines";
 import {
   Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
-  BookOpen, Users, Target, Layers, GraduationCap, TrendingUp,
-  Briefcase, MessageSquare, Scale, Repeat, Globe, Brain,
+  Layers, TrendingUp, BookOpen,
   CheckCircle2, Lightbulb, Award, Zap, Filter, ArrowRight,
   FileText, Video, Download, FolderOpen,
 } from "lucide-react";
 
 // ── Subject config ────────────────────────────────────────────────────────────
+// Sourced from disciplines.ts so this can never drift out of sync with Notes/Admin.
 const SUBJECTS = [
-  { value: "all",     label: "All Subjects",                          icon: Layers },
-  { value: "hrm",    label: "Human Resource Management",             icon: BookOpen },
-  { value: "ob",     label: "Organisational Behaviour",              icon: Brain },
-  { value: "sm",     label: "Strategic Management",                  icon: Target },
-  { value: "pom",    label: "Principles of Management",              icon: Briefcase },
-  { value: "bc",     label: "Business Communication",                icon: MessageSquare },
-  { value: "cgbe",   label: "Corporate Governance & Business Ethics", icon: Scale },
-  { value: "odcm",   label: "OD & Change Management",               icon: Repeat },
-  { value: "ghr",    label: "Global HR Practices",                   icon: Globe },
-  { value: "english", label: "English for Management",              icon: GraduationCap },
+  { value: "all", label: "All Subjects", icon: Layers },
+  ...DISCIPLINES.map(d => ({ value: d.value, label: d.label, icon: d.icon })),
 ];
 
 const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];

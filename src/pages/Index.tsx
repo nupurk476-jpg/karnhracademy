@@ -6,9 +6,8 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { DISCIPLINES } from "@/lib/disciplines";
 import {
-  ArrowRight, BookOpen, Users, Target, Languages,
-  GraduationCap, Scale, Repeat, Globe, Briefcase,
-  MessageSquare, Video, HelpCircle, Download, FileText,
+  ArrowRight, BookOpen, Users,
+  Video, HelpCircle, Download, FileText,
   CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
   PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
   Mail,
@@ -20,18 +19,28 @@ const GOLD  = "#c79a4b";
 const LIGHT = "#f8f9fc";
 
 // ─────────────── Data ────────────────────────────────────────────────────────
-// Exactly mirrors disciplines.ts — same values, same order
-const SUBJECTS = [
-  { icon: BookOpen,      label: "Human Resource Management",          short: "HRM",     value: "hrm",     color: "#3B5BDB", bg: "#EDF2FF" },
-  { icon: Users,         label: "Organisational Behaviour",           short: "OB",      value: "ob",      color: "#7048E8", bg: "#F3F0FF" },
-  { icon: Target,        label: "Strategic Management",               short: "SM",      value: "sm",      color: "#0CA678", bg: "#EBFBEE" },
-  { icon: Briefcase,     label: "Principles of Management",           short: "POM",     value: "pom",     color: "#E67E22", bg: "#FEF3E0" },
-  { icon: MessageSquare, label: "Business Communication",             short: "BC",      value: "bc",      color: "#0891B2", bg: "#ECFEFF" },
-  { icon: Scale,         label: "Corporate Governance & Business Ethics", short: "CG & BE", value: "cgbe", color: "#6B7280", bg: "#F9FAFB" },
-  { icon: Repeat,        label: "OD & Change Management",             short: "OD & CM", value: "odcm",    color: "#DD6B20", bg: "#FFFAF0" },
-  { icon: Globe,         label: "Global HR Practices",                short: "GHR",     value: "ghr",     color: "#319795", bg: "#E6FFFA" },
-  { icon: Languages,     label: "English for Management",             short: "English", value: "english", color: "#5B5EA6", bg: "#EEF0FF" },
-];
+// Hex colors for this page's custom (non-Tailwind-class) styling, keyed by
+// discipline value. Everything else (label, short, value, icon, topics) is
+// sourced from disciplines.ts so it can never drift out of sync.
+const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
+  hrm:     { color: "#3B5BDB", bg: "#EDF2FF" },
+  ob:      { color: "#7048E8", bg: "#F3F0FF" },
+  sm:      { color: "#0CA678", bg: "#EBFBEE" },
+  pom:     { color: "#E67E22", bg: "#FEF3E0" },
+  bc:      { color: "#0891B2", bg: "#ECFEFF" },
+  cgbe:    { color: "#6B7280", bg: "#F9FAFB" },
+  odcm:    { color: "#DD6B20", bg: "#FFFAF0" },
+  ghr:     { color: "#319795", bg: "#E6FFFA" },
+  english: { color: "#5B5EA6", bg: "#EEF0FF" },
+};
+
+const SUBJECTS = DISCIPLINES.map(d => ({
+  icon: d.icon,
+  label: d.label,
+  short: d.short,
+  value: d.value,
+  ...SUBJECT_HEX[d.value],
+}));
 
 const WHY_CHOOSE = [
   { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: "#3B5BDB", bg: "#EDF2FF" },
@@ -77,18 +86,7 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-// All 9 subjects — values exactly match disciplines.ts
-const HERO_SUBJECTS = [
-  { label: "Human Resource Management",          value: "hrm",     color: "#3B5BDB" },
-  { label: "Organisational Behaviour",           value: "ob",      color: "#7048E8" },
-  { label: "Strategic Management",               value: "sm",      color: "#0CA678" },
-  { label: "Principles of Management",           value: "pom",     color: "#E67E22" },
-  { label: "Business Communication",             value: "bc",      color: "#0891B2" },
-  { label: "Corporate Governance & Bus. Ethics", value: "cgbe",    color: "#6B7280" },
-  { label: "OD & Change Management",             value: "odcm",    color: "#DD6B20" },
-  { label: "Global HR Practices",                value: "ghr",     color: "#319795" },
-  { label: "English for Management",             value: "english", color: "#5B5EA6" },
-];
+const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
 
 const Hero = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -589,14 +587,14 @@ const BlogSection = () => {
 
   const placeholders = [
     { title: "What is Strategic HRM? A Complete Guide",              excerpt: "Understanding how HR strategy aligns with organisational goals for sustainable competitive advantage.", category: "HRM Basics",      created_at: new Date().toISOString() },
-    { title: "Motivation in the Workplace: Theories & Applications", excerpt: "Maslow, Herzberg, Vroom — how classic motivation theories apply to modern workplaces and exam questions.", category: "Organizational Behaviour", created_at: new Date().toISOString() },
+    { title: "Motivation in the Workplace: Theories & Applications", excerpt: "Maslow, Herzberg, Vroom — how classic motivation theories apply to modern workplaces and exam questions.", category: "Organisational Behaviour", created_at: new Date().toISOString() },
     { title: "HR Analytics: Why Every HR Professional Needs It",     excerpt: "Data-driven HR is no longer optional. Here's why analytics skills are essential for modern HR professionals.", category: "HRM Basics", created_at: new Date().toISOString() },
     { title: "UGC NET Management: Complete Preparation Strategy",    excerpt: "A structured 90-day roadmap for UGC NET Management aspirants — subjects, resources, and time allocation.", category: "Research Methodology", created_at: new Date().toISOString() },
   ];
 
   const items = posts.length > 0 ? posts : placeholders;
   const catColors: Record<string, string> = {
-    "HRM Basics": "#3B5BDB", "Organizational Behaviour": "#7048E8", "Research Methodology": "#0CA678",
+    "HRM Basics": "#3B5BDB", "Organisational Behaviour": "#7048E8", "Research Methodology": "#0CA678",
     "Ethical HRM": "#E53E3E", "Quiet Quitting": "#DD6B20", "General Studies": "#6B7280", "Current Affairs": "#0891B2",
   };
 

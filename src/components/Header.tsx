@@ -84,7 +84,7 @@ const Header = () => {
             </div>
             <div
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "'Sora', sans-serif",
                 fontWeight: 500,
                 fontSize: 9,
                 letterSpacing: 4,

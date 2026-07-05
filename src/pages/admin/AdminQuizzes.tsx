@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Upload, Loader2, FileText, Type } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 
 const AdminQuizzes = () => {
@@ -13,10 +13,6 @@ const AdminQuizzes = () => {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [qForm, setQForm] = useState({ question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "" });
-  const [uploading, setUploading] = useState(false);
-  const [pasteText, setPasteText] = useState("");
-  const [showPasteBox, setShowPasteBox] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const loadQuizzes = () => {
@@ -62,101 +58,6 @@ const AdminQuizzes = () => {
   const deleteQuestion = async (id: string) => {
     await supabase.from("quiz_questions").delete().eq("id", id);
     if (selectedQuiz) loadQuestions(selectedQuiz);
-  };
-
-  const insertParsedQuestions = async (parsed: any[]) => {
-    if (!selectedQuiz) return;
-    const inserts = parsed.map((q: any) => ({
-      quiz_id: selectedQuiz,
-      question: q.question,
-      options: Array.isArray(q.options) ? q.options.slice(0, 4) : ["", "", "", ""],
-      correct_answer: typeof q.correct_answer === "number" ? q.correct_answer : 0,
-      explanation: q.explanation || null,
-    }));
-    const { error } = await supabase.from("quiz_questions").insert(inserts);
-    if (error) throw error;
-    toast({ title: `${inserts.length} questions added` });
-    loadQuestions(selectedQuiz);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedQuiz) return;
-
-    const allowed = [".pdf", ".ppt", ".pptx", ".doc", ".docx"];
-    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-    if (!allowed.includes(ext)) {
-      toast({ title: "Unsupported file type", description: "Upload PDF, PPT, or DOC files.", variant: "destructive" });
-      return;
-    }
-
-    setUploading(true);
-    try {
-      // Step 1: Upload file to storage (handles any size)
-      const fileName = `${crypto.randomUUID()}${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("quiz-uploads")
-        .upload(fileName, file);
-
-      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
-
-      // Step 2: Get public URL
-      const { data: urlData } = supabase.storage
-        .from("quiz-uploads")
-        .getPublicUrl(fileName);
-
-      // Step 3: Send URL to edge function
-      const { data: result, error: fnError } = await supabase.functions.invoke('parse-quiz-pdf', {
-        body: { fileUrl: urlData.publicUrl },
-      });
-
-      if (fnError) throw new Error(fnError.message || "Failed to parse file");
-      if (!result) throw new Error("No response from parser");
-
-      const parsed = result.questions;
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        toast({ title: "No questions found in file", variant: "destructive" });
-        return;
-      }
-
-      await insertParsedQuestions(parsed);
-
-      // Clean up uploaded file
-      await supabase.storage.from("quiz-uploads").remove([fileName]);
-    } catch (err: any) {
-      toast({ title: "File parsing failed", description: err.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleTextSubmit = async () => {
-    if (!pasteText.trim() || !selectedQuiz) return;
-
-    setUploading(true);
-    try {
-      const { data: result, error: fnError } = await supabase.functions.invoke('parse-quiz-pdf', {
-        body: { text: pasteText },
-      });
-
-      if (fnError) throw new Error(fnError.message || "Failed to generate questions");
-      if (!result) throw new Error("No response from parser");
-
-      const parsed = result.questions;
-      if (!Array.isArray(parsed) || parsed.length === 0) {
-        toast({ title: "No questions generated from text", variant: "destructive" });
-        return;
-      }
-
-      await insertParsedQuestions(parsed);
-      setPasteText("");
-      setShowPasteBox(false);
-    } catch (err: any) {
-      toast({ title: "Text parsing failed", description: err.message, variant: "destructive" });
-    } finally {
-      setUploading(false);
-    }
   };
 
   return (
@@ -256,63 +157,7 @@ const AdminQuizzes = () => {
         {/* Questions */}
         {selectedQuiz && (
           <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
-              <div className="ml-auto flex gap-2">
-                <input
-                  type="file"
-                  accept=".pdf,.ppt,.pptx,.doc,.docx"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
-                >
-                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-                  {uploading ? "Processing..." : "Upload File"}
-                </button>
-                <button
-                  onClick={() => setShowPasteBox(!showPasteBox)}
-                  disabled={uploading}
-                  className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
-                >
-                  <Type className="h-4 w-4" />
-                  Paste Text
-                </button>
-              </div>
-            </div>
-
-            {/* Paste text box */}
-            {showPasteBox && (
-              <div className="mb-4 rounded-lg border border-border bg-card p-4">
-                <textarea
-                  placeholder="Paste your paragraph, statement, or study material here..."
-                  value={pasteText}
-                  onChange={e => setPasteText(e.target.value)}
-                  rows={5}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                />
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={handleTextSubmit}
-                    disabled={uploading || !pasteText.trim()}
-                    className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50"
-                  >
-                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                    Generate Questions
-                  </button>
-                  <button
-                    onClick={() => { setShowPasteBox(false); setPasteText(""); }}
-                    className="rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+            <h2 className="mb-2 text-lg font-semibold text-foreground">Questions</h2>
 
             {/* Manual question form */}
             <div className="mb-4 space-y-3 rounded-lg border border-border bg-card p-4">

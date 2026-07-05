@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 import { Repeat, Lightbulb, GitBranch, Workflow, RefreshCw, Compass, Users, TrendingUp, ShieldAlert } from "lucide-react";
 
 const odcmTopics = [
-  { label: "Introduction to OD", slug: "introduction-to-od", icon: Lightbulb, desc: "Concept, nature & scope of Organizational Development" },
+  { label: "Introduction to OD", slug: "introduction-to-od", icon: Lightbulb, desc: "Concept, nature & scope of Organisational Development" },
   { label: "OD Interventions", slug: "od-interventions", icon: Workflow, desc: "Techniques & strategies used in OD processes" },
   { label: "Action Research Model", slug: "action-research-model", icon: Compass, desc: "Diagnosis, action planning & evaluation cycles" },
   { label: "Change Management Models", slug: "change-management-models", icon: GitBranch, desc: "Lewin, Kotter, ADKAR & McKinsey 7S frameworks" },
   { label: "Managing Resistance to Change", slug: "managing-resistance", icon: ShieldAlert, desc: "Sources of resistance & strategies to overcome them" },
   { label: "Planned vs Emergent Change", slug: "planned-vs-emergent", icon: Repeat, desc: "Comparing structured and adaptive change approaches" },
-  { label: "Organizational Transformation", slug: "organizational-transformation", icon: RefreshCw, desc: "Large-scale change & business transformation" },
+  { label: "Organisational Transformation", slug: "organizational-transformation", icon: RefreshCw, desc: "Large-scale change & business transformation" },
   { label: "Team & Group Interventions", slug: "team-group-interventions", icon: Users, desc: "Team building, T-groups & process consultation" },
   { label: "Future of OD & Change", slug: "future-of-od", icon: TrendingUp, desc: "Trends, digital change & agile transformation" },
 ];
@@ -22,10 +22,10 @@ const OrgDevChangeMgmtSection = () => {
             Transformation & Growth
           </span>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Organizational Development & Change Management
+            Organisational Development & Change Management
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Explore frameworks, interventions & strategies driving organizational change — essential for MBA, BBA & UGC NET aspirants.
+            Explore frameworks, interventions & strategies driving organisational change — essential for MBA, BBA & UGC NET aspirants.
           </p>
         </div>
 

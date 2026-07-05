@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileUp } from "lucide-react";
 
-const categories = ["HRM Basics", "Organizational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
+const categories = ["HRM Basics", "Organisational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
 
 // ── HTML blog import logic (mirrors publish-blog.mjs) ────────────────────────
 function parseHtmlBlog(html: string) {
@@ -37,7 +37,7 @@ function parseHtmlBlog(html: string) {
   const eyebrow = textOf(doc.querySelector(".hero-eyebrow"));
   const combined = (eyebrow + " " + heroMetaText).toLowerCase();
   let category = "HRM Basics";
-  if (/organizational.behav|org.behav/i.test(combined))  category = "Organizational Behaviour";
+  if (/organizational.behav|org.behav/i.test(combined))  category = "Organisational Behaviour";
   else if (/research.method/i.test(combined))             category = "Research Methodology";
   else if (/ethical.hrm|ethics/i.test(combined))         category = "Ethical HRM";
   else if (/quiet.quitting/i.test(combined))              category = "Quiet Quitting";

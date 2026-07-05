@@ -1,4 +1,4 @@
-import { Mail, Linkedin, Youtube, Twitter } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -45,7 +45,7 @@ const Footer = () => {
                 </div>
                 <div
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "'Sora', sans-serif",
                     fontWeight: 500,
                     fontSize: 8,
                     letterSpacing: 4,
@@ -61,29 +61,6 @@ const Footer = () => {
               Academic resource hub for HR & Management — structured notes, video lectures,
               MCQs and research content for MBA, BBA & UGC NET aspirants.
             </p>
-            <div className="flex items-center gap-3">
-              <a
-                href="#"
-                aria-label="LinkedIn"
-                className="text-primary-foreground/60 hover:text-accent transition-colors"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                aria-label="YouTube"
-                className="text-primary-foreground/60 hover:text-accent transition-colors"
-              >
-                <Youtube className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter / X"
-                className="text-primary-foreground/60 hover:text-accent transition-colors"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-            </div>
           </div>
 
           {/* Col 2: Quick Links */}
