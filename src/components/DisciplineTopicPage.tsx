@@ -44,7 +44,8 @@ const DisciplineTopicPage = ({
       .select("*")
       .eq("topic_slug", slug)
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { console.error("DisciplineTopicPage: failed to load notes", error); return; }
         if (!data) return;
         // Legacy HRM notes were saved with subject = null before the "subject" column existed.
         const scoped = subject === "hrm" ? data.filter((n) => !n.subject || n.subject === "hrm") : data.filter((n) => n.subject === subject);

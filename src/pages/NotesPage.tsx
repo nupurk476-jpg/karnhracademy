@@ -24,7 +24,10 @@ const NotesPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setNotes(data));
+    supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
+      if (error) { console.error("NotesPage: failed to load notes", error); return; }
+      if (data) setNotes(data);
+    });
   }, []);
 
   const countFor = (value: string) =>
@@ -34,7 +37,8 @@ const NotesPage = () => {
     if (!activeSubject) return false;
     const matchesSearch = !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase());
     if (!matchesSearch) return false;
-    if (activeSubject === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject !== activeSubject) return false;
+    const matchesSubject = activeSubject === "hrm" ? (!n.subject || n.subject === "hrm") : n.subject === activeSubject;
+    if (!matchesSubject) return false;
     if (activeTopic !== "all" && n.topic_slug !== activeTopic) return false;
     return true;
   });

@@ -23,7 +23,8 @@ const HRTopicsSection = () => {
   const [notesByTopic, setNotesByTopic] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
-    supabase.from("notes").select("*").not("topic_slug", "is", null).order("created_at", { ascending: false }).then(({ data }) => {
+    supabase.from("notes").select("*").not("topic_slug", "is", null).order("created_at", { ascending: false }).then(({ data, error }) => {
+      if (error) { console.error("HRTopicsSection: failed to load notes", error); return; }
       if (data) {
         const grouped: Record<string, any[]> = {};
         data.forEach((note: any) => {
