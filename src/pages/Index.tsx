@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import { DISCIPLINES } from "@/lib/disciplines";
 import {
   ArrowRight, BookOpen, Users, Target, Languages,
   GraduationCap, Scale, Repeat, Globe, Briefcase,
   MessageSquare, Video, HelpCircle, Download, FileText,
   CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
   PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
-  Star, Mail,
+  Mail,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -19,15 +20,6 @@ const GOLD  = "#c79a4b";
 const LIGHT = "#f8f9fc";
 
 // ─────────────── Data ────────────────────────────────────────────────────────
-const STATS = [
-  { value: "500+",  label: "Study Notes",       icon: FileText  },
-  { value: "1000+", label: "Practice MCQs",     icon: HelpCircle },
-  { value: "50+",   label: "Video Lectures",    icon: Video      },
-  { value: "200+",  label: "Books Listed",      icon: BookMarked },
-  { value: "10+",   label: "Subjects Covered",  icon: BookOpen   },
-  { value: "5K+",   label: "Students Helped",   icon: Users      },
-];
-
 // Exactly mirrors disciplines.ts — same values, same order
 const SUBJECTS = [
   { icon: BookOpen,      label: "Human Resource Management",          short: "HRM",     value: "hrm",     color: "#3B5BDB", bg: "#EDF2FF" },
@@ -56,13 +48,6 @@ const ROADMAP = [
   { step: "03", icon: PlayCircle,    title: "Watch Lectures",    desc: "Reinforce concepts with expert video lectures." },
   { step: "04", icon: HelpCircle,    title: "Practice MCQs",     desc: "Test yourself with topic-wise quizzes." },
   { step: "05", icon: Award,         title: "Master the Topic",  desc: "Achieve exam readiness and subject mastery." },
-];
-
-const TESTIMONIALS = [
-  { name: "Priya Sharma",    role: "MBA HR Student, Delhi University",        text: "The notes are brilliantly structured. Cleared my semester exams using only Karn HR Academy — couldn't have done it without the topic-wise MCQs.", stars: 5, initial: "P" },
-  { name: "Rahul Mehta",     role: "UGC NET Management Aspirant",             text: "Best free resource for UGC NET Management prep. The HR Analytics section especially — no other platform covers it this clearly.", stars: 5, initial: "R" },
-  { name: "Dr. Anita Joshi", role: "Assistant Professor, Management Studies", text: "I recommend Karn HR Academy to all my students. The academic rigour and alignment to university syllabi is genuinely impressive.", stars: 5, initial: "A" },
-  { name: "Vikram Nair",     role: "HR Manager, Pune",                        text: "As a working HR professional, I use this to stay current. The OD & Change Management notes are the most comprehensive I've found.", stars: 5, initial: "V" },
 ];
 
 const TOPICS = [
@@ -227,23 +212,35 @@ const Hero = () => {
   );
 };
 
-// ─────────────── Section: Stats bar ──────────────────────────────────────────
-const StatsBar = () => {
+// Real content counts, shared by StatsBar and AboutAuthor — replaces the
+// fabricated static numbers both sections used to show independently.
+function useContentCounts() {
   const [notesCount, setNotesCount] = useState<number | null>(null);
   const [quizCount, setQuizCount] = useState<number | null>(null);
+  const [lecturesCount, setLecturesCount] = useState<number | null>(null);
+  const [booksCount, setBooksCount] = useState<number | null>(null);
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).then(({ count }) => setNotesCount(count ?? 0));
     supabase.from("quizzes").select("id", { count: "exact", head: true }).then(({ count }) => setQuizCount(count ?? 0));
+    supabase.from("lectures" as any).select("id", { count: "exact", head: true }).then(({ count }) => setLecturesCount(count ?? 0));
+    supabase.from("book_recommendations").select("id", { count: "exact", head: true }).then(({ count }) => setBooksCount(count ?? 0));
   }, []);
 
+  return { notesCount, quizCount, lecturesCount, booksCount };
+}
+
+// ─────────────── Section: Stats bar ──────────────────────────────────────────
+const StatsBar = () => {
+  const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
+
   const liveStats = [
-    { value: notesCount !== null ? String(notesCount) : "…",  label: "Study Notes",       icon: FileText  },
-    { value: quizCount  !== null ? String(quizCount)  : "…",  label: "Practice MCQs",     icon: HelpCircle },
-    { value: "50+",   label: "Video Lectures",    icon: Video      },
-    { value: "200+",  label: "Books Listed",      icon: BookMarked },
-    { value: "10",    label: "Subjects Covered",  icon: BookOpen   },
-    { value: "Free",  label: "Always",            icon: Users      },
+    { value: notesCount    !== null ? String(notesCount)    : "…", label: "Study Notes",      icon: FileText   },
+    { value: quizCount     !== null ? String(quizCount)     : "…", label: "Practice MCQs",    icon: HelpCircle },
+    { value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   icon: Video      },
+    { value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Listed",     icon: BookMarked },
+    { value: String(DISCIPLINES.length),                            label: "Subjects Covered", icon: BookOpen   },
+    { value: "Free",                                                label: "Always",           icon: Users      },
   ];
 
   return (
@@ -688,7 +685,17 @@ const PopularTopics = () => (
 );
 
 // ─────────────── Section: About the Author ────────────────────────────────────
-const AboutAuthor = () => (
+const AboutAuthor = () => {
+  const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
+  const achievements = [
+    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: "#3B5BDB", bg: "#EDF2FF" },
+    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: "#7048E8", bg: "#F3F0FF" },
+    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: "#0CA678", bg: "#EBFBEE" },
+    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: "#E53E3E", bg: "#FFF5F5" },
+    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: "#0891B2", bg: "#ECFEFF" },
+    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,      bg: "#FFF9DB" },
+  ];
+  return (
   <section className="py-20 md:py-24 bg-white">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -732,14 +739,7 @@ const AboutAuthor = () => (
 
         {/* Right: Achievements */}
         <div className="grid grid-cols-2 gap-4">
-          {[
-            { icon: BookOpen,   value: "10+",   label: "Subjects Covered",       color: "#3B5BDB", bg: "#EDF2FF" },
-            { icon: FileText,   value: "500+",  label: "Notes Published",         color: "#7048E8", bg: "#F3F0FF" },
-            { icon: HelpCircle, value: "1000+", label: "MCQs Created",            color: "#0CA678", bg: "#EBFBEE" },
-            { icon: Users,      value: "5K+",   label: "Students Helped",         color: GOLD,      bg: "#FFF9DB" },
-            { icon: BookMarked, value: "200+",  label: "Books Curated",           color: "#E53E3E", bg: "#FFF5F5" },
-            { icon: Video,      value: "50+",   label: "Video Lectures",          color: "#0891B2", bg: "#ECFEFF" },
-          ].map(item => {
+          {achievements.map(item => {
             const Icon = item.icon;
             return (
               <div key={item.label} className="rounded-2xl border p-5" style={{ background: item.bg, borderColor: `${item.color}18` }}>
@@ -755,36 +755,8 @@ const AboutAuthor = () => (
       </div>
     </div>
   </section>
-);
-
-// ─────────────── Section: Testimonials ───────────────────────────────────────
-const Testimonials = () => (
-  <section className="py-20 md:py-24" style={{ background: LIGHT }}>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-14">
-        <GoldLabel text="Student Reviews" />
-        <SectionHeading center title="Loved by 5,000+ Students & Educators" sub="Real feedback from MBA students, UGC NET aspirants, and HR professionals." />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {TESTIMONIALS.map(t => (
-          <div key={t.name} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex gap-0.5 mb-4">
-              {[...Array(t.stars)].map((_,i) => <Star key={i} className="h-4 w-4 fill-[#c79a4b] text-[#c79a4b]" />)}
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed flex-1 mb-5">"{t.text}"</p>
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full font-bold text-sm text-white flex-shrink-0" style={{ background: NAVY, fontFamily: "'Sora',sans-serif" }}>{t.initial}</div>
-              <div>
-                <p className="text-sm font-bold text-slate-800">{t.name}</p>
-                <p className="text-xs text-slate-500 leading-tight">{t.role}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+  );
+};
 
 // ─────────────── Section: Newsletter ─────────────────────────────────────────
 const Newsletter = () => {
@@ -847,6 +819,10 @@ const Newsletter = () => {
             </span>
           ))}
         </div>
+        <p className="mt-4 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+          By subscribing, you agree to our{" "}
+          <Link to="/privacy-policy" className="underline hover:text-white">Privacy Policy</Link>.
+        </p>
       </div>
     </section>
   );
@@ -873,7 +849,6 @@ const Index = () => (
       <BlogSection />
       <PopularTopics />
       <AboutAuthor />
-      <Testimonials />
       <Newsletter />
     </main>
     <Footer />

@@ -10,8 +10,6 @@ const navItems = [
   { label: "Video Lectures", to: "/lectures" },
   { label: "Blogs", to: "/blogs" },
   { label: "MCQs", to: "/quizzes" },
-  { label: "Case Studies", to: "/case-studies" },
-  { label: "Downloads", to: "/downloads" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];

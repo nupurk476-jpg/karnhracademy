@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -217,6 +218,10 @@ const NotesPage = () => {
                   Cancel
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                By continuing, you agree to our{" "}
+                <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
+              </p>
             </form>
           </div>
         </div>

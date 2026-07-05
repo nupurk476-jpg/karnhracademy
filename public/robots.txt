@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://karnhracademy.lovable.app/sitemap.xml
+Sitemap: https://karnhracademy.com/sitemap.xml

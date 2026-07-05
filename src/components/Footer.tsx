@@ -98,7 +98,6 @@ const Footer = () => {
                 { label: "Video Lectures", to: "/lectures" },
                 { label: "Blogs", to: "/blogs" },
                 { label: "MCQs", to: "/quizzes" },
-                { label: "Downloads", to: "/downloads" },
               ].map((link) => (
                 <Link
                   key={link.label}
@@ -154,11 +153,19 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="mt-12 border-t border-primary-foreground/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-primary-foreground/50">
             © {new Date().getFullYear()} Karn HR Academy. All rights reserved.
           </p>
-          <p className="text-xs text-primary-foreground/40">Academic Resource Hub</p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy-policy" className="text-xs text-primary-foreground/50 hover:text-accent transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-xs text-primary-foreground/50 hover:text-accent transition-colors">
+              Terms of Use
+            </Link>
+            <p className="text-xs text-primary-foreground/40">Academic Resource Hub</p>
+          </div>
         </div>
       </div>
     </footer>

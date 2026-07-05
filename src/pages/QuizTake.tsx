@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
 import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -160,6 +161,11 @@ const QuizTake = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={quiz.title}
+        description={`Practice ${quiz.topic} with this topic-focused MCQ quiz — instant feedback on every answer.`}
+        path={`/quizzes/${id}`}
+      />
       <Header />
       <main className="mx-auto max-w-3xl px-6 py-16">
         <Link to="/quizzes" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Radio, Calendar, ExternalLink, Video } from "lucide-react";
 
 const LiveLecturesPage = () => {
@@ -51,6 +52,11 @@ const LiveLecturesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Live Lectures"
+        description="Join interactive live classes and Q&A sessions on HR & Management topics with Karn HR Academy."
+        path="/live-lectures"
+      />
       <Header />
       <main className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-10 text-center">
