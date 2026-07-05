@@ -157,8 +157,8 @@ const AdminNotes = () => {
 
       <div className="space-y-2">
         {notes.map((note) => (
-          <div key={note.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
-            <div>
+          <div key={note.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-4 py-3">
+            <div className="min-w-0">
               <span className="font-medium text-foreground">{note.title}</span>
               {note.subject && (
                 <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
@@ -169,7 +169,7 @@ const AdminNotes = () => {
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
             </div>
-            <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+            <button onClick={() => handleDelete(note.id)} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
           </div>
         ))}
       </div>

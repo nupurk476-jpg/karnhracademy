@@ -183,8 +183,8 @@ const AdminLectures = () => {
 
       <div className="space-y-2">
         {lectures.map((lec) => (
-          <div key={lec.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
-            <div>
+          <div key={lec.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-4 py-3">
+            <div className="min-w-0">
               <span className="font-medium text-foreground">{lec.title}</span>
               {lec.subject && (
                 <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
@@ -198,7 +198,7 @@ const AdminLectures = () => {
               )}
               {lec.duration_minutes && <span className="ml-2 text-xs text-muted-foreground">{lec.duration_minutes} min</span>}
             </div>
-            <button onClick={() => handleDelete(lec.id)} className="text-muted-foreground hover:text-destructive">
+            <button onClick={() => handleDelete(lec.id)} className="shrink-0 text-muted-foreground hover:text-destructive">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>

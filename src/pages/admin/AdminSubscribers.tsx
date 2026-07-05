@@ -28,12 +28,12 @@ const AdminSubscribers = () => {
       ) : (
         <div className="space-y-2">
           {subscribers.map((s) => (
-            <div key={s.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
-              <div>
+            <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-4 py-3">
+              <div className="min-w-0">
                 <span className="text-sm font-medium text-foreground">{s.email}</span>
                 <span className="ml-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
               </div>
-              <button onClick={() => remove(s.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => remove(s.id)} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
           ))}
         </div>

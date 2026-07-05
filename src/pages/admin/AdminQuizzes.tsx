@@ -66,10 +66,10 @@ const AdminQuizzes = () => {
 
       {/* Create quiz */}
       <div className="mb-8 space-y-4 rounded-lg border border-border bg-card p-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <input placeholder="Quiz Title" value={title} onChange={e => setTitle(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
           <input placeholder="Topic" value={topic} onChange={e => setTopic(e.target.value)} className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
-          <button onClick={createQuiz} disabled={!title || !topic} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+          <button onClick={createQuiz} disabled={!title || !topic} className="flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
             <Plus className="h-4 w-4" />
           </button>
         </div>
@@ -136,8 +136,8 @@ const AdminQuizzes = () => {
         <div className="space-y-2">
           <h2 className="mb-2 text-lg font-semibold text-foreground">All Quizzes</h2>
           {quizzes.map((q) => (
-            <div key={q.id} className={`flex cursor-pointer items-center justify-between rounded-md border px-4 py-3 transition-colors ${selectedQuiz === q.id ? "border-accent bg-accent/5" : "border-border bg-card hover:bg-muted"}`} onClick={() => setSelectedQuiz(q.id)}>
-              <div>
+            <div key={q.id} className={`flex flex-wrap cursor-pointer items-center justify-between gap-2 rounded-md border px-4 py-3 transition-colors ${selectedQuiz === q.id ? "border-accent bg-accent/5" : "border-border bg-card hover:bg-muted"}`} onClick={() => setSelectedQuiz(q.id)}>
+              <div className="min-w-0">
                 <span className="font-medium text-foreground">{q.title}</span>
                 <span className="ml-2 text-xs text-muted-foreground">{q.topic}</span>
                 {q.subject && (
@@ -147,7 +147,7 @@ const AdminQuizzes = () => {
                 )}
                 {q.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(q.topic_slug)}</span>}
               </div>
-              <button onClick={(e) => { e.stopPropagation(); deleteQuiz(q.id); }} className="text-muted-foreground hover:text-destructive">
+              <button onClick={(e) => { e.stopPropagation(); deleteQuiz(q.id); }} className="shrink-0 text-muted-foreground hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
@@ -173,9 +173,9 @@ const AdminQuizzes = () => {
             </div>
             <div className="space-y-2">
               {questions.map((q, i) => (
-                <div key={q.id} className="flex items-start justify-between rounded-md border border-border bg-card px-4 py-3">
-                  <span className="text-sm text-foreground">{i + 1}. {q.question}</span>
-                  <button onClick={() => deleteQuestion(q.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                <div key={q.id} className="flex items-start justify-between gap-3 rounded-md border border-border bg-card px-4 py-3">
+                  <span className="min-w-0 text-sm text-foreground">{i + 1}. {q.question}</span>
+                  <button onClick={() => deleteQuestion(q.id)} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                 </div>
               ))}
             </div>

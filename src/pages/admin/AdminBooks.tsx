@@ -61,12 +61,12 @@ const AdminBooks = () => {
       </div>
       <div className="space-y-2">
         {books.map((b) => (
-          <div key={b.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
-            <div>
+          <div key={b.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3">
+            <div className="min-w-0">
               <span className="font-medium text-foreground">{b.title}</span>
               <span className="ml-2 text-sm text-muted-foreground">by {b.author}</span>
             </div>
-            <button onClick={() => handleDelete(b.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+            <button onClick={() => handleDelete(b.id)} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
           </div>
         ))}
       </div>

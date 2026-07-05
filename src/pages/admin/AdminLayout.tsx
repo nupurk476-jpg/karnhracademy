@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const adminLinks = [
@@ -18,31 +19,67 @@ const adminLinks = [
 
 const AdminLayout = () => {
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <nav className="space-y-1">
+      {adminLinks.map((link) => {
+        const active = location.pathname === link.to;
+        return (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={onNavigate}
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            <link.icon className="h-4 w-4" />
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="w-64 shrink-0 border-r border-border bg-card p-6">
+    <div className="min-h-screen bg-background md:flex">
+      {/* Mobile top bar */}
+      <div className="flex items-center justify-between border-b border-border bg-card p-4 md:hidden">
+        <Link to="/" className="flex items-center gap-2 text-foreground">
+          <BookOpen className="h-5 w-5 text-accent" />
+          <span className="text-sm font-bold">Admin Panel</span>
+        </Link>
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+          className="rounded-md p-2 text-foreground hover:bg-muted"
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+
+      {/* Mobile nav panel */}
+      {mobileOpen && (
+        <div className="border-b border-border bg-card p-4 md:hidden">
+          <NavLinks onNavigate={() => setMobileOpen(false)} />
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="mt-4 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </button>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="hidden w-64 shrink-0 border-r border-border bg-card p-6 md:block">
         <Link to="/" className="mb-8 flex items-center gap-2 text-foreground">
           <BookOpen className="h-5 w-5 text-accent" />
           <span className="text-sm font-bold">Admin Panel</span>
         </Link>
-        <nav className="space-y-1">
-          {adminLinks.map((link) => {
-            const active = location.pathname === link.to;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  active ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <NavLinks />
         <button
           onClick={() => supabase.auth.signOut()}
           className="mt-8 flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -50,7 +87,8 @@ const AdminLayout = () => {
           <LogOut className="h-4 w-4" /> Sign Out
         </button>
       </aside>
-      <main className="flex-1 p-8">
+
+      <main className="flex-1 p-4 md:p-8">
         <Outlet />
       </main>
     </div>

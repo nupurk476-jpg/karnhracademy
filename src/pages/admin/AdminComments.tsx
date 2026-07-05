@@ -40,7 +40,7 @@ const AdminComments = () => {
         <div className="space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="rounded-lg border border-border bg-card p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-semibold text-foreground">{c.name}</span>
                 {c.email && <span className="text-muted-foreground">({c.email})</span>}
                 <span className="text-muted-foreground">on {(c as any).blog_posts?.title}</span>

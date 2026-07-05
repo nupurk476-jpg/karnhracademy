@@ -433,7 +433,7 @@ const FeaturedNotes = () => {
                   <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
                     {note.description || "Comprehensive study material covering key concepts, definitions, and exam-focused explanations."}
                   </p>
-                  <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors hover:gap-2.5" style={{ color: sub.color }}>
+                  <Link to="/notes" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold transition-colors hover:gap-2.5" style={{ color: sub.color }}>
                     Download Notes <ChevronRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -497,7 +497,7 @@ const VideoLectures = () => {
                   {lec.title}
                 </h3>
                 {lec.description && <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lec.description}</p>}
-                <Link to="/lectures" className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: "#7048E8" }}>
+                <Link to="/lectures" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold" style={{ color: "#7048E8" }}>
                   <PlayCircle className="h-4 w-4" /> Watch Now
                 </Link>
               </div>
@@ -673,7 +673,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-[#c79a4b] hover:text-[#c79a4b] hover:bg-amber-50" style={{ borderColor: "#e2e8f0" }}>
+            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#c79a4b] hover:text-[#c79a4b] hover:bg-amber-50" style={{ borderColor: "#e2e8f0" }}>
               {t}
             </Link>
           ))}
