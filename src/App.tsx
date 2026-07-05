@@ -44,6 +44,7 @@ const AdminQuizzes = lazy(() => import("./pages/admin/AdminQuizzes"));
 const AdminBooks = lazy(() => import("./pages/admin/AdminBooks"));
 const AdminComments = lazy(() => import("./pages/admin/AdminComments"));
 const AdminSubscribers = lazy(() => import("./pages/admin/AdminSubscribers"));
+const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
 const AdminNewspaperHighlights = lazy(() => import("./pages/admin/AdminNewspaperHighlights"));
 const AdminLectures = lazy(() => import("./pages/admin/AdminLectures"));
 const AdminLiveLectures = lazy(() => import("./pages/admin/AdminLiveLectures"));
@@ -97,6 +98,7 @@ const App = () => (
               <Route path="books" element={<AdminBooks />} />
               <Route path="comments" element={<AdminComments />} />
               <Route path="subscribers" element={<AdminSubscribers />} />
+              <Route path="contact-messages" element={<AdminContactMessages />} />
               <Route path="newspaper" element={<AdminNewspaperHighlights />} />
               <Route path="lectures" element={<AdminLectures />} />
               <Route path="live-lectures" element={<AdminLiveLectures />} />

@@ -12,6 +12,7 @@ const adminLinks = [
   { label: "Books", to: "/admin/books", icon: BookMarked },
   { label: "Comments", to: "/admin/comments", icon: MessageSquare },
   { label: "Subscribers", to: "/admin/subscribers", icon: Mail },
+  { label: "Contact Messages", to: "/admin/contact-messages", icon: Mail },
   { label: "Newspaper", to: "/admin/newspaper", icon: Newspaper },
 ];
 

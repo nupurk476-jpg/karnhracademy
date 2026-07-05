@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { DISCIPLINES } from "@/lib/disciplines";
+import { useHoneypot } from "@/hooks/use-honeypot";
 import {
   ArrowRight, BookOpen, Users,
   Video, HelpCircle, Download, FileText,
@@ -761,10 +762,12 @@ const Newsletter = () => {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { isBot, honeypotFieldProps } = useHoneypot();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
+    if (isBot()) { setDone(true); setEmail(""); return; }
     setLoading(true);
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
     setLoading(false);
@@ -796,6 +799,7 @@ const Newsletter = () => {
           </div>
         ) : (
           <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-5">
+            <input type="text" {...honeypotFieldProps} />
             <input
               type="email" required
               placeholder="your@email.com"

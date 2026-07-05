@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { useToast } from "@/hooks/use-toast";
+import { useHoneypot } from "@/hooks/use-honeypot";
 import { Share2, Linkedin, Twitter, Facebook, ArrowLeft } from "lucide-react";
 
 const BlogPost = () => {
@@ -17,6 +18,7 @@ const BlogPost = () => {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const { isBot, honeypotFieldProps } = useHoneypot();
 
   useEffect(() => {
     if (!slug) return;
@@ -31,6 +33,11 @@ const BlogPost = () => {
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!post || !name.trim() || !content.trim()) return;
+    if (isBot()) {
+      toast({ title: "Comment submitted", description: "Your comment will appear after approval." });
+      setName(""); setEmail(""); setContent("");
+      return;
+    }
     setSubmitting(true);
     await supabase.from("blog_comments").insert({ blog_post_id: post.id, name: name.trim(), email: email.trim() || null, content: content.trim() });
     setSubmitting(false);
@@ -133,6 +140,7 @@ const BlogPost = () => {
 
           <form onSubmit={handleComment} className="space-y-4 rounded-lg border border-border bg-card p-6">
             <h3 className="text-lg font-semibold text-foreground">Leave a Comment</h3>
+            <input type="text" {...honeypotFieldProps} />
             <input type="text" required placeholder="Your name" value={name} onChange={e => setName(e.target.value)} className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
             <input type="email" placeholder="Email (optional)" value={email} onChange={e => setEmail(e.target.value)} className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
             <textarea required placeholder="Your comment" value={content} onChange={e => setContent(e.target.value)} className="min-h-[100px] w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
