@@ -47,6 +47,21 @@ export default async function TestResultsPage({
   if (!session) notFound();
   if (session.kind !== "mock") redirect(`/practice/session/${session.id}`);
 
+  // Results reveal correct answers, so an active test can't peek at them:
+  // send it back to the runner unless time has actually expired — in which
+  // case finalize it here (covers closed tabs that never auto-submitted).
+  if (session.status === "active") {
+    const expired = session.ends_at
+      ? Date.now() > new Date(session.ends_at).getTime()
+      : false;
+    if (!expired) redirect(`/tests/session/${session.id}`);
+    await supabase
+      .from("practice_sessions")
+      .update({ status: "completed", completed_at: new Date().toISOString() })
+      .eq("id", session.id)
+      .eq("user_id", profile.id);
+  }
+
   const [questionsRes, attemptsRes, topicsRes] = await Promise.all([
     supabase.from("questions").select("*").in("id", session.question_ids),
     supabase
