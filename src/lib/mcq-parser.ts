@@ -39,9 +39,11 @@ const EXPLANATION_RE = /^\s*(?:explanation|solution|reason|exp)\s*[:.\-]?\s*(.*)
 const KEY_HEADER_RE = /^\s*(?:answer\s*key|answers?\s*:?\s*$|key\s*:?\s*$)/i;
 const KEY_PAIR_RE = /(\d{1,3})\s*[.):\-–—]?\s*\(?([A-Fa-f])\)?(?![A-Za-z])/g;
 // "Q1 Q2 Q3 … Q10" header line in a grid-style answer key table.
-const KEY_TABLE_HEADER_RE = /^\s*(?:Q\d{1,3}\s+){2,}/i;
+// Anchored at both ends so "Q1. What is...?" doesn't accidentally match.
+const KEY_TABLE_HEADER_RE = /^\s*Q\d{1,3}(?:\s+Q\d{1,3})+\s*$/i;
 // A row of bare answer letters matching an earlier Q-number header: "B  C  A  D …"
-const KEY_TABLE_LETTERS_RE = /^\s*(?:[A-Fa-f]\s+){2,}[A-Fa-f]\s*$/i;
+// Requires ≥2 letters (one letter + at least one space+letter group).
+const KEY_TABLE_LETTERS_RE = /^\s*[A-Fa-f](?:\s+[A-Fa-f])+\s*$/i;
 // "Q1 — Correct Answer: B. Explanation text…" — common per-question explanation block.
 const QNUM_ANSWER_EXPL_RE = /^\s*Q(\d{1,3})\s*[—\-–]\s*correct\s*answer\s*:\s*([A-Fa-f])\.\s*(.*)/i;
 // Q. style question (Q&A / FAQ format, NOT numbered MCQ).
@@ -72,9 +74,13 @@ const preSplit = (line: string): string[] => {
   // Break before "Answer"/"Ans"/"Correct" keywords (even without colon/dash).
   // "Key" is only split when followed by a separator (Key: B), not bare "Key" which
   // can appear legitimately in option text ("Key Performance Indicator").
-  s = s.replace(/(\S)\s+((?:correct\s*(?:answer|option)?|answer|ans)\b)/gi, "$1\n$2");
-  s = s.replace(/(\S)\s+(key\s*[:.\-])/gi, "$1\n$2");
-  s = s.replace(/\s+(?=(?:explanation|solution)\s*[:\-])/gi, "\n");
+  // Skip this for "Q1 — Correct Answer: B." explanation headers — they already have
+  // the right structure and splitting would destroy the QNUM_ANSWER_EXPL_RE match.
+  if (!/^\s*Q\d{1,3}\s*[—\-–]/i.test(s)) {
+    s = s.replace(/(\S)\s+((?:correct\s*(?:answer|option)?|answer|ans)\b)/gi, "$1\n$2");
+    s = s.replace(/(\S)\s+(key\s*[:.\-])/gi, "$1\n$2");
+    s = s.replace(/\s+(?=(?:explanation|solution)\s*[:\-])/gi, "\n");
+  }
   // Break an inline option run "A) x B) y" / "(A) x (B) y" into separate lines.
   // Two-column PDFs produce exactly 2 markers per line (e.g. "(A) text  (B) text").
   // We also split when there are 3+ markers (standard inline runs).
