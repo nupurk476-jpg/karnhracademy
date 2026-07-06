@@ -4,6 +4,7 @@
 //   1. Question text?            Q1) Question text
 //   A) Option   (b) Option       a. Option
 //   Answer: B   Ans - b          Correct answer: (B)
+//   (B)                          *B) marked option   key: B
 //   Explanation: ...
 //
 // plus an "Answer Key" section at the end (1. A  2. C  3. B ...), inline
@@ -23,13 +24,16 @@ export type ParseResult = {
   skipped: number; // blocks that looked like questions but had < 2 options
 };
 
-const OPTION_RE = /^\s*\(?([A-Fa-f])[.):]\s+(.*)$/;
+const OPTION_RE = /^\s*\*?\s*\(?([A-Fa-f])[.):]\s+(.*?)(?:\s*\*\s*)?$/;
 const QUESTION_RE = /^\s*(?:Q(?:uestion)?\s*[.\s]?\s*)?(\d{1,3})\s*[.):]\s*(.*)$/i;
+// Matches "Answer: B", "Ans- b", "Correct answer: (B)", "Key: C", etc.
 // The (?![A-Za-z0-9]) guard stops "Answer: Both..." matching as option B.
-// Trailing text after the letter ("Answer: B) Key Performance Area") is allowed.
-const ANSWER_RE = /^\s*(?:correct\s*(?:answer|option)?|answer|ans)\s*[\s:().-]*([A-Fa-f1-6])(?![A-Za-z0-9]).*$/i;
+const ANSWER_RE = /^\s*(?:correct\s*(?:answer|option)?|answer|ans|key)\s*[\s:().\-]*([A-Fa-f1-6])(?![A-Za-z0-9]).*$/i;
+// A bare letter on its own line: "(B)" or "B" or "B." — treated as the answer
+// when we already have ≥2 options for the current question.
+const STANDALONE_ANS_RE = /^\s*\(?([A-Fa-f])\)?\s*\.?\s*$/;
 const EXPLANATION_RE = /^\s*(?:explanation|solution|reason|exp)\s*[:.\-]?\s*(.*)$/i;
-const KEY_HEADER_RE = /answer\s*key|answers\s*:?\s*$/i;
+const KEY_HEADER_RE = /answer\s*key|answers?\s*:?\s*$|^key\s*:?\s*$/i;
 const KEY_PAIR_RE = /(\d{1,3})\s*[.):\-–—]?\s*\(?([A-Fa-f])\)?(?![A-Za-z])/g;
 
 const letterToIndex = (ch: string): number => {
@@ -45,16 +49,21 @@ const isKeyLine = (line: string): boolean => {
   return !!pairs && pairs.length >= 1 && stripped.length === 0;
 };
 
+// Whether an option line is starred (correct answer marker):
+//   *A) text  or  A) text *  or  A) text*
+const isStarredOption = (raw: string): boolean =>
+  /^\s*\*\s*\(?[A-Fa-f][.):]/i.test(raw) || /\*\s*$/.test(raw.trimEnd());
+
 // PDF extraction often glues things onto one line; split them back apart.
 const preSplit = (line: string): string[] => {
   let s = line;
-  // break before "Answer:" / "Explanation:" when glued mid-line
-  s = s.replace(/\s+(?=(?:correct\s*(?:answer|option)?|answer|ans)\s*[:\-])/gi, "\n");
+  // Break before "Answer"/"Ans"/"Correct"/"Key" even without a colon/dash after them.
+  s = s.replace(/(\S)\s+((?:correct\s*(?:answer|option)?|answer|ans|key)\b)/gi, "$1\n$2");
   s = s.replace(/\s+(?=(?:explanation|solution)\s*[:\-])/gi, "\n");
   // break an inline option run "A) x B) y C) z" — only when 3+ markers present
-  const markers = s.match(/(?:^|\s)\(?[A-Fa-f][.)]\s/g);
+  const markers = s.match(/(?:^|\s)\*?\s*\(?[A-Fa-f][.)]\s/g);
   if (markers && markers.length >= 3) {
-    s = s.replace(/\s+(?=\(?[A-Fa-f][.)]\s)/g, "\n");
+    s = s.replace(/\s+(?=\*?\s*\(?[A-Fa-f][.)]\s)/g, "\n");
   }
   return s.split("\n");
 };
@@ -93,8 +102,15 @@ export function parseMcqText(raw: string): ParseResult {
       continue;
     }
 
+    // Explicit answer keyword: "Answer: B", "Ans- C", "Key: D", etc.
     const ans = line.match(ANSWER_RE);
     if (ans && cur) { cur.correct = letterToIndex(ans[1]); mode = null; continue; }
+
+    // Standalone letter line: "(B)" or just "B" — answer when ≥2 options already seen.
+    if (cur && cur.options.length >= 2 && cur.correct === null) {
+      const sa = line.match(STANDALONE_ANS_RE);
+      if (sa) { cur.correct = letterToIndex(sa[1]); mode = null; continue; }
+    }
 
     const exp = line.match(EXPLANATION_RE);
     if (exp && cur && cur.options.length >= 2) {
@@ -105,7 +121,10 @@ export function parseMcqText(raw: string): ParseResult {
 
     const opt = line.match(OPTION_RE);
     if (opt && cur) {
-      cur.options.push(opt[2]);
+      const optText = opt[2].replace(/\*\s*$/, "").trim(); // strip trailing star
+      cur.options.push(optText);
+      // A leading star (*A) ...) or trailing star (A) ...* ) marks the correct answer.
+      if (isStarredOption(rawLine)) cur.correct = cur.options.length - 1;
       mode = "option";
       continue;
     }
