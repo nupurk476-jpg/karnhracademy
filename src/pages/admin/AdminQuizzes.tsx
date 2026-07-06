@@ -285,9 +285,9 @@ const AdminQuizzes = () => {
             className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm" />
         </div>
       ))}
-      <input placeholder="Explanation shown after answering (optional)" value={qForm.explanation}
-        onChange={e => setQForm({ ...qForm, explanation: e.target.value })}
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+      <textarea placeholder="Explanation shown in results after the quiz (optional)" value={qForm.explanation}
+        onChange={e => setQForm({ ...qForm, explanation: e.target.value })} rows={3}
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none" />
       <div className="flex flex-wrap items-center gap-3">
         <select value={qForm.difficulty} onChange={e => setQForm({ ...qForm, difficulty: e.target.value })}
           className="rounded-md border border-input bg-background px-3 py-2 text-sm">

@@ -7,7 +7,7 @@ import SEO from "@/components/SEO";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
 import {
   ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star,
-  Flag, Trophy,
+  Flag, Trophy, Lightbulb,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -391,8 +391,12 @@ const QuizTake = () => {
                       })}
                     </div>
                     {rq.explanation && (
-                      <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 px-4 py-3 text-sm text-foreground">
-                        <span className="font-semibold text-accent">Explanation:</span> {rq.explanation}
+                      <div className="mt-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50/70 px-4 py-3 text-sm text-foreground dark:border-amber-800/40 dark:bg-amber-900/20">
+                        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                        <div>
+                          <p className="mb-0.5 font-semibold text-amber-700 dark:text-amber-400">Explanation</p>
+                          <p className="leading-relaxed text-foreground">{rq.explanation}</p>
+                        </div>
                       </div>
                     )}
                   </div>
