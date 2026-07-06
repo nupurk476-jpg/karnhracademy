@@ -3,10 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Pencil, X, Copy, Eye, EyeOff, ChevronDown, ChevronRight,
-  ArrowUp, ArrowDown, CheckCircle2,
+  ArrowUp, ArrowDown, CheckCircle2, FileUp,
 } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ImportQuestionsDialog from "@/components/admin/ImportQuestionsDialog";
+import type { ParsedMcq } from "@/lib/mcq-parser";
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"];
 
@@ -38,6 +40,7 @@ const AdminQuizzes = () => {
   const [savingQ, setSavingQ] = useState(false);
 
   const [previewQuiz, setPreviewQuiz] = useState<any | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const { toast } = useToast();
 
   const loadQuizzes = () => {
@@ -220,6 +223,30 @@ const AdminQuizzes = () => {
     loadQuestions(selectedQuiz);
   };
 
+  // Bulk-insert questions reviewed in the PDF/paste import dialog.
+  const importQuestions = async (qs: ParsedMcq[]): Promise<boolean> => {
+    if (!selectedQuiz) return false;
+    const fullRows = qs.map((q, i) => ({
+      quiz_id: selectedQuiz, question: q.question, options: q.options,
+      correct_answer: q.correct ?? 0, explanation: q.explanation,
+      marks: 1, position: questions.length + i + 1,
+    }));
+    let { error } = await supabase.from("quiz_questions").insert(fullRows as any);
+    let compat = false;
+    if (error && isMissingColumn(error)) {
+      compat = true;
+      const legacyRows = qs.map(q => ({
+        quiz_id: selectedQuiz, question: q.question, options: q.options,
+        correct_answer: q.correct ?? 0, explanation: q.explanation,
+      }));
+      ({ error } = await supabase.from("quiz_questions").insert(legacyRows as any));
+    }
+    if (error) { toast({ title: "Import failed", description: error.message, variant: "destructive" }); return false; }
+    toast({ title: `${qs.length} question${qs.length === 1 ? "" : "s"} added to "${activeQuizObj?.title}"`, description: compat ? COMPAT_HINT : undefined });
+    loadQuestions(selectedQuiz);
+    return true;
+  };
+
   const moveQuestion = async (index: number, dir: -1 | 1) => {
     const other = index + dir;
     if (other < 0 || other >= questions.length || !selectedQuiz) return;
@@ -393,10 +420,16 @@ const AdminQuizzes = () => {
               <h2 className="text-lg font-semibold text-foreground">
                 Questions <span className="text-sm font-normal text-muted-foreground">({questions.length} in "{activeQuizObj?.title}")</span>
               </h2>
-              <button onClick={openNewQuestion}
-                className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
-                <Plus className="h-4 w-4" /> Add Question
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setImportOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-accent px-3 py-2 text-sm font-semibold text-accent hover:bg-accent/10">
+                  <FileUp className="h-4 w-4" /> Import PDF
+                </button>
+                <button onClick={openNewQuestion}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
+                  <Plus className="h-4 w-4" /> Add Question
+                </button>
+              </div>
             </div>
 
             {/* New question block */}
@@ -456,6 +489,14 @@ const AdminQuizzes = () => {
           <QuizPreviewBody quizId={previewQuiz?.id} />
         </DialogContent>
       </Dialog>
+
+      {/* PDF / paste bulk import */}
+      <ImportQuestionsDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        quizTitle={activeQuizObj?.title ?? ""}
+        onImport={importQuestions}
+      />
     </div>
   );
 };
