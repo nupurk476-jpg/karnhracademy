@@ -73,6 +73,7 @@ const AdminQuizzes = () => {
 
   const startEditQuiz = (q: any) => {
     setEditingQuizId(q.id);
+    setSelectedQuiz(q.id);
     setTitle(q.title ?? ""); setTopic(q.topic ?? ""); setDescription(q.description ?? "");
     setSubject(q.subject ?? "hrm"); setTopicSlug(q.topic_slug ?? "");
     window.scrollTo({ top: 0, behavior: "smooth" });
