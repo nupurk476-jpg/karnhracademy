@@ -68,9 +68,15 @@ const AdminNotes = () => {
       const row: any = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject };
       if (file) row.file_size = file.size;          // record size for new uploads
       else if (!file_url) row.file_size = null;      // attachment removed
-      const { error } = editingId
-        ? await supabase.from("notes").update(row as any).eq("id", editingId)
-        : await supabase.from("notes").insert(row as any);
+      const write = (r: any) => editingId
+        ? supabase.from("notes").update(r as any).eq("id", editingId)
+        : supabase.from("notes").insert(r as any);
+      let { error } = await write(row);
+      // file_size doesn't exist until the pending DB update runs — save without it.
+      if (error && (error.code === "PGRST204" || /schema cache/i.test(error.message || ""))) {
+        const { file_size: _fs, ...legacy } = row;
+        ({ error } = await write(legacy));
+      }
       if (error) throw new Error(error.message);
 
       toast({ title: editingId ? "Note updated" : "Note created" });

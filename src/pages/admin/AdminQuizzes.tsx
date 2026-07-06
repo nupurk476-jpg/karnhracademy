@@ -12,6 +12,13 @@ const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"];
 
 const emptyQuestion = { question: "", options: ["", "", "", ""], correct_answer: 0, explanation: "", difficulty: "", marks: 1 };
 
+// PostgREST answers PGRST204 (or a "schema cache" message) when a write
+// references a column that doesn't exist yet — i.e. the LMS database update
+// hasn't been applied. Every write below retries without the new columns so
+// the admin keeps working either way.
+const isMissingColumn = (e: any) => e?.code === "PGRST204" || /schema cache/i.test(e?.message || "");
+const COMPAT_HINT = "Saved without the new fields (description / publish / difficulty / marks / ordering) — run the pending database update to enable them.";
+
 const AdminQuizzes = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -40,14 +47,16 @@ const AdminQuizzes = () => {
     });
   };
 
-  const loadQuestions = (quizId: string) => {
-    supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
+  const loadQuestions = async (quizId: string) => {
+    // Ordering by position fails outright if that column doesn't exist yet.
+    let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
       .order("position" as any, { ascending: true, nullsFirst: false })
-      .order("created_at")
-      .then(({ data, error }) => {
-        if (error) { toast({ title: "Failed to load questions", description: error.message, variant: "destructive" }); return; }
-        if (data) setQuestions(data);
-      });
+      .order("created_at");
+    if (error) {
+      ({ data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("created_at"));
+    }
+    if (error) { toast({ title: "Failed to load questions", description: error.message, variant: "destructive" }); return; }
+    if (data) setQuestions(data);
   };
 
   useEffect(() => { loadQuizzes(); }, []);
@@ -68,12 +77,19 @@ const AdminQuizzes = () => {
 
   const saveQuiz = async () => {
     if (!title || !topic) return;
-    const row = { title, topic, description: description || null, subject, topic_slug: topicSlug || null };
-    const { error } = editingQuizId
-      ? await supabase.from("quizzes").update(row as any).eq("id", editingQuizId)
-      : await supabase.from("quizzes").insert(row as any);
+    const fullRow = { title, topic, description: description || null, subject, topic_slug: topicSlug || null };
+    const legacyRow = { title, topic, subject, topic_slug: topicSlug || null };
+    const write = (row: any) => editingQuizId
+      ? supabase.from("quizzes").update(row).eq("id", editingQuizId)
+      : supabase.from("quizzes").insert(row);
+    let { error } = await write(fullRow);
+    let compat = false;
+    if (error && isMissingColumn(error)) {
+      compat = true;
+      ({ error } = await write(legacyRow));
+    }
     if (error) { toast({ title: "Failed to save quiz", description: error.message, variant: "destructive" }); return; }
-    toast({ title: editingQuizId ? "Quiz updated" : "Quiz created" });
+    toast({ title: editingQuizId ? "Quiz updated" : "Quiz created", description: compat ? COMPAT_HINT : undefined });
     resetQuizForm();
     loadQuizzes();
   };
@@ -90,28 +106,50 @@ const AdminQuizzes = () => {
   const togglePublish = async (q: any) => {
     const next = !(q.published ?? true);
     const { error } = await supabase.from("quizzes").update({ published: next } as any).eq("id", q.id);
-    if (error) { toast({ title: "Failed to update", description: error.message, variant: "destructive" }); return; }
+    if (error) {
+      toast({
+        title: "Publish/unpublish unavailable",
+        description: isMissingColumn(error) ? "This needs the pending database update to be applied first." : error.message,
+        variant: "destructive",
+      });
+      return;
+    }
     toast({ title: next ? "Quiz published" : "Quiz unpublished (hidden from students)" });
     loadQuizzes();
   };
 
   const duplicateQuiz = async (q: any) => {
-    const { data: newQuiz, error } = await supabase.from("quizzes")
+    let { data: newQuiz, error } = await supabase.from("quizzes")
       .insert({ title: `${q.title} (Copy)`, topic: q.topic, description: q.description, subject: q.subject, topic_slug: q.topic_slug, published: false } as any)
       .select().single();
+    let compat = false;
+    if (error && isMissingColumn(error)) {
+      compat = true;
+      ({ data: newQuiz, error } = await supabase.from("quizzes")
+        .insert({ title: `${q.title} (Copy)`, topic: q.topic, subject: q.subject, topic_slug: q.topic_slug } as any)
+        .select().single());
+    }
     if (error || !newQuiz) { toast({ title: "Failed to duplicate quiz", description: error?.message, variant: "destructive" }); return; }
-    const { data: qs } = await supabase.from("quiz_questions").select("*").eq("quiz_id", q.id)
+    let { data: qs, error: loadErr } = await supabase.from("quiz_questions").select("*").eq("quiz_id", q.id)
       .order("position" as any, { ascending: true, nullsFirst: false }).order("created_at");
+    if (loadErr) ({ data: qs } = await supabase.from("quiz_questions").select("*").eq("quiz_id", q.id).order("created_at"));
     if (qs && qs.length > 0) {
-      const copies = qs.map((qq: any, i: number) => ({
+      const fullCopies = qs.map((qq: any, i: number) => ({
         quiz_id: (newQuiz as any).id, question: qq.question, options: qq.options,
         correct_answer: qq.correct_answer, explanation: qq.explanation,
         difficulty: qq.difficulty, marks: qq.marks ?? 1, position: i + 1,
       }));
-      const { error: qErr } = await supabase.from("quiz_questions").insert(copies as any);
+      let { error: qErr } = await supabase.from("quiz_questions").insert(fullCopies as any);
+      if (qErr && isMissingColumn(qErr)) {
+        const legacyCopies = qs.map((qq: any) => ({
+          quiz_id: (newQuiz as any).id, question: qq.question, options: qq.options,
+          correct_answer: qq.correct_answer, explanation: qq.explanation,
+        }));
+        ({ error: qErr } = await supabase.from("quiz_questions").insert(legacyCopies as any));
+      }
       if (qErr) { toast({ title: "Quiz copied but questions failed", description: qErr.message, variant: "destructive" }); }
     }
-    toast({ title: `Duplicated as draft: ${q.title} (Copy)` });
+    toast({ title: `Duplicated: ${q.title} (Copy)`, description: compat ? COMPAT_HINT : "Created as a draft." });
     loadQuizzes();
   };
 
@@ -137,12 +175,22 @@ const AdminQuizzes = () => {
       question: qForm.question, options: qForm.options, correct_answer: qForm.correct_answer,
       explanation: qForm.explanation || null, difficulty: qForm.difficulty || null, marks: qForm.marks || 1,
     };
-    const { error } = expandedQ === "new"
-      ? await supabase.from("quiz_questions").insert({ ...row, quiz_id: selectedQuiz, position: questions.length + 1 } as any)
-      : await supabase.from("quiz_questions").update(row as any).eq("id", expandedQ!);
+    const legacyRow = {
+      question: qForm.question, options: qForm.options, correct_answer: qForm.correct_answer,
+      explanation: qForm.explanation || null,
+    };
+    const write = (r: any) => expandedQ === "new"
+      ? supabase.from("quiz_questions").insert({ ...r, quiz_id: selectedQuiz } as any)
+      : supabase.from("quiz_questions").update(r as any).eq("id", expandedQ!);
+    let { error } = await write({ ...row, ...(expandedQ === "new" ? { position: questions.length + 1 } : {}) });
+    let compat = false;
+    if (error && isMissingColumn(error)) {
+      compat = true;
+      ({ error } = await write(legacyRow));
+    }
     setSavingQ(false);
     if (error) { toast({ title: "Failed to save question", description: error.message, variant: "destructive" }); return; }
-    toast({ title: expandedQ === "new" ? "Question added" : "Question saved" });
+    toast({ title: expandedQ === "new" ? "Question added" : "Question saved", description: compat ? COMPAT_HINT : undefined });
     if (expandedQ === "new") setQForm({ ...emptyQuestion }); // keep form open for rapid entry
     else setExpandedQ(null);
     loadQuestions(selectedQuiz);
@@ -156,11 +204,17 @@ const AdminQuizzes = () => {
 
   const duplicateQuestion = async (q: any) => {
     if (!selectedQuiz) return;
-    const { error } = await supabase.from("quiz_questions").insert({
+    let { error } = await supabase.from("quiz_questions").insert({
       quiz_id: selectedQuiz, question: `${q.question}`, options: q.options,
       correct_answer: q.correct_answer, explanation: q.explanation,
       difficulty: q.difficulty, marks: q.marks ?? 1, position: questions.length + 1,
     } as any);
+    if (error && isMissingColumn(error)) {
+      ({ error } = await supabase.from("quiz_questions").insert({
+        quiz_id: selectedQuiz, question: `${q.question}`, options: q.options,
+        correct_answer: q.correct_answer, explanation: q.explanation,
+      } as any));
+    }
     if (error) { toast({ title: "Failed to duplicate", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Question duplicated (added at end)" });
     loadQuestions(selectedQuiz);
@@ -171,7 +225,15 @@ const AdminQuizzes = () => {
     if (other < 0 || other >= questions.length || !selectedQuiz) return;
     const a = questions[index], b = questions[other];
     const posA = a.position ?? index + 1, posB = b.position ?? other + 1;
-    await supabase.from("quiz_questions").update({ position: posB } as any).eq("id", a.id);
+    const { error } = await supabase.from("quiz_questions").update({ position: posB } as any).eq("id", a.id);
+    if (error) {
+      toast({
+        title: "Reordering unavailable",
+        description: isMissingColumn(error) ? "Reordering needs the pending database update to be applied first." : error.message,
+        variant: "destructive",
+      });
+      return;
+    }
     await supabase.from("quiz_questions").update({ position: posA } as any).eq("id", b.id);
     loadQuestions(selectedQuiz);
   };
@@ -403,9 +465,12 @@ const QuizPreviewBody = ({ quizId }: { quizId?: string }) => {
   const [qs, setQs] = useState<any[]>([]);
   useEffect(() => {
     if (!quizId) { setQs([]); return; }
-    supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
-      .order("position" as any, { ascending: true, nullsFirst: false }).order("created_at")
-      .then(({ data }) => data && setQs(data));
+    (async () => {
+      let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
+        .order("position" as any, { ascending: true, nullsFirst: false }).order("created_at");
+      if (error) ({ data } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("created_at"));
+      setQs(data ?? []);
+    })();
   }, [quizId]);
 
   if (!quizId) return null;

@@ -32,7 +32,9 @@ const AdminDashboard = () => {
 
     // Quiz analytics — computed from quizzes, questions and attempts.
     Promise.all([
-      supabase.from("quizzes").select("id, title, published, created_at" as any).order("created_at", { ascending: false }),
+      // select("*") so this still works before the `published` column exists;
+      // rows without it count as published below.
+      supabase.from("quizzes").select("*").order("created_at", { ascending: false }),
       supabase.from("quiz_questions").select("id", { count: "exact", head: true }),
       supabase.from("quiz_attempts").select("quiz_id, score, total_questions"),
     ]).then(([qz, qq, at]) => {

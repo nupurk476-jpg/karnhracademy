@@ -56,15 +56,17 @@ const QuizTake = () => {
   useEffect(() => {
     if (!id) return;
     supabase.from("quizzes").select("*").eq("id", id).single().then(({ data }) => setQuiz(data));
-    supabase.from("quiz_questions").select("*").eq("quiz_id", id)
-      .order("position" as any, { ascending: true, nullsFirst: false })
-      .order("created_at")
-      .then(({ data }) => {
-        if (data) {
-          setQuestions(data);
-          setTimeLeft(data.length * SECONDS_PER_QUESTION);
-        }
-      });
+    (async () => {
+      // Ordering by position fails if that column doesn't exist yet (pending DB update).
+      let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", id)
+        .order("position" as any, { ascending: true, nullsFirst: false })
+        .order("created_at");
+      if (error) ({ data } = await supabase.from("quiz_questions").select("*").eq("quiz_id", id).order("created_at"));
+      if (data) {
+        setQuestions(data);
+        setTimeLeft(data.length * SECONDS_PER_QUESTION);
+      }
+    })();
   }, [id]);
 
   // Ratings
