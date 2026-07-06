@@ -1,1 +1,0 @@
-ALTER TABLE public.notes ADD COLUMN subject text DEFAULT NULL;

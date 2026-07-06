@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── NETAce AI design tokens ─────────────────────────────────────────────────
+   Warm paper-white surfaces, violet primary, generous radii. Built to feel
+   like a premium learning product, not an admin panel. */
+
+@layer base {
+  :root {
+    --background: 40 25% 98%;
+    --foreground: 245 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 245 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 245 20% 12%;
+    --primary: 253 78% 57%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 250 25% 95%;
+    --secondary-foreground: 250 25% 22%;
+    --muted: 245 20% 95%;
+    --muted-foreground: 245 8% 44%;
+    --accent: 253 90% 96%;
+    --accent-foreground: 253 60% 38%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 155 62% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 94% 46%;
+    --warning-foreground: 30 90% 12%;
+    --border: 245 15% 89%;
+    --input: 245 15% 86%;
+    --ring: 253 78% 57%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 246 22% 8%;
+    --foreground: 245 15% 92%;
+    --card: 246 20% 11%;
+    --card-foreground: 245 15% 92%;
+    --popover: 246 20% 11%;
+    --popover-foreground: 245 15% 92%;
+    --primary: 253 82% 66%;
+    --primary-foreground: 253 60% 10%;
+    --secondary: 246 15% 17%;
+    --secondary-foreground: 245 15% 88%;
+    --muted: 246 15% 16%;
+    --muted-foreground: 245 8% 62%;
+    --accent: 253 40% 20%;
+    --accent-foreground: 253 80% 88%;
+    --destructive: 0 62% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 155 55% 42%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 90% 54%;
+    --warning-foreground: 30 90% 10%;
+    --border: 246 14% 20%;
+    --input: 246 14% 24%;
+    --ring: 253 82% 66%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+}
+
+@layer utilities {
+  /* Skeleton shimmer used by loading states */
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+  .shimmer::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite];
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.06),
+      transparent
+    );
+  }
+
+  /* Hide scrollbars on horizontal chip rows while keeping scrollability */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Safe-area padding for the mobile bottom nav */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

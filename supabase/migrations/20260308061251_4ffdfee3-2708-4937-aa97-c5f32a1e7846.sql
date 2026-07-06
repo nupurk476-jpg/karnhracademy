@@ -1,6 +1,0 @@
-
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS bio text DEFAULT '',
-ADD COLUMN IF NOT EXISTS phone text DEFAULT '',
-ADD COLUMN IF NOT EXISTS location text DEFAULT '',
-ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT '';
