@@ -63,7 +63,7 @@ const ImportQuestionsDialog = ({ open, onClose, quizTitle, onImport }: Props) =>
     if (questions.length === 0) {
       if (qaFormatDetected) {
         setParseError(
-          "This file appears to use a Q./A. question-answer format (e.g. "Q. What is…? A. The answer…"), not the A/B/C/D multiple-choice format this tool expects.\n\n" +
+          "This file appears to use a Q./A. question-answer format (e.g. \"Q. What is...? A. The answer...\"), not the A/B/C/D multiple-choice format this tool expects.\n\n" +
           "To import MCQ questions the file must have numbered questions with four labelled choices:\n" +
           "  1. Question text?\n  A) First choice\n  B) Second choice\n  C) Third choice\n  D) Fourth choice\n  Answer: B\n\n" +
           "Tip: paste the text instead and re-format a few questions manually, or ask your content provider for the MCQ version of the material."
