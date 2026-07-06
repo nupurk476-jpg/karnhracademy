@@ -4,10 +4,12 @@ import { FileUp, ClipboardPaste, Loader2, AlertTriangle, Trash2, CheckCircle2 } 
 import { parseMcqText, type ParsedMcq } from "@/lib/mcq-parser";
 
 // Reads the text out of a PDF in the browser. pdfjs is heavy, so it is only
-// downloaded the first time an admin actually imports a PDF.
+// downloaded the first time an admin actually imports a PDF. The "legacy"
+// build is used because the modern one requires brand-new browser APIs
+// (Uint8Array.toHex — "a.toHex is not a function" on slightly older Chrome).
 async function extractPdfText(file: File): Promise<string> {
-  const pdfjs = await import("pdfjs-dist");
-  const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url");
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
   const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
   let text = "";
