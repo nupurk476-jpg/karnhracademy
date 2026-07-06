@@ -102,6 +102,7 @@ export interface Question {
   ingestion_job_id: string | null;
   source_page: number | null;
   source_order: number | null;
+  source_chunk: number | null;
   source_excerpt: string | null;
   import_warnings: string[];
   normalized_hash: string | null;

@@ -232,6 +232,7 @@ create table public.questions (
   ingestion_job_id   uuid references public.ingestion_jobs (id) on delete set null,
   source_page        int,
   source_order       int,          -- question number / position in the source
+  source_chunk       int,          -- parse-chunk index; makes chunk retries idempotent
   source_excerpt     text,         -- raw text the question was extracted from
   import_warnings    text[] not null default '{}',
 

@@ -40,7 +40,16 @@ export default async function PracticeSessionPage({
   );
   const ordered = session.question_ids
     .map((qid) => byId.get(qid))
-    .filter((q): q is Question => Boolean(q));
+    .filter((q): q is Question => Boolean(q))
+    // Answers and explanations come back from submitAnswer after each attempt;
+    // don't ship them ahead of time in the page payload.
+    .map((q) => ({
+      ...q,
+      correct_options: null,
+      answer_text: null,
+      explanation: null,
+      explanation_is_ai: false,
+    }));
 
   if (ordered.length === 0) redirect("/practice");
 

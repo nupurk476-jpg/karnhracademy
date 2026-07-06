@@ -44,7 +44,16 @@ export default async function MockSessionPage({
   );
   const ordered = session.question_ids
     .map((qid) => byId.get(qid))
-    .filter((q): q is Question => Boolean(q));
+    .filter((q): q is Question => Boolean(q))
+    // Never ship answers/explanations to the client during an active test —
+    // grading happens server-side in submitAnswer.
+    .map((q) => ({
+      ...q,
+      correct_options: null,
+      answer_text: null,
+      explanation: null,
+      explanation_is_ai: false,
+    }));
 
   if (ordered.length === 0) redirect("/tests");
 

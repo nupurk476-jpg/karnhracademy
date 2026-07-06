@@ -244,11 +244,19 @@ async function stageExtract(
   const chunkIndex = cursor.ocrChunk ?? 0;
   const { text, done } = await ocrPDFChunk(buffer, chunkIndex, pageCount);
 
-  const existing = doc.extracted_text ?? "";
-  const combined = `${existing}${existing ? "\n\n" : ""}${text}`.slice(0, MAX_TEXT_CHARS);
+  // Idempotent accumulation: chunks are stored by index and re-joined, so a
+  // crashed tick that re-runs a chunk overwrites rather than duplicates it.
+  const meta = { ...(doc.extraction_meta ?? {}) } as { ocrChunks?: string[] };
+  const ocrChunks = [...(meta.ocrChunks ?? [])];
+  ocrChunks[chunkIndex] = text;
+  const combined = ocrChunks.filter(Boolean).join("\n\n").slice(0, MAX_TEXT_CHARS);
   await db
     .from("documents")
-    .update({ extracted_text: combined, page_count: pageCount })
+    .update({
+      extracted_text: combined,
+      page_count: pageCount,
+      extraction_meta: { ...meta, ocrChunks },
+    })
     .eq("id", doc.id);
 
   const totalChunks = Math.ceil(pageCount / OCR_PAGES_PER_CHUNK);
@@ -300,6 +308,7 @@ async function stageParse(
       );
       const inserted = await insertCandidates(db, job, doc, tabular.candidates, {
         wasOCR: false,
+        chunkIndex: 0,
         topicHints: tabular.topicHints,
       });
       await updateJob(db, job.id, {
@@ -353,7 +362,7 @@ async function stageParse(
     const candidates = result.questions.map(sanitizeCandidate);
     const inserted = await insertCandidates(db, job, doc, candidates, {
       wasOCR: doc.needs_ocr,
-      startOrder: found,
+      chunkIndex: i,
       rawText: text,
     });
     found += inserted;
@@ -368,6 +377,14 @@ async function stageParse(
       `Section ${i + 1}/${chunks.length}: found ${candidates.length} questions${result.answer_key?.length ? `, ${result.answer_key.length} key entries` : ""}.`,
     );
   }
+
+  // Deletes during idempotent re-processing can make the running total drift;
+  // the database is the source of truth.
+  const { count: actualFound } = await db
+    .from("questions")
+    .select("id", { count: "exact", head: true })
+    .eq("ingestion_job_id", job.id);
+  found = actualFound ?? found;
 
   // Heuristic key section wins over LLM-scraped entries (deterministic parse).
   for (const entry of keySection?.entries ?? []) {
@@ -452,7 +469,8 @@ async function stageEnrich(
     .select("id, stem, options, correct_options, answer_text, explanation, confidence, import_warnings, normalized_hash")
     .eq("ingestion_job_id", job.id)
     .eq("status", "processing")
-    .order("source_order", { ascending: true })
+    .order("source_order", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true })
     .limit(ENRICH_BATCH_SIZE);
 
   const batch = batchRaw ?? [];
@@ -589,11 +607,20 @@ async function insertCandidates(
   candidates: CandidateQuestion[],
   opts: {
     wasOCR: boolean;
-    startOrder?: number;
+    chunkIndex: number;
     rawText?: string;
     topicHints?: (string | null)[];
   },
 ): Promise<number> {
+  // Idempotency: a tick can crash after inserting but before the cursor
+  // advances. Re-processing a chunk first clears that chunk's earlier rows.
+  await db
+    .from("questions")
+    .delete()
+    .eq("ingestion_job_id", job.id)
+    .eq("source_chunk", opts.chunkIndex)
+    .eq("status", "processing");
+
   if (candidates.length === 0) return 0;
 
   const rows = candidates.map((c, i) => {
@@ -619,7 +646,11 @@ async function insertCandidates(
       document_id: doc.id,
       ingestion_job_id: job.id,
       source_page: opts.rawText ? findSourcePage(opts.rawText, c.stem) : null,
-      source_order: c.number ?? (opts.startOrder ?? 0) + i + 1,
+      // Only explicit question numbers are stored — answer keys match on this,
+      // and a synthetic number could silently attach an answer to the wrong
+      // question, which is worse than leaving the answer missing.
+      source_order: c.number,
+      source_chunk: opts.chunkIndex,
       source_excerpt: excerptFor(opts.rawText, c.stem),
       import_warnings: c.warnings,
       normalized_hash: questionHash(c.stem, c.options),
@@ -704,8 +735,18 @@ async function applyEntriesToQuestions(
   const byNumber = new Map(entries.map((e) => [e.number, e]));
   let applied = 0;
 
+  // Numbering that restarts mid-document makes a key entry ambiguous — skip
+  // those numbers rather than risk attaching an answer to the wrong question.
+  const numberCounts = new Map<number, number>();
+  for (const q of questions) {
+    if (q.source_order !== null) {
+      numberCounts.set(q.source_order, (numberCounts.get(q.source_order) ?? 0) + 1);
+    }
+  }
+
   for (const q of questions) {
     if (q.source_order === null) continue;
+    if ((numberCounts.get(q.source_order) ?? 0) > 1) continue;
     const entry = byNumber.get(q.source_order);
     if (!entry) continue;
 
