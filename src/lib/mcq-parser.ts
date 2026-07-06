@@ -22,6 +22,7 @@ export type ParsedMcq = {
 export type ParseResult = {
   questions: ParsedMcq[];
   skipped: number; // blocks that looked like questions but had < 2 options
+  qaFormatDetected: boolean; // true when the document uses Q./A. style, not A/B/C/D MCQ
 };
 
 const OPTION_RE = /^\s*\*?\s*\(?([A-Fa-f])[.):]\s+(.*?)(?:\s*\*\s*)?$/;
@@ -35,6 +36,9 @@ const STANDALONE_ANS_RE = /^\s*\(?([A-Fa-f])\)?\s*\.?\s*$/;
 const EXPLANATION_RE = /^\s*(?:explanation|solution|reason|exp)\s*[:.\-]?\s*(.*)$/i;
 const KEY_HEADER_RE = /answer\s*key|answers?\s*:?\s*$|^key\s*:?\s*$/i;
 const KEY_PAIR_RE = /(\d{1,3})\s*[.):\-–—]?\s*\(?([A-Fa-f])\)?(?![A-Za-z])/g;
+// Q. style question (Q&A / FAQ format, NOT numbered MCQ).
+// "Q." followed by a non-digit word character — excludes "Q1.", "Q2." which ARE MCQ.
+const QA_QUESTION_LINE_RE = /^\s*Q\.\s+\w/;
 
 const letterToIndex = (ch: string): number => {
   const c = ch.toUpperCase();
@@ -57,10 +61,13 @@ const isStarredOption = (raw: string): boolean =>
 // PDF extraction often glues things onto one line; split them back apart.
 const preSplit = (line: string): string[] => {
   let s = line;
-  // Break before "Answer"/"Ans"/"Correct"/"Key" even without a colon/dash after them.
-  s = s.replace(/(\S)\s+((?:correct\s*(?:answer|option)?|answer|ans|key)\b)/gi, "$1\n$2");
+  // Break before "Answer"/"Ans"/"Correct" keywords (even without colon/dash).
+  // "Key" is only split when followed by a separator (Key: B), not bare "Key" which
+  // can appear legitimately in option text ("Key Performance Indicator").
+  s = s.replace(/(\S)\s+((?:correct\s*(?:answer|option)?|answer|ans)\b)/gi, "$1\n$2");
+  s = s.replace(/(\S)\s+(key\s*[:.\-])/gi, "$1\n$2");
   s = s.replace(/\s+(?=(?:explanation|solution)\s*[:\-])/gi, "\n");
-  // break an inline option run "A) x B) y C) z" — only when 3+ markers present
+  // Break an inline option run "A) x B) y C) z" — only when 3+ markers present.
   const markers = s.match(/(?:^|\s)\*?\s*\(?[A-Fa-f][.)]\s/g);
   if (markers && markers.length >= 3) {
     s = s.replace(/\s+(?=\*?\s*\(?[A-Fa-f][.)]\s)/g, "\n");
@@ -74,11 +81,14 @@ export function parseMcqText(raw: string): ParseResult {
   const questions: ParsedMcq[] = [];
   const keyMap = new Map<number, number>();
   let skipped = 0;
+  let qaLineCount = 0; // counts "Q. text" style lines seen
 
   let cur: ParsedMcq | null = null;
-  // which field trailing text should be appended to
   let mode: "question" | "option" | "explanation" | null = null;
   let keySection = false;
+  // Track expected next option index so options must arrive in A→B→C→D order.
+  // This prevents Q&A answers (each labeled A.) from being stacked as fake options.
+  let nextOptIdx = 0;
 
   const flush = () => {
     if (!cur) return;
@@ -88,6 +98,7 @@ export function parseMcqText(raw: string): ParseResult {
     else if (cur.question) skipped++;
     cur = null;
     mode = null;
+    nextOptIdx = 0;
   };
 
   for (const rawLine of lines) {
@@ -99,6 +110,15 @@ export function parseMcqText(raw: string): ParseResult {
     // Answer-key entries ("7. C", or many pairs on one line)
     if ((keySection || isKeyLine(line)) && isKeyLine(line)) {
       for (const m of line.matchAll(KEY_PAIR_RE)) keyMap.set(parseInt(m[1], 10), letterToIndex(m[2]));
+      continue;
+    }
+
+    // "Q. text" is a Q&A-style question (not an MCQ numbered question).
+    // Flush whatever was being built and skip — we don't parse Q&A format as MCQ.
+    // "Q1. text" is DIFFERENT (numbered) and is handled by QUESTION_RE below.
+    if (QA_QUESTION_LINE_RE.test(line)) {
+      qaLineCount++;
+      flush();
       continue;
     }
 
@@ -121,12 +141,19 @@ export function parseMcqText(raw: string): ParseResult {
 
     const opt = line.match(OPTION_RE);
     if (opt && cur) {
-      const optText = opt[2].replace(/\*\s*$/, "").trim(); // strip trailing star
-      cur.options.push(optText);
-      // A leading star (*A) ...) or trailing star (A) ...* ) marks the correct answer.
-      if (isStarredOption(rawLine)) cur.correct = cur.options.length - 1;
-      mode = "option";
-      continue;
+      const optIdx = letterToIndex(opt[1]);
+      // Enforce sequential A→B→C→D order. If optIdx doesn't match what's expected,
+      // this "option" is likely a Q&A answer or out-of-context letter — treat as
+      // continuation text instead.
+      if (optIdx === nextOptIdx) {
+        const optText = opt[2].replace(/\*\s*$/, "").trim();
+        cur.options.push(optText);
+        if (isStarredOption(rawLine)) cur.correct = cur.options.length - 1;
+        nextOptIdx++;
+        mode = "option";
+        continue;
+      }
+      // Wrong order — fall through to continuation handling
     }
 
     const q = line.match(QUESTION_RE);
@@ -154,5 +181,6 @@ export function parseMcqText(raw: string): ParseResult {
     if (qq.correct !== null && qq.correct >= qq.options.length) qq.correct = null;
   }
 
-  return { questions, skipped };
+  const qaFormatDetected = qaLineCount >= 3 && questions.length < qaLineCount / 2;
+  return { questions, skipped, qaFormatDetected };
 }
