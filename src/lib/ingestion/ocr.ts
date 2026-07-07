@@ -17,9 +17,16 @@ Rules:
 - If a region is illegible, write [illegible] in its place.
 - Separate pages with a line containing exactly: [[Page N]] (N = page number given).`;
 
-export const OCR_PAGES_PER_CHUNK = 6;
+// Small chunks keep dense scans inside the output-token budget; truncation is
+// detected via finishReason and surfaced as a warning instead of silent loss.
+export const OCR_PAGES_PER_CHUNK = 4;
 
-export async function ocrImage(buffer: Buffer, mimeType: string): Promise<string> {
+export interface OCRResult {
+  text: string;
+  truncated: boolean;
+}
+
+export async function ocrImage(buffer: Buffer, mimeType: string): Promise<OCRResult> {
   const provider = getAIProvider();
   const part: AIFilePart = {
     type: "file",
@@ -40,7 +47,10 @@ export async function ocrImage(buffer: Buffer, mimeType: string): Promise<string
       },
     ],
   });
-  return cleanExtractedText(result.text);
+  return {
+    text: cleanExtractedText(result.text),
+    truncated: result.finishReason === "length",
+  };
 }
 
 export async function countPDFPages(buffer: Buffer): Promise<number> {
@@ -67,7 +77,7 @@ export async function ocrPDFChunk(
   fullPdf: Buffer,
   chunkIndex: number,
   pageCount: number,
-): Promise<{ text: string; done: boolean }> {
+): Promise<{ text: string; done: boolean; truncated: boolean }> {
   const start = chunkIndex * OCR_PAGES_PER_CHUNK;
   const end = Math.min(start + OCR_PAGES_PER_CHUNK, pageCount);
   const slice = await slicePDF(fullPdf, start, end);
@@ -91,5 +101,9 @@ export async function ocrPDFChunk(
     ],
   });
 
-  return { text: cleanExtractedText(result.text), done: end >= pageCount };
+  return {
+    text: cleanExtractedText(result.text),
+    done: end >= pageCount,
+    truncated: result.finishReason === "length",
+  };
 }

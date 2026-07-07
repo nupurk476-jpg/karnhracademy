@@ -8,7 +8,7 @@ import type {
 } from "../types";
 
 interface GeminiResponse {
-  candidates?: { content?: { parts?: { text?: string }[] } }[];
+  candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
   usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number };
 }
 
@@ -20,13 +20,32 @@ function toGeminiParts(parts: AIContentPart[]) {
   );
 }
 
-/** Gemini's responseSchema rejects some JSON-Schema keywords; strip them. */
-function sanitizeSchema(schema: unknown): unknown {
+/**
+ * Gemini's responseSchema is OpenAPI-style, not JSON Schema: `type` must be a
+ * single string (nullability is a separate `nullable` flag) and `enum` cannot
+ * contain null. Convert both so shared schemas work across providers.
+ */
+export function sanitizeSchema(schema: unknown): unknown {
   if (Array.isArray(schema)) return schema.map(sanitizeSchema);
   if (schema && typeof schema === "object") {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(schema)) {
       if (k === "additionalProperties" || k === "$schema") continue;
+
+      if (k === "type" && Array.isArray(v)) {
+        const nonNull = v.filter((t) => t !== "null");
+        out.type = nonNull[0] ?? "string";
+        if (nonNull.length !== v.length) out.nullable = true;
+        continue;
+      }
+
+      if (k === "enum" && Array.isArray(v)) {
+        const nonNull = v.filter((e) => e !== null);
+        out.enum = nonNull;
+        if (nonNull.length !== v.length) out.nullable = true;
+        continue;
+      }
+
       out[k] = sanitizeSchema(v);
     }
     return out;
@@ -73,6 +92,7 @@ export function createGeminiProvider(apiKey: string, model?: string): AIProvider
           ?.map((p) => p.text ?? "")
           .join("") ?? "";
 
+      const finish = res.candidates?.[0]?.finishReason;
       return {
         text,
         usage: res.usageMetadata
@@ -81,6 +101,8 @@ export function createGeminiProvider(apiKey: string, model?: string): AIProvider
               outputTokens: res.usageMetadata.candidatesTokenCount ?? 0,
             }
           : undefined,
+        finishReason:
+          finish === "MAX_TOKENS" ? "length" : finish === "STOP" ? "stop" : "other",
       };
     },
   };

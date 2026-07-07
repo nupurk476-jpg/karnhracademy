@@ -12,16 +12,14 @@ export default async function SyllabusPage() {
   const [unitsRes, topicsRes, countsRes] = await Promise.all([
     supabase.from("syllabus_units").select("*").order("order_index"),
     supabase.from("topics").select("*").order("order_index"),
-    supabase
-      .from("questions")
-      .select("topic_id")
-      .not("topic_id", "is", null)
-      .not("status", "in", '("rejected","duplicate")'),
+    // Aggregated in SQL — fetching raw rows would silently cap at the
+    // PostgREST row limit once the bank grows past ~1000 questions.
+    supabase.rpc("get_topic_question_counts"),
   ]);
 
   const counts = new Map<string, number>();
-  for (const row of countsRes.data ?? []) {
-    if (row.topic_id) counts.set(row.topic_id, (counts.get(row.topic_id) ?? 0) + 1);
+  for (const row of (countsRes.data ?? []) as { topic_id: string; question_count: number }[]) {
+    counts.set(row.topic_id, Number(row.question_count));
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -66,6 +66,13 @@ export function ReviewList({
   const [pending, startTransition] = useTransition();
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
+  // Selections must not silently survive filter/page changes — bulk actions
+  // would hit rows that are no longer on screen.
+  const filterKey = searchParams.toString();
+  useEffect(() => {
+    setSelected(new Set());
+  }, [filterKey]);
+
   const topicById = useMemo(() => new Map(topics.map((t) => [t.id, t])), [topics]);
   const unitById = useMemo(() => new Map(units.map((u) => [u.id, u])), [units]);
 
@@ -122,6 +129,13 @@ export function ReviewList({
             ? "New uploads land here after AI processing. Great work staying on top of it!"
             : "No questions match the current filters."
         }
+        action={
+          page > 1 ? (
+            <Button variant="outline" size="sm" onClick={() => goToPage(1)}>
+              Back to first page
+            </Button>
+          ) : undefined
+        }
       />
     );
   }
@@ -129,7 +143,7 @@ export function ReviewList({
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", selected.size > 0 && "pb-24")}>
       <div className="flex items-center gap-3 px-1">
         <Checkbox
           checked={allSelected}
@@ -298,6 +312,16 @@ function BulkEditDialog({
   const [topicId, setTopicId] = useState<string>("keep");
   const [difficulty, setDifficulty] = useState<string>("keep");
   const [pending, startTransition] = useTransition();
+
+  // Fresh dialog per open — leftover choices from a previous bulk edit must
+  // never silently apply to a new selection.
+  useEffect(() => {
+    if (open) {
+      setUnitId("keep");
+      setTopicId("keep");
+      setDifficulty("keep");
+    }
+  }, [open]);
 
   const unitTopics = topics.filter((t) => t.unit_id === unitId);
 

@@ -12,13 +12,14 @@ import type { ExtractedText } from "./types";
 
 const IMAGE_TYPES = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
 
+// Note: legacy binary formats (.doc, .xls) are intentionally NOT supported —
+// the parsers we ship (mammoth, exceljs) only read the modern XML formats.
+// Rejecting them at upload beats failing mid-pipeline with a parser error.
 export const SUPPORTED_EXTENSIONS = [
   "pdf",
   "docx",
-  "doc",
   "csv",
   "xlsx",
-  "xls",
   "txt",
   "md",
   "png",
@@ -46,12 +47,10 @@ export async function extractFromFile(
     case "pdf":
       return extractPDF(buffer);
     case "docx":
-    case "doc":
       return extractDOCX(buffer);
     case "csv":
       return extractCSVText(buffer);
     case "xlsx":
-    case "xls":
       return extractXLSX(buffer);
     case "txt":
     case "md":

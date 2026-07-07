@@ -117,6 +117,25 @@ supabase/
   seed.sql                starter syllabus
 ```
 
+## Security model
+
+- **Roles**: `student` / `faculty` / `admin` on `profiles`; the first signup
+  bootstraps as admin (serialized with an advisory lock). RLS gates every table.
+- **Server-only grading**: students have SELECT-only access to `attempts` and
+  `practice_sessions`. All grading, session and counter writes go through
+  server actions using the service role, so scores, timers and the usage stats
+  that feed analytics cannot be forged from the browser.
+- **Mock-test integrity**: answers/explanations are stripped from active-test
+  payloads, `submitAnswer` returns no feedback for mocks, results pages are
+  unreachable while time remains, and attempts are unique per (session,
+  question). Known limitation: columns of *published* questions (which
+  practice mode reveals after answering anyway) are readable through the API
+  by signed-in users; column-level views are the planned hardening if
+  high-stakes exams are ever run on this platform.
+- **Pipeline safety**: optimistic lock with token-guarded writes, idempotent
+  chunk processing, per-job tick ceiling, and bounded AI-call timeouts sized
+  to the serverless execution window.
+
 ## Scale notes
 
 Designed for 150 → 100,000+ questions: HNSW vector index, GIN FTS + trigram indexes,

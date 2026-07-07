@@ -8,7 +8,7 @@ import type {
 } from "../types";
 
 interface OpenAIResponse {
-  choices: { message: { content: string | null } }[];
+  choices: { message: { content: string | null }; finish_reason?: string }[];
   usage?: { prompt_tokens: number; completion_tokens: number };
 }
 
@@ -68,11 +68,13 @@ export function createOpenAIProvider(apiKey: string, model?: string): AIProvider
         body,
       );
 
+      const finish = res.choices[0]?.finish_reason;
       return {
         text: res.choices[0]?.message?.content ?? "",
         usage: res.usage
           ? { inputTokens: res.usage.prompt_tokens, outputTokens: res.usage.completion_tokens }
           : undefined,
+        finishReason: finish === "length" ? "length" : finish === "stop" ? "stop" : "other",
       };
     },
   };

@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { CheckCircle2, Sparkles, Timer, XCircle } from "lucide-react";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProgressRing } from "@/components/shared/progress-ring";
@@ -55,7 +56,8 @@ export default async function TestResultsPage({
       ? Date.now() > new Date(session.ends_at).getTime()
       : false;
     if (!expired) redirect(`/tests/session/${session.id}`);
-    await supabase
+    // Session writes are service-role only (students have SELECT-only RLS).
+    await createAdminClient()
       .from("practice_sessions")
       .update({ status: "completed", completed_at: new Date().toISOString() })
       .eq("id", session.id)

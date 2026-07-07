@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { PracticeSession, Question } from "@/lib/types";
 import { PracticeRunner } from "./practice-runner";
 
@@ -26,14 +27,23 @@ export default async function PracticeSessionPage({
   if (session.kind === "mock") redirect(`/tests/session/${session.id}`);
   if (session.status !== "active") redirect("/practice");
 
-  const [questionsRes, bookmarksRes] = await Promise.all([
+  const [questionsRes, bookmarksRes, attemptsRes] = await Promise.all([
     supabase.from("questions").select("*").in("id", session.question_ids),
     supabase
       .from("bookmarks")
       .select("question_id")
       .eq("user_id", profile.id)
       .in("question_id", session.question_ids),
+    supabase
+      .from("attempts")
+      .select("question_id")
+      .eq("session_id", session.id)
+      .eq("user_id", profile.id),
   ]);
+
+  const answeredIds = new Set(
+    ((attemptsRes.data ?? []) as { question_id: string }[]).map((a) => a.question_id),
+  );
 
   const byId = new Map(
     ((questionsRes.data ?? []) as Question[]).map((q) => [q.id, q]),
@@ -53,11 +63,29 @@ export default async function PracticeSessionPage({
 
   if (ordered.length === 0) redirect("/practice");
 
+  // Resume support: a refresh continues from the first unanswered question
+  // instead of restarting (submitAnswer is also idempotent server-side).
+  const remaining = ordered.filter((q) => !answeredIds.has(q.id));
+  if (remaining.length === 0) {
+    // Session writes are service-role only (students have SELECT-only RLS).
+    await createAdminClient()
+      .from("practice_sessions")
+      .update({ status: "completed", completed_at: new Date().toISOString() })
+      .eq("id", session.id)
+      .eq("user_id", profile.id);
+    redirect("/practice");
+  }
+
   const bookmarkedIds = ((bookmarksRes.data ?? []) as { question_id: string }[]).map(
     (b) => b.question_id,
   );
 
   return (
-    <PracticeRunner session={session} questions={ordered} bookmarkedIds={bookmarkedIds} />
+    <PracticeRunner
+      session={session}
+      questions={remaining}
+      bookmarkedIds={bookmarkedIds}
+      initialAnswered={answeredIds.size}
+    />
   );
 }

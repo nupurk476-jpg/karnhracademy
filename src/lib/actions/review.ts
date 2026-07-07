@@ -110,8 +110,9 @@ const TRANSITIONS: Record<
   { from: QuestionStatus[]; to: QuestionStatus }
 > = {
   approve: { from: ["pending_review"], to: "approved" },
-  publish: { from: ["pending_review", "approved"], to: "published" },
-  reject: { from: ["pending_review", "approved"], to: "rejected" },
+  // archived → published makes unpublish reversible
+  publish: { from: ["pending_review", "approved", "archived"], to: "published" },
+  reject: { from: ["pending_review", "approved", "archived"], to: "rejected" },
   unpublish: { from: ["published"], to: "archived" },
 };
 
@@ -274,10 +275,23 @@ export async function resolveDuplicate(
       .in("id", [pair.question_id, pair.duplicate_id]);
     if (!questions || questions.length !== 2) return fail("Questions no longer exist.");
 
-    const [keep, drop] =
-      new Date(questions[0].created_at) <= new Date(questions[1].created_at)
-        ? [questions[0], questions[1]]
-        : [questions[1], questions[0]];
+    // Keep the question in the healthier state first (never retire a live
+    // published question in favor of a rejected twin), then the older one.
+    const STATUS_RANK: Record<string, number> = {
+      published: 0,
+      approved: 1,
+      pending_review: 2,
+      processing: 3,
+      archived: 4,
+      duplicate: 5,
+      rejected: 6,
+    };
+    const sorted = [...questions].sort((a, b) => {
+      const rank = (STATUS_RANK[a.status] ?? 9) - (STATUS_RANK[b.status] ?? 9);
+      if (rank !== 0) return rank;
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+    const [keep, drop] = [sorted[0], sorted[1]];
 
     // Fill gaps on the kept question from the dropped one.
     const patch: Record<string, unknown> = {};

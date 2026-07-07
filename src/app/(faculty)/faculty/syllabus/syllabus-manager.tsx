@@ -142,7 +142,13 @@ export function SyllabusManager({
       {topicDialog && (
         <TopicDialog
           unitId={topicDialog.unitId}
-          topic={topicDialog.topic}
+          // Resolve against fresh props so the active toggle reflects the
+          // latest state after router.refresh(), not the object captured at open.
+          topic={
+            topicDialog.topic
+              ? (topics.find((t) => t.id === topicDialog.topic?.id) ?? topicDialog.topic)
+              : undefined
+          }
           nextOrder={topics.filter((t) => t.unit_id === topicDialog.unitId).length + 1}
           onToggleActive={(id, v) => toggleActive("topics", id, v)}
           pending={pending}

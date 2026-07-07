@@ -9,6 +9,7 @@ interface AnthropicContentBlock {
 
 interface AnthropicResponse {
   content: AnthropicContentBlock[];
+  stop_reason?: string;
   usage?: { input_tokens: number; output_tokens: number };
 }
 
@@ -86,6 +87,12 @@ export function createAnthropicProvider(apiKey: string, model?: string): AIProvi
         usage: res.usage
           ? { inputTokens: res.usage.input_tokens, outputTokens: res.usage.output_tokens }
           : undefined,
+        finishReason:
+          res.stop_reason === "max_tokens"
+            ? "length"
+            : res.stop_reason === "end_turn" || res.stop_reason === "tool_use"
+              ? "stop"
+              : "other",
       };
     },
   };

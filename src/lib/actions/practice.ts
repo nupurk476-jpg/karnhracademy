@@ -3,12 +3,15 @@
 import { z } from "zod";
 import { assertUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ok, fail, type ActionResult, toSafeMessage } from "@/lib/errors";
 import type { PracticeSession, Question } from "@/lib/types";
 
 /**
- * Student practice & mock-test sessions. Question selection runs server-side;
- * answers are validated server-side so results can't be spoofed from the client.
+ * Student practice & mock-test sessions. Ownership is proven through
+ * user-scoped reads (RLS), but ALL writes go through the service role —
+ * students have no direct write access to attempts or sessions, so grades,
+ * timers and the usage counters that feed analytics can't be forged.
  */
 
 const startSchema = z.object({
@@ -49,16 +52,16 @@ export async function startSession(
         .limit(count);
       questionIds = shuffle((data ?? []).map((b) => b.question_id)).slice(0, count);
     } else {
-      let query = supabase
-        .from("questions")
-        .select("id")
-        .eq("status", "published")
-        .limit(400);
-      if (unitId) query = query.eq("unit_id", unitId);
-      if (topicId) query = query.eq("topic_id", topicId);
-      if (difficulty) query = query.eq("difficulty", difficulty);
-      const { data } = await query;
-      questionIds = shuffle((data ?? []).map((q) => q.id)).slice(0, count);
+      // Uniform random sample server-side — stays representative at 100k+ scale.
+      const { data } = await supabase.rpc("pick_random_published", {
+        p_unit: unitId ?? null,
+        p_topic: topicId ?? null,
+        p_difficulty: difficulty ?? null,
+        p_count: count,
+      });
+      questionIds = ((data ?? []) as ({ pick_random_published: string } | string)[]).map((r) =>
+        typeof r === "string" ? r : Object.values(r)[0],
+      );
     }
 
     if (questionIds.length === 0) {
@@ -72,7 +75,8 @@ export async function startSession(
     const isMock = kind === "mock";
     const duration = isMock ? (durationMin ?? Math.max(10, questionIds.length)) * 60 : null;
 
-    const { data: session, error } = await supabase
+    const admin = createAdminClient();
+    const { data: session, error } = await admin
       .from("practice_sessions")
       .insert({
         user_id: profile.id,
@@ -138,12 +142,42 @@ export async function submitAnswer(
       return fail("Time is up for this test.");
     }
 
-    const { data: question } = await supabase
+    const admin = createAdminClient();
+    const { data: question } = await admin
       .from("questions")
       .select("correct_options, answer_text, explanation, explanation_is_ai, question_type")
       .eq("id", questionId)
       .single<Pick<Question, "correct_options" | "answer_text" | "explanation" | "explanation_is_ai" | "question_type">>();
     if (!question) return fail("Question not found.");
+
+    // Idempotency: refreshes and double-clicks must not double-count. An
+    // already-answered question returns its feedback without a new attempt.
+    const { data: existing } = await admin
+      .from("attempts")
+      .select("id, is_correct")
+      .eq("session_id", sessionId)
+      .eq("question_id", questionId)
+      .eq("user_id", profile.id)
+      .limit(1)
+      .maybeSingle();
+    if (existing) {
+      if (session.kind === "mock") {
+        return ok({
+          isCorrect: null,
+          correctOptions: null,
+          answerText: null,
+          explanation: null,
+          explanationIsAI: false,
+        });
+      }
+      return ok({
+        isCorrect: existing.is_correct,
+        correctOptions: question.correct_options,
+        answerText: question.answer_text,
+        explanation: question.explanation,
+        explanationIsAI: question.explanation_is_ai,
+      });
+    }
 
     let isCorrect: boolean | null = null;
     if (question.correct_options?.length) {
@@ -157,7 +191,7 @@ export async function submitAnswer(
     }
     // Descriptive / unknown-answer questions stay null (not graded).
 
-    const { error: attemptErr } = await supabase.from("attempts").insert({
+    const { error: attemptErr } = await admin.from("attempts").insert({
       user_id: profile.id,
       question_id: questionId,
       session_id: sessionId,
@@ -167,9 +201,31 @@ export async function submitAnswer(
       time_taken_ms: timeTakenMs,
       kind: session.kind,
     });
-    if (attemptErr) return fail("Could not record the answer.");
+    if (attemptErr) {
+      // Unique (user, session, question) — a concurrent duplicate lost the
+      // race; treat it as already answered rather than an error.
+      if (attemptErr.code === "23505") {
+        if (session.kind === "mock") {
+          return ok({
+            isCorrect: null,
+            correctOptions: null,
+            answerText: null,
+            explanation: null,
+            explanationIsAI: false,
+          });
+        }
+        return ok({
+          isCorrect,
+          correctOptions: question.correct_options,
+          answerText: question.answer_text,
+          explanation: question.explanation,
+          explanationIsAI: question.explanation_is_ai,
+        });
+      }
+      return fail("Could not record the answer.");
+    }
 
-    await supabase
+    await admin
       .from("practice_sessions")
       .update({
         total_answered: session.total_answered + 1,
@@ -202,9 +258,16 @@ export async function submitAnswer(
   }
 }
 
+export interface SessionSummary {
+  correct: number;
+  graded: number;
+  answered: number;
+  total: number;
+}
+
 export async function completeSession(
   sessionId: string,
-): Promise<ActionResult<{ correct: number; total: number }>> {
+): Promise<ActionResult<SessionSummary>> {
   try {
     const profile = await assertUser();
     const supabase = await createClient();
@@ -217,14 +280,30 @@ export async function completeSession(
       .single<PracticeSession>();
     if (!session) return fail("Session not found.");
 
-    if (session.status === "active") {
-      await supabase
-        .from("practice_sessions")
-        .update({ status: "completed", completed_at: new Date().toISOString() })
-        .eq("id", sessionId);
-    }
+    // Attempts are the source of truth — concurrent saves make the session's
+    // incremental counters approximate, so recompute them here.
+    const { data: attempts } = await supabase
+      .from("attempts")
+      .select("is_correct")
+      .eq("session_id", sessionId)
+      .eq("user_id", profile.id);
 
-    return ok({ correct: session.correct_count, total: session.question_ids.length });
+    const answered = attempts?.length ?? 0;
+    const graded = (attempts ?? []).filter((a) => a.is_correct !== null).length;
+    const correct = (attempts ?? []).filter((a) => a.is_correct === true).length;
+
+    await createAdminClient()
+      .from("practice_sessions")
+      .update({
+        status: "completed",
+        completed_at: session.completed_at ?? new Date().toISOString(),
+        total_answered: answered,
+        correct_count: correct,
+      })
+      .eq("id", sessionId)
+      .eq("user_id", profile.id);
+
+    return ok({ correct, graded, answered, total: session.question_ids.length });
   } catch (err) {
     const safe = toSafeMessage(err);
     return fail(safe.message, safe.code);

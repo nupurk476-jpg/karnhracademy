@@ -14,6 +14,23 @@ export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({ questionId: z.string().uuid() });
 
+// Best-effort per-user rate limit on paid AI generation. In-memory, so it is
+// per-instance on serverless — move to a durable store (e.g. Upstash) if
+// abuse becomes a concern; cache hits below are not limited.
+const RATE_LIMIT = 10;
+const RATE_WINDOW_MS = 60_000;
+const recentCalls = new Map<string, number[]>();
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const calls = (recentCalls.get(userId) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (calls.length >= RATE_LIMIT) return true;
+  calls.push(now);
+  recentCalls.set(userId, calls);
+  if (recentCalls.size > 5000) recentCalls.clear(); // bound memory
+  return false;
+}
+
 /**
  * On-demand AI explanation for a published question. Results are cached in
  * ai_explanation_cache — the reviewed question row is never mutated.
@@ -54,6 +71,13 @@ export async function POST(request: Request) {
       .maybeSingle();
     if (cached) {
       return NextResponse.json({ explanation: cached.explanation, isAI: true, cached: true });
+    }
+
+    if (isRateLimited(profile.id)) {
+      return NextResponse.json(
+        { error: "Slow down a little — try again in a minute." },
+        { status: 429 },
+      );
     }
 
     const provider = getAIProvider();

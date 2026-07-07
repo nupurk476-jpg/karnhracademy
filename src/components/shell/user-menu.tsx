@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, GraduationCap, LayoutDashboard } from "lucide-react";
+import { LogOut, GraduationCap, LayoutDashboard, Bookmark } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -41,6 +41,12 @@ export function UserMenu({ profile }: { profile: Profile }) {
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="cursor-pointer">
             <GraduationCap className="mr-2 size-4" /> Student portal
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          {/* Bookmarks isn't in the 5-slot mobile bottom nav — keep it reachable here. */}
+          <Link href="/bookmarks" className="cursor-pointer">
+            <Bookmark className="mr-2 size-4" /> Bookmarks
           </Link>
         </DropdownMenuItem>
         {isStaff && (

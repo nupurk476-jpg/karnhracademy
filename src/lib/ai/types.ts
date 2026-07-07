@@ -38,6 +38,8 @@ export interface CompleteOptions {
 export interface CompletionResult {
   text: string;
   usage?: { inputTokens: number; outputTokens: number };
+  /** "length" means the output hit maxTokens and is likely truncated. */
+  finishReason?: "stop" | "length" | "other";
 }
 
 export interface AIProvider {

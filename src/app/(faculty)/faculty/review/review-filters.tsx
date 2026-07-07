@@ -71,6 +71,7 @@ export function ReviewFilters({
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
+            aria-pressed={activeStatus === tab.value}
             onClick={() => setParam("status", tab.value === "pending_review" ? null : tab.value)}
             className={cn(
               "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",

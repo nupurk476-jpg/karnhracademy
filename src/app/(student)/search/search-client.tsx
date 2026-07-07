@@ -78,6 +78,7 @@ export function SearchClient({
       };
 
       let rows: ResultRow[] = [];
+      let failed = false;
       const primary = await withFilters()
         .textSearch("search_tsv", trimmed, { type: "websearch" })
         .limit(20);
@@ -88,9 +89,17 @@ export function SearchClient({
       if (primary.error || rows.length === 0) {
         const fallback = await withFilters().ilike("stem", `%${trimmed}%`).limit(20);
         if (!fallback.error && fallback.data) rows = fallback.data as ResultRow[];
+        // Both queries erroring is a connectivity problem, not "no results".
+        else if (fallback.error && primary.error) failed = true;
       }
 
       if (requestRef.current !== requestId) return;
+      if (failed) {
+        setResults(null);
+        setLoading(false);
+        toast.error("Search is unavailable right now — check your connection and try again.");
+        return;
+      }
       setResults(rows);
       setLoading(false);
 

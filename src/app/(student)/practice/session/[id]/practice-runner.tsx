@@ -20,6 +20,7 @@ import {
   submitAnswer,
   toggleBookmark,
   type AnswerFeedback,
+  type SessionSummary,
 } from "@/lib/actions/practice";
 import {
   AlertDialog,
@@ -61,13 +62,18 @@ export function PracticeRunner({
   session,
   questions,
   bookmarkedIds,
+  initialAnswered = 0,
 }: {
   session: PracticeSession;
   questions: Question[];
   bookmarkedIds: string[];
+  /** Questions already answered before this mount (resume after refresh). */
+  initialAnswered?: number;
 }) {
   const router = useRouter();
-  const total = questions.length;
+  // `questions` holds only the remaining (unanswered) items on resume.
+  const segmentTotal = questions.length;
+  const total = session.question_ids.length;
 
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("answering");
@@ -84,6 +90,8 @@ export function PracticeRunner({
   // One entry per submitted answer: true/false = graded, null = recorded only.
   const [results, setResults] = useState<(boolean | null)[]>([]);
   const [skippedCount, setSkippedCount] = useState(0);
+  // Authoritative whole-session numbers from the server at completion.
+  const [serverSummary, setServerSummary] = useState<SessionSummary | null>(null);
 
   const questionStartRef = useRef(Date.now());
   const completedRef = useRef(false);
@@ -126,10 +134,11 @@ export function PracticeRunner({
     completedRef.current = true;
     const result = await completeSession(session.id);
     if (!result.ok) toast.error(result.error);
+    else setServerSummary(result.data);
   }, [session.id]);
 
   const goNext = useCallback(() => {
-    if (index + 1 >= total) {
+    if (index + 1 >= segmentTotal) {
       void finish();
       return;
     }
@@ -141,7 +150,7 @@ export function PracticeRunner({
     setAiLoading(false);
     setPhase("answering");
     questionStartRef.current = Date.now();
-  }, [index, total, finish]);
+  }, [index, segmentTotal, finish]);
 
   function skipQuestion() {
     setSkippedCount((n) => n + 1);
@@ -257,9 +266,12 @@ export function PracticeRunner({
 
   /* ── Summary ─────────────────────────────────────────────────────────── */
   if (phase === "summary") {
-    const graded = results.filter((r) => r !== null).length;
-    const correct = results.filter((r) => r === true).length;
-    const recorded = results.filter((r) => r === null).length;
+    // Prefer whole-session server numbers (covers resumed sessions).
+    const graded = serverSummary?.graded ?? results.filter((r) => r !== null).length;
+    const correct = serverSummary?.correct ?? results.filter((r) => r === true).length;
+    const recorded = serverSummary
+      ? serverSummary.answered - serverSummary.graded
+      : results.filter((r) => r === null).length;
     const accuracy = graded > 0 ? correct / graded : 0;
 
     return (
@@ -308,7 +320,7 @@ export function PracticeRunner({
   }
 
   /* ── Question view ───────────────────────────────────────────────────── */
-  const answeredSoFar = results.length + skippedCount;
+  const answeredSoFar = initialAnswered + results.length + skippedCount;
   const graded = feedback ? feedback.isCorrect !== null : false;
   const correctSet = new Set(feedback?.correctOptions ?? []);
   const explanation = feedback?.explanation ?? aiText;
@@ -346,7 +358,7 @@ export function PracticeRunner({
           aria-label="Session progress"
         />
         <span className="shrink-0 text-xs font-medium tabular-nums text-muted-foreground">
-          {Math.min(index + 1, total)} of {total}
+          {Math.min(initialAnswered + index + 1, total)} of {total}
         </span>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -578,7 +590,7 @@ export function PracticeRunner({
             )}
 
             <Button className="mt-4 h-11 w-full rounded-xl" onClick={goNext}>
-              {index + 1 >= total ? "See summary" : "Next question"}
+              {index + 1 >= segmentTotal ? "See summary" : "Next question"}
               <ArrowRight className="size-4" />
             </Button>
           </div>

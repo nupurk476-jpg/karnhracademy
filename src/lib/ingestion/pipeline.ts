@@ -31,6 +31,10 @@ const log = createLogger("ingestion");
 
 const LOCK_STALE_MS = 3 * 60 * 1000;
 const MAX_RETRIES = 3;
+// Hard ceiling on process ticks per job. Runtime kills (function timeouts)
+// never reach the error path, so without this a pathological document could
+// loop the same stage - and its AI spend - forever.
+const MAX_TICKS = 600;
 const PARSE_CHUNKS_PER_TICK = 1;
 const ENRICH_BATCH_SIZE = 8;
 const MAX_TEXT_CHARS = 1_500_000;
@@ -76,13 +80,27 @@ export async function processJobTick(jobId: string): Promise<TickResult> {
     return { status: job.status, progress: job.progress, detail: "processing…", done: false };
   }
 
+  // Persist the tick counter up front (guarded by our token) so even ticks
+  // that get killed by the runtime count toward the ceiling.
+  const ticks = ((job.config.ticks as number | undefined) ?? 0) + 1;
+  job.config = { ...job.config, ticks };
+  await db
+    .from("ingestion_jobs")
+    .update({ config: job.config })
+    .eq("id", jobId)
+    .eq("lock_token", lockToken);
+  if (ticks > MAX_TICKS) {
+    await failJob(db, job, "Processing exceeded the safety limit for this document.", lockToken);
+    return { status: "failed", progress: job.progress, detail: null, done: true };
+  }
+
   const { data: doc } = await db
     .from("documents")
     .select("*")
     .eq("id", job.document_id)
     .single<DocumentRow>();
   if (!doc) {
-    await failJob(db, job, "Source document is missing.");
+    await failJob(db, job, "Source document is missing.", lockToken);
     return { status: "failed", progress: job.progress, detail: null, done: true };
   }
 
@@ -90,16 +108,16 @@ export async function processJobTick(jobId: string): Promise<TickResult> {
     let result: TickResult;
     switch (job.status) {
       case "pending":
-        result = await stageStart(db, job, doc);
+        result = await stageStart(db, job, doc, lockToken);
         break;
       case "extracting":
-        result = await stageExtract(db, job, doc);
+        result = await stageExtract(db, job, doc, lockToken);
         break;
       case "parsing":
-        result = await stageParse(db, job, doc);
+        result = await stageParse(db, job, doc, lockToken);
         break;
       case "enriching":
-        result = await stageEnrich(db, job, doc);
+        result = await stageEnrich(db, job, doc, lockToken);
         break;
       default:
         result = { status: job.status, progress: job.progress, detail: job.stage_detail, done: false };
@@ -118,9 +136,10 @@ export async function processJobTick(jobId: string): Promise<TickResult> {
     const cursor = getCursor(job);
     const retries = (cursor.retries ?? 0) + 1;
     if (retries >= MAX_RETRIES) {
-      await failJob(db, job, message);
+      await failJob(db, job, message, lockToken);
       return { status: "failed", progress: job.progress, detail: message, done: true };
     }
+    // Guarded by our token: a zombie tick must not clobber a successor's state.
     await db
       .from("ingestion_jobs")
       .update({
@@ -129,7 +148,8 @@ export async function processJobTick(jobId: string): Promise<TickResult> {
         locked_at: null,
         stage_detail: `Retrying after error (${retries}/${MAX_RETRIES})`,
       })
-      .eq("id", jobId);
+      .eq("id", jobId)
+      .eq("lock_token", lockToken);
     return {
       status: job.status,
       progress: job.progress,
@@ -145,6 +165,7 @@ async function stageStart(
   db: SupabaseClient,
   job: IngestionJob,
   doc: DocumentRow,
+  lockToken: string,
 ): Promise<TickResult> {
   await logEvent(db, job.id, "info", `Processing "${doc.file_name}" (${formatBytes(doc.size_bytes)})`);
 
@@ -188,12 +209,12 @@ async function stageStart(
       progress: 5,
       started_at: job.started_at ?? new Date().toISOString(),
       config: { ...job.config, retries: 0, ocrChunk: 0 },
-    });
+    }, lockToken);
     return { status: "extracting", progress: 5, detail: "Running OCR", done: false };
   }
 
   if (extracted.text.trim().length < 20) {
-    await failJob(db, job, "No readable text could be extracted from this file.");
+    await failJob(db, job, "No readable text could be extracted from this file.", lockToken);
     return { status: "failed", progress: 0, detail: null, done: true };
   }
 
@@ -209,7 +230,7 @@ async function stageStart(
     progress: 30,
     started_at: job.started_at ?? new Date().toISOString(),
     config: { ...job.config, retries: 0, parseChunk: 0 },
-  });
+  }, lockToken);
   return { status: "parsing", progress: 30, detail: "Splitting questions", done: false };
 }
 
@@ -219,30 +240,34 @@ async function stageExtract(
   db: SupabaseClient,
   job: IngestionJob,
   doc: DocumentRow,
+  lockToken: string,
 ): Promise<TickResult> {
   const cursor = getCursor(job);
   const buffer = await downloadDocument(db, doc);
   const isImage = !doc.file_ext.toLowerCase().includes("pdf");
 
   if (isImage) {
-    const text = await ocrImage(buffer, doc.mime_type ?? "image/png");
+    const { text, truncated } = await ocrImage(buffer, doc.mime_type ?? "image/png");
     await db
       .from("documents")
       .update({ extracted_text: text.slice(0, MAX_TEXT_CHARS) })
       .eq("id", doc.id);
     await logEvent(db, job.id, "info", `OCR complete (${text.length.toLocaleString()} characters).`);
+    if (truncated) {
+      await logEvent(db, job.id, "warn", "OCR output hit the length limit — the transcription may be incomplete.");
+    }
     await updateJob(db, job.id, {
       status: "parsing",
       stage_detail: "OCR complete — splitting questions",
       progress: 30,
       config: { ...job.config, retries: 0, parseChunk: 0 },
-    });
+    }, lockToken);
     return { status: "parsing", progress: 30, detail: "OCR complete", done: false };
   }
 
   const pageCount = doc.page_count ?? (await countPDFPages(buffer));
   const chunkIndex = cursor.ocrChunk ?? 0;
-  const { text, done } = await ocrPDFChunk(buffer, chunkIndex, pageCount);
+  const { text, done, truncated } = await ocrPDFChunk(buffer, chunkIndex, pageCount);
 
   // Idempotent accumulation: chunks are stored by index and re-joined, so a
   // crashed tick that re-runs a chunk overwrites rather than duplicates it.
@@ -267,6 +292,14 @@ async function stageExtract(
     "info",
     `OCR pages ${chunkIndex * OCR_PAGES_PER_CHUNK + 1}–${Math.min((chunkIndex + 1) * OCR_PAGES_PER_CHUNK, pageCount)} of ${pageCount}.`,
   );
+  if (truncated) {
+    await logEvent(
+      db,
+      job.id,
+      "warn",
+      `OCR output for pages ${chunkIndex * OCR_PAGES_PER_CHUNK + 1}–${Math.min((chunkIndex + 1) * OCR_PAGES_PER_CHUNK, pageCount)} hit the length limit — some text on those pages may be missing.`,
+    );
+  }
 
   if (done) {
     await updateJob(db, job.id, {
@@ -274,7 +307,7 @@ async function stageExtract(
       stage_detail: "OCR complete — splitting questions",
       progress: 30,
       config: { ...job.config, retries: 0, parseChunk: 0 },
-    });
+    }, lockToken);
     return { status: "parsing", progress: 30, detail: "OCR complete", done: false };
   }
 
@@ -282,7 +315,7 @@ async function stageExtract(
     stage_detail: `OCR in progress (${chunkIndex + 1}/${totalChunks} sections)`,
     progress,
     config: { ...job.config, retries: 0, ocrChunk: chunkIndex + 1 },
-  });
+  }, lockToken);
   return { status: "extracting", progress, detail: "OCR in progress", done: false };
 }
 
@@ -292,6 +325,7 @@ async function stageParse(
   db: SupabaseClient,
   job: IngestionJob,
   doc: DocumentRow,
+  lockToken: string,
 ): Promise<TickResult> {
   const cursor = getCursor(job);
   const text = doc.extracted_text ?? "";
@@ -310,6 +344,7 @@ async function stageParse(
         wasOCR: false,
         chunkIndex: 0,
         topicHints: tabular.topicHints,
+        lockToken,
       });
       await updateJob(db, job.id, {
         status: "enriching",
@@ -317,7 +352,7 @@ async function stageParse(
         progress: 70,
         questions_found: inserted,
         config: { ...job.config, retries: 0 },
-      });
+      }, lockToken);
       return { status: "enriching", progress: 70, detail: "Enriching questions", done: false };
     }
     // Not a recognizable question table — let the LLM interpret the text.
@@ -341,7 +376,7 @@ async function stageParse(
   }
 
   if (chunks.length === 0) {
-    await failJob(db, job, "Document contained no parseable question text.");
+    await failJob(db, job, "Document contained no parseable question text.", lockToken);
     return { status: "failed", progress: job.progress, detail: null, done: true };
   }
 
@@ -364,6 +399,7 @@ async function stageParse(
       wasOCR: doc.needs_ocr,
       chunkIndex: i,
       rawText: text,
+      lockToken,
     });
     found += inserted;
 
@@ -401,7 +437,7 @@ async function stageParse(
       progress,
       questions_found: found,
       config: { ...job.config, retries: 0, parseChunk: end, answerKey: collectedKeys, kindVotes },
-    });
+    }, lockToken);
     return { status: "parsing", progress, detail: "Extracting questions", done: false };
   }
 
@@ -429,7 +465,7 @@ async function stageParse(
         "info",
         `Answer-key document: updated ${appliedLinked} questions from the linked upload.`,
       );
-      await completeJob(db, job.id, found, appliedLinked);
+      await completeJob(db, job.id, found, appliedLinked, lockToken);
       return { status: "completed", progress: 100, detail: "Answer key applied", done: true };
     }
     if (collectedKeys.length > 0) {
@@ -437,13 +473,14 @@ async function stageParse(
         db,
         job,
         "This looks like a standalone answer key. Re-upload it and link it to the question document it belongs to.",
+        lockToken,
       );
       return { status: "failed", progress: job.progress, detail: null, done: true };
     }
   }
 
   if (found === 0) {
-    await failJob(db, job, "No questions could be identified in this document.");
+    await failJob(db, job, "No questions could be identified in this document.", lockToken);
     return { status: "failed", progress: job.progress, detail: null, done: true };
   }
 
@@ -453,7 +490,7 @@ async function stageParse(
     progress: 70,
     questions_found: found,
     config: { ...job.config, retries: 0, answerKey: collectedKeys, kindVotes },
-  });
+  }, lockToken);
   return { status: "enriching", progress: 70, detail: "Enriching questions", done: false };
 }
 
@@ -463,6 +500,7 @@ async function stageEnrich(
   db: SupabaseClient,
   job: IngestionJob,
   _doc: DocumentRow,
+  lockToken: string,
 ): Promise<TickResult> {
   const { data: batchRaw } = await db
     .from("questions")
@@ -476,7 +514,7 @@ async function stageEnrich(
   const batch = batchRaw ?? [];
 
   if (batch.length === 0) {
-    await completeJob(db, job.id, job.questions_found, job.questions_imported);
+    await completeJob(db, job.id, job.questions_found, job.questions_imported, lockToken);
     return { status: "completed", progress: 100, detail: "Import complete", done: true };
   }
 
@@ -526,34 +564,54 @@ async function stageEnrich(
       confidence.explanation = expl.confidence;
     }
 
-    if (vector) {
+    // A wrong-dimension vector would fail the vector(1536) cast forever;
+    // skip it rather than wedge the whole batch.
+    if (vector && vector.length === 1536) {
       update.embedding = JSON.stringify(vector);
     }
 
     update.confidence = confidence;
 
-    await db.from("questions").update(update).eq("id", q.id);
+    // Status guard: if faculty already touched this row mid-enrichment,
+    // don't yank it back to pending_review.
+    const { error: enrichErr } = await db
+      .from("questions")
+      .update(update)
+      .eq("id", q.id)
+      .eq("status", "processing");
+    if (enrichErr) {
+      // Surface it: unchecked failures would re-select this row every tick
+      // and burn AI calls forever.
+      throw new Error(`Failed to save enrichment: ${enrichErr.message}`);
+    }
 
     // Duplicate detection: hash → trigram → embedding (RPC handles all three).
-    const { data: similar } = await db.rpc("find_similar_questions", {
+    const { data: similar, error: similarErr } = await db.rpc("find_similar_questions", {
       p_hash: q.normalized_hash,
       p_stem: q.stem,
-      p_embedding: vector ? JSON.stringify(vector) : null,
+      p_embedding: vector && vector.length === 1536 ? JSON.stringify(vector) : null,
       p_exclude: q.id,
       p_limit: 5,
     });
+    if (similarErr) {
+      log.warn("duplicate check failed", { jobId: job.id, questionId: q.id, error: similarErr.message });
+    }
 
     for (const hit of similar ?? []) {
-      const { error: dupErr } = await db.from("question_duplicates").upsert(
-        {
-          question_id: q.id,
-          duplicate_id: hit.id,
-          similarity: hit.similarity,
-          method: hit.method,
-        },
-        { onConflict: "question_id,duplicate_id", ignoreDuplicates: true },
-      );
-      if (!dupErr) duplicatesFound++;
+      const { data: dupInserted } = await db
+        .from("question_duplicates")
+        .upsert(
+          {
+            question_id: q.id,
+            duplicate_id: hit.id,
+            similarity: hit.similarity,
+            method: hit.method,
+          },
+          { onConflict: "question_id,duplicate_id", ignoreDuplicates: true },
+        )
+        .select("id");
+      // Count only rows actually inserted (re-runs would double-count).
+      duplicatesFound += dupInserted?.length ?? 0;
       if (hit.method === "hash") {
         await db
           .from("questions")
@@ -578,7 +636,7 @@ async function stageEnrich(
     questions_imported: imported,
     duplicates_found: duplicatesFound,
     config: { ...job.config, retries: 0 },
-  });
+  }, lockToken);
 
   return {
     status: "enriching",
@@ -610,8 +668,22 @@ async function insertCandidates(
     chunkIndex: number;
     rawText?: string;
     topicHints?: (string | null)[];
+    lockToken?: string;
   },
 ): Promise<number> {
+  // A zombie tick (stalled past the stale-lock takeover) must not write rows a
+  // successor tick already owns — verify we still hold the lock first.
+  if (opts.lockToken) {
+    const { data: lockRow } = await db
+      .from("ingestion_jobs")
+      .select("lock_token")
+      .eq("id", job.id)
+      .single();
+    if (lockRow?.lock_token !== opts.lockToken) {
+      throw new Error("Lost the processing lock to another tick — aborting this step.");
+    }
+  }
+
   // Idempotency: a tick can crash after inserting but before the cursor
   // advances. Re-processing a chunk first clears that chunk's earlier rows.
   await db
@@ -682,6 +754,24 @@ function excerptFor(rawText: string | undefined, stem: string): string | null {
   return rawText.slice(Math.max(0, idx - 40), idx + 400).trim();
 }
 
+const KEY_TARGET_COLUMNS =
+  "id, source_order, options, correct_options, answer_text, explanation, confidence, import_warnings";
+
+/** Page through matching rows — PostgREST caps unpaged selects at ~1000 rows. */
+async function fetchAllKeyTargets(
+  buildQuery: (from: number, to: number) => PromiseLike<{ data: KeyTarget[] | null }>,
+): Promise<KeyTarget[]> {
+  const PAGE = 1000;
+  const all: KeyTarget[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await buildQuery(from, from + PAGE - 1);
+    const rows = data ?? [];
+    all.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return all;
+}
+
 /** Fill missing answers on this job's questions from collected key entries. */
 async function applyAnswerKey(
   db: SupabaseClient,
@@ -690,13 +780,17 @@ async function applyAnswerKey(
 ): Promise<number> {
   if (entries.length === 0) return 0;
 
-  const { data: candidates } = await db
-    .from("questions")
-    .select("id, source_order, options, correct_options, answer_text, explanation, confidence, import_warnings")
-    .eq("ingestion_job_id", job.id)
-    .is("correct_options", null);
+  const candidates = await fetchAllKeyTargets((from, to) =>
+    db
+      .from("questions")
+      .select(KEY_TARGET_COLUMNS)
+      .eq("ingestion_job_id", job.id)
+      .is("correct_options", null)
+      .order("created_at")
+      .range(from, to),
+  );
 
-  return applyEntriesToQuestions(db, candidates ?? [], entries);
+  return applyEntriesToQuestions(db, candidates, entries);
 }
 
 /** Apply a standalone answer-key document to its linked question document. */
@@ -706,13 +800,17 @@ async function applyAnswerKeyToDocument(
   linkedDocumentId: string,
   entries: AnswerKeyEntry[],
 ): Promise<number> {
-  const { data: candidates } = await db
-    .from("questions")
-    .select("id, source_order, options, correct_options, answer_text, explanation, confidence, import_warnings")
-    .eq("document_id", linkedDocumentId)
-    .in("status", ["processing", "pending_review", "approved"]);
+  const candidates = await fetchAllKeyTargets((from, to) =>
+    db
+      .from("questions")
+      .select(KEY_TARGET_COLUMNS)
+      .eq("document_id", linkedDocumentId)
+      .in("status", ["processing", "pending_review", "approved"])
+      .order("created_at")
+      .range(from, to),
+  );
 
-  return applyEntriesToQuestions(db, candidates ?? [], entries, job.created_by);
+  return applyEntriesToQuestions(db, candidates, entries, job.created_by);
 }
 
 interface KeyTarget {
@@ -831,13 +929,27 @@ function majorityKind(votes: string[], questionsFound: number): "questions" | "a
   return "unknown";
 }
 
+/**
+ * Job mutation guarded by the caller's lock token: a zombie tick that lost a
+ * stale-lock takeover gets 0 rows and aborts instead of clobbering the
+ * successor's cursor.
+ */
 async function updateJob(
   db: SupabaseClient,
   jobId: string,
   patch: Record<string, unknown>,
+  lockToken: string,
 ): Promise<void> {
-  const { error } = await db.from("ingestion_jobs").update(patch).eq("id", jobId);
+  const { data, error } = await db
+    .from("ingestion_jobs")
+    .update(patch)
+    .eq("id", jobId)
+    .eq("lock_token", lockToken)
+    .select("id");
   if (error) throw new Error(`Failed to update job: ${error.message}`);
+  if (!data || data.length === 0) {
+    throw new Error("Lost the processing lock to another tick — aborting this step.");
+  }
 }
 
 async function completeJob(
@@ -845,6 +957,7 @@ async function completeJob(
   jobId: string,
   found: number,
   imported: number,
+  lockToken: string,
 ): Promise<void> {
   await updateJob(db, jobId, {
     status: "completed",
@@ -853,7 +966,7 @@ async function completeJob(
     questions_found: found,
     questions_imported: imported,
     finished_at: new Date().toISOString(),
-  });
+  }, lockToken);
   await logEvent(
     db,
     jobId,
@@ -862,8 +975,13 @@ async function completeJob(
   );
 }
 
-async function failJob(db: SupabaseClient, job: IngestionJob, message: string): Promise<void> {
-  await db
+async function failJob(
+  db: SupabaseClient,
+  job: IngestionJob,
+  message: string,
+  lockToken?: string,
+): Promise<void> {
+  let query = db
     .from("ingestion_jobs")
     .update({
       status: "failed",
@@ -874,6 +992,8 @@ async function failJob(db: SupabaseClient, job: IngestionJob, message: string): 
       locked_at: null,
     })
     .eq("id", job.id);
+  if (lockToken) query = query.eq("lock_token", lockToken);
+  await query;
   await logEvent(db, job.id, "error", message);
 }
 

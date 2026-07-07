@@ -172,10 +172,17 @@ export function QuestionEditor({
         toast.error(result.error);
         return;
       }
+      if (result.data.updated === 0) {
+        toast.error("This question can't be rejected from its current status.");
+        return;
+      }
       toast.success("Question rejected.");
       router.push("/faculty/review");
     });
   }
+
+  const canReject = ["pending_review", "approved", "archived"].includes(question.status);
+  const canPublish = ["pending_review", "approved", "archived"].includes(question.status);
 
   return (
     <div className="container max-w-6xl animate-fade-in-up py-6">
@@ -197,7 +204,7 @@ export function QuestionEditor({
               <Check className="size-3.5" /> Save & approve
             </Button>
           )}
-          {question.status !== "published" && question.status !== "rejected" && (
+          {canPublish && (
             <Button size="sm" className="gap-1.5" disabled={pending} onClick={() => save("publish")}>
               {pending ? <Spinner className="size-3.5" /> : <Send className="size-3.5" />} Save & publish
             </Button>
@@ -420,13 +427,16 @@ export function QuestionEditor({
             />
           </div>
 
-          <Separator />
-
-          <div className="flex justify-between">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive" disabled={pending} onClick={reject}>
-              <X className="size-3.5" /> Reject question
-            </Button>
-          </div>
+          {canReject && (
+            <>
+              <Separator />
+              <div className="flex justify-between">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive" disabled={pending} onClick={reject}>
+                  <X className="size-3.5" /> Reject question
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Side panel */}
@@ -492,7 +502,7 @@ export function QuestionEditor({
                         <span className="font-medium capitalize">{r.action.replace(/_/g, " ")}</span>
                         {r.actorName ? ` · ${r.actorName}` : ""}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                         {new Date(r.created_at).toLocaleString()}
                       </p>
                       {r.note && <p className="text-xs text-muted-foreground">{r.note}</p>}

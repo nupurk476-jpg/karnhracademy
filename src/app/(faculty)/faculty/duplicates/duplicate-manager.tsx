@@ -145,7 +145,7 @@ function DupeCard({
           ))}
         </ul>
       )}
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className="mt-2 text-[11px] text-muted-foreground" suppressHydrationWarning>
         Added {new Date(question.created_at).toLocaleDateString()}
         {question.explanation ? " · has explanation" : " · no explanation"}
       </p>

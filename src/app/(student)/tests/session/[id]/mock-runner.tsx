@@ -50,17 +50,24 @@ export function MockRunner({
 
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, SavedAnswer>>(initialAnswers);
-  const [draft, setDraft] = useState<string[]>([]);
-  const [textDraft, setTextDraft] = useState("");
+  // Drafts are keyed by question id so navigating the palette never discards
+  // an in-progress multi-select or typed answer.
+  const [drafts, setDrafts] = useState<Record<string, string[]>>({});
+  const [textDrafts, setTextDrafts] = useState<Record<string, string>>({});
   const [finishing, setFinishing] = useState(false);
   // null until mounted so the SSR HTML and first client render agree.
   const [now, setNow] = useState<number | null>(null);
 
   const submittedRef = useRef(false);
   const questionStartRef = useRef(Date.now());
+  // In-flight answer saves; submit must wait for these, or the answer given in
+  // the final seconds would hit an already-completed session and be dropped.
+  const pendingSaves = useRef(new Set<Promise<unknown>>());
 
   const current = questions[index];
   const currentAnswer: SavedAnswer | undefined = answers[current.id];
+  const draft = drafts[current.id] ?? [];
+  const textDraft = textDrafts[current.id] ?? "";
   const isMulti = current.question_type === "mcq_multi";
   const isText =
     current.question_type === "numeric" || current.question_type === "descriptive";
@@ -83,6 +90,8 @@ export function MockRunner({
       if (submittedRef.current) return;
       submittedRef.current = true;
       setFinishing(true);
+      // Let in-flight answer saves land before the session is finalized.
+      await Promise.allSettled([...pendingSaves.current]);
       const result = await completeSession(session.id);
       if (!result.ok) {
         toast.error(result.error);
@@ -104,17 +113,15 @@ export function MockRunner({
   function goTo(i: number) {
     if (i < 0 || i >= total || i === index) return;
     setIndex(i);
-    setDraft([]);
-    setTextDraft("");
     questionStartRef.current = Date.now();
   }
 
-  /** Save locally, then fire-and-forget to the server (mocks return no feedback). */
+  /** Save locally, then persist in the background (mocks return no feedback). */
   function commitAnswer(question: Question, options: string[] | null, text: string | null) {
     if (answers[question.id] || finishing) return;
     setAnswers((prev) => ({ ...prev, [question.id]: { options, text } }));
     const timeTakenMs = Math.min(Date.now() - questionStartRef.current, 3_600_000);
-    void submitAnswer({
+    const save = submitAnswer({
       sessionId: session.id,
       questionId: question.id,
       selectedOptions: options,
@@ -138,15 +145,25 @@ export function MockRunner({
           return next;
         });
         toast.error("Network error — your answer wasn't saved, please retry.");
+      })
+      .finally(() => {
+        pendingSaves.current.delete(save);
       });
+    pendingSaves.current.add(save);
   }
 
   function onOptionClick(key: string) {
     if (currentAnswer || finishing) return;
     if (isMulti) {
-      setDraft((prev) =>
-        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
-      );
+      setDrafts((prev) => {
+        const existing = prev[current.id] ?? [];
+        return {
+          ...prev,
+          [current.id]: existing.includes(key)
+            ? existing.filter((k) => k !== key)
+            : [...existing, key],
+        };
+      });
     } else {
       commitAnswer(current, [key], null);
     }
@@ -317,7 +334,7 @@ export function MockRunner({
                   placeholder="Type your answer…"
                   value={textDraft}
                   disabled={finishing}
-                  onChange={(e) => setTextDraft(e.target.value)}
+                  onChange={(e) => setTextDrafts((prev) => ({ ...prev, [current.id]: e.target.value }))}
                   aria-label="Your answer"
                 />
               ) : (
@@ -326,7 +343,7 @@ export function MockRunner({
                   placeholder="Write your answer…"
                   value={textDraft}
                   disabled={finishing}
-                  onChange={(e) => setTextDraft(e.target.value)}
+                  onChange={(e) => setTextDrafts((prev) => ({ ...prev, [current.id]: e.target.value }))}
                   aria-label="Your answer"
                 />
               )}

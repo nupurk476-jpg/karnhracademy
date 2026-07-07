@@ -69,6 +69,8 @@ as $$
 declare
   v_role public.user_role;
 begin
+  -- Serialize the "first user becomes admin" check against concurrent signups.
+  perform pg_advisory_xact_lock(hashtext('netace_first_admin'));
   if not exists (select 1 from public.profiles) then
     v_role := 'admin';
   else
@@ -353,6 +355,11 @@ create table public.attempts (
 create index attempts_user_time_idx on public.attempts (user_id, created_at desc);
 create index attempts_user_question_idx on public.attempts (user_id, question_id);
 create index attempts_session_idx on public.attempts (session_id);
+-- Each session grades a question at most once (refreshes, double-clicks,
+-- concurrent submissions).
+create unique index attempts_once_per_session_idx
+  on public.attempts (user_id, session_id, question_id)
+  where session_id is not null;
 
 create table public.bookmarks (
   user_id     uuid not null references public.profiles (id) on delete cascade,
@@ -521,7 +528,42 @@ as $$
      where q.status = 'published'
        and q.id not in (select question_id from recent)
   )
-  select id from candidates order by score desc limit p_count;
+  select id from candidates order by score desc
+   limit least(greatest(p_count, 1), 100);
+$$;
+
+-- Uniform random sample of published questions with optional filters.
+-- Keeps non-adaptive practice/mock selection representative at 100k+ scale.
+create or replace function public.pick_random_published(
+  p_unit       uuid default null,
+  p_topic      uuid default null,
+  p_difficulty public.difficulty_level default null,
+  p_count      int default 10
+)
+returns setof uuid
+language sql stable security definer set search_path = public
+as $$
+  select q.id
+    from public.questions q
+   where q.status = 'published'
+     and (p_unit is null or q.unit_id = p_unit)
+     and (p_topic is null or q.topic_id = p_topic)
+     and (p_difficulty is null or q.difficulty = p_difficulty)
+   order by random()
+   limit least(greatest(p_count, 1), 100);
+$$;
+
+-- Exact per-topic question counts (avoids the PostgREST row cap).
+create or replace function public.get_topic_question_counts()
+returns table (topic_id uuid, question_count bigint)
+language sql stable security definer set search_path = public
+as $$
+  select q.topic_id, count(*)
+    from public.questions q
+   where q.topic_id is not null
+     and q.status not in ('rejected', 'duplicate')
+     and public.is_staff()
+   group by q.topic_id;
 $$;
 
 -- Daily activity for the analytics trend chart.
@@ -533,7 +575,9 @@ as $$
   select d::date as day,
          count(a.id)::int as total,
          count(a.id) filter (where a.is_correct)::int as correct
-    from generate_series(current_date - (p_days - 1), current_date, '1 day') d
+    from generate_series(
+           current_date - (least(greatest(p_days, 1), 365) - 1),
+           current_date, '1 day') d
     left join public.attempts a
       on a.user_id = (case when public.is_staff() then p_user else auth.uid() end)
      and a.created_at::date = d::date
@@ -595,11 +639,13 @@ create policy "staff revisions" on public.question_revisions for all
 create policy "staff duplicates" on public.question_duplicates for all
   using (public.is_staff()) with check (public.is_staff());
 
--- student activity: owner-scoped
-create policy "own sessions" on public.practice_sessions for all
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
-create policy "own attempts" on public.attempts for all
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+-- Student activity: SELECT-only for owners. All writes flow through server
+-- actions using the service role, so grades, timers and usage counters can't
+-- be forged from the browser (attempts feed global question stats).
+create policy "own sessions" on public.practice_sessions for select
+  using (user_id = auth.uid());
+create policy "own attempts" on public.attempts for select
+  using (user_id = auth.uid());
 create policy "own bookmarks" on public.bookmarks for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "own topic stats" on public.user_topic_stats for select using (user_id = auth.uid());

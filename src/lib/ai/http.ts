@@ -1,12 +1,17 @@
 import { AIProviderError } from "./types";
 
-/** POST JSON with timeout + retry on transient failures (429/5xx/network). */
+/**
+ * POST JSON with timeout + retry on transient failures (429/5xx/network).
+ * Defaults are sized for serverless: pipeline ticks run under a 60s function
+ * limit, so a single attempt must fail fast enough for the tick's own retry
+ * accounting to observe it (cross-tick retries live in the job cursor).
+ */
 export async function postJSON<T>(
   provider: string,
   url: string,
   headers: Record<string, string>,
   body: unknown,
-  { retries = 2, timeoutMs = 120_000 }: { retries?: number; timeoutMs?: number } = {},
+  { retries = 0, timeoutMs = 50_000 }: { retries?: number; timeoutMs?: number } = {},
 ): Promise<T> {
   let lastError: AIProviderError | undefined;
 

@@ -29,8 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ACCEPT =
-  ".pdf,.docx,.doc,.csv,.xlsx,.xls,.txt,.md,.png,.jpg,.jpeg,.webp";
+const ACCEPT = ".pdf,.docx,.csv,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp";
 const MAX_BYTES = 50 * 1024 * 1024;
 
 type FileState =
@@ -132,15 +131,26 @@ export function UploadCenter({
       return;
     }
     setBusy(true);
-    let anySuccess = false;
+    let succeeded = 0;
+    let failed = 0;
     for (const item of files) {
       if (item.state.phase === "queued" || item.state.phase === "error") {
         const success = await uploadOne(item);
-        anySuccess = anySuccess || success;
+        if (success) succeeded++;
+        else failed++;
       }
     }
     setBusy(false);
-    if (anySuccess) {
+    if (failed > 0) {
+      // Stay on this screen so the per-file error messages remain visible.
+      toast.error(
+        succeeded > 0
+          ? `${succeeded} queued, but ${failed} ${failed === 1 ? "file" : "files"} failed — see details below.`
+          : "Upload failed — see the details below and retry.",
+      );
+      return;
+    }
+    if (succeeded > 0) {
       toast.success("Files queued — processing has started.");
       router.push("/faculty/processing");
     }
