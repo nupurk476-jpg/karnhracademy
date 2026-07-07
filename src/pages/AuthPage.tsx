@@ -19,6 +19,28 @@ const AuthPage = () => {
   const location = useLocation();
   const redirectTo = (location.state as any)?.from || "/quizzes";
 
+  // Translate raw Supabase auth errors into messages a student can act on.
+  const friendlyAuthError = (message: string): { title: string; description: string } => {
+    const m = message.toLowerCase();
+    if (m.includes("already registered") || m.includes("already been registered"))
+      return { title: "This email already has an account", description: "Please sign in instead. Use “Forgot password?” if you don't remember it." };
+    if (m.includes("invalid login credentials"))
+      return { title: "Wrong email or password", description: "Check your details and try again, or use “Forgot password?”." };
+    if (m.includes("email not confirmed"))
+      return { title: "Email not confirmed yet", description: "Open the confirmation link we emailed you, then sign in." };
+    if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+      return { title: "Sign-ups are temporarily closed", description: "New registrations are disabled right now. Please try again later." };
+    if (m.includes("sending confirmation") || m.includes("confirmation mail") || m.includes("error sending"))
+      return { title: "We couldn't send the confirmation email", description: "Your account wasn't created. Please try again later — if this keeps happening, contact us via the Contact page." };
+    if (m.includes("rate limit") || m.includes("too many requests"))
+      return { title: "Too many attempts", description: "Please wait a few minutes and try again." };
+    if (m.includes("at least 6 characters") || m.includes("password should"))
+      return { title: "Password too short", description: "Use at least 6 characters." };
+    if (m.includes("database error"))
+      return { title: "Server problem while creating your account", description: "Please try again later — if this keeps happening, contact us via the Contact page." };
+    return { title: "Something went wrong", description: message };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -29,7 +51,7 @@ const AuthPage = () => {
         toast({ title: "Welcome back!" });
         navigate(redirectTo);
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -38,10 +60,29 @@ const AuthPage = () => {
           },
         });
         if (error) throw error;
-        toast({ title: "Check your email to confirm your account." });
+        // Supabase quirk: signing up an already-registered email returns a
+        // fake user with no identities instead of an error.
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          toast({
+            title: "This email already has an account",
+            description: "Please sign in instead. Use “Forgot password?” if you don't remember it.",
+            variant: "destructive",
+          });
+          setIsLogin(true);
+          return;
+        }
+        if (data.session) {
+          // Email confirmation is disabled — the user is signed in already.
+          toast({ title: "Account created — welcome!" });
+          navigate(redirectTo);
+          return;
+        }
+        toast({ title: "Almost done — check your email", description: "We sent you a confirmation link. Click it to activate your account, then sign in." });
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      console.error("Auth error:", err);
+      const friendly = friendlyAuthError(err?.message || String(err));
+      toast({ ...friendly, variant: "destructive" });
     } finally {
       setLoading(false);
     }
