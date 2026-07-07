@@ -111,36 +111,36 @@ const Hero = () => {
   }, []);
 
   return (
-  <section className="relative overflow-hidden" style={{ background: NAVY }}>
+  <section className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, #FFFFFF 0%, ${LIGHT} 100%)` }}>
     {/* Dot grid */}
-    <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "26px 26px" }} />
+    <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: `radial-gradient(circle,${NAVY} 1px,transparent 1px)`, backgroundSize: "26px 26px" }} />
     {/* Gold glow */}
-    <div className="absolute -top-40 -left-32 w-96 h-96 rounded-full pointer-events-none opacity-20" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)` }} />
+    <div className="absolute -top-40 -left-32 w-96 h-96 rounded-full pointer-events-none opacity-15" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)` }} />
 
     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 min-h-[88vh] items-center py-16 lg:py-0">
 
         {/* Left */}
         <div className="flex flex-col justify-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}33` }}>
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-            <span className="text-xs font-semibold" style={{ color: GOLD }}>India's Premier HR Academic Portal</span>
+            <span className="text-xs font-semibold" style={{ color: GOLD_DARK }}>India's Premier HR Academic Portal</span>
           </div>
 
-          <h1 className="font-extrabold text-white leading-[1.04] mb-5" style={{ fontFamily: "'Sora',sans-serif", fontSize: "clamp(2.4rem,5vw,3.75rem)", letterSpacing: "-0.025em" }}>
+          <h1 className="font-extrabold leading-[1.04] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(2.4rem,5vw,3.75rem)", letterSpacing: "-0.025em" }}>
             Complete Learning Platform for{" "}
-            <span style={{ color: GOLD }}>HR & Management</span>{" "}
+            <span style={{ color: GOLD_DARK }}>HR & Management</span>{" "}
             Excellence
           </h1>
 
-          <p className="text-base md:text-lg leading-relaxed mb-7 max-w-lg" style={{ color: "rgba(255,255,255,0.72)" }}>
+          <p className="text-base md:text-lg leading-relaxed mb-7 max-w-lg" style={{ color: "#4A6076" }}>
             Structured notes, expert video lectures, curated books, and research resources — all aligned with MBA, BBA & UGC NET syllabi. Built by an educator, for serious learners.
           </p>
 
           {/* Audience pills */}
           <div className="flex flex-wrap gap-2 mb-9">
             {["MBA Students", "BBA Students", "HR Professionals", "UGC NET Aspirants", "Professors & Researchers"].map(a => (
-              <span key={a} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.78)", border: "1px solid rgba(255,255,255,0.12)" }}>
+              <span key={a} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
                 <CheckCircle2 className="h-3 w-3" style={{ color: GOLD }} />{a}
               </span>
             ))}
@@ -151,10 +151,10 @@ const Hero = () => {
             <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
               Start Learning Free <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/quizzes" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid rgba(255,255,255,0.22)`, color: "#fff", background: "rgba(255,255,255,0.05)", fontFamily: "'Sora',sans-serif" }}>
+            <Link to="/quizzes" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
               Practice MCQs
             </Link>
-            <Link to="/lectures" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid rgba(255,255,255,0.22)`, color: "#fff", background: "rgba(255,255,255,0.05)", fontFamily: "'Sora',sans-serif" }}>
+            <Link to="/lectures" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
               <PlayCircle className="h-4 w-4" /> Watch Lectures
             </Link>
           </div>
@@ -164,14 +164,14 @@ const Hero = () => {
         <div className="hidden lg:flex items-center justify-center">
           <div className="w-full max-w-md">
             {/* Card: no overflow:hidden so badge won't clip */}
-            <div className="rounded-2xl shadow-2xl" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", backdropFilter: "blur(12px)" }}>
+            <div className="rounded-2xl shadow-xl" style={{ background: "#FFFFFF", border: "1px solid #DCE6F1" }}>
 
               {/* Card header — no star rating */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #EEF0F8" }}>
                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>K</div>
                 <div>
-                  <p className="text-sm font-bold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>Karn HR Academy</p>
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Notes by subject — live from the library</p>
+                  <p className="text-sm font-bold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>Karn HR Academy</p>
+                  <p className="text-xs" style={{ color: "#7A8FA6" }}>Notes by subject — live from the library</p>
                 </div>
               </div>
 
@@ -183,14 +183,14 @@ const Hero = () => {
                     <div key={s.value} className="flex items-center justify-between gap-3">
                       {/* Color dot */}
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: s.color }} />
-                      <span className="flex-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.80)" }}>{s.label}</span>
+                      <span className="flex-1 text-xs font-medium" style={{ color: "#33475C" }}>{s.label}</span>
                       {c > 0 ? (
                         <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
                           {c} {c === 1 ? "note" : "notes"}
                         </span>
                       ) : (
                         /* Neutral gray — does not compete with gold CTA buttons */
-                        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.45)" }}>
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "#EEF0F8", color: "#8296AC" }}>
                           Coming Soon
                         </span>
                       )}
@@ -200,9 +200,9 @@ const Hero = () => {
               </div>
 
               {/* Total badge — inside the card at the bottom, no absolute overlap */}
-              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                <p className="text-xs" style={{ color: "rgba(255,255,255,0.50)" }}>Study notes in library</p>
-                <p className="text-xl font-extrabold" style={{ color: "#fff", fontFamily: "'Sora',sans-serif" }}>
+              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #DCE6F1" }}>
+                <p className="text-xs" style={{ color: "#64798F" }}>Study notes in library</p>
+                <p className="text-xl font-extrabold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>
                   {totalNotes !== null ? `${totalNotes}` : "…"}
                 </p>
               </div>
@@ -247,14 +247,14 @@ const StatsBar = () => {
   ];
 
   return (
-  <section style={{ background: GOLD }}>
+  <section style={{ background: "#F7F1E3", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
       <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
         {liveStats.map(s => {
           const Icon = s.icon;
           return (
             <div key={s.label} className="flex flex-col items-center text-center gap-1">
-              <Icon className="h-5 w-5 mb-0.5" style={{ color: NAVY }} />
+              <Icon className="h-5 w-5 mb-0.5" style={{ color: GOLD_DARK }} />
               <p className="text-xl font-extrabold leading-none" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
               <p className="text-[11px] font-semibold leading-tight" style={{ color: `${NAVY}aa` }}>{s.label}</p>
             </div>
@@ -328,37 +328,37 @@ const Subjects = () => (
 
 // ─────────────── Section: Learning Roadmap ───────────────────────────────────
 const Roadmap = () => (
-  <section className="py-20 md:py-24" style={{ background: NAVY }}>
+  <section className="py-20 md:py-24" style={{ background: "#DCE6F1" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-14">
         <div className="flex items-center justify-center gap-2 mb-3">
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>Your Path to Mastery</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_DARK }}>Your Path to Mastery</span>
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight" style={{ fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
+        <h2 className="text-3xl md:text-4xl font-extrabold leading-tight" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
           How It Works
         </h2>
-        <p className="mt-3 max-w-xl mx-auto leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+        <p className="mt-3 max-w-xl mx-auto leading-relaxed" style={{ color: "#4A6076" }}>
           Follow this proven 5-step path to go from complete beginner to exam-ready in any HR subject.
         </p>
       </div>
 
       <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Connector line (desktop) */}
-        <div className="absolute top-10 left-0 right-0 h-px hidden lg:block" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}50, transparent)` }} />
+        <div className="absolute top-10 left-0 right-0 h-px hidden lg:block" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}70, transparent)` }} />
 
         {ROADMAP.map((r, i) => {
           const Icon = r.icon;
           return (
             <div key={r.step} className="relative flex flex-col items-center text-center">
               {/* Step circle */}
-              <div className="relative z-10 mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-lg" style={{ background: i === 0 ? GOLD : "rgba(255,255,255,0.06)", borderColor: i === 0 ? GOLD : "rgba(255,255,255,0.12)" }}>
-                <Icon className="h-7 w-7" style={{ color: i === 0 ? NAVY : "#fff" }} />
+              <div className="relative z-10 mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-md" style={{ background: i === 0 ? GOLD : "#FFFFFF", borderColor: i === 0 ? GOLD : "#C9D8E8" }}>
+                <Icon className="h-7 w-7" style={{ color: NAVY }} />
               </div>
-              <span className="text-[10px] font-bold tracking-widest mb-1.5" style={{ color: GOLD }}>STEP {r.step}</span>
-              <h3 className="text-sm font-bold text-white mb-1.5" style={{ fontFamily: "'Sora',sans-serif" }}>{r.title}</h3>
-              <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.50)" }}>{r.desc}</p>
+              <span className="text-[10px] font-bold tracking-widest mb-1.5" style={{ color: GOLD_DARK }}>STEP {r.step}</span>
+              <h3 className="text-sm font-bold mb-1.5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{r.title}</h3>
+              <p className="text-xs leading-relaxed" style={{ color: "#64798F" }}>{r.desc}</p>
             </div>
           );
         })}
@@ -780,25 +780,25 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: NAVY }}>
-      <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "24px 24px" }} />
-      <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none opacity-10 rounded-full" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)`, transform: "translate(40%,-40%)" }} />
+    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: "#DCE6F1" }}>
+      <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: `radial-gradient(circle,${NAVY} 1px,transparent 1px)`, backgroundSize: "24px 24px" }} />
+      <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none opacity-15 rounded-full" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)`, transform: "translate(40%,-40%)" }} />
       <div className="relative mx-auto max-w-2xl px-4 sm:px-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
-          <Mail className="h-5 w-5" style={{ color: GOLD }} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>Stay Updated</span>
+          <Mail className="h-5 w-5" style={{ color: GOLD_DARK }} />
+          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_DARK }}>Stay Updated</span>
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4" style={{ fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
           Join the HR Learning Community
         </h2>
-        <p className="mb-8 leading-relaxed" style={{ color: "rgba(255,255,255,0.60)" }}>
+        <p className="mb-8 leading-relaxed" style={{ color: "#4A6076" }}>
           New notes, MCQs, video lectures, and articles every week — curated for MBA, BBA, and UGC NET preparation. Free forever.
         </p>
 
         {done ? (
-          <div className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold" style={{ background: "rgba(16,185,129,0.15)", color: "#34d399", border: "1px solid rgba(52,211,153,0.3)" }}>
+          <div className="inline-flex items-center gap-2 rounded-xl px-6 py-3 font-semibold" style={{ background: "#EDF7F1", color: "#1E7E4A", border: "1px solid #A8D5BC" }}>
             <CheckCircle2 className="h-5 w-5" /> You're subscribed — welcome to the community!
           </div>
         ) : (
@@ -810,7 +810,7 @@ const Newsletter = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C7994A]/50"
-              style={{ background: "rgba(255,255,255,0.95)" }}
+              style={{ background: "#FFFFFF", border: "1px solid #C9D8E8" }}
             />
             <button type="submit" disabled={loading} className="rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>
               {loading ? "Subscribing…" : "Subscribe Free"}
@@ -818,16 +818,16 @@ const Newsletter = () => {
           </form>
         )}
 
-        <div className="flex items-center justify-center gap-5 text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
+        <div className="flex items-center justify-center gap-5 text-xs" style={{ color: "#64798F" }}>
           {["No spam, ever", "Free forever", "Unsubscribe anytime"].map(t => (
             <span key={t} className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5" style={{ color: GOLD }} /> {t}
+              <CheckCircle2 className="h-3.5 w-3.5" style={{ color: GOLD_DARK }} /> {t}
             </span>
           ))}
         </div>
-        <p className="mt-4 text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <p className="mt-4 text-xs" style={{ color: "#7A8FA6" }}>
           By subscribing, you agree to our{" "}
-          <Link to="/privacy-policy" className="underline hover:text-white">Privacy Policy</Link>.
+          <Link to="/privacy-policy" className="underline hover:text-[#1F4E79]">Privacy Policy</Link>.
         </p>
       </div>
     </section>

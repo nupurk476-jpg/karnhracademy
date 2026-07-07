@@ -401,9 +401,9 @@ const QuizList = () => {
       </section>
 
       {/* ── Stats bar ───────────────────────────────────────────────────── */}
-      <div className="bg-primary border-b border-primary/20">
+      <div className="bg-[#DCE6F1] border-y border-[#C9D8E8]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 divide-x divide-primary-foreground/10 sm:grid-cols-4">
+          <div className="grid grid-cols-2 divide-x divide-[#C9D8E8] sm:grid-cols-4">
             {[
               { value: quizzes.length,    label: "Quizzes Available",  icon: HelpCircle },
               { value: totalQuestions,    label: "Total Questions",    icon: BarChart3 },
@@ -411,10 +411,10 @@ const QuizList = () => {
               { value: `${Math.round(totalQuestions * 1.5)}+`, label: "Practice Minutes", icon: Clock },
             ].map(stat => (
               <div key={stat.label} className="flex items-center gap-3 px-6 py-5">
-                <stat.icon className="h-8 w-8 text-accent flex-shrink-0" />
+                <stat.icon className="h-8 w-8 text-[#A9823F] flex-shrink-0" />
                 <div>
-                  <p className="text-2xl font-bold text-primary-foreground">{stat.value}</p>
-                  <p className="text-xs text-primary-foreground/70">{stat.label}</p>
+                  <p className="text-2xl font-bold text-[#1F4E79]">{stat.value}</p>
+                  <p className="text-xs text-[#4A6076]">{stat.label}</p>
                 </div>
               </div>
             ))}
