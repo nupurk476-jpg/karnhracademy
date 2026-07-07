@@ -52,7 +52,7 @@ const Header = () => {
             style={{
               width: 5,
               height: 42,
-              background: "#c79a4b",
+              background: "#C7994A",
               borderRadius: 3,
               flexShrink: 0,
             }}

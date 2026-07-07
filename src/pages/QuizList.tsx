@@ -55,9 +55,9 @@ function getDifficulty(topic: string): "Beginner" | "Intermediate" | "Advanced" 
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
-  Beginner:     "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Intermediate: "bg-amber-50 text-amber-700 border-amber-200",
-  Advanced:     "bg-rose-50 text-rose-700 border-rose-200",
+  Beginner:     "bg-[#F2F6FA] text-[#3D6C98] border-[#C9D8E8]",
+  Intermediate: "bg-[#FAF5EA] text-[#8F6D33] border-[#E8DCC0]",
+  Advanced:     "bg-[#E9EEF5] text-[#0D2A45] border-[#C0CEDD]",
 };
 
 function getSubjectForTopic(topic: string) {
@@ -211,7 +211,7 @@ const QuizCard = ({
         </span>
         {rating && (
           <span className="flex items-center gap-1">
-            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+            <Star className="h-3.5 w-3.5 fill-[#C7994A] text-[#C7994A]" />
             <strong className="text-foreground">{rating.avg.toFixed(1)}</strong>
             <span>({rating.count})</span>
           </span>

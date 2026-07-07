@@ -15,24 +15,28 @@ import {
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
-const NAVY  = "#16243f";
-const GOLD  = "#c79a4b";
-const LIGHT = "#f8f9fc";
+const NAVY  = "#1F4E79";
+const NAVY_DARK = "#0D2A45";
+const STEEL = "#5B8AB8";
+const STEEL_DARK = "#3D6C98";
+const GOLD  = "#C7994A";
+const GOLD_DARK = "#A9823F";
+const LIGHT = "#EEF0F8";
 
 // ─────────────── Data ────────────────────────────────────────────────────────
 // Hex colors for this page's custom (non-Tailwind-class) styling, keyed by
 // discipline value. Everything else (label, short, value, icon, topics) is
 // sourced from disciplines.ts so it can never drift out of sync.
 const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
-  hrm:     { color: "#3B5BDB", bg: "#EDF2FF" },
-  ob:      { color: "#7048E8", bg: "#F3F0FF" },
-  sm:      { color: "#0CA678", bg: "#EBFBEE" },
-  pom:     { color: "#E67E22", bg: "#FEF3E0" },
-  bc:      { color: "#0891B2", bg: "#ECFEFF" },
-  cgbe:    { color: "#6B7280", bg: "#F9FAFB" },
-  odcm:    { color: "#DD6B20", bg: "#FFFAF0" },
-  ghr:     { color: "#319795", bg: "#E6FFFA" },
-  english: { color: "#5B5EA6", bg: "#EEF0FF" },
+  hrm:     { color: NAVY,       bg: "#DCE6F1" },
+  ob:      { color: STEEL_DARK, bg: "#EEF0F8" },
+  sm:      { color: GOLD_DARK,  bg: "#F7F1E3" },
+  pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
+  bc:      { color: STEEL,      bg: "#EEF0F8" },
+  cgbe:    { color: NAVY,       bg: "#EEF0F8" },
+  odcm:    { color: GOLD,       bg: "#F7F1E3" },
+  ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
+  english: { color: STEEL_DARK, bg: "#E3EAF2" },
 };
 
 const SUBJECTS = DISCIPLINES.map(d => ({
@@ -44,12 +48,12 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 }));
 
 const WHY_CHOOSE = [
-  { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: "#3B5BDB", bg: "#EDF2FF" },
-  { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: "#7048E8", bg: "#F3F0FF" },
-  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: "#0CA678", bg: "#EBFBEE" },
-  { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,      bg: "#FFF9DB" },
-  { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: "#0891B2", bg: "#ECFEFF" },
-  { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: "#E53E3E", bg: "#FFF5F5" },
+  { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: NAVY,       bg: "#DCE6F1" },
+  { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8" },
+  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2" },
+  { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3" },
+  { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: STEEL,      bg: "#EEF0F8" },
+  { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3" },
 ];
 
 const ROADMAP = [
@@ -118,7 +122,7 @@ const Hero = () => {
 
         {/* Left */}
         <div className="flex flex-col justify-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,154,75,0.12)", border: `1px solid ${GOLD}33` }}>
+          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}33` }}>
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
             <span className="text-xs font-semibold" style={{ color: GOLD }}>India's Premier HR Academic Portal</span>
           </div>
@@ -377,15 +381,15 @@ const FeaturedNotes = () => {
   }, []);
 
   const subjectLabel: Record<string, { label: string; color: string }> = {
-    hrm:    { label: "HRM",       color: "#3B5BDB" },
-    ob:     { label: "OB",        color: "#7048E8" },
-    sm:     { label: "SM",        color: "#0CA678" },
-    pom:    { label: "POM",       color: "#E67E22" },
-    bc:     { label: "BC",        color: "#0891B2" },
-    cgbe:   { label: "CG & BE",   color: "#E53E3E" },
-    odcm:   { label: "OD & CM",   color: "#DD6B20" },
-    ghr:    { label: "Global HR", color: "#319795" },
-    english:{ label: "English",   color: "#6B7280" },
+    hrm:    { label: "HRM",       color: NAVY },
+    ob:     { label: "OB",        color: STEEL_DARK },
+    sm:     { label: "SM",        color: GOLD_DARK },
+    pom:    { label: "POM",       color: NAVY_DARK },
+    bc:     { label: "BC",        color: STEEL },
+    cgbe:   { label: "CG & BE",   color: NAVY },
+    odcm:   { label: "OD & CM",   color: GOLD },
+    ghr:    { label: "Global HR", color: NAVY_DARK },
+    english:{ label: "English",   color: STEEL_DARK },
   };
 
   const placeholders = [
@@ -411,7 +415,7 @@ const FeaturedNotes = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {items.map((note: any, i: number) => {
-            const sub = subjectLabel[note.subject] || { label: "HRM", color: "#3B5BDB" };
+            const sub = subjectLabel[note.subject] || { label: "HRM", color: NAVY };
             return (
               <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
                 {/* Top color strip */}
@@ -419,14 +423,14 @@ const FeaturedNotes = () => {
                 <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
-                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700">New</span>}
+                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-[#DCE6F1] text-[#1F4E79]">New</span>}
                     <span className="ml-auto flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" />5 min read</span>
                   </div>
                   <div className="flex items-start gap-3 mb-4">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: `${sub.color}12` }}>
                       <FileText className="h-5 w-5" style={{ color: sub.color }} />
                     </div>
-                    <h3 className="text-base font-bold text-slate-800 leading-snug group-hover:text-blue-700 transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                    <h3 className="text-base font-bold text-slate-800 leading-snug group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
                       {note.title}
                     </h3>
                   </div>
@@ -493,11 +497,11 @@ const VideoLectures = () => {
                 </span>
               </div>
               <div className="p-5">
-                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
                   {lec.title}
                 </h3>
                 {lec.description && <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lec.description}</p>}
-                <Link to="/lectures" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold" style={{ color: "#7048E8" }}>
+                <Link to="/lectures" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold" style={{ color: STEEL_DARK }}>
                   <PlayCircle className="h-4 w-4" /> Watch Now
                 </Link>
               </div>
@@ -529,7 +533,7 @@ const BooksSection = () => {
   ];
 
   const items = books.length > 0 ? books : placeholders;
-  const bookColors = ["#3B5BDB", "#7048E8", "#0CA678", GOLD];
+  const bookColors = [NAVY, STEEL_DARK, NAVY_DARK, GOLD];
 
   return (
     <section className="py-20 md:py-24 bg-white">
@@ -595,8 +599,8 @@ const BlogSection = () => {
 
   const items = posts.length > 0 ? posts : placeholders;
   const catColors: Record<string, string> = {
-    "HRM Basics": "#3B5BDB", "Organisational Behaviour": "#7048E8", "Research Methodology": "#0CA678",
-    "Ethical HRM": "#E53E3E", "Quiet Quitting": "#DD6B20", "General Studies": "#6B7280", "Current Affairs": "#0891B2",
+    "HRM Basics": NAVY, "Organisational Behaviour": STEEL_DARK, "Research Methodology": NAVY_DARK,
+    "Ethical HRM": GOLD_DARK, "Quiet Quitting": GOLD, "General Studies": STEEL, "Current Affairs": NAVY,
   };
 
   const [featured, ...rest] = items;
@@ -620,7 +624,7 @@ const BlogSection = () => {
           {/* Featured left */}
           {featured && (
             <Link to={featured.slug ? `/blogs/${featured.slug}` : "/blogs"} className="group lg:col-span-3 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-200 overflow-hidden">
-              <div className="relative h-56 lg:h-72 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}, #2a3f6b)` }}>
+              <div className="relative h-56 lg:h-72 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
                 {featured.cover_image && <img src={featured.cover_image} alt={featured.title} className="absolute inset-0 h-full w-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-300" />}
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
                   <span className="inline-block w-fit rounded-full px-3 py-0.5 text-xs font-bold mb-3" style={{ background: GOLD, color: NAVY }}>{featured.category}</span>
@@ -650,7 +654,7 @@ const BlogSection = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: catColors[post.category] || GOLD }}>{post.category}</span>
-                  <h4 className="text-sm font-bold text-slate-800 leading-snug line-clamp-2 mb-1 group-hover:text-blue-700 transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>{post.title}</h4>
+                  <h4 className="text-sm font-bold text-slate-800 leading-snug line-clamp-2 mb-1 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>{post.title}</h4>
                   <span className="text-xs text-slate-400 flex items-center gap-1"><Clock className="h-3 w-3" />{readTime(post.content)} min read</span>
                 </div>
               </Link>
@@ -673,7 +677,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#c79a4b] hover:text-[#c79a4b] hover:bg-amber-50" style={{ borderColor: "#e2e8f0" }}>
+            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#A9823F] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
               {t}
             </Link>
           ))}
@@ -687,12 +691,12 @@ const PopularTopics = () => (
 const AboutAuthor = () => {
   const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
   const achievements = [
-    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: "#3B5BDB", bg: "#EDF2FF" },
-    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: "#7048E8", bg: "#F3F0FF" },
-    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: "#0CA678", bg: "#EBFBEE" },
-    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: "#E53E3E", bg: "#FFF5F5" },
-    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: "#0891B2", bg: "#ECFEFF" },
-    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,      bg: "#FFF9DB" },
+    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#DCE6F1" },
+    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#EEF0F8" },
+    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#E3EAF2" },
+    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F1E3" },
+    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#EEF0F8" },
+    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F1E3" },
   ];
   return (
   <section className="py-20 md:py-24 bg-white">
@@ -702,7 +706,7 @@ const AboutAuthor = () => {
         <div className="flex flex-col items-start gap-6">
           <div className="flex items-center gap-5">
             <div className="relative">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-extrabold text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, #2a3f6b)`, fontFamily: "'Sora',sans-serif" }}>
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-extrabold text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})`, fontFamily: "'Sora',sans-serif" }}>
                 NK
               </div>
               <div className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow" style={{ background: GOLD }}>
@@ -725,7 +729,7 @@ const AboutAuthor = () => {
 
           <div className="flex flex-wrap gap-3">
             {["MBA (HR)", "UGC NET Management", "HR Research", "Academic Writing", "OB & Leadership"].map(t => (
-              <span key={t} className="rounded-full border px-3 py-1 text-xs font-semibold text-slate-600" style={{ borderColor: "#e2e8f0", background: LIGHT }}>
+              <span key={t} className="rounded-full border px-3 py-1 text-xs font-semibold text-slate-600" style={{ borderColor: "#DCE6F1", background: LIGHT }}>
                 {t}
               </span>
             ))}
@@ -805,7 +809,7 @@ const Newsletter = () => {
               placeholder="your@email.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#c79a4b]/50"
+              className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C7994A]/50"
               style={{ background: "rgba(255,255,255,0.95)" }}
             />
             <button type="submit" disabled={loading} className="rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>
@@ -817,7 +821,7 @@ const Newsletter = () => {
         <div className="flex items-center justify-center gap-5 text-xs" style={{ color: "rgba(255,255,255,0.40)" }}>
           {["No spam, ever", "Free forever", "Unsubscribe anytime"].map(t => (
             <span key={t} className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> {t}
+              <CheckCircle2 className="h-3.5 w-3.5" style={{ color: GOLD }} /> {t}
             </span>
           ))}
         </div>

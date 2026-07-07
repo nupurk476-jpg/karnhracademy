@@ -18,7 +18,7 @@ const formatTime = (s: number) => {
 };
 
 const rankIcons = [
-  <Trophy key="1" className="h-5 w-5 text-yellow-500" />,
+  <Trophy key="1" className="h-5 w-5 text-[#C7994A]" />,
   <Medal key="2" className="h-5 w-5 text-gray-400" />,
   <Medal key="3" className="h-5 w-5 text-amber-700" />,
 ];
