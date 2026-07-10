@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Eye, LayoutGrid, List, Calendar, PlayCircle } from "lucide-react";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
+import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 
 const PAGE_SIZE = 30;
 const EMAIL_KEY = "khr_subscriber_email";
@@ -191,28 +192,48 @@ const NotesPage = () => {
     </div>
   );
 
+  const CoverFallback = ({ size }: { size: "sm" | "lg" }) => (
+    <div className={`flex h-full w-full items-center justify-center ${activeDiscipline?.iconBg ?? "bg-muted"}`}>
+      <FileText className={`${size === "lg" ? "h-10 w-10" : "h-5 w-5"} ${activeDiscipline?.iconColor ?? "text-muted-foreground"}`} />
+    </div>
+  );
+
   const ListRow = ({ note }: { note: any }) => (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-4 transition-shadow hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
-        <div className="mb-1 flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold leading-snug text-foreground">{note.title}</h3>
-          <Badges note={note} />
+      <div className="flex min-w-0 flex-1 items-start gap-4">
+        <NoteCoverThumbnail
+          fileUrl={note.file_url}
+          title={note.title}
+          className="hidden h-16 w-12 flex-shrink-0 overflow-hidden rounded border border-border sm:block"
+        >
+          <CoverFallback size="sm" />
+        </NoteCoverThumbnail>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-semibold leading-snug text-foreground">{note.title}</h3>
+            <Badges note={note} />
+          </div>
+          {note.description && <p className="mb-1.5 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
+          <Meta note={note} />
         </div>
-        {note.description && <p className="mb-1.5 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
-        <Meta note={note} />
       </div>
       <Actions note={note} />
     </div>
   );
 
   const GridCard = ({ note }: { note: any }) => (
-    <div className="flex flex-col rounded-lg border border-border bg-card p-5 transition-shadow hover:shadow-md">
-      {note.video_url && <video src={note.video_url} controls className="mb-3 aspect-video w-full rounded-md bg-black" />}
-      <div className="mb-1.5 flex flex-wrap items-center gap-2"><Badges note={note} /></div>
-      <h3 className="mb-1.5 text-base font-semibold leading-snug text-foreground">{note.title}</h3>
-      {note.description && <p className="mb-3 line-clamp-2 flex-1 text-sm text-muted-foreground">{note.description}</p>}
-      <div className="mb-3"><Meta note={note} /></div>
-      <Actions note={note} />
+    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
+      <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} className="relative h-40 w-full overflow-hidden border-b border-border">
+        <CoverFallback size="lg" />
+      </NoteCoverThumbnail>
+      <div className="flex flex-1 flex-col p-5">
+        {note.video_url && <video src={note.video_url} controls className="mb-3 aspect-video w-full rounded-md bg-black" />}
+        <div className="mb-1.5 flex flex-wrap items-center gap-2"><Badges note={note} /></div>
+        <h3 className="mb-1.5 text-base font-semibold leading-snug text-foreground">{note.title}</h3>
+        {note.description && <p className="mb-3 line-clamp-2 flex-1 text-sm text-muted-foreground">{note.description}</p>}
+        <div className="mb-3"><Meta note={note} /></div>
+        <Actions note={note} />
+      </div>
     </div>
   );
 

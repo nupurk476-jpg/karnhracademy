@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import { DISCIPLINES } from "@/lib/disciplines";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import {
@@ -418,7 +419,12 @@ const FeaturedNotes = () => {
             const sub = subjectLabel[note.subject] || { label: "HRM", color: NAVY };
             return (
               <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                {/* Top color strip */}
+                {/* Cover page — real PDF page 1 when available, icon fallback otherwise */}
+                <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} className="relative h-44 w-full overflow-hidden border-b border-slate-100">
+                  <div className="flex h-full w-full items-center justify-center" style={{ background: `${sub.color}0d` }}>
+                    <FileText className="h-10 w-10" style={{ color: `${sub.color}80` }} />
+                  </div>
+                </NoteCoverThumbnail>
                 <div className="h-1.5 w-full" style={{ background: sub.color }} />
                 <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -426,14 +432,9 @@ const FeaturedNotes = () => {
                     {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-[#DCE6F1] text-[#1F4E79]">New</span>}
                     <span className="ml-auto flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" />5 min read</span>
                   </div>
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: `${sub.color}12` }}>
-                      <FileText className="h-5 w-5" style={{ color: sub.color }} />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-800 leading-snug group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
-                      {note.title}
-                    </h3>
-                  </div>
+                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                    {note.title}
+                  </h3>
                   <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
                     {note.description || "Comprehensive study material covering key concepts, definitions, and exam-focused explanations."}
                   </p>
