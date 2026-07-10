@@ -1,7 +1,8 @@
 import {
   BookOpen, Languages, Briefcase, Users, Target,
-  MessageSquare, Scale, Repeat, Globe,
+  MessageSquare, Scale, Repeat, Globe, HandHeart,
 } from "lucide-react";
+import { LW_TOPICS } from "./labourWelfareUnits";
 
 export const DISCIPLINES = [
   {
@@ -209,6 +210,18 @@ export const DISCIPLINES = [
       { label: "Synonyms & Antonyms",     slug: "synonyms-antonyms" },
       { label: "Idioms & Phrases",        slug: "idioms-phrases" },
     ],
+  },
+  {
+    value: "lw",
+    label: "Labour Welfare (UGC NET)",
+    short: "Labour Welfare",
+    icon: HandHeart,
+    color: "bg-[#E9EEF5] border-[#C0CEDD] text-[#0D2A45]",
+    activeColor: "bg-[#0D2A45] border-[#0D2A45] text-white",
+    iconBg: "bg-[#DCE6F1]",
+    iconColor: "text-[#0D2A45]",
+    description: "UGC NET Paper II (Subject Code 55) — Personnel Management, HRD, Industrial Relations, Trade Unions, Labour Legislation, Labour Welfare & Labour Market, Units I–X",
+    topics: LW_TOPICS,
   },
 ] as const;
 

@@ -11,6 +11,7 @@ const AdminNotes = () => {
   const [description, setDescription] = useState("");
   const [topicSlug, setTopicSlug] = useState("");
   const [subject, setSubject] = useState("hrm");
+  const [tagsInput, setTagsInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   // Existing attachments while editing; null = removed by the admin.
@@ -31,7 +32,7 @@ const AdminNotes = () => {
   const resetForm = () => {
     setEditingId(null);
     setTitle(""); setDescription(""); setFile(null); setVideoFile(null);
-    setTopicSlug(""); setSubject("hrm");
+    setTopicSlug(""); setSubject("hrm"); setTagsInput("");
     setExistingFileUrl(null); setExistingVideoUrl(null);
   };
 
@@ -41,6 +42,7 @@ const AdminNotes = () => {
     setDescription(note.description ?? "");
     setSubject(note.subject ?? "hrm");
     setTopicSlug(note.topic_slug ?? "");
+    setTagsInput((note.tags ?? []).join(", "));
     setExistingFileUrl(note.file_url ?? null);
     setExistingVideoUrl(note.video_url ?? null);
     setFile(null); setVideoFile(null);
@@ -65,16 +67,17 @@ const AdminNotes = () => {
       if (file) file_url = await uploadFile("notes", file);
       if (videoFile) video_url = await uploadFile("note-videos", videoFile);
 
-      const row: any = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject };
+      const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
+      const row: any = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject, tags };
       if (file) row.file_size = file.size;          // record size for new uploads
       else if (!file_url) row.file_size = null;      // attachment removed
       const write = (r: any) => editingId
         ? supabase.from("notes").update(r as any).eq("id", editingId)
         : supabase.from("notes").insert(r as any);
       let { error } = await write(row);
-      // file_size doesn't exist until the pending DB update runs — save without it.
+      // file_size/tags don't exist until the pending DB update runs — retry without them.
       if (error && (error.code === "PGRST204" || /schema cache/i.test(error.message || ""))) {
-        const { file_size: _fs, ...legacy } = row;
+        const { file_size: _fs, tags: _tags, ...legacy } = row;
         ({ error } = await write(legacy));
       }
       if (error) throw new Error(error.message);
@@ -114,6 +117,7 @@ const AdminNotes = () => {
         </div>
         <input placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         <input placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <input placeholder="Tags (comma-separated, e.g. wage act, factories act, exam-important)" value={tagsInput} onChange={e => setTagsInput(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
 
         {/* Discipline selector */}
         <div>
@@ -223,6 +227,9 @@ const AdminNotes = () => {
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
+              {(note.tags ?? []).map((tag: string) => (
+                <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
+              ))}
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${note.title}`}>

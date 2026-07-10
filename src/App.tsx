@@ -21,6 +21,7 @@ const GHRTopicPage = lazy(() => import("./pages/GHRTopicPage"));
 const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
+const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
 const LecturesPage = lazy(() => import("./pages/LecturesPage"));
 const LiveLecturesPage = lazy(() => import("./pages/LiveLecturesPage"));
 const QuizList = lazy(() => import("./pages/QuizList"));
@@ -41,6 +42,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminBlogs = lazy(() => import("./pages/admin/AdminBlogs"));
 const AdminNotes = lazy(() => import("./pages/admin/AdminNotes"));
 const AdminQuizzes = lazy(() => import("./pages/admin/AdminQuizzes"));
+const AdminPYQs = lazy(() => import("./pages/admin/AdminPYQs"));
 const AdminBooks = lazy(() => import("./pages/admin/AdminBooks"));
 const AdminComments = lazy(() => import("./pages/admin/AdminComments"));
 const AdminSubscribers = lazy(() => import("./pages/admin/AdminSubscribers"));
@@ -69,6 +71,7 @@ const App = () => (
             <Route path="/blogs" element={<BlogList />} />
             <Route path="/blogs/:slug" element={<BlogPost />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/ugc-net-labour-welfare" element={<LabourWelfarePage />} />
             <Route path="/lectures" element={<LecturesPage />} />
             <Route path="/live-lectures" element={<LiveLecturesPage />} />
             <Route path="/quizzes" element={<QuizList />} />
@@ -95,6 +98,7 @@ const App = () => (
               <Route path="blogs" element={<AdminBlogs />} />
               <Route path="notes" element={<AdminNotes />} />
               <Route path="quizzes" element={<AdminQuizzes />} />
+              <Route path="pyq" element={<AdminPYQs />} />
               <Route path="books" element={<AdminBooks />} />
               <Route path="comments" element={<AdminComments />} />
               <Route path="subscribers" element={<AdminSubscribers />} />

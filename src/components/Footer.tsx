@@ -97,9 +97,9 @@ const Footer = () => {
                 { label: "Human Resource Management", to: "/notes?subject=hrm" },
                 { label: "Organisational Behaviour", to: "/notes?subject=ob" },
                 { label: "Strategic HRM", to: "/notes?subject=sm" },
+                { label: "UGC NET Labour Welfare", to: "/ugc-net-labour-welfare" },
                 { label: "HR Analytics", to: "/notes?subject=hrm" },
                 { label: "Performance Management", to: "/notes?subject=hrm" },
-                { label: "Training & Development", to: "/notes?subject=hrm" },
               ].map((link) => (
                 <Link
                   key={link.label}
