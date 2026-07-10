@@ -12,7 +12,7 @@ import {
   Video, HelpCircle, Download, FileText,
   CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
   PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
-  Mail,
+  Mail, HandHeart, ScrollText,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -38,6 +38,7 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   odcm:    { color: GOLD,       bg: "#F7F1E3" },
   ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
   english: { color: STEEL_DARK, bg: "#E3EAF2" },
+  lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
 };
 
 const SUBJECTS = DISCIPLINES.map(d => ({
@@ -309,8 +310,11 @@ const Subjects = () => (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {SUBJECTS.map(s => {
           const Icon = s.icon;
+          // Labour Welfare has its own dedicated unit-wise hub — send it there
+          // instead of the generic notes browser every other subject uses.
+          const href = s.value === "lw" ? "/ugc-net-labour-welfare" : "/notes";
           return (
-            <Link key={s.label} to="/notes" className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md" style={{ background: s.bg, borderColor: `${s.color}20` }}>
+            <Link key={s.label} to={href} className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md" style={{ background: s.bg, borderColor: `${s.color}20` }}>
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
                 <Icon className="h-5 w-5 text-white" />
               </div>
@@ -326,6 +330,86 @@ const Subjects = () => (
     </div>
   </section>
 );
+
+// ─────────────── Section: Labour Welfare feature banner ─────────────────────
+// A framed callout for the one subject that has a full unit-wise hub (notes +
+// MCQs + previous year papers across all 10 official units) rather than just
+// a filtered notes view, so it doesn't get lost among the plain subject tiles.
+const LabourWelfareBanner = () => {
+  const [notesCount, setNotesCount] = useState<number | null>(null);
+  const [quizCount, setQuizCount] = useState<number | null>(null);
+  const [pyqCount, setPyqCount] = useState<number | null>(null);
+
+  // Three independent queries (not Promise.all) — same pattern as
+  // useContentCounts above, which avoids TypeScript trying to infer one
+  // combined tuple type across differently-shaped Supabase query builders.
+  useEffect(() => {
+    supabase.from("notes").select("id", { count: "exact", head: true }).eq("subject", "lw")
+      .then(({ count }) => setNotesCount(count ?? 0));
+    (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).eq("subject", "lw")
+      .then(({ count }: any) => setQuizCount(count ?? 0));
+    (supabase.from("pyq_papers" as any) as any).select("id", { count: "exact", head: true }).eq("subject", "lw")
+      .then(({ count }: any) => setPyqCount(count ?? 0));
+  }, []);
+
+  const stats = [
+    { label: "Units", value: "10" },
+    { label: "Notes", value: notesCount !== null ? String(notesCount) : "…" },
+    { label: "MCQ Sets", value: quizCount !== null ? String(quizCount) : "…" },
+    { label: "PYQ Papers", value: pyqCount !== null ? String(pyqCount) : "…" },
+  ];
+
+  return (
+    <section className="py-16 md:py-20 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          className="relative overflow-hidden rounded-3xl border-2 p-8 md:p-12"
+          style={{ borderColor: NAVY_DARK, background: `linear-gradient(135deg, ${NAVY_DARK}0a, ${STEEL}0a)` }}
+        >
+          <div className="absolute -right-8 -top-8 h-32 w-32 rotate-45 rounded-2xl opacity-[0.06]" style={{ background: NAVY_DARK }} />
+          <div className="absolute right-16 bottom-10 h-14 w-14 rotate-45 rounded-xl opacity-[0.10]" style={{ background: GOLD }} />
+
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: NAVY_DARK }}>
+                  <HandHeart className="h-4.5 w-4.5 text-white" />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: NAVY_DARK }}>
+                  UGC NET Paper II · Subject Code 55
+                </span>
+              </div>
+              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl" style={{ fontFamily: "'Sora',sans-serif" }}>
+                UGC NET Labour Welfare — our only fully unit-wise study hub
+              </h2>
+              <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+                Personnel Management, HRD, Industrial Relations, Trade Unions, Labour Legislation, Labour Welfare &amp;
+                Labour Market — every one of the 10 official units, with notes, MCQs, and previous year question
+                papers all organised unit-by-unit.
+              </p>
+              <Link
+                to="/ugc-net-labour-welfare"
+                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
+                style={{ background: NAVY_DARK, fontFamily: "'Sora',sans-serif" }}
+              >
+                <ScrollText className="h-4 w-4" /> Explore the Unit-wise Hub <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${NAVY_DARK}25` }}>
+              {stats.map(s => (
+                <div key={s.label} className="text-center">
+                  <p className="text-2xl font-extrabold" style={{ color: NAVY_DARK, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
+                  <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ─────────────── Section: Learning Roadmap ───────────────────────────────────
 const Roadmap = () => (
@@ -849,6 +933,7 @@ const Index = () => (
       <StatsBar />
       <WhyChoose />
       <Subjects />
+      <LabourWelfareBanner />
       <Roadmap />
       <FeaturedNotes />
       <VideoLectures />
