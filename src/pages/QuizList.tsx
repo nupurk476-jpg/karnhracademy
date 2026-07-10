@@ -9,8 +9,11 @@ import {
   Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
   Layers, TrendingUp, BookOpen,
   CheckCircle2, Lightbulb, Award, Zap, Filter, ArrowRight,
-  FileText, Video, Download, FolderOpen,
+  FileText, Video, Download, FolderOpen, PlayCircle,
 } from "lucide-react";
+
+const NAVY_HEX = "#1F4E79";
+const GOLD_HEX = "#C7994A";
 
 // ── Subject config ────────────────────────────────────────────────────────────
 // Sourced from disciplines.ts so this can never drift out of sync with Notes/Admin.
@@ -60,6 +63,14 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Advanced:     "bg-[#E9EEF5] text-[#0D2A45] border-[#C0CEDD]",
 };
 
+// Solid text color per difficulty, for badges placed on a white/translucent
+// chip over a cover image (rather than the tinted DIFFICULTY_COLOR pairing).
+const DIFFICULTY_TEXT: Record<string, string> = {
+  Beginner: "#3D6C98",
+  Intermediate: "#8F6D33",
+  Advanced: "#0D2A45",
+};
+
 function getSubjectForTopic(topic: string) {
   const t = (topic || "").toLowerCase();
   if (t.includes("vocabulary") || t.includes("grammar") || t.includes("verbal") || t.includes("comprehension") || t.includes("idiom") || t.includes("synonym")) return "english";
@@ -81,6 +92,35 @@ function resolveSubject(quiz: any) {
   return quiz.subject || getSubjectForTopic(quiz.topic || "");
 }
 
+// Per-subject cover gradient, built from the site's navy/steel/gold palette so
+// quiz covers feel like a designed poster rather than a stock icon tile.
+const SUBJECT_GRADIENT: Record<string, [string, string]> = {
+  hrm:     ["#1F4E79", "#0D2A45"],
+  ob:      ["#3D6C98", "#1F4E79"],
+  sm:      ["#A9823F", "#0D2A45"],
+  pom:     ["#0D2A45", "#1F4E79"],
+  bc:      ["#5B8AB8", "#1F4E79"],
+  cgbe:    ["#1F4E79", "#3D6C98"],
+  odcm:    ["#C7994A", "#A9823F"],
+  ghr:     ["#0D2A45", "#3D6C98"],
+  english: ["#3D6C98", "#0D2A45"],
+};
+
+// Decorative gradient + pattern layer shared by the featured and grid quiz
+// covers — diamonds echo the brand mark, the icon watermark ties the cover
+// back to the subject without repeating text.
+const CoverBackdrop = ({ subjectValue, icon: Icon }: { subjectValue: string; icon: any }) => {
+  const [from, to] = SUBJECT_GRADIENT[subjectValue] || SUBJECT_GRADIENT.hrm;
+  return (
+    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+      <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "20px 20px" }} />
+      <div className="absolute -right-5 -top-5 h-20 w-20 rotate-45 rounded-lg bg-white/10" />
+      <div className="absolute right-10 top-16 h-8 w-8 rotate-45 rounded bg-white/15" />
+      <Icon className="absolute -bottom-5 -right-5 h-32 w-32 text-white/10" strokeWidth={1.5} />
+    </div>
+  );
+};
+
 // ── QuizCard ──────────────────────────────────────────────────────────────────
 const QuizCard = ({
   quiz,
@@ -100,37 +140,49 @@ const QuizCard = ({
 
   if (featured) {
     return (
-      <div className="group grid lg:grid-cols-5 gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm hover:shadow-md transition-all">
-        {/* Left accent panel */}
-        <div className="lg:col-span-2 relative flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 p-10">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/10">
-            <HelpCircle className="h-10 w-10 text-accent" />
-          </div>
-          <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground shadow">
-            Featured Quiz
-          </span>
-          {/* Stats */}
-          <div className="flex gap-4 text-center">
-            <div>
-              <p className="text-xl font-bold text-foreground">{questionCount}</p>
-              <p className="text-xs text-muted-foreground">Questions</p>
+      <div className="group grid lg:grid-cols-5 gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm hover:shadow-lg transition-all">
+        {/* Cover panel */}
+        <Link
+          to={`/quizzes/${quiz.id}`}
+          className="lg:col-span-2 relative flex min-h-[260px] flex-col items-center justify-center gap-4 p-10"
+        >
+          <CoverBackdrop subjectValue={subject.value} icon={SubjectIcon} />
+          <div className="relative z-10 flex flex-col items-center gap-4">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
+              <SubjectIcon className="h-10 w-10 text-white" />
             </div>
-            <div className="w-px bg-border" />
-            <div>
-              <p className="text-xl font-bold text-foreground">{mins}</p>
-              <p className="text-xs text-muted-foreground">Minutes</p>
+            <span className="rounded-full px-3 py-1 text-xs font-bold shadow" style={{ background: GOLD_HEX, color: NAVY_HEX }}>
+              Featured Quiz
+            </span>
+            {/* Stats */}
+            <div className="flex gap-4 text-center">
+              <div>
+                <p className="text-xl font-bold text-white">{questionCount}</p>
+                <p className="text-xs text-white/70">Questions</p>
+              </div>
+              <div className="w-px bg-white/20" />
+              <div>
+                <p className="text-xl font-bold text-white">{mins}</p>
+                <p className="text-xs text-white/70">Minutes</p>
+              </div>
+              {rating && (
+                <>
+                  <div className="w-px bg-white/20" />
+                  <div>
+                    <p className="text-xl font-bold text-white">{rating.avg.toFixed(1)}</p>
+                    <p className="text-xs text-white/70">Rating</p>
+                  </div>
+                </>
+              )}
             </div>
-            {rating && (
-              <>
-                <div className="w-px bg-border" />
-                <div>
-                  <p className="text-xl font-bold text-foreground">{rating.avg.toFixed(1)}</p>
-                  <p className="text-xs text-muted-foreground">Rating</p>
-                </div>
-              </>
-            )}
           </div>
-        </div>
+          {/* Hover invite */}
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-hover:opacity-100">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold shadow-lg" style={{ color: NAVY_HEX }}>
+              <PlayCircle className="h-3.5 w-3.5" /> Start Quiz
+            </span>
+          </div>
+        </Link>
 
         {/* Right content */}
         <div className="lg:col-span-3 flex flex-col justify-between p-8">
@@ -173,26 +225,35 @@ const QuizCard = ({
   }
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm hover:shadow-md transition-all duration-200">
-      {/* Header */}
-      <div className="flex items-start gap-4 p-5 pb-4">
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent/10">
-          <HelpCircle className="h-6 w-6 text-accent" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1.5 flex flex-wrap gap-1.5">
-            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${DIFFICULTY_COLOR[difficulty]}`}>
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+      {/* Cover */}
+      <Link to={`/quizzes/${quiz.id}`} className="relative block h-40 w-full overflow-hidden">
+        <CoverBackdrop subjectValue={subject.value} icon={SubjectIcon} />
+        <div className="relative z-10 flex h-full flex-col justify-between p-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold" style={{ color: DIFFICULTY_TEXT[difficulty] }}>
               {difficulty}
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/5 px-2.5 py-0.5 text-xs font-semibold text-primary">
-              <SubjectIcon className="h-3 w-3" />{subject.label}
+            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
+              <SubjectIcon className="h-4 w-4 text-white" />
             </span>
           </div>
-          <h3 className="text-base font-bold leading-snug text-foreground group-hover:text-accent transition-colors line-clamp-2">
-            {quiz.title}
-          </h3>
+          <div>
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
+              {subject.label} • {questionCount} Qs • ~{mins} min
+            </p>
+            <h3 className="text-base font-bold leading-snug text-white line-clamp-2" style={{ fontFamily: "'Sora',sans-serif" }}>
+              {quiz.title}
+            </h3>
+          </div>
         </div>
-      </div>
+        {/* Hover invite */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-hover:opacity-100">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold shadow-lg" style={{ color: NAVY_HEX }}>
+            <PlayCircle className="h-3.5 w-3.5" /> Start Quiz
+          </span>
+        </div>
+      </Link>
 
       {/* Description */}
       <p className="flex-1 px-5 pb-4 text-sm leading-relaxed text-muted-foreground line-clamp-2">
