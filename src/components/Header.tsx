@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { label: "Home", to: "/" },
   { label: "Notes", to: "/notes" },
-  { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
   { label: "Video Lectures", to: "/lectures" },
   { label: "Blogs", to: "/blogs" },
   { label: "MCQs", to: "/quizzes" },
+  { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
