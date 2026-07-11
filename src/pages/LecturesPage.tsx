@@ -53,14 +53,16 @@ const LecturesPage = () => {
     ? activeDiscipline.topics.filter(t => subjectLectures.some((l: any) => l.topic_slug === t.slug))
     : [];
 
-  const Card = ({ lec }: { lec: any }) => (
+  const Card = ({ lec }: { lec: any }) => {
+    const [thumbFailed, setThumbFailed] = useState(false);
+    return (
     <button
       onClick={() => setPlaying(lec)}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card text-left transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-video w-full bg-muted">
-        {lec.thumbnail_url ? (
-          <img src={lec.thumbnail_url} alt={lec.title} className="h-full w-full object-cover" loading="lazy" />
+        {lec.thumbnail_url && !thumbFailed ? (
+          <img src={lec.thumbnail_url} alt={lec.title} className="h-full w-full object-cover" loading="lazy" onError={() => setThumbFailed(true)} />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-primary/10">
             <PlayCircle className="h-14 w-14 text-accent" />
@@ -80,7 +82,8 @@ const LecturesPage = () => {
         {lec.description && <p className="line-clamp-2 text-sm text-muted-foreground">{lec.description}</p>}
       </div>
     </button>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">

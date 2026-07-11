@@ -575,10 +575,19 @@ const VideoLectures = () => {
             >
               {/* Thumbnail */}
               <div className="relative flex items-center justify-center h-44 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}>
-                {lec.thumbnail_url
-                  ? <img src={lec.thumbnail_url} alt={lec.title} className="absolute inset-0 h-full w-full object-cover opacity-60" />
-                  : null}
-                <PlayCircle className="relative z-10 h-14 w-14 text-white opacity-90 group-hover:scale-110 transition-transform" />
+                {lec.thumbnail_url && (
+                  <img
+                    src={lec.thumbnail_url}
+                    alt={lec.title}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                )}
+                {/* Bottom scrim so the play button/badges stay legible over any thumbnail, without washing the image out */}
+                {lec.thumbnail_url && (
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(13,42,69,0.15) 0%, rgba(13,42,69,0.05) 45%, rgba(13,42,69,0.55) 100%)" }} />
+                )}
+                <PlayCircle className="relative z-10 h-14 w-14 text-white opacity-90 drop-shadow-lg group-hover:scale-110 transition-transform" />
                 {lec.duration_minutes && (
                   <span className="absolute bottom-3 right-3 rounded px-2 py-0.5 text-xs font-bold bg-black/60 text-white">
                     {lec.duration_minutes} min
