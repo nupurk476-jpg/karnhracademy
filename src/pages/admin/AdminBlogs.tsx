@@ -14,7 +14,8 @@ const AdminBlogs = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [importStage, setImportStage] = useState<"" | "parsing" | "cover">("");
+  const [importStage, setImportStage] = useState<"" | "parsing" | "cover" | "publishing">("");
+  const [publishImmediately, setPublishImmediately] = useState(true);
   const htmlInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -40,33 +41,49 @@ const AdminBlogs = () => {
       try {
         const html = ev.target?.result as string;
         const parsed = parseHtmlBlog(html);
-        setForm(prev => ({
-          ...prev,
-          title: parsed.title,
-          slug: parsed.slug,
-          excerpt: parsed.excerpt,
-          content: parsed.content,
-          category: parsed.category,
-          author_name: parsed.author_name,
-        }));
 
         // Auto-generate the cover from the hero banner (or a branded
         // fallback) — these HTML articles never contain a separate photo.
         setImportStage("cover");
-        let coverNote = "";
+        let cover_image = "";
         try {
           const blob = await generateCoverImage(parsed);
           const path = `${parsed.slug}-cover-${Date.now()}.png`;
           const { error: uploadError } = await supabase.storage.from("blog-images").upload(path, blob, { contentType: "image/png" });
           if (uploadError) throw uploadError;
           const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
-          setForm(prev => ({ ...prev, cover_image: urlData.publicUrl }));
+          cover_image = urlData.publicUrl;
         } catch (coverErr) {
           console.error("Cover generation failed:", coverErr);
-          coverNote = " Cover image couldn't be generated automatically — upload one manually below.";
         }
 
-        toast({ title: "HTML imported", description: `Review the fields below, then click Create.${coverNote}` });
+        const postData = {
+          title: parsed.title,
+          slug: parsed.slug,
+          excerpt: parsed.excerpt,
+          content: parsed.content,
+          category: parsed.category,
+          author_name: parsed.author_name,
+          cover_image,
+        };
+
+        if (publishImmediately) {
+          setImportStage("publishing");
+          const { error } = await supabase.from("blog_posts").insert({ ...postData, published: true });
+          if (error) {
+            // Most likely a duplicate slug — don't lose the parsed work,
+            // drop it into the form as a draft so it can be fixed and saved.
+            setForm(prev => ({ ...prev, ...postData, published: false }));
+            toast({ title: "Couldn't auto-publish", description: `${error.message} — review the fields below, then save.`, variant: "destructive" });
+          } else {
+            toast({ title: "Published!", description: `"${parsed.title}" is now live at /blogs/${parsed.slug}.` });
+            resetForm();
+            load();
+          }
+        } else {
+          setForm(prev => ({ ...prev, ...postData, published: false }));
+          toast({ title: "HTML imported", description: "Review the fields below, then click Create." });
+        }
       } catch {
         toast({ title: "Import failed", description: "Could not parse the HTML file.", variant: "destructive" });
       } finally {
@@ -139,7 +156,7 @@ const AdminBlogs = () => {
 
           {/* HTML Import button */}
           {!editing && (
-            <div>
+            <div className="text-right">
               <input
                 ref={htmlInputRef}
                 type="file"
@@ -147,15 +164,30 @@ const AdminBlogs = () => {
                 className="hidden"
                 onChange={handleHtmlImport}
               />
-              <button
-                onClick={() => htmlInputRef.current?.click()}
-                disabled={importing}
-                className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
-              >
-                <FileUp className="h-4 w-4" />
-                {importStage === "cover" ? "Generating cover…" : importing ? "Importing…" : "Import from HTML"}
-              </button>
-              <p className="mt-1 text-xs text-muted-foreground">Title, excerpt, content, category &amp; cover image are all extracted automatically.</p>
+              <div className="flex items-center justify-end gap-3">
+                <label className="flex cursor-pointer select-none items-center gap-1.5 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={publishImmediately}
+                    onChange={e => setPublishImmediately(e.target.checked)}
+                    className="h-3.5 w-3.5 accent-green-600"
+                  />
+                  Publish immediately
+                </label>
+                <button
+                  onClick={() => htmlInputRef.current?.click()}
+                  disabled={importing}
+                  className="inline-flex items-center gap-2 rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50"
+                >
+                  <FileUp className="h-4 w-4" />
+                  {importStage === "publishing" ? "Publishing…" : importStage === "cover" ? "Generating cover…" : importing ? "Reading…" : "Upload HTML"}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {publishImmediately
+                  ? "Pick a file and it goes live automatically — title, excerpt, content, category & cover are all extracted for you."
+                  : "Title, excerpt, content, category & cover image are all extracted automatically. Review below, then click Create."}
+              </p>
             </div>
           )}
         </div>
