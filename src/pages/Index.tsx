@@ -538,6 +538,7 @@ const FeaturedNotes = () => {
 // ─────────────── Section: Video Lectures ─────────────────────────────────────
 const VideoLectures = () => {
   const [lectures, setLectures] = useState<any[]>([]);
+  const [playing, setPlaying] = useState<any | null>(null);
   useEffect(() => {
     supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setLectures(data));
   }, []);
@@ -565,7 +566,13 @@ const VideoLectures = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {items.map((lec: any, i: number) => (
-            <div key={lec.id || i} className="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+            <button
+              key={lec.id || i}
+              type="button"
+              onClick={() => lec.video_url && setPlaying(lec)}
+              disabled={!lec.video_url}
+              className="group flex w-full flex-col rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-all duration-200 hover:shadow-lg overflow-hidden disabled:cursor-default"
+            >
               {/* Thumbnail */}
               <div className="relative flex items-center justify-center h-44 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}>
                 {lec.thumbnail_url
@@ -586,14 +593,46 @@ const VideoLectures = () => {
                   {lec.title}
                 </h3>
                 {lec.description && <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lec.description}</p>}
-                <Link to="/lectures" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold" style={{ color: STEEL_DARK }}>
+                <span className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold" style={{ color: STEEL_DARK }}>
                   <PlayCircle className="h-4 w-4" /> Watch Now
-                </Link>
+                </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
+
+      {/* Lightbox player — same pattern as /lectures */}
+      {playing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setPlaying(null)}>
+          <div className="w-full max-w-4xl" onClick={e => e.stopPropagation()}>
+            {(() => {
+              const url: string = playing.video_url || "";
+              const isFile = /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(url) || url.includes("/storage/v1/object/");
+              if (isFile) return <video src={url} controls autoPlay className="w-full rounded-lg bg-black" />;
+              let embed = url;
+              const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+              if (yt) embed = `https://www.youtube.com/embed/${yt[1]}?autoplay=1`;
+              return (
+                <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+                  <iframe src={embed} title={playing.title} allow="autoplay; encrypted-media; fullscreen" allowFullScreen className="h-full w-full border-0" />
+                </div>
+              );
+            })()}
+            <div className="mt-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">{playing.title}</h2>
+              <div className="flex items-center gap-2">
+                <a href={playing.video_url} target="_blank" rel="noopener noreferrer" className="rounded-md bg-white/90 px-3 py-1.5 text-sm text-slate-800 hover:bg-white">
+                  Open in new tab
+                </a>
+                <button onClick={() => setPlaying(null)} className="rounded-md bg-white px-3 py-1.5 text-sm text-slate-800">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

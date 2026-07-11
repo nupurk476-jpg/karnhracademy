@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Trash2, Video, Image as ImageIcon } from "lucide-react";
+import { Trash2, Video, Image as ImageIcon, Youtube, Loader2 } from "lucide-react";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { extractYouTubeId, fetchYouTubeMetadata } from "@/lib/youtube";
 
 const AdminLectures = () => {
   const [lectures, setLectures] = useState<any[]>([]);
@@ -14,8 +15,27 @@ const AdminLectures = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrlInput, setVideoUrlInput] = useState("");
   const [thumbFile, setThumbFile] = useState<File | null>(null);
+  const [fetchedThumbnailUrl, setFetchedThumbnailUrl] = useState<string | null>(null);
+  const [fetchingMeta, setFetchingMeta] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+
+  const handleFetchFromYouTube = async () => {
+    setFetchingMeta(true);
+    try {
+      const meta = await fetchYouTubeMetadata(videoUrlInput.trim());
+      if (!meta) {
+        toast({ title: "Couldn't fetch video details", description: "Check the link, or fill in the details manually.", variant: "destructive" });
+        return;
+      }
+      setTitle(meta.title);
+      if (meta.description) setDescription(meta.description);
+      setFetchedThumbnailUrl(meta.thumbnailUrl);
+      toast({ title: meta.description ? "Fetched title, description & thumbnail" : "Fetched title & thumbnail", description: meta.description ? undefined : "No YouTube API key configured — add a description manually." });
+    } finally {
+      setFetchingMeta(false);
+    }
+  };
 
   const load = () => {
     supabase.from("lectures" as any).select("*").order("created_at", { ascending: false }).then(({ data }) => data && setLectures(data));
@@ -40,7 +60,9 @@ const AdminLectures = () => {
       const video_url = videoFile
         ? await upload("note-videos", videoFile)
         : videoUrlInput.trim();
-      let thumbnail_url: string | null = null;
+      // A manually uploaded thumbnail wins; otherwise fall back to whatever
+      // was auto-fetched from YouTube.
+      let thumbnail_url: string | null = fetchedThumbnailUrl;
       if (thumbFile) thumbnail_url = await upload("blog-images", thumbFile);
       await supabase.from("lectures" as any).insert({
         title,
@@ -53,7 +75,7 @@ const AdminLectures = () => {
       } as any);
       toast({ title: "Lecture uploaded" });
       setTitle(""); setDescription(""); setVideoFile(null); setVideoUrlInput("");
-      setThumbFile(null); setTopicSlug(""); setSubject("hrm"); setDuration("");
+      setThumbFile(null); setFetchedThumbnailUrl(null); setTopicSlug(""); setSubject("hrm"); setDuration("");
       load();
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
@@ -150,13 +172,34 @@ const AdminLectures = () => {
           <p className="mb-2 text-xs text-muted-foreground">
             Best for large files (over ~500 MB). Upload to YouTube (Unlisted) or Zoom Cloud, then paste the share link here.
           </p>
-          <input
-            type="url"
-            placeholder="https://youtu.be/... or https://zoom.us/rec/share/..."
-            value={videoUrlInput}
-            onChange={e => setVideoUrlInput(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="url"
+              placeholder="https://youtu.be/... or https://zoom.us/rec/share/..."
+              value={videoUrlInput}
+              onChange={e => { setVideoUrlInput(e.target.value); setFetchedThumbnailUrl(null); }}
+              className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+            {extractYouTubeId(videoUrlInput) && (
+              <button
+                type="button"
+                onClick={handleFetchFromYouTube}
+                disabled={fetchingMeta}
+                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-md bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-60"
+              >
+                {fetchingMeta ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Youtube className="h-3.5 w-3.5" />}
+                {fetchingMeta ? "Fetching…" : "Fetch title, description & thumbnail"}
+              </button>
+            )}
+          </div>
+          {fetchedThumbnailUrl && (
+            <div className="mt-2 flex items-center gap-2">
+              <img src={fetchedThumbnailUrl} alt="Fetched YouTube thumbnail" className="h-12 w-20 rounded object-cover" />
+              <p className="text-xs text-muted-foreground">
+                Auto-fetched from YouTube — used as the thumbnail unless you upload your own image below.
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="text-center text-xs uppercase tracking-wider text-muted-foreground">— or upload a small file directly —</div>
