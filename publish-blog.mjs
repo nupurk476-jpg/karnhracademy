@@ -96,19 +96,22 @@ function textOf(el) {
 }
 
 // ── Extract metadata ──────────────────────────────────────────────────────────
-// Title: prefer .hero h1 element text content
+// Title: prefer .hero h1 element text content, else fall back to a placeholder
 const heroH1 = doc.querySelector('.hero h1');
-const title = heroH1
+const title = (heroH1
   ? textOf(heroH1.cloneNode(true))
-  : (doc.querySelector('title')?.textContent ?? '').split('|')[0].replace(/\s+/g, ' ').trim();
+  : (doc.querySelector('title')?.textContent ?? '').split('|')[0].replace(/\s+/g, ' ').trim()
+) || 'Untitled Post';
 
 // Author: from hero-meta (first span, after ✍ emoji)
 const heroMetaText = textOf(doc.querySelector('.hero-meta'));
 const authorMatch = heroMetaText.match(/[✍✏✐]\s*([^,|·\n]+)/);
 const authorName = authorMatch ? authorMatch[1].trim().replace(/MBA.*$/, '').trim() : 'Nupur Karn';
 
-// Excerpt: from .hero-sub paragraph
-const excerpt = textOf(doc.querySelector('.hero-sub')).slice(0, 300);
+// Excerpt: from .hero-sub paragraph — if absent, derived from the article
+// body itself further down once that's been extracted.
+const heroSubExcerpt = textOf(doc.querySelector('.hero-sub')).slice(0, 300);
+let excerpt = heroSubExcerpt;
 
 // Category: auto-detect from eyebrow/meta text
 const eyebrowText = textOf(doc.querySelector('.hero-eyebrow'));
@@ -135,7 +138,7 @@ function makeSlug(str) {
     .replace(/^-|-$/g, '')
     .slice(0, 80);
 }
-const slug = slugOverride || makeSlug(title);
+const slug = slugOverride || makeSlug(title) || `post-${Date.now()}`;
 
 console.log(`   Title    : ${title}`);
 console.log(`   Author   : ${authorName}`);
@@ -230,17 +233,26 @@ if (heroStats) {
   contentHtml += heroStats.outerHTML + '\n';
 }
 
-// 2. Main section blocks
+// 2. Main section blocks — falls back progressively (.content → <main>/.main
+//    minus hero & footer → full <body> minus hero & footer) so an unfamiliar
+//    layout still brings the article text across instead of publishing empty.
+let mainBodyHtml = '';
 if (contentEl) {
-  contentHtml += contentEl.innerHTML.trim() + '\n';
+  mainBodyHtml = contentEl.innerHTML.trim();
 } else {
-  console.warn('⚠️   .content element not found — using full <main> as fallback.');
-  const main = doc.querySelector('main, .main');
-  if (main) {
-    main.querySelector('.hero')?.remove();
-    main.querySelector('.footer')?.remove();
-    contentHtml += main.innerHTML.trim() + '\n';
-  }
+  console.warn('⚠️   .content element not found — falling back to <main>/<body> minus hero & footer.');
+  const fallbackRoot = doc.querySelector('main, .main') || doc.body;
+  const clone = fallbackRoot.cloneNode(true);
+  clone.querySelector('.hero')?.remove();
+  clone.querySelector('.footer')?.remove();
+  clone.querySelectorAll('script, style').forEach(el => el.remove());
+  mainBodyHtml = clone.innerHTML.trim();
+}
+if (mainBodyHtml) contentHtml += mainBodyHtml + '\n';
+
+// Excerpt fallback: derive from the article body when there's no .hero-sub tagline.
+if (!excerpt) {
+  excerpt = mainBodyHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
 }
 
 // 3. Footer / author byline

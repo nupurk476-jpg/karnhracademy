@@ -32,19 +32,21 @@ export function parseHtmlBlog(html: string): ParsedHtmlBlog {
     return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
   }
 
-  // Title
+  // Title — falls back to "Untitled Post" if neither the hero nor <title> has text
   const heroH1 = doc.querySelector(".hero h1");
-  const title = heroH1
+  const title = (heroH1
     ? textOf(heroH1)
-    : (doc.querySelector("title")?.textContent ?? "").split("|")[0].replace(/\s+/g, " ").trim();
+    : (doc.querySelector("title")?.textContent ?? "").split("|")[0].replace(/\s+/g, " ").trim()
+  ) || "Untitled Post";
 
   // Author
   const heroMetaText = textOf(doc.querySelector(".hero-meta"));
   const authorMatch = heroMetaText.match(/[✍✏✐]\s*([^,|·\n]+)/);
   const author_name = authorMatch ? authorMatch[1].trim().replace(/MBA.*$/, "").trim() : "Nupur Karn";
 
-  // Excerpt
-  const excerpt = textOf(doc.querySelector(".hero-sub")).slice(0, 300);
+  // Excerpt — if there's no .hero-sub tagline, it's derived from the article
+  // body itself further down, once that's been extracted.
+  const heroSubExcerpt = textOf(doc.querySelector(".hero-sub")).slice(0, 300);
 
   // Category
   const eyebrow = textOf(doc.querySelector(".hero-eyebrow"));
@@ -57,7 +59,8 @@ export function parseHtmlBlog(html: string): ParsedHtmlBlog {
   else if (/current.affairs/i.test(combined))             category = "Current Affairs";
   else if (/general.studies/i.test(combined))             category = "General Studies";
 
-  // Slug
+  // Slug — falls back to a timestamped placeholder if the title has no
+  // word characters at all (e.g. an emoji-only or symbol-only title).
   const slug = title
     .toLowerCase()
     .replace(/['''"":]/g, "")
@@ -65,7 +68,7 @@ export function parseHtmlBlog(html: string): ParsedHtmlBlog {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
-    .slice(0, 80);
+    .slice(0, 80) || `post-${Date.now()}`;
 
   // Capture the hero banner's markup + the document's <style> rules (and any
   // Google Fonts stylesheet links) before anything is transformed, so the
@@ -124,13 +127,34 @@ export function parseHtmlBlog(html: string): ParsedHtmlBlog {
   doc.querySelectorAll("*").forEach(el => eventAttrs.forEach(a => el.removeAttribute(a)));
 
   // Build content
-  let content = "";
+  let mainHtml = "";
   const heroStats = doc.querySelector(".hero-stats");
-  if (heroStats) content += heroStats.outerHTML + "\n";
+  if (heroStats) mainHtml += heroStats.outerHTML + "\n";
   const contentEl = doc.querySelector(".content");
   if (contentEl) {
-    content += contentEl.innerHTML.trim() + "\n";
+    mainHtml += contentEl.innerHTML.trim() + "\n";
+  } else {
+    // No .content wrapper in this layout — fall back to the rest of <body>
+    // (minus the hero banner and footer, appended separately below) so an
+    // unfamiliar structure still imports the article text instead of
+    // leaving the content field blank.
+    const bodyClone = doc.body?.cloneNode(true) as HTMLElement | null;
+    if (bodyClone) {
+      bodyClone.querySelector(".hero")?.remove();
+      bodyClone.querySelector(".footer")?.remove();
+      bodyClone.querySelectorAll("script, style").forEach(el => el.remove());
+      const fallback = bodyClone.innerHTML.trim();
+      if (fallback) mainHtml += fallback + "\n";
+    }
   }
+
+  const excerpt = heroSubExcerpt || (() => {
+    const tmp = doc.createElement("div");
+    tmp.innerHTML = mainHtml;
+    return (tmp.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 300);
+  })();
+
+  let content = mainHtml;
   const footerEl = doc.querySelector(".footer");
   if (footerEl) {
     content += `<div class="blog-footer">\n${footerEl.innerHTML.trim()}\n</div>\n`;
