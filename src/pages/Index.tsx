@@ -579,20 +579,34 @@ const VideoLectures = () => {
               {/* Thumbnail */}
               <div
                 className="relative flex items-center justify-center h-44 overflow-hidden"
-                style={{ background: thumb ? "#CBD5E1" : `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}
+                style={{ background: `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}
               >
                 {thumb && (
-                  <img
-                    src={thumb}
-                    alt={lec.title}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                )}
-                {/* Bottom scrim so the play button/badges stay legible over any thumbnail, without washing the image out */}
-                {thumb && (
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.02) 45%, rgba(0,0,0,0.55) 100%)" }} />
+                  <>
+                    {/* Blurred, scaled backdrop — fills the frame no matter the thumbnail's
+                        own aspect ratio, so there's never a plain gap around it. */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `url("${thumb}")`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        filter: "blur(16px) brightness(0.6)",
+                        transform: "scale(1.15)",
+                      }}
+                    />
+                    {/* The real thumbnail, always shown in FULL — object-fit: contain
+                        can never crop, unlike cover, so nothing is ever cut off. */}
+                    <img
+                      src={thumb}
+                      alt={lec.title}
+                      className="relative z-[1] h-full w-full"
+                      style={{ objectFit: "contain" }}
+                      onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                    {/* Bottom scrim so the play button/badges stay legible over any thumbnail */}
+                    <div className="absolute inset-0 z-[2]" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.02) 55%, rgba(0,0,0,0.45) 100%)" }} />
+                  </>
                 )}
                 <PlayCircle className="relative z-10 h-14 w-14 text-white opacity-90 drop-shadow-lg group-hover:scale-110 transition-transform" />
                 {lec.duration_minutes && (

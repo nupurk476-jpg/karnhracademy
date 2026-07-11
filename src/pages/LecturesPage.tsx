@@ -64,7 +64,23 @@ const LecturesPage = () => {
     >
       <div className="relative aspect-video w-full bg-muted">
         {thumb && !thumbFailed ? (
-          <img src={thumb} alt={lec.title} className="h-full w-full object-cover" loading="lazy" onError={() => setThumbFailed(true)} />
+          <>
+            {/* Blurred, scaled backdrop so there's never a plain gap around a
+                thumbnail whose own aspect ratio doesn't exactly match the card. */}
+            <div
+              className="absolute inset-0"
+              style={{ backgroundImage: `url("${thumb}")`, backgroundSize: "cover", backgroundPosition: "center", filter: "blur(16px) brightness(0.6)", transform: "scale(1.15)" }}
+            />
+            {/* The real thumbnail, always shown in FULL — contain can never crop it. */}
+            <img
+              src={thumb}
+              alt={lec.title}
+              className="relative z-[1] h-full w-full"
+              style={{ objectFit: "contain" }}
+              loading="lazy"
+              onError={() => setThumbFailed(true)}
+            />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-primary/10">
             <PlayCircle className="h-14 w-14 text-accent" />
