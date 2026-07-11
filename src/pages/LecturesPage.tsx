@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { PlayCircle, Clock } from "lucide-react";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 
 const LecturesPage = () => {
   const [lectures, setLectures] = useState<any[]>([]);
@@ -55,14 +56,15 @@ const LecturesPage = () => {
 
   const Card = ({ lec }: { lec: any }) => {
     const [thumbFailed, setThumbFailed] = useState(false);
+    const thumb = normalizeYouTubeThumbnail(lec.thumbnail_url);
     return (
     <button
       onClick={() => setPlaying(lec)}
       className="group flex flex-col overflow-hidden rounded-lg border border-border bg-card text-left transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-video w-full bg-muted">
-        {lec.thumbnail_url && !thumbFailed ? (
-          <img src={lec.thumbnail_url} alt={lec.title} className="h-full w-full object-cover" loading="lazy" onError={() => setThumbFailed(true)} />
+        {thumb && !thumbFailed ? (
+          <img src={thumb} alt={lec.title} className="h-full w-full object-cover" loading="lazy" onError={() => setThumbFailed(true)} />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-primary/10">
             <PlayCircle className="h-14 w-14 text-accent" />

@@ -19,6 +19,16 @@ export type YouTubeMetadata = {
   thumbnailUrl: string;
 };
 
+// Lectures saved before this fix may have hqdefault.jpg stored as their
+// thumbnail — a destructive 4:3 center crop of the original 16:9 frame that
+// chops the edges off a custom thumbnail design. Rewrite it to mqdefault.jpg
+// (the uncropped 16:9 version) at display time, so already-saved lectures
+// self-heal without an admin having to re-fetch and re-save each one.
+export function normalizeYouTubeThumbnail(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.replace(/\/hqdefault\.jpg(\?.*)?$/, "/mqdefault.jpg$1");
+}
+
 const ID_PATTERNS = [
   /youtu\.be\/([\w-]{11})/,
   /youtube\.com\/watch\?(?:.*&)?v=([\w-]{11})/,
@@ -38,10 +48,13 @@ export function extractYouTubeId(url: string): string | null {
 // maxresdefault.jpg is the largest thumbnail YouTube serves (the custom
 // "clickbait" image creators upload) but 404s for videos that never had one
 // generated (older or vertical videos) — probe it via Image() and fall back
-// to hqdefault.jpg, which YouTube guarantees exists for every video.
+// to mqdefault.jpg (320x180, true 16:9, always exists). NOT hqdefault.jpg:
+// that one is a destructive 4:3 CENTER CROP of the original 16:9 frame, so
+// it chops the left/right edges off any custom thumbnail — exactly the
+// "only a sliver of the real thumbnail shows" bug this avoids.
 function resolveBestThumbnail(videoId: string): Promise<string> {
   const maxres = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  const fallback = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  const fallback = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
   return new Promise((resolve) => {
     const probe = new Image();
     // YouTube's placeholder for a missing maxresdefault is a tiny grey image

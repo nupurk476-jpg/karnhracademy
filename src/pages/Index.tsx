@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import { DISCIPLINES } from "@/lib/disciplines";
+import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import {
   ArrowRight, BookOpen, Users,
@@ -565,7 +566,9 @@ const VideoLectures = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map((lec: any, i: number) => (
+          {items.map((lec: any, i: number) => {
+            const thumb = normalizeYouTubeThumbnail(lec.thumbnail_url);
+            return (
             <button
               key={lec.id || i}
               type="button"
@@ -574,18 +577,22 @@ const VideoLectures = () => {
               className="group flex w-full flex-col rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-all duration-200 hover:shadow-lg overflow-hidden disabled:cursor-default"
             >
               {/* Thumbnail */}
-              <div className="relative flex items-center justify-center h-44 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}>
-                {lec.thumbnail_url && (
+              <div
+                className="relative flex items-center justify-center h-44 overflow-hidden"
+                style={{ background: thumb ? "#CBD5E1" : `linear-gradient(135deg, ${NAVY}ee, ${NAVY}bb)` }}
+              >
+                {thumb && (
                   <img
-                    src={lec.thumbnail_url}
+                    src={thumb}
                     alt={lec.title}
                     className="absolute inset-0 h-full w-full object-cover"
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
                     onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 )}
                 {/* Bottom scrim so the play button/badges stay legible over any thumbnail, without washing the image out */}
-                {lec.thumbnail_url && (
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(13,42,69,0.15) 0%, rgba(13,42,69,0.05) 45%, rgba(13,42,69,0.55) 100%)" }} />
+                {thumb && (
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.02) 45%, rgba(0,0,0,0.55) 100%)" }} />
                 )}
                 <PlayCircle className="relative z-10 h-14 w-14 text-white opacity-90 drop-shadow-lg group-hover:scale-110 transition-transform" />
                 {lec.duration_minutes && (
@@ -607,7 +614,8 @@ const VideoLectures = () => {
                 </span>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
