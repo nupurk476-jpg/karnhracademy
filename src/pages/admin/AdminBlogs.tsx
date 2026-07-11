@@ -2,123 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileUp } from "lucide-react";
+import { generateCoverImage } from "@/lib/blogCover";
+import { parseHtmlBlog } from "@/lib/blogImport";
 
 const categories = ["HRM Basics", "Organisational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
-
-// ── HTML blog import logic (mirrors publish-blog.mjs) ────────────────────────
-function parseHtmlBlog(html: string) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-
-  function textOf(el: Element | null) {
-    if (!el) return "";
-    const clone = el.cloneNode(true) as Element;
-    clone.querySelectorAll("br,p,div,h1,h2,h3,h4").forEach(b => {
-      b.textContent = " " + b.textContent + " ";
-    });
-    return (clone.textContent ?? "").replace(/\s+/g, " ").trim();
-  }
-
-  // Title
-  const heroH1 = doc.querySelector(".hero h1");
-  const title = heroH1
-    ? textOf(heroH1)
-    : (doc.querySelector("title")?.textContent ?? "").split("|")[0].replace(/\s+/g, " ").trim();
-
-  // Author
-  const heroMetaText = textOf(doc.querySelector(".hero-meta"));
-  const authorMatch = heroMetaText.match(/[✍✏✐]\s*([^,|·\n]+)/);
-  const author_name = authorMatch ? authorMatch[1].trim().replace(/MBA.*$/, "").trim() : "Nupur Karn";
-
-  // Excerpt
-  const excerpt = textOf(doc.querySelector(".hero-sub")).slice(0, 300);
-
-  // Category
-  const eyebrow = textOf(doc.querySelector(".hero-eyebrow"));
-  const combined = (eyebrow + " " + heroMetaText).toLowerCase();
-  let category = "HRM Basics";
-  if (/organizational.behav|org.behav/i.test(combined))  category = "Organisational Behaviour";
-  else if (/research.method/i.test(combined))             category = "Research Methodology";
-  else if (/ethical.hrm|ethics/i.test(combined))         category = "Ethical HRM";
-  else if (/quiet.quitting/i.test(combined))              category = "Quiet Quitting";
-  else if (/current.affairs/i.test(combined))             category = "Current Affairs";
-  else if (/general.studies/i.test(combined))             category = "General Studies";
-
-  // Slug
-  const slug = title
-    .toLowerCase()
-    .replace(/['''"":]/g, "")
-    .replace(/[^\w\s-]/g, " ")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80);
-
-  // Transform accordions → <details>/<summary>
-  doc.querySelectorAll(".acc-item").forEach(item => {
-    const trigger = item.querySelector(".acc-trigger");
-    const body = item.querySelector(".acc-body");
-    if (!trigger || !body) return;
-    trigger.querySelector(".acc-arrow")?.remove();
-    const details = doc.createElement("details");
-    details.className = "acc-item";
-    const summary = doc.createElement("summary");
-    summary.className = "acc-trigger";
-    summary.innerHTML = trigger.innerHTML.trim();
-    const bodyDiv = doc.createElement("div");
-    bodyDiv.className = "acc-body";
-    bodyDiv.innerHTML = body.innerHTML;
-    details.appendChild(summary);
-    details.appendChild(bodyDiv);
-    item.replaceWith(details);
-  });
-
-  // Transform lifecycle tabs → stacked <details>
-  doc.querySelectorAll(".lifecycle").forEach(lifecycle => {
-    const tabs   = [...lifecycle.querySelectorAll(".lc-tab")];
-    const panels = [...lifecycle.querySelectorAll(".lc-panel")];
-    if (!panels.length) return;
-    const newEl = doc.createElement("div");
-    newEl.className = "lifecycle";
-    panels.forEach((panel, i) => {
-      const details = doc.createElement("details");
-      details.className = "lc-stage";
-      if (i === 0) details.setAttribute("open", "");
-      const summary = doc.createElement("summary");
-      summary.className = "lc-tab";
-      summary.innerHTML = tabs[i] ? tabs[i].innerHTML : `<span class="lc-tab-label">Stage ${i + 1}</span>`;
-      const content = doc.createElement("div");
-      content.className = "lc-panel";
-      content.innerHTML = panel.innerHTML;
-      details.appendChild(summary);
-      details.appendChild(content);
-      newEl.appendChild(details);
-    });
-    lifecycle.replaceWith(newEl);
-  });
-
-  // Strip event handlers
-  const eventAttrs = ["onclick","onchange","oninput","onsubmit","onkeyup","onkeydown","onfocus","onblur"];
-  doc.querySelectorAll("*").forEach(el => eventAttrs.forEach(a => el.removeAttribute(a)));
-
-  // Build content
-  let content = "";
-  const heroStats = doc.querySelector(".hero-stats");
-  if (heroStats) content += heroStats.outerHTML + "\n";
-  const contentEl = doc.querySelector(".content");
-  if (contentEl) {
-    content += contentEl.innerHTML.trim() + "\n";
-  }
-  const footerEl = doc.querySelector(".footer");
-  if (footerEl) {
-    content += `<div class="blog-footer">\n${footerEl.innerHTML.trim()}\n</div>\n`;
-  }
-  content = content.replace(/<!--[\s\S]*?-->/g, "").replace(/\n{3,}/g, "\n\n").trim();
-
-  return { title, slug, excerpt, content, category, author_name };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -127,6 +14,7 @@ const AdminBlogs = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [importStage, setImportStage] = useState<"" | "parsing" | "cover">("");
   const htmlInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -146,8 +34,9 @@ const AdminBlogs = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
+    setImportStage("parsing");
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const html = ev.target?.result as string;
         const parsed = parseHtmlBlog(html);
@@ -160,11 +49,29 @@ const AdminBlogs = () => {
           category: parsed.category,
           author_name: parsed.author_name,
         }));
-        toast({ title: "HTML imported", description: "Review the fields below, then click Create." });
+
+        // Auto-generate the cover from the hero banner (or a branded
+        // fallback) — these HTML articles never contain a separate photo.
+        setImportStage("cover");
+        let coverNote = "";
+        try {
+          const blob = await generateCoverImage(parsed);
+          const path = `${parsed.slug}-cover-${Date.now()}.png`;
+          const { error: uploadError } = await supabase.storage.from("blog-images").upload(path, blob, { contentType: "image/png" });
+          if (uploadError) throw uploadError;
+          const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
+          setForm(prev => ({ ...prev, cover_image: urlData.publicUrl }));
+        } catch (coverErr) {
+          console.error("Cover generation failed:", coverErr);
+          coverNote = " Cover image couldn't be generated automatically — upload one manually below.";
+        }
+
+        toast({ title: "HTML imported", description: `Review the fields below, then click Create.${coverNote}` });
       } catch {
         toast({ title: "Import failed", description: "Could not parse the HTML file.", variant: "destructive" });
       } finally {
         setImporting(false);
+        setImportStage("");
         // Reset the file input so the same file can be re-imported if needed
         if (htmlInputRef.current) htmlInputRef.current.value = "";
       }
@@ -246,8 +153,9 @@ const AdminBlogs = () => {
                 className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
               >
                 <FileUp className="h-4 w-4" />
-                {importing ? "Importing…" : "Import from HTML"}
+                {importStage === "cover" ? "Generating cover…" : importing ? "Importing…" : "Import from HTML"}
               </button>
+              <p className="mt-1 text-xs text-muted-foreground">Title, excerpt, content, category &amp; cover image are all extracted automatically.</p>
             </div>
           )}
         </div>
