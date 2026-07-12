@@ -204,6 +204,8 @@ const NotesPage = () => {
         <NoteCoverThumbnail
           fileUrl={note.file_url}
           title={note.title}
+          subject={note.subject}
+          size="sm"
           className="hidden h-16 w-12 flex-shrink-0 overflow-hidden rounded border border-border sm:block"
         >
           <CoverFallback size="sm" />
@@ -223,7 +225,7 @@ const NotesPage = () => {
 
   const GridCard = ({ note }: { note: any }) => (
     <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
-      <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} className="relative h-40 w-full overflow-hidden border-b border-border">
+      <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} subject={note.subject} size="lg" className="relative h-40 w-full overflow-hidden border-b border-border">
         <CoverFallback size="lg" />
       </NoteCoverThumbnail>
       <div className="flex flex-1 flex-col p-5">

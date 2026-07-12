@@ -5,15 +5,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { DISCIPLINES } from "@/lib/disciplines";
+import { NAVY_HEX, GOLD_HEX, SUBJECT_GRADIENT } from "@/lib/subjectGradients";
 import {
   Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
   Layers, TrendingUp, BookOpen,
   CheckCircle2, Lightbulb, Award, Zap, Filter, ArrowRight,
   FileText, Video, Download, FolderOpen, PlayCircle,
 } from "lucide-react";
-
-const NAVY_HEX = "#1F4E79";
-const GOLD_HEX = "#C7994A";
 
 // ── Subject config ────────────────────────────────────────────────────────────
 // Sourced from disciplines.ts so this can never drift out of sync with Notes/Admin.
@@ -91,20 +89,6 @@ function getSubjectForTopic(topic: string) {
 function resolveSubject(quiz: any) {
   return quiz.subject || getSubjectForTopic(quiz.topic || "");
 }
-
-// Per-subject cover gradient, built from the site's navy/steel/gold palette so
-// quiz covers feel like a designed poster rather than a stock icon tile.
-const SUBJECT_GRADIENT: Record<string, [string, string]> = {
-  hrm:     ["#1F4E79", "#0D2A45"],
-  ob:      ["#3D6C98", "#1F4E79"],
-  sm:      ["#A9823F", "#0D2A45"],
-  pom:     ["#0D2A45", "#1F4E79"],
-  bc:      ["#5B8AB8", "#1F4E79"],
-  cgbe:    ["#1F4E79", "#3D6C98"],
-  odcm:    ["#C7994A", "#A9823F"],
-  ghr:     ["#0D2A45", "#3D6C98"],
-  english: ["#3D6C98", "#0D2A45"],
-};
 
 // Decorative gradient + pattern layer shared by the featured and grid quiz
 // covers — diamonds echo the brand mark, the icon watermark ties the cover
