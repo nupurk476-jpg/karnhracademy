@@ -3,13 +3,22 @@ import {
   AlertTriangle, MessageSquare, Landmark, ShieldCheck, Calendar,
   Target, RefreshCw, Building2, Globe, Gavel, HandHeart, BarChart3,
   Lightbulb, Brain, Users, Star, Handshake, BookOpen, Presentation,
+  Scale, Flag,
   type LucideIcon,
 } from "lucide-react";
 
-// Keyword → icon, checked in order against a topic's label/slug. This way any
-// topic (present or future, across every discipline) gets a content-relevant
-// icon on its generated cover without hand-mapping each one individually.
+// Keyword → icon, checked in order against a note's title + topic name. This
+// way any note (present or future, across every discipline) gets a
+// content-relevant icon without hand-mapping each one individually. Specific
+// named theories are listed first and win over the broader topic bucket they
+// happen to be filed under (e.g. many different motivation-theory PPTs all
+// live under the single "Motivation" topic, but "Equity Theory" and
+// "Goal-Setting Theory" should still look different from one another).
 const TOPIC_ICON_RULES: [RegExp, LucideIcon][] = [
+  [/equity theory|organi[sz]ational justice|distributive justice|procedural justice/i, Scale],
+  [/self.efficacy|bandura|social learning|self.belief/i, Brain],
+  [/goal.setting|\blocke'?s\b|smart goals/i, Flag],
+  [/maslow|hierarchy of needs|herzberg|two.factor|mcgregor|theory x|theory y|\bvroom\b|expectancy theory/i, Flame],
   [/recruit|selection|staffing|hiring|induction|placement/i, UserPlus],
   [/compensation|benefit|salary|wage|pay\b/i, Wallet],
   [/performance|appraisal|\bkpi\b/i, TrendingUp],

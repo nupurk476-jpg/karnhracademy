@@ -68,26 +68,31 @@ function hslToHex(h: number, s: number, l: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-// Nudges a hex color's hue/lightness by an amount derived from `seed`, so the
-// result stays recognizably part of the same color family (brand palette)
-// while still reading as visually distinct.
+// Nudges a hex color's hue/lightness/saturation by an amount derived from
+// `seed`, so the result stays recognizably part of the same color family
+// (brand palette) while still reading as clearly, visibly distinct — not
+// just technically-different-in-the-hex-value.
 function shiftColor(hex: string, seed: number): string {
   const [h, s, l] = hexToHsl(hex);
-  const hueShift = (seed % 40) - 20; // ±20°
-  const lightShift = ((seed >> 8) % 18) - 9; // ±9%
+  const hueShift = (seed % 56) - 28; // ±28°
+  const satShift = ((seed >> 6) % 30) - 15; // ±15%
+  const lightShift = ((seed >> 11) % 24) - 12; // ±12%
   const newH = (h + hueShift + 360) % 360;
+  const newS = Math.min(90, Math.max(25, s + satShift));
   const newL = Math.min(76, Math.max(16, l + lightShift));
-  return hslToHex(newH, s, newL);
+  return hslToHex(newH, newS, newL);
 }
 
-// Per-topic cover gradient: starts from the subject's base gradient (so it's
-// still instantly recognizable as "an HRM note" etc.) but nudges the hue and
-// lightness by a hash of `seed` (typically the topic slug, or the note
-// title when no topic is set) so notes on different topics don't all render
-// with an identical cover.
+// Per-note cover gradient: starts from the subject's base gradient (so it's
+// still instantly recognizable as "an HRM note" etc.) but nudges the hue,
+// saturation and lightness by a hash of `seed`. `seed` should be something
+// unique to the individual file (its storage URL, ideally) rather than the
+// topic — many different uploaded notes share the same broad topic (e.g. a
+// dozen PPTs all filed under "Motivation"), and keying purely off topic
+// would make all of them render identically.
 export function topicGradient(subjectValue: string | null | undefined, seed: string): [string, string] {
   const [from, to] = subjectGradient(subjectValue);
   if (!seed) return [from, to];
   const hash = hashString(seed);
-  return [shiftColor(from, hash), shiftColor(to, hash >> 3)];
+  return [shiftColor(from, hash), shiftColor(to, hash >> 4)];
 }

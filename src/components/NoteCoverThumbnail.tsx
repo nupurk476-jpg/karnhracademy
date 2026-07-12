@@ -44,15 +44,16 @@ async function renderPdfCover(url: string): Promise<string> {
 // Designed cover for PPT/PPTX notes — a PowerPoint file can't be rasterized
 // in-browser the way a PDF's first page can, so instead of a bland "no
 // preview" box this renders a gradient poster (same visual language as the
-// quiz cards) tuned to the note's actual topic: the gradient is nudged away
-// from the subject's base color per-topic (so a subject's notes don't all
-// look identical), and the icon is picked by matching keywords in the topic
-// name, so e.g. a Recruitment note and a Compensation note read differently
-// at a glance instead of sharing one generic slide-deck icon.
-const PptCoverArt = ({ subject, topicSlug, title, size }: { subject?: string | null; topicSlug?: string | null; title: string; size: "sm" | "lg" }) => {
-  const topicLabel = topicSlug ? getTopicLabel(topicSlug) : title;
-  const [from, to] = topicGradient(subject, topicSlug || title);
-  const Icon = iconForTopic(topicLabel);
+// quiz cards) tuned to the note itself: the gradient is seeded by the file's
+// own URL (guaranteed unique — unlike topic, which many notes share, e.g. a
+// dozen PPTs all filed under "Motivation") so no two notes render identically,
+// and the icon is matched against the note's title first, falling back to its
+// topic name, so specific content (e.g. "Equity Theory") can pick a more
+// on-point icon than the broad topic bucket it's filed under.
+const PptCoverArt = ({ subject, topicSlug, title, fileUrl, size }: { subject?: string | null; topicSlug?: string | null; title: string; fileUrl?: string | null; size: "sm" | "lg" }) => {
+  const topicLabel = topicSlug ? getTopicLabel(topicSlug) : "";
+  const [from, to] = topicGradient(subject, fileUrl || title);
+  const Icon = iconForTopic(`${title} ${topicLabel}`);
   if (size === "sm") {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
@@ -136,7 +137,7 @@ const NoteCoverThumbnail = ({ fileUrl, title, subject, topicSlug, size = "lg", c
           loading="lazy"
         />
       ) : isPpt ? (
-        <PptCoverArt subject={subject} topicSlug={topicSlug} title={title} size={size} />
+        <PptCoverArt subject={subject} topicSlug={topicSlug} title={title} fileUrl={fileUrl} size={size} />
       ) : (
         children
       )}
