@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Presentation } from "lucide-react";
-import { subjectGradient } from "@/lib/subjectGradients";
+import { topicGradient } from "@/lib/subjectGradients";
+import { iconForTopic } from "@/lib/topicIcons";
+import { getTopicLabel } from "@/lib/disciplines";
 
 // Renders page 1 of a note's PDF as a cover image, so visitors can see what's
 // inside before the email gate. pdfjs is heavy, so it's dynamically imported
@@ -42,14 +43,20 @@ async function renderPdfCover(url: string): Promise<string> {
 
 // Designed cover for PPT/PPTX notes — a PowerPoint file can't be rasterized
 // in-browser the way a PDF's first page can, so instead of a bland "no
-// preview" box this renders a subject-tinted gradient poster (same visual
-// language as the quiz cards) with a slide-deck icon and the note's title.
-const PptCoverArt = ({ subject, title, size }: { subject?: string | null; title: string; size: "sm" | "lg" }) => {
-  const [from, to] = subjectGradient(subject);
+// preview" box this renders a gradient poster (same visual language as the
+// quiz cards) tuned to the note's actual topic: the gradient is nudged away
+// from the subject's base color per-topic (so a subject's notes don't all
+// look identical), and the icon is picked by matching keywords in the topic
+// name, so e.g. a Recruitment note and a Compensation note read differently
+// at a glance instead of sharing one generic slide-deck icon.
+const PptCoverArt = ({ subject, topicSlug, title, size }: { subject?: string | null; topicSlug?: string | null; title: string; size: "sm" | "lg" }) => {
+  const topicLabel = topicSlug ? getTopicLabel(topicSlug) : title;
+  const [from, to] = topicGradient(subject, topicSlug || title);
+  const Icon = iconForTopic(topicLabel);
   if (size === "sm") {
     return (
       <div className="flex h-full w-full items-center justify-center" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
-        <Presentation className="h-5 w-5 text-white/90" strokeWidth={1.75} />
+        <Icon className="h-5 w-5 text-white/90" strokeWidth={1.75} />
       </div>
     );
   }
@@ -58,10 +65,10 @@ const PptCoverArt = ({ subject, title, size }: { subject?: string | null; title:
       <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "20px 20px" }} />
       <div className="absolute -right-5 -top-5 h-20 w-20 rotate-45 rounded-lg bg-white/10" />
       <div className="absolute right-10 top-16 h-8 w-8 rotate-45 rounded bg-white/15" />
-      <Presentation className="absolute -bottom-5 -right-5 h-28 w-28 text-white/10" strokeWidth={1.5} />
+      <Icon className="absolute -bottom-5 -right-5 h-28 w-28 text-white/10" strokeWidth={1.5} />
       <div className="relative z-10 flex h-full flex-col justify-between p-4">
         <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
-          <Presentation className="h-3 w-3" /> PPT
+          <Icon className="h-3 w-3" /> PPT
         </span>
         <h3 className="text-sm font-bold leading-snug text-white line-clamp-3" style={{ fontFamily: "'Sora',sans-serif" }}>
           {title}
@@ -74,8 +81,10 @@ const PptCoverArt = ({ subject, title, size }: { subject?: string | null; title:
 type Props = {
   fileUrl?: string | null;
   title: string;
-  /** Discipline value (e.g. "hrm", "ob") — picks the PPT cover's gradient. */
+  /** Discipline value (e.g. "hrm", "ob") — the PPT cover's base gradient family. */
   subject?: string | null;
+  /** Topic slug — nudges the PPT cover's gradient and picks its icon so notes on different topics look different. */
+  topicSlug?: string | null;
   /** "sm" for tiny list-row thumbnails, "lg" for full cards. Defaults to "lg". */
   size?: "sm" | "lg";
   /** Sizing/rounding/overflow for the cover box. */
@@ -84,7 +93,7 @@ type Props = {
   children?: React.ReactNode;
 };
 
-const NoteCoverThumbnail = ({ fileUrl, title, subject, size = "lg", className, children }: Props) => {
+const NoteCoverThumbnail = ({ fileUrl, title, subject, topicSlug, size = "lg", className, children }: Props) => {
   const isPdf = !!fileUrl && /\.pdf(\?|$)/i.test(fileUrl);
   const isPpt = !!fileUrl && /\.pptx?(\?|$)/i.test(fileUrl);
   const [src, setSrc] = useState<string | null>(isPdf ? coverCache.get(fileUrl!) ?? null : null);
@@ -127,7 +136,7 @@ const NoteCoverThumbnail = ({ fileUrl, title, subject, size = "lg", className, c
           loading="lazy"
         />
       ) : isPpt ? (
-        <PptCoverArt subject={subject} title={title} size={size} />
+        <PptCoverArt subject={subject} topicSlug={topicSlug} title={title} size={size} />
       ) : (
         children
       )}

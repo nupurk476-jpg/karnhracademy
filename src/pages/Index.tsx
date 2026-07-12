@@ -505,7 +505,7 @@ const FeaturedNotes = () => {
             return (
               <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
                 {/* Cover page — real PDF page 1 when available, icon fallback otherwise */}
-                <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} subject={note.subject} size="lg" className="relative h-44 w-full overflow-hidden border-b border-slate-100">
+                <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} subject={note.subject} topicSlug={note.topic_slug} size="lg" className="relative h-44 w-full overflow-hidden border-b border-slate-100">
                   <div className="flex h-full w-full items-center justify-center" style={{ background: `${sub.color}0d` }}>
                     <FileText className="h-10 w-10" style={{ color: `${sub.color}80` }} />
                   </div>
