@@ -9,6 +9,7 @@ const categories = ["HRM Basics", "Organisational Behaviour", "Research Methodol
 
 const AdminBlogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ title: "", slug: "", excerpt: "", content: "", category: categories[0], author_name: "Nupur Karn", published: false, cover_image: "" });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -145,6 +146,11 @@ const AdminBlogs = () => {
     setImageFile(null);
   };
 
+  const term = search.trim().toLowerCase();
+  const filteredPosts = posts.filter(p =>
+    !term || p.title?.toLowerCase().includes(term) || p.category?.toLowerCase().includes(term)
+  );
+
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Blog Posts</h1>
@@ -220,8 +226,20 @@ const AdminBlogs = () => {
       </div>
 
       {/* List */}
+      {posts.length > 0 && (
+        <input
+          type="text"
+          placeholder="Search posts by title or category..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-3 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      )}
       <div className="space-y-2">
-        {posts.map((post) => (
+        {posts.length > 0 && filteredPosts.length === 0 && (
+          <p className="rounded-md border border-dashed border-border py-8 text-center text-sm text-muted-foreground">No posts match "{search}".</p>
+        )}
+        {filteredPosts.map((post) => (
           <div key={post.id} className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
             <div className="flex-1 min-w-0 mr-4">
               <span className="font-medium text-foreground">{post.title}</span>

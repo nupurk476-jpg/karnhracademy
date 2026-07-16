@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 
 const AdminBooks = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({ title: "", author: "", description: "", buy_link: "" });
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -42,6 +43,11 @@ const AdminBooks = () => {
     load();
   };
 
+  const term = search.trim().toLowerCase();
+  const filteredBooks = books.filter(b =>
+    !term || b.title?.toLowerCase().includes(term) || b.author?.toLowerCase().includes(term)
+  );
+
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold text-foreground">Book Recommendations</h1>
@@ -59,8 +65,20 @@ const AdminBooks = () => {
           {uploading ? "Uploading..." : "Add Book"}
         </button>
       </div>
+      {books.length > 0 && (
+        <input
+          type="text"
+          placeholder="Search books by title or author..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-3 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      )}
       <div className="space-y-2">
-        {books.map((b) => (
+        {books.length > 0 && filteredBooks.length === 0 && (
+          <p className="rounded-md border border-dashed border-border py-8 text-center text-sm text-muted-foreground">No books match "{search}".</p>
+        )}
+        {filteredBooks.map((b) => (
           <div key={b.id} className="flex items-center justify-between gap-3 rounded-md border border-border bg-card px-4 py-3">
             <div className="min-w-0">
               <span className="font-medium text-foreground">{b.title}</span>

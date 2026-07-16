@@ -23,6 +23,7 @@ const COMPAT_HINT = "Saved without the new fields (description / publish / diffi
 
 const AdminQuizzes = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizSearch, setQuizSearch] = useState("");
   const [questions, setQuestions] = useState<any[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null);
 
@@ -268,6 +269,14 @@ const AdminQuizzes = () => {
 
   const activeQuizObj = quizzes.find(q => q.id === selectedQuiz);
 
+  const quizTerm = quizSearch.trim().toLowerCase();
+  const filteredQuizzes = quizzes.filter(q =>
+    !quizTerm ||
+    q.title?.toLowerCase().includes(quizTerm) ||
+    q.topic?.toLowerCase().includes(quizTerm) ||
+    getDiscipline(q.subject)?.label.toLowerCase().includes(quizTerm)
+  );
+
   // ── Question form fields (shared by new + edit) ────────────────────────────
   const renderQuestionFields = () => (
     <div className="space-y-3 border-t border-border pt-3">
@@ -380,9 +389,23 @@ const AdminQuizzes = () => {
       <div className="grid items-start gap-6 lg:grid-cols-2">
         {/* Quiz list */}
         <div className="space-y-2">
-          <h2 className="mb-2 text-lg font-semibold text-foreground">All Quizzes ({quizzes.length})</h2>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-foreground">All Quizzes ({filteredQuizzes.length}{quizTerm ? ` of ${quizzes.length}` : ""})</h2>
+          </div>
+          {quizzes.length > 0 && (
+            <input
+              type="text"
+              placeholder="Search quizzes by title, topic, or subject..."
+              value={quizSearch}
+              onChange={e => setQuizSearch(e.target.value)}
+              className="mb-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          )}
           {quizzes.length === 0 && <p className="text-sm text-muted-foreground">No quizzes yet — create your first one above.</p>}
-          {quizzes.map((q) => {
+          {quizzes.length > 0 && filteredQuizzes.length === 0 && (
+            <p className="text-sm text-muted-foreground">No quizzes match "{quizSearch}".</p>
+          )}
+          {filteredQuizzes.map((q) => {
             const isPublished = q.published ?? true;
             return (
               <div key={q.id}

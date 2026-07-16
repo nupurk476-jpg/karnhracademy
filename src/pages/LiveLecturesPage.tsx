@@ -7,6 +7,7 @@ import { Radio, Calendar, ExternalLink, Video } from "lucide-react";
 
 const LiveLecturesPage = () => {
   const [items, setItems] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     supabase.from("live_lectures" as any).select("*").order("scheduled_at", { ascending: true })
@@ -14,9 +15,11 @@ const LiveLecturesPage = () => {
   }, []);
 
   const now = Date.now();
-  const live = items.filter(i => i.status === "live");
-  const upcoming = items.filter(i => i.status === "upcoming" && new Date(i.scheduled_at).getTime() >= now - 1000 * 60 * 60);
-  const past = items.filter(i => i.status === "ended" || (i.status !== "live" && new Date(i.scheduled_at).getTime() < now - 1000 * 60 * 60));
+  const term = search.trim().toLowerCase();
+  const matches = items.filter(i => !term || i.title?.toLowerCase().includes(term) || i.description?.toLowerCase().includes(term));
+  const live = matches.filter(i => i.status === "live");
+  const upcoming = matches.filter(i => i.status === "upcoming" && new Date(i.scheduled_at).getTime() >= now - 1000 * 60 * 60);
+  const past = matches.filter(i => i.status === "ended" || (i.status !== "live" && new Date(i.scheduled_at).getTime() < now - 1000 * 60 * 60));
 
   const Card = ({ l }: { l: any }) => (
     <article className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-lg">
@@ -67,7 +70,18 @@ const LiveLecturesPage = () => {
             Live Lectures
           </h1>
           <p className="mt-2 text-muted-foreground">Join interactive live classes and Q&A sessions.</p>
+          <input
+            type="text"
+            placeholder="Search live lectures..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="mx-auto mt-4 block w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
+
+        {matches.length === 0 && (
+          <p className="py-12 text-center text-muted-foreground">No live lectures found.</p>
+        )}
 
         {live.length > 0 && (
           <section className="mb-12">

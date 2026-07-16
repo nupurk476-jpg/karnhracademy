@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -33,14 +33,23 @@ const NewspaperPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const term = search.trim().replace(/[%,()]/g, "");
       let query = supabase
         .from("newspaper_highlights")
         .select("*", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+        .order("created_at", { ascending: false });
 
       if (activeSection !== "all") {
         query = query.eq("section", activeSection);
+      }
+
+      if (term) {
+        // Search runs server-side across every matching row, not just the
+        // current page — otherwise it would silently only search whatever
+        // 9 rows happened to already be loaded.
+        query = query.or(`title.ilike.%${term}%,summary.ilike.%${term}%`);
+      } else {
+        query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
       }
 
       const { data, count } = await query;
@@ -49,8 +58,9 @@ const NewspaperPage = () => {
       setLoading(false);
     };
     fetchData();
-  }, [activeSection, page]);
+  }, [activeSection, page, search]);
 
+  const searching = search.trim().length > 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const updateParams = (updates: Record<string, string>) => {
@@ -100,15 +110,11 @@ const NewspaperPage = () => {
               <div key={i} className="h-72 animate-pulse rounded-lg bg-muted" />
             ))}
           </div>
-        ) : (() => {
-          const filtered = highlights.filter(h =>
-            !search || h.title?.toLowerCase().includes(search.toLowerCase()) || h.summary?.toLowerCase().includes(search.toLowerCase())
-          );
-          return filtered.length === 0 ? (
+        ) : highlights.length === 0 ? (
           <p className="py-12 text-center text-muted-foreground">No highlights found.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((h) => (
+            {highlights.map((h) => (
               <div key={h.id} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {h.image_url ? (
                   <img src={h.image_url} alt={h.title} className="h-48 w-full object-cover" />
@@ -128,10 +134,9 @@ const NewspaperPage = () => {
               </div>
             ))}
           </div>
-        );
-        })()}
+        )}
 
-        {totalPages > 1 && (
+        {!searching && totalPages > 1 && (
           <div className="mt-10 flex items-center justify-center gap-2">
             <Button
               variant="outline"

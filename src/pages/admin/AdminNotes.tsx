@@ -6,6 +6,7 @@ import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -102,6 +103,14 @@ const AdminNotes = () => {
   const activeDiscipline = getDiscipline(subject);
   const topics = activeDiscipline ? [...activeDiscipline.topics] : [];
   const fileName = (url: string) => decodeURIComponent(url.split("/").pop() || "").slice(0, 40);
+
+  const term = search.trim().toLowerCase();
+  const filteredNotes = notes.filter(n =>
+    !term ||
+    n.title?.toLowerCase().includes(term) ||
+    n.description?.toLowerCase().includes(term) ||
+    (n.tags ?? []).some((t: string) => t.toLowerCase().includes(term))
+  );
 
   return (
     <div>
@@ -214,8 +223,22 @@ const AdminNotes = () => {
         </button>
       </div>
 
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <input
+          type="text"
+          placeholder="Search notes by title, description, or tag..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+        <span className="shrink-0 text-xs text-muted-foreground">{filteredNotes.length} of {notes.length}</span>
+      </div>
+
       <div className="space-y-2">
-        {notes.map((note) => (
+        {filteredNotes.length === 0 && notes.length > 0 && (
+          <p className="rounded-md border border-dashed border-border py-8 text-center text-sm text-muted-foreground">No notes match "{search}".</p>
+        )}
+        {filteredNotes.map((note) => (
           <div key={note.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-md border bg-card px-4 py-3 ${editingId === note.id ? "border-accent" : "border-border"}`}>
             <div className="min-w-0">
               <span className="font-medium text-foreground">{note.title}</span>
