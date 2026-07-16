@@ -176,28 +176,31 @@ const Hero = () => {
                 </div>
               </div>
 
-              {/* Subject rows — Option B: name + status label, no progress bars */}
+              {/* Subject rows — only subjects with real content, so this card
+                  never reads as "mostly empty". Repeating a "Coming Soon"
+                  badge across every not-yet-populated subject undermined
+                  trust more than just not mentioning them here at all. */}
               <div className="px-6 py-4 space-y-2.5">
-                {HERO_SUBJECTS.map(s => {
-                  const c = counts[s.value] || 0;
-                  return (
+                {(() => {
+                  const withContent = HERO_SUBJECTS.filter(s => (counts[s.value] || 0) > 0);
+                  if (withContent.length === 0) {
+                    return (
+                      <p className="text-xs" style={{ color: "#8296AC" }}>
+                        New content added every week — check back soon.
+                      </p>
+                    );
+                  }
+                  return withContent.map(s => (
                     <div key={s.value} className="flex items-center justify-between gap-3">
                       {/* Color dot */}
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: s.color }} />
                       <span className="flex-1 text-xs font-medium" style={{ color: "#33475C" }}>{s.label}</span>
-                      {c > 0 ? (
-                        <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
-                          {c} {c === 1 ? "note" : "notes"}
-                        </span>
-                      ) : (
-                        /* Neutral gray — does not compete with gold CTA buttons */
-                        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "#EEF0F8", color: "#8296AC" }}>
-                          Coming Soon
-                        </span>
-                      )}
+                      <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
+                        {counts[s.value]} {counts[s.value] === 1 ? "note" : "notes"}
+                      </span>
                     </div>
-                  );
-                })}
+                  ));
+                })()}
               </div>
 
               {/* Total badge — inside the card at the bottom, no absolute overlap */}
