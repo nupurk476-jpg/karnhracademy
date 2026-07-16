@@ -38,7 +38,6 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   cgbe:    { color: NAVY,       bg: "#EEF0F8" },
   odcm:    { color: GOLD,       bg: "#F7F1E3" },
   ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
-  english: { color: STEEL_DARK, bg: "#E3EAF2" },
   lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
 };
 
@@ -94,9 +93,7 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-// English for Management is excluded from this banner card specifically — it
-// still exists as a full subject elsewhere on the site (Notes, Quizzes, etc.).
-const HERO_SUBJECTS = SUBJECTS.filter(s => s.value !== "english").map(s => ({ label: s.label, value: s.value, color: s.color }));
+const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
 
 const Hero = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -477,7 +474,6 @@ const FeaturedNotes = () => {
     cgbe:   { label: "CG & BE",   color: NAVY },
     odcm:   { label: "OD & CM",   color: GOLD },
     ghr:    { label: "Global HR", color: NAVY_DARK },
-    english:{ label: "English",   color: STEEL_DARK },
   };
 
   const placeholders = [

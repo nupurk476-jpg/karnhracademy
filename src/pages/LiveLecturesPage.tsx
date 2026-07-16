@@ -38,7 +38,7 @@ const LiveLecturesPage = () => {
         <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           {new Date(l.scheduled_at).toLocaleString()}
-          <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary">{l.subject === "english" ? "English" : "HRM"}</span>
+          <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-primary">HRM</span>
         </div>
         {l.meeting_url && (
           <a href={l.meeting_url} target="_blank" rel="noopener noreferrer"

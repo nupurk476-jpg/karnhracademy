@@ -15,7 +15,6 @@ export const SUBJECT_GRADIENT: Record<string, [string, string]> = {
   cgbe:    ["#1F4E79", "#3D6C98"],
   odcm:    ["#C7994A", "#A9823F"],
   ghr:     ["#0D2A45", "#3D6C98"],
-  english: ["#3D6C98", "#0D2A45"],
 };
 
 export function subjectGradient(subjectValue?: string | null): [string, string] {

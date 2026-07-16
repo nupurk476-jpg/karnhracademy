@@ -71,7 +71,6 @@ const DIFFICULTY_TEXT: Record<string, string> = {
 
 function getSubjectForTopic(topic: string) {
   const t = (topic || "").toLowerCase();
-  if (t.includes("vocabulary") || t.includes("grammar") || t.includes("verbal") || t.includes("comprehension") || t.includes("idiom") || t.includes("synonym")) return "english";
   if (t.includes("behaviour") || t.includes("motivation") || t.includes("perception") || t.includes("personality") || t.includes("leadership") || t.includes("group dynamics")) return "ob";
   if (t.includes("strateg")) return "sm";
   if (t.includes("governance") || t.includes("ethics") || t.includes("csr") || t.includes("esg")) return "cgbe";

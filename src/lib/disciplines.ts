@@ -1,5 +1,5 @@
 import {
-  BookOpen, Languages, Briefcase, Users, Target,
+  BookOpen, Briefcase, Users, Target,
   MessageSquare, Scale, Repeat, Globe, HandHeart,
 } from "lucide-react";
 import { LW_TOPICS } from "./labourWelfareUnits";
@@ -189,26 +189,6 @@ export const DISCIPLINES = [
       { label: "International Labour Standards",    slug: "international-labour-standards" },
       { label: "MNCs & HR Practices",              slug: "mncs-hr-practices" },
       { label: "Global Workforce Diversity",        slug: "global-workforce-diversity" },
-    ],
-  },
-  {
-    value: "english",
-    label: "English for Management",
-    short: "English",
-    icon: Languages,
-    color: "bg-[#F2F6FA] border-[#C9D8E8] text-[#3D6C98]",
-    activeColor: "bg-[#3D6C98] border-[#3D6C98] text-white",
-    iconBg: "bg-[#DCE6F1]",
-    iconColor: "text-[#3D6C98]",
-    description: "Vocabulary, grammar, reading comprehension, writing skills",
-    topics: [
-      { label: "Vocabulary",              slug: "vocabulary" },
-      { label: "Grammar",                 slug: "grammar" },
-      { label: "Reading Comprehension",   slug: "reading-comprehension" },
-      { label: "Writing Skills",          slug: "writing-skills" },
-      { label: "Verbal Ability",          slug: "verbal-ability" },
-      { label: "Synonyms & Antonyms",     slug: "synonyms-antonyms" },
-      { label: "Idioms & Phrases",        slug: "idioms-phrases" },
     ],
   },
   {
