@@ -105,12 +105,12 @@ const AdminNotes = () => {
   const fileName = (url: string) => decodeURIComponent(url.split("/").pop() || "").slice(0, 40);
 
   const term = search.trim().toLowerCase();
-  const filteredNotes = notes.filter(n =>
-    !term ||
-    n.title?.toLowerCase().includes(term) ||
-    n.description?.toLowerCase().includes(term) ||
-    (n.tags ?? []).some((t: string) => t.toLowerCase().includes(term))
-  );
+  const filteredNotes = notes.filter(n => {
+    if (!term) return true;
+    const haystack = [n.title, n.description, getTopicLabel(n.topic_slug), ...(n.tags ?? [])]
+      .filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(term);
+  });
 
   return (
     <div>

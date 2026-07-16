@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { PlayCircle, Clock } from "lucide-react";
-import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 
 const LecturesPage = () => {
@@ -45,8 +45,10 @@ const LecturesPage = () => {
   const filtered = lectures.filter((l: any) => {
     if (!lectureMatchesSubject(l, activeSubject)) return false;
     if (activeTopic !== "all" && l.topic_slug !== activeTopic) return false;
-    const searchMatch = !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.description?.toLowerCase().includes(search.toLowerCase());
-    return searchMatch;
+    if (!search) return true;
+    const term = search.toLowerCase();
+    const haystack = [l.title, l.description, getTopicLabel(l.topic_slug)].filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(term);
   });
 
   const subjectLectures = lectures.filter((l: any) => lectureMatchesSubject(l, activeSubject));

@@ -74,8 +74,15 @@ const NotesPage = () => {
 
   const filtered = useMemo(() => {
     const list = notes.filter(n => {
-      const matchesSearch = !search || n.title?.toLowerCase().includes(search.toLowerCase()) || n.description?.toLowerCase().includes(search.toLowerCase());
-      if (!matchesSearch) return false;
+      if (search) {
+        const term = search.toLowerCase();
+        // Include the resolved topic label (and tags) — a note's topic_slug
+        // shows up as a badge on the card even when the title/description
+        // don't literally contain that topic's name.
+        const haystack = [n.title, n.description, getTopicLabel(n.topic_slug), ...(n.tags ?? [])]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
       if (!noteMatchesSubject(n, activeSubject)) return false;
       if (activeTopic !== "all" && n.topic_slug !== activeTopic) return false;
       return true;

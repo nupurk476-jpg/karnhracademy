@@ -302,7 +302,7 @@ const BlogList = () => {
 
   const filtered = posts
     .filter(p => category === "All" || p.category === category)
-    .filter(p => !search || p.title?.toLowerCase().includes(search.toLowerCase()) || p.excerpt?.toLowerCase().includes(search.toLowerCase()))
+    .filter(p => !search || [p.title, p.excerpt, p.category].filter(Boolean).some((v: string) => v.toLowerCase().includes(search.toLowerCase())))
     .sort((a, b) => {
       if (sort === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       return 0;

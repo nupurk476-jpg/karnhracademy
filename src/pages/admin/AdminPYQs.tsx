@@ -105,12 +105,13 @@ const AdminPYQs = () => {
   const fileName = (url: string) => decodeURIComponent(url.split("/").pop() || "").slice(0, 40);
 
   const term = search.trim().toLowerCase();
-  const filteredPapers = papers.filter(p =>
-    !term ||
-    p.title?.toLowerCase().includes(term) ||
-    String(p.year).includes(term) ||
-    (p.tags ?? []).some((t: string) => t.toLowerCase().includes(term))
-  );
+  const filteredPapers = papers.filter(p => {
+    if (!term) return true;
+    const unitTitles = (p.unit_tags ?? []).map((n: number) => (SUBJECT_UNITS[p.subject] ?? []).find(u => u.number === n)?.title);
+    const haystack = [p.title, String(p.year), getDiscipline(p.subject)?.label, ...(p.tags ?? []), ...unitTitles]
+      .filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(term);
+  });
 
   return (
     <div>

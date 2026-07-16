@@ -270,12 +270,15 @@ const AdminQuizzes = () => {
   const activeQuizObj = quizzes.find(q => q.id === selectedQuiz);
 
   const quizTerm = quizSearch.trim().toLowerCase();
-  const filteredQuizzes = quizzes.filter(q =>
-    !quizTerm ||
-    q.title?.toLowerCase().includes(quizTerm) ||
-    q.topic?.toLowerCase().includes(quizTerm) ||
-    getDiscipline(q.subject)?.label.toLowerCase().includes(quizTerm)
-  );
+  const filteredQuizzes = quizzes.filter(q => {
+    if (!quizTerm) return true;
+    // Match everything actually shown on the row — the free-text topic
+    // field can be blank/generic while topic_slug still resolves to a
+    // specific label shown as a badge; search should still find that.
+    const haystack = [q.title, q.topic, q.description, getTopicLabel(q.topic_slug), getDiscipline(q.subject)?.label]
+      .filter(Boolean).join(" ").toLowerCase();
+    return haystack.includes(quizTerm);
+  });
 
   // ── Question form fields (shared by new + edit) ────────────────────────────
   const renderQuestionFields = () => (

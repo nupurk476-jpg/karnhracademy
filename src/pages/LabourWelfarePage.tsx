@@ -11,7 +11,7 @@ import {
   Calendar, Clock, Layers, BookOpen,
 } from "lucide-react";
 import { getTopicLabel } from "@/lib/disciplines";
-import { LW_UNITS, getUnitForTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
+import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 
 const SUBJECT = "lw";
 const EMAIL_KEY = "khr_subscriber_email";
@@ -178,12 +178,16 @@ const LabourWelfarePage = () => {
 
   const allYears = useMemo(() => Array.from(new Set(pyqs.map(p => p.year))).sort((a, b) => b - a), [pyqs]);
 
-  const matchesSearch = (title?: string, description?: string) =>
-    !search || title?.toLowerCase().includes(search.toLowerCase()) || description?.toLowerCase().includes(search.toLowerCase());
+  // Matches against everything actually shown on a card — not just the raw
+  // title/description — so searching a topic or unit name still finds
+  // items whose title doesn't literally contain that phrase but whose
+  // topic_slug/unit_tags badge does show it.
+  const matchesSearch = (...values: (string | undefined | null)[]) =>
+    !search || values.some(v => v?.toLowerCase().includes(search.toLowerCase()));
 
   const filteredNotes = useMemo(() => notes.filter(n => {
     if (typeFilter !== "all" && typeFilter !== "notes") return false;
-    if (!matchesSearch(n.title, n.description)) return false;
+    if (!matchesSearch(n.title, n.description, getTopicLabel(n.topic_slug), ...(n.tags ?? []))) return false;
     if (tagFilter !== "all" && !(n.tags ?? []).includes(tagFilter)) return false;
     if (unitFilter !== "all" && getUnitForTopicSlug(n.topic_slug)?.number !== unitFilter) return false;
     return true;
@@ -192,7 +196,7 @@ const LabourWelfarePage = () => {
 
   const filteredQuizzes = useMemo(() => quizzes.filter(q => {
     if (typeFilter !== "all" && typeFilter !== "mcqs") return false;
-    if (!matchesSearch(q.title, q.description)) return false;
+    if (!matchesSearch(q.title, q.description, getTopicLabel(q.topic_slug))) return false;
     if (unitFilter !== "all" && getUnitForTopicSlug(q.topic_slug)?.number !== unitFilter) return false;
     return true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,7 +204,8 @@ const LabourWelfarePage = () => {
 
   const filteredPyqs = useMemo(() => pyqs.filter(p => {
     if (typeFilter !== "all" && typeFilter !== "pyq") return false;
-    if (!matchesSearch(p.title, "")) return false;
+    const unitTitles = (p.unit_tags ?? []).map((n: number) => getUnitByNumber(n)?.title);
+    if (!matchesSearch(p.title, ...(p.tags ?? []), ...unitTitles)) return false;
     if (tagFilter !== "all" && !(p.tags ?? []).includes(tagFilter)) return false;
     if (yearFilter !== "all" && p.year !== yearFilter) return false;
     if (unitFilter !== "all" && !(p.unit_tags ?? []).includes(unitFilter)) return false;

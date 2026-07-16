@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { DISCIPLINES } from "@/lib/disciplines";
+import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { NAVY_HEX, GOLD_HEX, SUBJECT_GRADIENT } from "@/lib/subjectGradients";
 import {
   Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
@@ -337,7 +337,16 @@ const QuizList = () => {
   const subjectsCovered = useMemo(() => new Set(quizzes.map(q => resolveSubject(q))).size, [quizzes]);
 
   const filtered = useMemo(() => quizzes.filter(q => {
-    if (search && !q.title?.toLowerCase().includes(search.toLowerCase()) && !q.topic?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search) {
+      const term = search.toLowerCase();
+      // Match against everything actually shown on the card — the free-text
+      // topic field can be blank or generic while the quiz is still tagged
+      // with a specific topic_slug/subject, whose label only shows up as a
+      // badge; searching that exact term should still find it.
+      const haystack = [q.title, q.topic, q.description, getTopicLabel(q.topic_slug), getDiscipline(q.subject)?.label]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!haystack.includes(term)) return false;
+    }
     if (subject !== "all" && resolveSubject(q) !== subject) return false;
     if (topicSlug !== "all" && q.topic_slug !== topicSlug) return false;
     if (difficulty !== "All" && getDifficulty(q.topic || q.title) !== difficulty) return false;
