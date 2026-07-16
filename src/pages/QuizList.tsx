@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { NAVY_HEX, GOLD_HEX, SUBJECT_GRADIENT } from "@/lib/subjectGradients";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import {
   Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
   Layers, TrendingUp, BookOpen,
@@ -302,32 +303,35 @@ const QuizList = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [{ data: quizData }, { data: questions }, { data: ratingData }] = await Promise.all([
+      // quiz_questions/quiz_ratings are fetched across every quiz at once to
+      // build per-quiz counts — a plain .select() silently truncates at
+      // Supabase's default row cap once the combined total grows large
+      // enough, undercounting exactly the quizzes with the most questions.
+      // fetchAllRows pages through with .range() so the count is always
+      // the real total, however many rows there are.
+      const [{ data: quizData }, questions, ratingData] = await Promise.all([
         supabase.from("quizzes").select("*").order("created_at", { ascending: false }),
-        supabase.from("quiz_questions").select("quiz_id"),
-        supabase.from("quiz_ratings").select("quiz_id, rating"),
+        fetchAllRows<{ quiz_id: string }>(() => supabase.from("quiz_questions").select("quiz_id")),
+        fetchAllRows<{ quiz_id: string; rating: number }>(() => supabase.from("quiz_ratings").select("quiz_id, rating")),
       ]);
 
       // Drafts stay admin-only; rows predating the "published" column count as published.
       if (quizData) setQuizzes(quizData.filter((q: any) => q.published !== false));
 
-      if (questions) {
-        const counts: Record<string, number> = {};
-        questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
-        setQuestionCounts(counts);
-      }
+      const counts: Record<string, number> = {};
+      questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
+      setQuestionCounts(counts);
 
-      if (ratingData) {
-        const r: Record<string, { total: number; count: number }> = {};
-        ratingData.forEach(rd => {
-          if (!r[rd.quiz_id]) r[rd.quiz_id] = { total: 0, count: 0 };
-          r[rd.quiz_id].total += rd.rating;
-          r[rd.quiz_id].count++;
-        });
-        const mapped: Record<string, { avg: number; count: number }> = {};
-        Object.entries(r).forEach(([id, v]) => { mapped[id] = { avg: v.total / v.count, count: v.count }; });
-        setRatings(mapped);
-      }
+      const r: Record<string, { total: number; count: number }> = {};
+      ratingData.forEach(rd => {
+        if (!r[rd.quiz_id]) r[rd.quiz_id] = { total: 0, count: 0 };
+        r[rd.quiz_id].total += rd.rating;
+        r[rd.quiz_id].count++;
+      });
+      const mapped: Record<string, { avg: number; count: number }> = {};
+      Object.entries(r).forEach(([id, v]) => { mapped[id] = { avg: v.total / v.count, count: v.count }; });
+      setRatings(mapped);
+
       setLoading(false);
     };
     load();

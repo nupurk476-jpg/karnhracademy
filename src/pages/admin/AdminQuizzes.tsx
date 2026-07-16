@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchQuizQuestions } from "@/lib/quizQuestions";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Pencil, X, Copy, Eye, EyeOff, ChevronDown, ChevronRight,
@@ -52,15 +53,11 @@ const AdminQuizzes = () => {
   };
 
   const loadQuestions = async (quizId: string) => {
-    // Ordering by position fails outright if that column doesn't exist yet.
-    let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
-      .order("position" as any, { ascending: true, nullsFirst: false })
-      .order("created_at");
-    if (error) {
-      ({ data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("created_at"));
+    try {
+      setQuestions(await fetchQuizQuestions(quizId));
+    } catch (err: any) {
+      toast({ title: "Failed to load questions", description: err.message, variant: "destructive" });
     }
-    if (error) { toast({ title: "Failed to load questions", description: error.message, variant: "destructive" }); return; }
-    if (data) setQuestions(data);
   };
 
   useEffect(() => { loadQuizzes(); }, []);
@@ -135,10 +132,13 @@ const AdminQuizzes = () => {
         .select().single());
     }
     if (error || !newQuiz) { toast({ title: "Failed to duplicate quiz", description: error?.message, variant: "destructive" }); return; }
-    let { data: qs, error: loadErr } = await supabase.from("quiz_questions").select("*").eq("quiz_id", q.id)
-      .order("position" as any, { ascending: true, nullsFirst: false }).order("created_at");
-    if (loadErr) ({ data: qs } = await supabase.from("quiz_questions").select("*").eq("quiz_id", q.id).order("created_at"));
-    if (qs && qs.length > 0) {
+    let qs: any[] = [];
+    try {
+      qs = await fetchQuizQuestions(q.id);
+    } catch (err: any) {
+      toast({ title: "Quiz duplicated but questions failed to load", description: err.message, variant: "destructive" });
+    }
+    if (qs.length > 0) {
       const fullCopies = qs.map((qq: any, i: number) => ({
         quiz_id: (newQuiz as any).id, question: qq.question, options: qq.options,
         correct_answer: qq.correct_answer, explanation: qq.explanation,
@@ -534,10 +534,11 @@ const QuizPreviewBody = ({ quizId }: { quizId?: string }) => {
   useEffect(() => {
     if (!quizId) { setQs([]); return; }
     (async () => {
-      let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId)
-        .order("position" as any, { ascending: true, nullsFirst: false }).order("created_at");
-      if (error) ({ data } = await supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("created_at"));
-      setQs(data ?? []);
+      try {
+        setQs(await fetchQuizQuestions(quizId));
+      } catch {
+        setQs([]);
+      }
     })();
   }, [quizId]);
 

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchQuizQuestions } from "@/lib/quizQuestions";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -57,15 +58,9 @@ const QuizTake = () => {
     if (!id) return;
     supabase.from("quizzes").select("*").eq("id", id).single().then(({ data }) => setQuiz(data));
     (async () => {
-      // Ordering by position fails if that column doesn't exist yet (pending DB update).
-      let { data, error } = await supabase.from("quiz_questions").select("*").eq("quiz_id", id)
-        .order("position" as any, { ascending: true, nullsFirst: false })
-        .order("created_at");
-      if (error) ({ data } = await supabase.from("quiz_questions").select("*").eq("quiz_id", id).order("created_at"));
-      if (data) {
-        setQuestions(data);
-        setTimeLeft(data.length * SECONDS_PER_QUESTION);
-      }
+      const data = await fetchQuizQuestions(id);
+      setQuestions(data);
+      setTimeLeft(data.length * SECONDS_PER_QUESTION);
     })();
   }, [id]);
 

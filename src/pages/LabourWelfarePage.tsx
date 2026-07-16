@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 const SUBJECT = "lw";
 const EMAIL_KEY = "khr_subscriber_email";
@@ -42,13 +43,17 @@ function useLabourWelfareContent() {
       setPyqs(pyqData ?? []);
 
       if (publishedQuizzes.length > 0) {
-        const { data: questions } = await supabase
-          .from("quiz_questions")
-          .select("quiz_id")
-          .in("quiz_id", publishedQuizzes.map((q: any) => q.id));
-        if (!cancelled && questions) {
+        const quizIds = publishedQuizzes.map((q: any) => q.id);
+        // Paged via fetchAllRows — a plain .select() here would silently
+        // truncate at Supabase's default row cap once the combined
+        // question count across every LW quiz grows large enough,
+        // undercounting exactly the quizzes with the most questions.
+        const questions = await fetchAllRows<{ quiz_id: string }>(() =>
+          supabase.from("quiz_questions").select("quiz_id").in("quiz_id", quizIds)
+        );
+        if (!cancelled) {
           const counts: Record<string, number> = {};
-          questions.forEach((q: any) => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
+          questions.forEach((q) => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
           setQuestionCounts(counts);
         }
       }
