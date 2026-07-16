@@ -32,6 +32,17 @@ async function extractPdfText(file: File): Promise<string> {
   return text;
 }
 
+// Reads the text out of a .docx file in the browser via mammoth (a .docx is
+// just a zip of XML, so this needs no server round-trip). Only the older
+// binary .doc format isn't supported — mammoth can't read it, and there's no
+// good client-side library that can, so those are called out to the admin
+// with a clear message asking for a re-save as .docx or PDF instead.
+async function extractDocxText(file: File): Promise<string> {
+  const mammoth = await import("mammoth/mammoth.browser");
+  const { value } = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+  return value;
+}
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -83,10 +94,20 @@ const ImportQuestionsDialog = ({ open, onClose, quizTitle, onImport }: Props) =>
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
+    if (/\.doc$/i.test(file.name) && !/\.docx$/i.test(file.name)) {
+      setParseError(
+        "This is an old .doc file — the browser can't read that format directly. " +
+        "Please re-save it as .docx (File > Save As > Word Document) or as a PDF, then upload that instead."
+      );
+      return;
+    }
     setParsing(true); setParseError(null);
     try {
-      const text = file.type === "application/pdf" || /\.pdf$/i.test(file.name)
-        ? await extractPdfText(file)
+      const isDocx = file.name.toLowerCase().endsWith(".docx")
+        || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+      const text = isPdf ? await extractPdfText(file)
+        : isDocx ? await extractDocxText(file)
         : await file.text();
       runParse(text);
     } catch (e: any) {
@@ -120,7 +141,7 @@ const ImportQuestionsDialog = ({ open, onClose, quizTitle, onImport }: Props) =>
         <DialogHeader>
           <DialogTitle>Import Questions</DialogTitle>
           <DialogDescription>
-            Add questions to "{quizTitle}" from a PDF (or pasted text) — no retyping needed.
+            Add questions to "{quizTitle}" from a PDF, Word (.docx) document, or pasted text — no retyping needed.
           </DialogDescription>
         </DialogHeader>
 
@@ -132,7 +153,7 @@ const ImportQuestionsDialog = ({ open, onClose, quizTitle, onImport }: Props) =>
 A) Option one   B) Option two
 C) Option three D) Option four
 Answer: B`}</pre>
-              <p className="mt-1">An "Answer Key" list at the end of the PDF also works. You'll review everything before it's added.</p>
+              <p className="mt-1">An "Answer Key" list at the end of the file also works. You'll review everything before it's added.</p>
             </div>
 
             {!pasteMode ? (
@@ -140,15 +161,20 @@ Answer: B`}</pre>
                 <button onClick={() => fileRef.current?.click()} disabled={parsing}
                   className="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-dashed border-accent/50 bg-accent/5 px-4 py-8 text-sm font-semibold text-accent hover:bg-accent/10 disabled:opacity-50">
                   {parsing ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileUp className="h-5 w-5" />}
-                  {parsing ? "Reading PDF…" : "Choose PDF file"}
+                  {parsing ? "Reading file…" : "Choose PDF or Word file"}
                 </button>
                 <button onClick={() => setPasteMode(true)} disabled={parsing}
                   className="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-dashed border-border px-4 py-8 text-sm font-medium text-muted-foreground hover:bg-muted disabled:opacity-50">
                   <ClipboardPaste className="h-5 w-5" /> Paste text instead
                 </button>
-                <input ref={fileRef} type="file" accept=".pdf,.txt,application/pdf,text/plain" className="hidden"
-                  aria-label="Upload question PDF"
-                  onChange={e => handleFile(e.target.files?.[0])} />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  className="hidden"
+                  aria-label="Upload question file"
+                  onChange={e => handleFile(e.target.files?.[0])}
+                />
               </div>
             ) : (
               <div className="space-y-2">
