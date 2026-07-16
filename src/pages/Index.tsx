@@ -94,7 +94,9 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 );
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
+// English for Management is excluded from this banner card specifically — it
+// still exists as a full subject elsewhere on the site (Notes, Quizzes, etc.).
+const HERO_SUBJECTS = SUBJECTS.filter(s => s.value !== "english").map(s => ({ label: s.label, value: s.value, color: s.color }));
 
 const Hero = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
