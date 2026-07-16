@@ -124,6 +124,7 @@ export const LW_UNITS: LWUnit[] = [
       { label: "Payment of Wages Act, 1936", slug: "u8-payment-of-wages-act-1936" },
       { label: "Equal Remuneration Act, 1976", slug: "u8-equal-remuneration-act-1976" },
       { label: "Payment of Bonus Act, 1965", slug: "u8-payment-of-bonus-act-1965" },
+      { label: "Child Labour (Prohibition & Regulation) Act, 1986", slug: "u8-child-labour-prohibition-regulation-act-1986" },
     ],
   },
   {
