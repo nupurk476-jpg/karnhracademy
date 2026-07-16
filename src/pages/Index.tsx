@@ -473,7 +473,7 @@ const FeaturedNotes = () => {
     bc:     { label: "BC",        color: STEEL },
     cgbe:   { label: "CG & BE",   color: NAVY },
     odcm:   { label: "OD & CM",   color: GOLD },
-    ghr:    { label: "Global HR", color: NAVY_DARK },
+    ghr:    { label: "International HRM", color: NAVY_DARK },
   };
 
   const placeholders = [

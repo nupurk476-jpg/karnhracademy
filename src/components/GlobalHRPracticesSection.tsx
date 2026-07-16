@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Globe, Plane, Languages, Briefcase, Scale, Users2, Building, HandCoins, Network } from "lucide-react";
 
 const ghrTopics = [
-  { label: "Introduction to Global HRM", slug: "introduction-to-ghrm", icon: Globe, desc: "Concept, scope & importance of international HRM" },
+  { label: "Introduction to International HRM", slug: "introduction-to-ghrm", icon: Globe, desc: "Concept, scope & importance of international HRM" },
   { label: "International Staffing", slug: "international-staffing", icon: Users2, desc: "Ethnocentric, polycentric, geocentric & regiocentric approaches" },
   { label: "Expatriate Management", slug: "expatriate-management", icon: Plane, desc: "Selection, training, repatriation & failure factors" },
   { label: "Cross-Cultural Management", slug: "cross-cultural-management", icon: Languages, desc: "Hofstede, Trompenaars & cultural dimensions" },
@@ -22,7 +22,7 @@ const GlobalHRPracticesSection = () => {
             International HRM
           </span>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Global HR Practices
+            International HRM Practices
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
             Understand international HRM, cross-cultural management & global workforce strategies — vital for MBA, BBA & UGC NET aspirants.

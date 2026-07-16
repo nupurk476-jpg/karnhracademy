@@ -171,8 +171,8 @@ export const DISCIPLINES = [
   },
   {
     value: "ghr",
-    label: "Global HR Practices",
-    short: "Global HR",
+    label: "International HRM Practices",
+    short: "International HRM",
     icon: Globe,
     color: "bg-[#E9EEF5] border-[#C0CEDD] text-[#0D2A45]",
     activeColor: "bg-[#0D2A45] border-[#0D2A45] text-white",
@@ -180,7 +180,7 @@ export const DISCIPLINES = [
     iconColor: "text-[#0D2A45]",
     description: "Expatriate management, international staffing, MNCs & diversity",
     topics: [
-      { label: "Introduction to Global HRM",        slug: "introduction-to-ghrm" },
+      { label: "Introduction to International HRM", slug: "introduction-to-ghrm" },
       { label: "International Staffing",            slug: "international-staffing" },
       { label: "Expatriate Management",             slug: "expatriate-management" },
       { label: "Cross-Cultural Management",         slug: "cross-cultural-management" },

@@ -6,7 +6,7 @@ const GHRTopicPage = () => (
     subject="ghr"
     topics={ghrTopics}
     backLink="/#ghr"
-    backLabel="All Global HR Topics"
+    backLabel="All International HRM Topics"
     routePrefix="ghr"
   />
 );
