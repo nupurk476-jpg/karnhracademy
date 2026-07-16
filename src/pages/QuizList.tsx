@@ -73,7 +73,6 @@ function getSubjectForTopic(topic: string) {
   const t = (topic || "").toLowerCase();
   if (t.includes("behaviour") || t.includes("motivation") || t.includes("perception") || t.includes("personality") || t.includes("leadership") || t.includes("group dynamics")) return "ob";
   if (t.includes("strateg")) return "sm";
-  if (t.includes("governance") || t.includes("ethics") || t.includes("csr") || t.includes("esg")) return "cgbe";
   if (t.includes("global") || t.includes("international") || t.includes("expatriate") || t.includes("mnc")) return "ghr";
   if (t.includes("change") || t.includes(" od ") || t.includes("organisation development") || t.includes("organizational development")) return "odcm";
   if (t.includes("planning") || t.includes("organiz") || t.includes("direct") || t.includes("control") || t.includes("fayol") || t.includes("taylor") || t.includes("management theor")) return "pom";

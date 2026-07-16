@@ -15,7 +15,6 @@ const POMTopicPage = lazy(() => import("./pages/POMTopicPage"));
 const OBTopicPage = lazy(() => import("./pages/OBTopicPage"));
 const SMTopicPage = lazy(() => import("./pages/SMTopicPage"));
 const BCTopicPage = lazy(() => import("./pages/BCTopicPage"));
-const CGBETopicPage = lazy(() => import("./pages/CGBETopicPage"));
 const ODCMTopicPage = lazy(() => import("./pages/ODCMTopicPage"));
 const GHRTopicPage = lazy(() => import("./pages/GHRTopicPage"));
 const BlogList = lazy(() => import("./pages/BlogList"));
@@ -90,7 +89,6 @@ const App = () => (
             <Route path="/ob/:slug" element={<OBTopicPage />} />
             <Route path="/sm/:slug" element={<SMTopicPage />} />
             <Route path="/bc/:slug" element={<BCTopicPage />} />
-            <Route path="/cgbe/:slug" element={<CGBETopicPage />} />
             <Route path="/odcm/:slug" element={<ODCMTopicPage />} />
             <Route path="/ghr/:slug" element={<GHRTopicPage />} />
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>

@@ -35,7 +35,6 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   sm:      { color: GOLD_DARK,  bg: "#F7F1E3" },
   pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
   bc:      { color: STEEL,      bg: "#EEF0F8" },
-  cgbe:    { color: NAVY,       bg: "#EEF0F8" },
   odcm:    { color: GOLD,       bg: "#F7F1E3" },
   ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
   lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
@@ -471,7 +470,6 @@ const FeaturedNotes = () => {
     sm:     { label: "SM",        color: GOLD_DARK },
     pom:    { label: "POM",       color: NAVY_DARK },
     bc:     { label: "BC",        color: STEEL },
-    cgbe:   { label: "CG & BE",   color: NAVY },
     odcm:   { label: "OD & CM",   color: GOLD },
     ghr:    { label: "International HRM", color: NAVY_DARK },
   };

@@ -12,7 +12,6 @@ export const SUBJECT_GRADIENT: Record<string, [string, string]> = {
   sm:      ["#A9823F", "#0D2A45"],
   pom:     ["#0D2A45", "#1F4E79"],
   bc:      ["#5B8AB8", "#1F4E79"],
-  cgbe:    ["#1F4E79", "#3D6C98"],
   odcm:    ["#C7994A", "#A9823F"],
   ghr:     ["#0D2A45", "#3D6C98"],
 };

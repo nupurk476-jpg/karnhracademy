@@ -1,6 +1,6 @@
 import {
   BookOpen, Briefcase, Users, Target,
-  MessageSquare, Scale, Repeat, Globe, HandHeart,
+  MessageSquare, Repeat, Globe, HandHeart,
 } from "lucide-react";
 import { LW_TOPICS } from "./labourWelfareUnits";
 
@@ -123,28 +123,6 @@ export const DISCIPLINES = [
       { label: "Negotiation & Persuasion",         slug: "negotiation-persuasion" },
       { label: "Cross-cultural Communication",     slug: "cross-cultural-communication" },
       { label: "Corporate Communication",          slug: "corporate-communication" },
-    ],
-  },
-  {
-    value: "cgbe",
-    label: "Corporate Governance & Business Ethics",
-    short: "CG & BE",
-    icon: Scale,
-    color: "bg-[#EEF0F8] border-[#C9D8E8] text-[#1F4E79]",
-    activeColor: "bg-[#1F4E79] border-[#1F4E79] text-white",
-    iconBg: "bg-[#DCE6F1]",
-    iconColor: "text-[#1F4E79]",
-    description: "Board governance, CSR, ESG, ethical decision-making",
-    topics: [
-      { label: "Intro to Corporate Governance",   slug: "introduction-to-cg" },
-      { label: "Board of Directors & Committees", slug: "board-of-directors" },
-      { label: "Shareholders & Stakeholders",     slug: "shareholders-stakeholders" },
-      { label: "Governance Codes & Regulations",  slug: "governance-codes" },
-      { label: "Business Ethics & CSR",           slug: "business-ethics-csr" },
-      { label: "Ethical Decision Making",         slug: "ethical-decision-making" },
-      { label: "Corporate Social Responsibility", slug: "corporate-social-responsibility" },
-      { label: "Sustainability & ESG",            slug: "sustainability-esg" },
-      { label: "Insider Trading & Fraud",         slug: "insider-trading-fraud" },
     ],
   },
   {
