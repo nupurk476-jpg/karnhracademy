@@ -50,9 +50,9 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 
 const WHY_CHOOSE = [
   { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: NAVY,       bg: "#DCE6F1", link: "/notes" },
-  { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8", link: "/lectures" },
+  { icon: Video,        title: "On-Demand Video Lectures",   desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8", link: "/lectures" },
   { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2", link: "/quizzes" },
-  { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3", link: "/books" },
+  { icon: BookMarked,   title: "Essential Reading List",     desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3", link: "/books" },
   { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3", link: "/ugc-net-labour-welfare" },
 ];
 
@@ -309,14 +309,15 @@ const Subjects = () => (
           View all notes <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {SUBJECTS.map(s => {
+      {/* Labour Welfare is deliberately left out of this grid — the
+          LabourWelfareBanner section immediately below already gives it a
+          full, dedicated promotion, so a plain tile here just repeated the
+          same "go to the Labour Welfare hub" link a second time in a row. */}
+      <div className="flex flex-wrap justify-center gap-4">
+        {SUBJECTS.filter(s => s.value !== "lw").map(s => {
           const Icon = s.icon;
-          // Labour Welfare has its own dedicated unit-wise hub — send it there
-          // instead of the generic notes browser every other subject uses.
-          const href = s.value === "lw" ? "/ugc-net-labour-welfare" : "/notes";
           return (
-            <Link key={s.label} to={href} className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md" style={{ background: s.bg, borderColor: `${s.color}20` }}>
+            <Link key={s.label} to="/notes" className="group flex w-[calc(50%-8px)] flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)]" style={{ background: s.bg, borderColor: `${s.color}20` }}>
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
                 <Icon className="h-5 w-5 text-white" />
               </div>
