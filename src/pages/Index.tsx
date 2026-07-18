@@ -12,7 +12,7 @@ import {
   ArrowRight, BookOpen, Users,
   Video, HelpCircle, Download, FileText,
   CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
-  PlayCircle, BookMarked, Search, Zap, Shield, BarChart2,
+  PlayCircle, BookMarked, Search, Zap, Shield,
   Mail, HandHeart, ScrollText,
 } from "lucide-react";
 
@@ -53,7 +53,6 @@ const WHY_CHOOSE = [
   { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8", link: "/lectures" },
   { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2", link: "/quizzes" },
   { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3", link: "/books" },
-  { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: STEEL,      bg: "#EEF0F8", link: "/hr/hr-analytics" },
   { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3", link: "/ugc-net-labour-welfare" },
 ];
 
@@ -274,11 +273,13 @@ const WhyChoose = () => (
         <GoldLabel text="Why Choose Us" />
         <SectionHeading center title="Everything You Need to Excel in HR & Management" sub="One platform covering notes, quizzes, lectures, books, and research — free for every learner." />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* flex-wrap + justify-center (rather than a fixed-column grid) so an
+          odd card count centers its last row instead of leaving a gap */}
+      <div className="flex flex-wrap justify-center gap-5">
         {WHY_CHOOSE.map(f => {
           const Icon = f.icon;
           return (
-            <Link key={f.title} to={f.link} className="group rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
+            <Link key={f.title} to={f.link} className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: f.bg }}>
                 <Icon className="h-6 w-6" style={{ color: f.color }} />
               </div>
