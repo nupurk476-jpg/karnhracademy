@@ -5,7 +5,7 @@ const HRTopicPage = () => (
   <DisciplineTopicPage
     subject="hrm"
     topics={hrTopics}
-    backLink="/#hr-topics"
+    backLink="/notes?subject=hrm"
     backLabel="All HR Topics"
     accentBg="bg-accent/10"
     accentText="text-accent"

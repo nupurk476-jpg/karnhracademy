@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 
 const SITE_URL = "https://karnhracademy.com";
 const SITE_NAME = "Karn HR Academy";
+const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
 interface SEOProps {
   title: string;
@@ -12,7 +13,7 @@ interface SEOProps {
   jsonLd?: Record<string, any> | Record<string, any>[];
 }
 
-const SEO = ({ title, description, path, type = "website", image, jsonLd }: SEOProps) => {
+const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
   const trimmedTitle = fullTitle.length > 60 ? fullTitle.slice(0, 57) + "…" : fullTitle;
@@ -29,11 +30,11 @@ const SEO = ({ title, description, path, type = "website", image, jsonLd }: SEOP
       <meta property="og:url" content={url} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={SITE_NAME} />
-      {image && <meta property="og:image" content={image} />}
+      <meta property="og:image" content={image} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={trimmedTitle} />
       <meta name="twitter:description" content={trimmedDesc} />
-      {image && <meta name="twitter:image" content={image} />}
+      <meta name="twitter:image" content={image} />
       {jsonLdArray.map((data, i) => (
         <script key={i} type="application/ld+json">{JSON.stringify(data)}</script>
       ))}

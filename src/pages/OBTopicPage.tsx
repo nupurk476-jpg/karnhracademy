@@ -5,7 +5,7 @@ const OBTopicPage = () => (
   <DisciplineTopicPage
     subject="ob"
     topics={obTopics}
-    backLink="/#ob"
+    backLink="/notes?subject=ob"
     backLabel="All OB Topics"
     accentBg="bg-accent/10"
     accentText="text-accent"

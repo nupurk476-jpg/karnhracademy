@@ -5,7 +5,7 @@ const ODCMTopicPage = () => (
   <DisciplineTopicPage
     subject="odcm"
     topics={odcmTopics}
-    backLink="/#odcm"
+    backLink="/notes?subject=odcm"
     backLabel="All OD & Change Topics"
     routePrefix="odcm"
   />
