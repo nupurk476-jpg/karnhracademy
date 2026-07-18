@@ -49,12 +49,12 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 }));
 
 const WHY_CHOOSE = [
-  { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: NAVY,       bg: "#DCE6F1" },
-  { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2" },
-  { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3" },
-  { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: STEEL,      bg: "#EEF0F8" },
-  { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3" },
+  { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: NAVY,       bg: "#DCE6F1", link: "/notes" },
+  { icon: Video,        title: "Expert Video Lectures",      desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8", link: "/lectures" },
+  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2", link: "/quizzes" },
+  { icon: BookMarked,   title: "Curated Book Library",       desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3", link: "/books" },
+  { icon: BarChart2,    title: "HR Analytics Resources",     desc: "Data-driven HR content — workforce analytics, dashboards, and predictive tools explained clearly.",       color: STEEL,      bg: "#EEF0F8", link: "/hr/hr-analytics" },
+  { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3", link: "/ugc-net-labour-welfare" },
 ];
 
 const ROADMAP = [
@@ -237,38 +237,34 @@ function useContentCounts() {
   return { notesCount, quizCount, lecturesCount, booksCount };
 }
 
-// ─────────────── Section: Stats bar ──────────────────────────────────────────
-const StatsBar = () => {
-  const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
-
-  const liveStats = [
-    { value: notesCount    !== null ? String(notesCount)    : "…", label: "Study Notes",      icon: FileText   },
-    { value: quizCount     !== null ? String(quizCount)     : "…", label: "Practice MCQs",    icon: HelpCircle },
-    { value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   icon: Video      },
-    { value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Listed",     icon: BookMarked },
-    { value: String(DISCIPLINES.length),                            label: "Subjects Covered", icon: BookOpen   },
-    { value: "Free",                                                label: "Always",           icon: Users      },
-  ];
-
-  return (
+// ─────────────── Section: Compact "How It Works" strip ──────────────────────
+// Replaces the old raw stats grid (132 notes / 50 quizzes / ...) right below
+// the hero — a wall of numbers this early reads as "prove it to me" rather
+// than helping a first-time visitor understand what to do next. The fuller,
+// illustrated version of this same roadmap still appears further down the
+// page (see Roadmap); this is just a compact preview.
+const CompactHowItWorks = () => (
   <section style={{ background: "#F7F1E3", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-        {liveStats.map(s => {
-          const Icon = s.icon;
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
+      <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
+        {ROADMAP.map((r, i) => {
+          const Icon = r.icon;
           return (
-            <div key={s.label} className="flex flex-col items-center text-center gap-1">
-              <Icon className="h-5 w-5 mb-0.5" style={{ color: GOLD_DARK }} />
-              <p className="text-xl font-extrabold leading-none" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
-              <p className="text-[11px] font-semibold leading-tight" style={{ color: `${NAVY}aa` }}>{s.label}</p>
+            <div key={r.step} className="flex flex-shrink-0 items-center gap-2">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full" style={{ background: GOLD, color: NAVY }}>
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                <span className="text-xs font-semibold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{r.title}</span>
+              </div>
+              {i < ROADMAP.length - 1 && <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" style={{ color: GOLD_DARK }} />}
             </div>
           );
         })}
       </div>
     </div>
   </section>
-  );
-};
+);
 
 // ─────────────── Section: Why Choose ─────────────────────────────────────────
 const WhyChoose = () => (
@@ -282,13 +278,16 @@ const WhyChoose = () => (
         {WHY_CHOOSE.map(f => {
           const Icon = f.icon;
           return (
-            <div key={f.title} className="group rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
+            <Link key={f.title} to={f.link} className="group rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: f.bg }}>
                 <Icon className="h-6 w-6" style={{ color: f.color }} />
               </div>
-              <h3 className="text-base font-bold text-slate-800 mb-2" style={{ fontFamily: "'Sora',sans-serif" }}>{f.title}</h3>
+              <h3 className="mb-2 flex items-center gap-1.5 text-base font-bold text-slate-800 transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                <span className="transition-colors group-hover:opacity-80">{f.title}</span>
+                <ArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" style={{ color: f.color }} />
+              </h3>
               <p className="text-sm leading-relaxed text-slate-500">{f.desc}</p>
-            </div>
+            </Link>
           );
         })}
       </div>
@@ -999,7 +998,7 @@ const Index = () => (
     <Header />
     <main>
       <Hero />
-      <StatsBar />
+      <CompactHowItWorks />
       <WhyChoose />
       <Subjects />
       <LabourWelfareBanner />
