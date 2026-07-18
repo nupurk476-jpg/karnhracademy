@@ -239,9 +239,9 @@ function useContentCounts() {
 // ─────────────── Section: Compact "How It Works" strip ──────────────────────
 // Replaces the old raw stats grid (132 notes / 50 quizzes / ...) right below
 // the hero — a wall of numbers this early reads as "prove it to me" rather
-// than helping a first-time visitor understand what to do next. The fuller,
-// illustrated version of this same roadmap still appears further down the
-// page (see Roadmap); this is just a compact preview.
+// than helping a first-time visitor understand what to do next. This is the
+// only "how it works" section on the page — the full illustrated version
+// used to duplicate it further down and was removed as dead weight.
 const CompactHowItWorks = () => (
   <section style={{ background: "#F7F1E3", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
@@ -412,53 +412,6 @@ const LabourWelfareBanner = () => {
     </section>
   );
 };
-
-// ─────────────── Section: Learning Roadmap ───────────────────────────────────
-const Roadmap = () => (
-  <section className="py-20 md:py-24" style={{ background: "#DCE6F1" }}>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-14">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_DARK }}>Your Path to Mastery</span>
-          <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
-        </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold leading-tight" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
-          How It Works
-        </h2>
-        <p className="mt-3 max-w-xl mx-auto leading-relaxed" style={{ color: "#4A6076" }}>
-          Follow this proven 5-step path to go from complete beginner to exam-ready in any HR subject.
-        </p>
-      </div>
-
-      <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {/* Connector line (desktop) */}
-        <div className="absolute top-10 left-0 right-0 h-px hidden lg:block" style={{ background: `linear-gradient(90deg, transparent, ${GOLD}70, transparent)` }} />
-
-        {ROADMAP.map((r, i) => {
-          const Icon = r.icon;
-          return (
-            <div key={r.step} className="relative flex flex-col items-center text-center">
-              {/* Step circle */}
-              <div className="relative z-10 mb-4 flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-md" style={{ background: i === 0 ? GOLD : "#FFFFFF", borderColor: i === 0 ? GOLD : "#C9D8E8" }}>
-                <Icon className="h-7 w-7" style={{ color: NAVY }} />
-              </div>
-              <span className="text-[10px] font-bold tracking-widest mb-1.5" style={{ color: GOLD_DARK }}>STEP {r.step}</span>
-              <h3 className="text-sm font-bold mb-1.5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{r.title}</h3>
-              <p className="text-xs leading-relaxed" style={{ color: "#64798F" }}>{r.desc}</p>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-12 text-center">
-        <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>
-          Begin Your Journey <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </div>
-  </section>
-);
 
 // ─────────────── Section: Featured Notes (live from DB) ──────────────────────
 const FeaturedNotes = () => {
@@ -1003,7 +956,6 @@ const Index = () => (
       <WhyChoose />
       <Subjects />
       <LabourWelfareBanner />
-      <Roadmap />
       <FeaturedNotes />
       <VideoLectures />
       <BooksSection />
