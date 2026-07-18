@@ -26,6 +26,7 @@ const QuizTake = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<any>(null);
+  const [quizNotFound, setQuizNotFound] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [flagged, setFlagged] = useState<Record<string, boolean>>({});
@@ -56,7 +57,10 @@ const QuizTake = () => {
 
   useEffect(() => {
     if (!id) return;
-    supabase.from("quizzes").select("*").eq("id", id).single().then(({ data }) => setQuiz(data));
+    supabase.from("quizzes").select("*").eq("id", id).single().then(({ data, error }) => {
+      if (error || !data) { setQuizNotFound(true); return; }
+      setQuiz(data);
+    });
     (async () => {
       const data = await fetchQuizQuestions(id);
       setQuestions(data);
@@ -154,6 +158,19 @@ const QuizTake = () => {
     if (isAnswered) return base + "bg-emerald-100 text-emerald-800 border border-emerald-300";
     return base + "bg-muted text-muted-foreground border border-border hover:bg-slate-200";
   };
+
+  if (quizNotFound) return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="py-20 text-center">
+        <p className="mb-4 text-muted-foreground">This quiz doesn't exist or may have been removed.</p>
+        <Link to="/quizzes" className="text-sm font-semibold text-accent hover:underline">
+          <ArrowLeft className="mr-1 inline h-4 w-4" /> Back to Quizzes
+        </Link>
+      </div>
+      <Footer />
+    </div>
+  );
 
   if (!quiz) return (
     <div className="min-h-screen bg-background">
