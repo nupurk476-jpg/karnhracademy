@@ -14,7 +14,7 @@ import {
   CheckCircle2, ChevronRight, Clock, Award,
   PlayCircle, BookMarked, Search,
   Mail, HandHeart, ScrollText, Linkedin,
-  BadgeCheck, Network, History, RefreshCw, Smartphone,
+  BadgeCheck, Network, History, RefreshCw, Smartphone, GraduationCap,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -126,38 +126,45 @@ const Hero = () => {
         <div className="flex flex-col justify-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-            <span className="text-xs font-semibold" style={{ color: GOLD_DARK }}>India's Premier HR Academic Portal</span>
+            <span className="text-xs font-semibold" style={{ color: GOLD_DARK }}>100% Free Academic Resource Platform</span>
           </div>
 
-          <h1 className="font-extrabold leading-[1.04] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(2.4rem,5vw,3.75rem)", letterSpacing: "-0.025em" }}>
-            Complete <span style={{ color: GOLD_DARK }}>UGC NET Code 55</span>{" "}
-            Learning Platform
+          <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
+            India's Premier Learning Platform for{" "}
+            <span style={{ color: GOLD_DARK }}>Human Resource Management, Labour Welfare</span>{" "}
+            &amp; Management Studies
           </h1>
 
-          <p className="text-base md:text-lg leading-relaxed mb-8 max-w-lg font-medium" style={{ color: "#4A6076" }}>
-            {["Premium Notes", "MCQs", "PYQs", "Case Studies", "Blogs", "Research Resources"].map((item, i, arr) => (
-              <span key={item}>
-                {item}
-                {i < arr.length - 1 && <span aria-hidden="true" style={{ color: GOLD }}>{" • "}</span>}
-              </span>
-            ))}
+          <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#4A6076" }}>
+            Empowering UGC NET Aspirants, MBA &amp; BBA Students, University Learners, Assistant
+            Professors, Researchers and HR Professionals through Premium Notes, MCQs, Previous Year
+            Questions, Case Studies, Blogs and Research Resources.
           </p>
 
           {/* CTAs */}
           <div className="flex flex-wrap gap-3 mb-8">
-            <Link to="/ugc-net-labour-welfare" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
+            <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
               Start Learning <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
-              Browse Notes
-            </Link>
+            <a href="#subjects" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
+              Explore Resources
+            </a>
           </div>
 
-          {/* Trust badges */}
-          <ul className="flex flex-wrap gap-2 mb-10" aria-label="Why students trust Karn HR Academy">
-            {["Latest Syllabus", "Research Based", "Updated Regularly", "Mobile Friendly", "Premium PDFs"].map(a => (
-              <li key={a} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
-                <CheckCircle2 aria-hidden="true" className="h-3 w-3" style={{ color: GOLD }} />{a}
+          {/* Trust badges — each with its own academic icon */}
+          <ul className="flex flex-wrap gap-2 mb-10 max-w-xl" aria-label="Why learners trust Karn HR Academy">
+            {[
+              { icon: BadgeCheck,    label: "Latest UGC NET Syllabus" },
+              { icon: BookOpen,      label: "Research-Based Content" },
+              { icon: GraduationCap, label: "University-Oriented Learning" },
+              { icon: Network,       label: "Premium Visual Notes" },
+              { icon: RefreshCw,     label: "Regularly Updated" },
+              { icon: Smartphone,    label: "Mobile & Print Friendly" },
+              { icon: FileText,      label: "Case Studies & Research Support" },
+              { icon: Award,         label: "Designed by Academic Experts" },
+            ].map(({ icon: Icon, label }) => (
+              <li key={label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
+                <Icon aria-hidden="true" className="h-3 w-3 flex-shrink-0" style={{ color: GOLD }} />{label}
               </li>
             ))}
           </ul>
