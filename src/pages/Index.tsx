@@ -9,11 +9,12 @@ import { DISCIPLINES } from "@/lib/disciplines";
 import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import {
-  ArrowRight, BookOpen, Users,
-  Video, HelpCircle, Download, FileText,
-  CheckCircle2, ChevronRight, Clock, Award, Lightbulb,
-  PlayCircle, BookMarked, Search, Zap, Shield,
+  ArrowRight, BookOpen,
+  Video, HelpCircle, FileText,
+  CheckCircle2, ChevronRight, Clock, Award,
+  PlayCircle, BookMarked, Search,
   Mail, HandHeart, ScrollText,
+  BadgeCheck, Network, History, RefreshCw, Smartphone,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -49,11 +50,12 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 }));
 
 const WHY_CHOOSE = [
-  { icon: FileText,     title: "Structured Study Notes",     desc: "Chapter-wise, topic-wise notes aligned to MBA & UGC NET syllabi. Downloadable PDFs for every subject.", color: NAVY,       bg: "#DCE6F1", link: "/notes" },
-  { icon: Video,        title: "On-Demand Video Lectures",   desc: "Concept-clarity videos by HR academics. Watch, rewind, and master every topic at your own pace.",        color: STEEL_DARK, bg: "#EEF0F8", link: "/lectures" },
-  { icon: HelpCircle,   title: "Topic-wise MCQ Quizzes",     desc: "Topic-wise MCQs with instant feedback and expert explanations — new quizzes added regularly.",          color: NAVY_DARK,  bg: "#E3EAF2", link: "/quizzes" },
-  { icon: BookMarked,   title: "Essential Reading List",     desc: "Hand-picked books on HRM, OB, Strategy and Research Methodology with author notes and buy links.",        color: GOLD,       bg: "#F7F1E3", link: "/books" },
-  { icon: Shield,       title: "UGC NET & Exam Ready",       desc: "All content is mapped to UGC NET Management, MBA entrance, and university examination patterns.",         color: GOLD_DARK,  bg: "#F7F1E3", link: "/ugc-net-labour-welfare" },
+  { icon: BadgeCheck, title: "Latest UGC NET Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1" },
+  { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8" },
+  { icon: Network,    title: "Premium Diagrams & Visual Learning",  desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2" },
+  { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3" },
+  { icon: RefreshCw,  title: "Regular Content Updates",             desc: "Notes are continuously updated with recent developments, reports and amendments.",                     color: STEEL,      bg: "#EEF0F8" },
+  { icon: Smartphone, title: "Mobile & Print Friendly PDFs",        desc: "Professionally designed PDFs optimized for desktop, tablet and mobile reading.",                       color: GOLD,       bg: "#F7F1E3" },
 ];
 
 const ROADMAP = [
@@ -265,13 +267,15 @@ const CompactHowItWorks = () => (
   </section>
 );
 
-// ─────────────── Section: Why Choose ─────────────────────────────────────────
+// ─────────────── Section: Why Karn HR Academy ────────────────────────────────
 const WhyChoose = () => (
-  <section className="py-20 md:py-24 bg-white">
+  <section className="py-20 md:py-24 bg-white" aria-labelledby="why-khr-heading">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-14">
-        <GoldLabel text="Why Choose Us" />
-        <SectionHeading center title="Everything You Need to Excel in HR & Management" sub="One platform covering notes, quizzes, lectures, books, and research — free for every learner." />
+        <GoldLabel text="Why Karn HR Academy?" />
+        <div id="why-khr-heading">
+          <SectionHeading center title="Study Material Built to Premium Standards" sub="Every note, diagram, and PDF is researched, structured, and updated the way serious exam preparation demands — and it's all free." />
+        </div>
       </div>
       {/* flex-wrap + justify-center (rather than a fixed-column grid) so an
           odd card count centers its last row instead of leaving a gap */}
@@ -279,18 +283,26 @@ const WhyChoose = () => (
         {WHY_CHOOSE.map(f => {
           const Icon = f.icon;
           return (
-            <Link key={f.title} to={f.link} className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: f.bg }}>
-                <Icon className="h-6 w-6" style={{ color: f.color }} />
+            <div key={f.title} className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110" style={{ background: f.bg }}>
+                <Icon aria-hidden="true" className="h-6 w-6" style={{ color: f.color }} />
               </div>
-              <h3 className="mb-2 flex items-center gap-1.5 text-base font-bold text-slate-800 transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
-                <span className="transition-colors group-hover:opacity-80">{f.title}</span>
-                <ArrowRight className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" style={{ color: f.color }} />
+              <h3 className="mb-2 text-base font-bold text-slate-800" style={{ fontFamily: "'Sora',sans-serif" }}>
+                {f.title}
               </h3>
               <p className="text-sm leading-relaxed text-slate-500">{f.desc}</p>
-            </Link>
+            </div>
           );
         })}
+      </div>
+      <div className="mt-12 text-center">
+        <Link
+          to="/notes"
+          className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
+          style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}
+        >
+          Explore Premium Notes <ArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   </section>
