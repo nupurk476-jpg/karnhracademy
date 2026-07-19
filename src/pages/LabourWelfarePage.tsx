@@ -236,6 +236,62 @@ const LabourWelfarePage = () => {
   const clearFilters = () => { setSearch(""); setUnitFilter("all"); setTypeFilter("all"); setTagFilter("all"); setYearFilter("all"); };
   const activeFilterCount = [unitFilter !== "all", typeFilter !== "all", tagFilter !== "all", yearFilter !== "all", search !== ""].filter(Boolean).length;
 
+  // Content whose topic doesn't map to any unit (uploaded with "All Topics",
+  // or with a non-Labour-Welfare topic). Surfaced in their own section below
+  // the units rather than silently dropped — otherwise a note the admin just
+  // uploaded can be "missing" from the public hub with no explanation.
+  const unassignedNotes = useMemo(
+    () => filteredNotes.filter(n => !getUnitForTopicSlug(n.topic_slug)),
+    [filteredNotes],
+  );
+  const unassignedQuizzes = useMemo(
+    () => filteredQuizzes.filter(q => !getUnitForTopicSlug(q.topic_slug)),
+    [filteredQuizzes],
+  );
+
+  const renderNoteRow = (note: any) => (
+    <div key={note.id} className="flex flex-col gap-2 rounded-md border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+          <h3 className="text-sm font-semibold text-foreground">{note.title}</h3>
+          {note.topic_slug && (
+            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+              {getTopicLabel(note.topic_slug)}
+            </span>
+          )}
+        </div>
+        {note.description && <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(note.created_at)}</span>
+          {(note.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button onClick={() => openNote(note, "view")} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">
+          <Eye className="h-3.5 w-3.5" /> View Notes
+        </button>
+        <button onClick={() => openNote(note, "download")} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+          <Download className="h-3.5 w-3.5" /> Download
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderQuizCard = (q: any) => (
+    <div key={q.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <h3 className="text-sm font-semibold text-foreground">{q.title}</h3>
+        {q.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">{getTopicLabel(q.topic_slug)}</span>}
+      </div>
+      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+        <Clock className="h-3 w-3" /> {questionCounts[q.id] || 0} questions
+      </p>
+      <Link to={`/quizzes/${q.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+        Take Quiz <ChevronRight className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -401,39 +457,33 @@ const LabourWelfarePage = () => {
                           <EmptyState text={`No notes uploaded yet for Unit ${unitRoman(u.number)}: ${u.title}.`} />
                         ) : (
                           <div className="space-y-2.5">
-                            {unitNotes.map(note => (
-                              <div key={note.id} className="flex flex-col gap-2 rounded-md border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="min-w-0">
-                                  <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                                    <h3 className="text-sm font-semibold text-foreground">{note.title}</h3>
-                                    {note.topic_slug && (
-                                      <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
-                                        {getTopicLabel(note.topic_slug)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {note.description && <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
-                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                                    <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(note.created_at)}</span>
-                                    {(note.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
-                                  </div>
-                                </div>
-                                <div className="flex shrink-0 items-center gap-2">
-                                  <button onClick={() => openNote(note, "view")} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">
-                                    <Eye className="h-3.5 w-3.5" /> View Notes
-                                  </button>
-                                  <button onClick={() => openNote(note, "download")} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                                    <Download className="h-3.5 w-3.5" /> Download
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
+                            {unitNotes.map(renderNoteRow)}
                           </div>
                         )}
                       </div>
                     </details>
                   );
                 })}
+                {unitFilter === "all" && unassignedNotes.length > 0 && (
+                  <details className="group rounded-lg border border-amber-300 bg-amber-50/40">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                      <span className="text-sm font-semibold text-foreground">Not yet assigned to a unit</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {unassignedNotes.length} note{unassignedNotes.length !== 1 ? "s" : ""}
+                        <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                      </span>
+                    </summary>
+                    <div className="border-t border-amber-200 p-4 pt-3">
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        These notes were uploaded without a unit topic. To file one under its unit, edit it in
+                        Admin → Notes and pick the matching topic under Labour Welfare.
+                      </p>
+                      <div className="space-y-2.5">
+                        {unassignedNotes.map(renderNoteRow)}
+                      </div>
+                    </div>
+                  </details>
+                )}
               </div>
             </section>
 
@@ -460,26 +510,33 @@ const LabourWelfarePage = () => {
                           <EmptyState text={`No MCQs uploaded yet for Unit ${unitRoman(u.number)}: ${u.title}.`} />
                         ) : (
                           <div className="grid gap-3 sm:grid-cols-2">
-                            {unitQuizzes.map(q => (
-                              <div key={q.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
-                                <div className="flex flex-wrap items-center gap-1.5">
-                                  <h3 className="text-sm font-semibold text-foreground">{q.title}</h3>
-                                  {q.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">{getTopicLabel(q.topic_slug)}</span>}
-                                </div>
-                                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Clock className="h-3 w-3" /> {questionCounts[q.id] || 0} questions
-                                </p>
-                                <Link to={`/quizzes/${q.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                                  Take Quiz <ChevronRight className="h-3.5 w-3.5" />
-                                </Link>
-                              </div>
-                            ))}
+                            {unitQuizzes.map(renderQuizCard)}
                           </div>
                         )}
                       </div>
                     </details>
                   );
                 })}
+                {unitFilter === "all" && unassignedQuizzes.length > 0 && (
+                  <details className="group rounded-lg border border-amber-300 bg-amber-50/40">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                      <span className="text-sm font-semibold text-foreground">Not yet assigned to a unit</span>
+                      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {unassignedQuizzes.length} MCQ set{unassignedQuizzes.length !== 1 ? "s" : ""}
+                        <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                      </span>
+                    </summary>
+                    <div className="border-t border-amber-200 p-4 pt-3">
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        These MCQ sets were created without a unit topic. To file one under its unit, edit it in
+                        Admin → Quizzes and pick the matching topic under Labour Welfare.
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {unassignedQuizzes.map(renderQuizCard)}
+                      </div>
+                    </div>
+                  </details>
+                )}
               </div>
             </section>
 

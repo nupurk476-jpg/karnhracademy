@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Video, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
+import { LW_UNITS, getUnitForTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -154,11 +155,15 @@ const AdminNotes = () => {
           </div>
         </div>
 
-        {/* Topic chips */}
+        {/* Topic chips — for Labour Welfare, grouped by unit so the admin can
+            see exactly which unit of the public hub a topic files the note
+            under; the flat list gave no way to tell. */}
         {topics.length > 0 && (
           <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</p>
-            <div className="flex flex-wrap gap-2">
+            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {subject === "lw" ? "Unit & Topic" : "Topic (optional)"}
+            </p>
+            <div className="mb-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setTopicSlug("")}
@@ -168,19 +173,54 @@ const AdminNotes = () => {
               >
                 All Topics
               </button>
-              {topics.map(t => (
-                <button
-                  key={t.slug}
-                  type="button"
-                  onClick={() => setTopicSlug(t.slug)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
             </div>
+            {subject === "lw" && topicSlug === "" && (
+              <p className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Without a unit topic, this note will NOT appear under any unit on the public Labour
+                Welfare hub — it will be listed in a separate "Not yet assigned to a unit" section.
+                Pick the topic below that matches the note.
+              </p>
+            )}
+            {subject === "lw" ? (
+              <div className="space-y-3">
+                {LW_UNITS.map(u => (
+                  <div key={u.number}>
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-accent">
+                      Unit {unitRoman(u.number)} · {u.title}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {u.topics.map(t => (
+                        <button
+                          key={t.slug}
+                          type="button"
+                          onClick={() => setTopicSlug(t.slug)}
+                          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                            topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {topics.map(t => (
+                  <button
+                    key={t.slug}
+                    type="button"
+                    onClick={() => setTopicSlug(t.slug)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -247,6 +287,21 @@ const AdminNotes = () => {
                   {getDiscipline(note.subject)?.short ?? note.subject.toUpperCase()}
                 </span>
               )}
+              {/* Labour Welfare notes: show which hub unit this note files under —
+                  or an explicit warning when it maps to none, which is exactly the
+                  case that used to silently vanish from the public unit lists. */}
+              {note.subject === "lw" && (() => {
+                const unit = getUnitForTopicSlug(note.topic_slug);
+                return unit ? (
+                  <span className="ml-2 rounded-full bg-[#E9EEF5] px-2 py-0.5 text-xs font-semibold text-[#0D2A45]">
+                    Unit {unitRoman(unit.number)}
+                  </span>
+                ) : (
+                  <span className="ml-2 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                    No unit — pick a topic
+                  </span>
+                );
+              })()}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
