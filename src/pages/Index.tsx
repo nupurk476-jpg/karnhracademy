@@ -130,36 +130,37 @@ const Hero = () => {
           </div>
 
           <h1 className="font-extrabold leading-[1.04] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(2.4rem,5vw,3.75rem)", letterSpacing: "-0.025em" }}>
-            Complete Learning Platform for{" "}
-            <span style={{ color: GOLD_DARK }}>HR & Management</span>{" "}
-            Excellence
+            Complete <span style={{ color: GOLD_DARK }}>UGC NET Code 55</span>{" "}
+            Learning Platform
           </h1>
 
-          <p className="text-base md:text-lg leading-relaxed mb-7 max-w-lg" style={{ color: "#4A6076" }}>
-            Structured notes, expert video lectures, curated books, and research resources — all aligned with MBA, BBA & UGC NET syllabi. Built by an educator, for serious learners.
-          </p>
-
-          {/* Audience pills */}
-          <div className="flex flex-wrap gap-2 mb-9">
-            {["MBA Students", "BBA Students", "HR Professionals", "UGC NET Aspirants", "Professors & Researchers"].map(a => (
-              <span key={a} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
-                <CheckCircle2 className="h-3 w-3" style={{ color: GOLD }} />{a}
+          <p className="text-base md:text-lg leading-relaxed mb-8 max-w-lg font-medium" style={{ color: "#4A6076" }}>
+            {["Premium Notes", "MCQs", "PYQs", "Case Studies", "Blogs", "Research Resources"].map((item, i, arr) => (
+              <span key={item}>
+                {item}
+                {i < arr.length - 1 && <span aria-hidden="true" style={{ color: GOLD }}>{" • "}</span>}
               </span>
             ))}
-          </div>
+          </p>
 
           {/* CTAs */}
-          <div className="flex flex-wrap gap-3 mb-10">
-            <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
-              Start Learning Free <ArrowRight className="h-4 w-4" />
+          <div className="flex flex-wrap gap-3 mb-8">
+            <Link to="/ugc-net-labour-welfare" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
+              Start Learning <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <Link to="/quizzes" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
-              Practice MCQs
-            </Link>
-            <Link to="/lectures" className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
-              <PlayCircle className="h-4 w-4" /> Watch Lectures
+            <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
+              Browse Notes
             </Link>
           </div>
+
+          {/* Trust badges */}
+          <ul className="flex flex-wrap gap-2 mb-10" aria-label="Why students trust Karn HR Academy">
+            {["Latest Syllabus", "Research Based", "Updated Regularly", "Mobile Friendly", "Premium PDFs"].map(a => (
+              <li key={a} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
+                <CheckCircle2 aria-hidden="true" className="h-3 w-3" style={{ color: GOLD }} />{a}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Right: Live content snapshot — Option B layout (no bars) */}
