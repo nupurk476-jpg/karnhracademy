@@ -97,7 +97,7 @@ const AuthPage = () => {
         noindex
       />
       <Header />
-      <main className="mx-auto max-w-md px-6 py-20">
+      <main id="main-content" className="mx-auto max-w-md px-6 py-20">
         <div className="rounded-lg border border-border bg-card p-8">
           <h1 className="mb-6 text-2xl font-bold text-foreground">
             {isLogin ? "Sign In" : "Create Account"}

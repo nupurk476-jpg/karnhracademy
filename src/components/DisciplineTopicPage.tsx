@@ -86,7 +86,7 @@ const DisciplineTopicPage = ({
         }}
       />
       <Header />
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
         <Breadcrumbs items={[
           { label: "Home", to: "/" },
           { label: discipline?.short ?? "Notes", to: `/notes?subject=${subject}` },

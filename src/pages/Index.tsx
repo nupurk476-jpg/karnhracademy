@@ -955,7 +955,7 @@ const Index = () => (
       path="/"
     />
     <Header />
-    <main>
+    <main id="main-content">
       <Hero />
       <CompactHowItWorks />
       <WhyChoose />

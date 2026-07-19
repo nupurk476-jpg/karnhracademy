@@ -162,7 +162,7 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-background">
       <SEO title="My Profile" description="Manage your Karn HR Academy profile and view your quiz history." path="/profile" noindex />
       <Header />
-      <main className="mx-auto max-w-4xl px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-4xl px-6 py-12">
         {/* Profile Card */}
         <div className="mb-10 rounded-lg border border-border bg-card p-6 md:p-8">
           <div className="mb-6 flex items-center justify-between">

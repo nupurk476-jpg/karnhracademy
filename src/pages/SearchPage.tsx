@@ -143,7 +143,7 @@ const SearchPage = () => {
     <div className="min-h-screen bg-background">
       <SEO title="Search" description="Search study notes, MCQ quizzes, articles, and topic pages across Karn HR Academy." path="/search" noindex />
       <Header />
-      <main className="mx-auto max-w-4xl px-6 py-10">
+      <main id="main-content" className="mx-auto max-w-4xl px-6 py-10">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Search" }]} />
         <h1 className="mb-4 text-3xl font-bold text-foreground">Search</h1>
 

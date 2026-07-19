@@ -25,7 +25,7 @@ const BooksPage = () => {
         path="/books"
       />
       <Header />
-      <main className="mx-auto max-w-6xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-6xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Book Recommendations</h1>
         <p className="mb-6 text-muted-foreground">Curated reading list for HR students and researchers.</p>
         <input

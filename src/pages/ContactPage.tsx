@@ -47,7 +47,7 @@ const ContactPage = () => {
         path="/contact"
       />
       <Header />
-      <main className="mx-auto max-w-xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-xl px-6 py-16">
         <h1 className="mb-4 text-4xl font-bold text-foreground">Contact Us</h1>
         <p className="mb-8 text-muted-foreground">
           Have questions, feedback, or want to collaborate? Send us a message and we'll get back to you.

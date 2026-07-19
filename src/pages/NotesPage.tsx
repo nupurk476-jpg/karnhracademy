@@ -258,7 +258,7 @@ const NotesPage = () => {
       />
       <Header />
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main id="main-content" className="mx-auto max-w-6xl px-6 py-10">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Study Notes" }]} />
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>

@@ -77,7 +77,7 @@ const NewspaperPage = () => {
         path="/newspaper"
       />
       <Header />
-      <main className="mx-auto max-w-6xl px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-8">
           <p className="mb-1 text-sm font-semibold uppercase tracking-[0.15em] text-accent">Stay Informed</p>
           <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>

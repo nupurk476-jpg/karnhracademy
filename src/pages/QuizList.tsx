@@ -403,7 +403,7 @@ const QuizList = () => {
       <Header />
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="bg-white border-b border-border">
+      <section id="main-content" className="bg-white border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
           {/* Breadcrumb (visual + BreadcrumbList schema) */}
           <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes" }]} />

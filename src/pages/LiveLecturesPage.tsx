@@ -61,7 +61,7 @@ const LiveLecturesPage = () => {
         path="/live-lectures"
       />
       <Header />
-      <main className="mx-auto max-w-6xl px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-10 text-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-destructive">
             <Radio className="h-3 w-3" /> Live Sessions

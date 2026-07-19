@@ -13,7 +13,7 @@ const TermsPage = () => {
         path="/terms"
       />
       <Header />
-      <main className="mx-auto max-w-3xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="mb-2 text-4xl font-bold text-foreground">Terms of Use</h1>
         <p className="mb-10 text-sm text-muted-foreground">Last updated: {lastUpdated}</p>
 

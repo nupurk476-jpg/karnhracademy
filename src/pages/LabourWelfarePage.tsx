@@ -260,7 +260,7 @@ const LabourWelfarePage = () => {
       />
       <Header />
 
-      <main>
+      <main id="main-content">
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="border-b border-border bg-white">
           <div className="mx-auto max-w-6xl px-6 py-10">

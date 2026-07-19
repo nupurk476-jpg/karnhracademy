@@ -57,6 +57,13 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border">
+      {/* Keyboard/screen-reader users can jump past the nav on every page */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-accent-foreground"
+      >
+        Skip to content
+      </a>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 shrink-0">

@@ -32,7 +32,7 @@ const AboutPage = () => {
         path="/about"
       />
       <Header />
-      <main className="mx-auto max-w-4xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
         <h1 className="mb-8 text-4xl font-bold text-foreground">About</h1>
         <div className="grid items-start gap-12 lg:grid-cols-2">
           <div className="flex justify-center">

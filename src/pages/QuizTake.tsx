@@ -203,7 +203,7 @@ const QuizTake = () => {
         }}
       />
       <Header />
-      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <main id="main-content" className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes", to: "/quizzes" }, { label: quiz.title }]} />
         <Link to="/quizzes" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Quizzes

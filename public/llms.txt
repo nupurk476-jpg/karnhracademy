@@ -1,26 +1,41 @@
-# HR & Management Research Hub
+# Karn HR Academy
 
-> Academic resource hub for MBA, BBA, UGC NET HR aspirants, and research scholars in Human Resource Management. Focus on Ethical HRM and Quiet Quitting.
+> Free academic learning platform for HR & Management — structured study notes, expert video lectures, topic-wise MCQ quizzes, curated books, and previous year question papers for MBA, BBA, HR professionals, and UGC NET aspirants. Built by HR educator Nupur Karn. All content is free.
 
-## Pages
+## Main Pages
 
-- [Home](/): Overview of the academic platform.
+- [Home](/): Platform overview — disciplines, featured notes, lectures, books, and articles.
+- [Study Notes](/notes): Downloadable, exam-aligned notes for every discipline, filterable by subject and topic.
+- [MCQ Quizzes](/quizzes): Topic-wise practice quizzes with instant feedback, explanations, timers, and leaderboards.
+- [Video Lectures](/lectures): Concept-clarity video lectures by HR academics.
+- [Live Lectures](/live-lectures): Scheduled live teaching sessions.
+- [UGC NET Labour Welfare](/ugc-net-labour-welfare): Flagship unit-wise study hub for UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM (Subject Code 55) — notes, MCQs, and previous year question papers organised across all 10 official units.
+- [Blog](/blogs): In-depth articles on HR, management, and exam preparation.
+- [Books](/books): Curated book recommendations with author notes.
+- [Newspaper Highlights](/newspaper): Current-affairs highlights for aspirants.
+- [Search](/search): Sitewide search across notes, quizzes, topics, and articles.
 - [About](/about): About the educator and the mission.
 - [Contact](/contact): Get in touch.
-- [Blogs](/blogs): Articles on HR, management, and academic research.
-- [Notes](/notes): Downloadable HRM, English, and exam-preparation notes.
-- [Quizzes](/quizzes): Practice quizzes for MBA/BBA & UGC NET HR.
-- [Books](/books): Curated book recommendations for HR students.
-- [Newspaper Highlights](/newspaper): Daily news highlights for aspirants.
 
-## HR Topics
+## Disciplines Covered
 
-- [Compensation & Benefits](/hr/compensation-and-benefits)
-- [Performance Management](/hr/performance-management)
-- [Recruitment & Selection](/hr/recruitment-and-selection)
-- [Functions of HR](/hr/functions-of-hr)
-- [Industrial Relations](/hr/industrial-relations)
-- [HRIS & SHRM](/hr/hris-and-shrm)
+- Human Resource Management (HRM) — notes at [/notes?subject=hrm](/notes?subject=hrm), topic pages under /hr/
+- Organisational Behaviour (OB) — notes at [/notes?subject=ob](/notes?subject=ob), topic pages under /ob/
+- Strategic Management (SM) — notes at [/notes?subject=sm](/notes?subject=sm), topic pages under /sm/
+- Principles of Management (POM) — notes at [/notes?subject=pom](/notes?subject=pom), topic pages under /pom/
+- Business Communication (BC) — notes at [/notes?subject=bc](/notes?subject=bc), topic pages under /bc/
+- Organisation Development & Change Management (OD & CM) — notes at [/notes?subject=odcm](/notes?subject=odcm), topic pages under /odcm/
+- International HRM — notes at [/notes?subject=ghr](/notes?subject=ghr), topic pages under /ghr/
+- Labour Welfare (UGC NET) — full unit-wise hub at [/ugc-net-labour-welfare](/ugc-net-labour-welfare)
+
+## Popular Topic Pages
+
 - [HR Analytics](/hr/hr-analytics)
-- [HR Planning](/hr/human-resource-planning)
-- [Evolution of HRM](/hr/evolution-of-hrm)
+- [Recruitment & Selection](/hr/recruitment-and-selection)
+- [Performance Management](/hr/performance-management)
+- [Compensation & Benefits](/hr/compensation-and-benefits)
+- [Industrial Relations](/hr/industrial-relations)
+- [Motivation](/ob/motivation)
+- [Leadership](/ob/leadership)
+
+A complete list of all pages is available in the [sitemap](/sitemap.xml).
