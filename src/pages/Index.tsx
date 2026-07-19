@@ -13,7 +13,7 @@ import {
   Video, HelpCircle, FileText,
   CheckCircle2, ChevronRight, Clock, Award,
   PlayCircle, BookMarked, Search,
-  Mail, HandHeart, ScrollText,
+  Mail, HandHeart, ScrollText, Linkedin,
   BadgeCheck, Network, History, RefreshCw, Smartphone,
 } from "lucide-react";
 
@@ -811,9 +811,34 @@ const PopularTopics = () => (
   </section>
 );
 
-// ─────────────── Section: About the Author ────────────────────────────────────
+// ─────────────── Section: Meet the Founder ───────────────────────────────────
+// Set this to the founder's exact LinkedIn profile URL when available; the
+// default is a safe public search for her name, so the button always works.
+const FOUNDER_LINKEDIN = "https://www.linkedin.com/search/results/people/?keywords=Nupur%20Karn";
+const FOUNDER_EMAIL = "contact@karnhracademy.com";
+
+const FOUNDER_QUALIFICATIONS = [
+  "UGC NET Qualified (Code 55)",
+  "Assistant Professor",
+  "PhD Scholar (Management)",
+  "MBA (HR)",
+  "Industry Experience in Banking & HR",
+  "Author & Researcher",
+];
+
 const AboutAuthor = () => {
   const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  // Same photo source the About page uses — a real photo uploaded to the
+  // "educator" storage bucket appears here automatically, monogram otherwise.
+  useEffect(() => {
+    const { data } = supabase.storage.from("educator").getPublicUrl("profile.jpg");
+    fetch(data.publicUrl, { method: "HEAD" }).then(res => {
+      if (res.ok) setPhotoUrl(data.publicUrl);
+    }).catch(() => {});
+  }, []);
+
   const achievements = [
     { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#DCE6F1" },
     { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#EEF0F8" },
@@ -823,45 +848,69 @@ const AboutAuthor = () => {
     { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F1E3" },
   ];
   return (
-  <section className="py-20 md:py-24 bg-white">
+  <section className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
-        {/* Left: Profile */}
-        <div className="flex flex-col items-start gap-6">
-          <div className="flex items-center gap-5">
-            <div className="relative">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-extrabold text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})`, fontFamily: "'Sora',sans-serif" }}>
-                NK
+        {/* Left: Founder card */}
+        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#DCE6F1", background: "#fafafa" }}>
+          <div className="mb-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+            <div className="relative flex-shrink-0">
+              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Ms. Nupur Karn, founder of Karn HR Academy" className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>NK</span>
+                )}
               </div>
-              <div className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow" style={{ background: GOLD }}>
-                <Award className="h-3.5 w-3.5" style={{ color: NAVY }} />
+              <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow" style={{ background: GOLD }}>
+                <Award aria-hidden="true" className="h-4 w-4" style={{ color: NAVY }} />
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: GOLD }}>About the Author</p>
-              <h3 className="text-xl font-extrabold text-slate-900" style={{ fontFamily: "'Sora',sans-serif" }}>Nupur Karn</h3>
-              <p className="text-sm text-slate-500">HR Educator, Researcher & Academic Content Creator</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: GOLD }}>Meet the Founder</p>
+              <h3 id="founder-heading" className="text-2xl font-extrabold text-slate-900" style={{ fontFamily: "'Sora',sans-serif" }}>Ms. Nupur Karn</h3>
+              <p className="text-sm text-slate-500">Founder, Karn HR Academy</p>
             </div>
           </div>
 
-          <p className="text-slate-600 leading-relaxed">
-            Nupur Karn is an HR educator and researcher with deep expertise in Human Resource Management, Organisational Behaviour, and Strategic HRM. With a passion for making complex HR concepts accessible, she has built Karn HR Academy as a comprehensive free knowledge hub for MBA students, BBA students, HR professionals, and UGC NET aspirants across India.
-          </p>
-          <p className="text-slate-600 leading-relaxed">
-            All content on this platform is personally researched, structured, and aligned with current university and competitive exam syllabi — ensuring academic rigour while remaining practical and exam-ready.
-          </p>
+          <ul className="mb-6 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+            {FOUNDER_QUALIFICATIONS.map(q => (
+              <li key={q} className="flex items-start gap-2 text-sm text-slate-600">
+                <CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: GOLD_DARK }} />
+                {q}
+              </li>
+            ))}
+          </ul>
+
+          <blockquote className="mb-7 border-l-2 pl-4 text-slate-600 italic leading-relaxed" style={{ borderColor: GOLD }}>
+            "Karn HR Academy was created to provide high-quality academic resources that bridge university learning and competitive examination preparation."
+          </blockquote>
 
           <div className="flex flex-wrap gap-3">
-            {["MBA (HR)", "UGC NET Management", "HR Research", "Academic Writing", "OB & Leadership"].map(t => (
-              <span key={t} className="rounded-full border px-3 py-1 text-xs font-semibold text-slate-600" style={{ borderColor: "#DCE6F1", background: LIGHT }}>
-                {t}
-              </span>
-            ))}
+            <a
+              href={FOUNDER_LINKEDIN}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: NAVY, fontFamily: "'Sora',sans-serif" }}
+            >
+              <Linkedin aria-hidden="true" className="h-4 w-4" /> LinkedIn
+            </a>
+            <a
+              href={`mailto:${FOUNDER_EMAIL}`}
+              className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}
+            >
+              <Mail aria-hidden="true" className="h-4 w-4" /> Email
+            </a>
+            <Link
+              to="/blogs"
+              className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}
+            >
+              <ScrollText aria-hidden="true" className="h-4 w-4" /> Publications
+            </Link>
           </div>
-
-          <Link to="/about" className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold transition-all hover:opacity-90" style={{ background: NAVY, color: "#fff", fontFamily: "'Sora',sans-serif" }}>
-            Learn More <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
 
         {/* Right: Achievements */}
