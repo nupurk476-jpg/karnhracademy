@@ -5,6 +5,7 @@ import { fetchQuizQuestions } from "@/lib/quizQuestions";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
 import {
   ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star,
@@ -189,9 +190,21 @@ const QuizTake = () => {
         title={quiz.title}
         description={`Practice ${quiz.topic} with this topic-focused MCQ quiz — instant feedback on every answer.`}
         path={`/quizzes/${id}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Quiz",
+          name: quiz.title,
+          about: quiz.topic || quiz.title,
+          description: quiz.description || `Topic-wise MCQ quiz on ${quiz.topic || quiz.title} for MBA, BBA and UGC NET preparation.`,
+          educationalUse: "assessment",
+          isAccessibleForFree: true,
+          numberOfQuestions: questions.length || undefined,
+          provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
+        }}
       />
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes", to: "/quizzes" }, { label: quiz.title }]} />
         <Link to="/quizzes" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Quizzes
         </Link>

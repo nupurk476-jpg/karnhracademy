@@ -65,6 +65,8 @@ const ArticleCard = ({ post }: { post: any }) => {
           <img
             src={post.cover_image}
             alt={post.title}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -197,7 +199,7 @@ const Sidebar = ({
             <Link key={p.id} to={`/blogs/${p.slug}`} className="group flex gap-3">
               <div className="h-12 w-14 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
                 {p.cover_image
-                  ? <img src={p.cover_image} alt={p.title} className="h-full w-full object-cover" />
+                  ? <img src={p.cover_image} alt={p.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   : <div className="flex h-full items-center justify-center"><BookOpen className="h-4 w-4 text-slate-300" /></div>
                 }
               </div>

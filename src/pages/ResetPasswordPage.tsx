@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +48,7 @@ const ResetPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Reset Password" description="Set a new password for your Karn HR Academy account." path="/reset-password" noindex />
       <Header />
       <main className="mx-auto max-w-md px-6 py-20">
         <div className="rounded-lg border border-border bg-card p-8">

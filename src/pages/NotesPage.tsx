@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Eye, LayoutGrid, List, Calendar, PlayCircle } from "lucide-react";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 const PAGE_SIZE = 30;
 const EMAIL_KEY = "khr_subscriber_email";
@@ -34,7 +35,8 @@ const NotesPage = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [search, setSearch] = useState("");
+  // ?q= lets the sitewide /search page deep-link to a specific note here.
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const requestedSubject = searchParams.get("subject");
   const hadUrlParam = !!(requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject));
   const [activeSubject, setActiveSubject] = useState<string>(hadUrlParam ? requestedSubject! : "hrm");
@@ -257,6 +259,7 @@ const NotesPage = () => {
       <Header />
 
       <main className="mx-auto max-w-6xl px-6 py-10">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Study Notes" }]} />
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Study Notes</h1>

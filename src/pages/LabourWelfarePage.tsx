@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -241,6 +242,21 @@ const LabourWelfarePage = () => {
         title="UGC NET Labour Welfare — Unit-wise Notes, MCQs & PYQs"
         description="UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X."
         path="/ugc-net-labour-welfare"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Course",
+          name: "UGC NET Labour Welfare (Subject Code 55) — Unit-wise Study Hub",
+          description: "Free unit-wise preparation covering all 10 official units of UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.",
+          provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
+          isAccessibleForFree: true,
+          inLanguage: "en",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "INR", category: "Free" },
+          hasCourseInstance: {
+            "@type": "CourseInstance",
+            courseMode: "online",
+            courseWorkload: "PT10H",
+          },
+        }}
       />
       <Header />
 
@@ -248,11 +264,7 @@ const LabourWelfarePage = () => {
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="border-b border-border bg-white">
           <div className="mx-auto max-w-6xl px-6 py-10">
-            <nav className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Link to="/" className="hover:text-accent transition-colors">Home</Link>
-              <ChevronRight className="h-3 w-3" />
-              <span className="text-foreground font-medium">UGC NET Labour Welfare</span>
-            </nav>
+            <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET Labour Welfare" }]} />
 
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">UGC NET Paper II · Subject Code 55</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>

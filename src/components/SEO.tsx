@@ -11,9 +11,12 @@ interface SEOProps {
   type?: "website" | "article";
   image?: string;
   jsonLd?: Record<string, any> | Record<string, any>[];
+  /** Set on utility pages (auth, profile, search results, 404, admin) that
+      should never appear in search engines. */
+  noindex?: boolean;
 }
 
-const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd }: SEOProps) => {
+const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd, noindex = false }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
   const trimmedTitle = fullTitle.length > 60 ? fullTitle.slice(0, 57) + "…" : fullTitle;
@@ -24,6 +27,7 @@ const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE
     <Helmet>
       <title>{trimmedTitle}</title>
       <meta name="description" content={trimmedDesc} />
+      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
       <link rel="canonical" href={url} />
       <meta property="og:title" content={trimmedTitle} />
       <meta property="og:description" content={trimmedDesc} />

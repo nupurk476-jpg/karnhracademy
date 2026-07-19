@@ -553,6 +553,8 @@ const VideoLectures = () => {
                     <img
                       src={thumb}
                       alt={lec.title}
+                      loading="lazy"
+                      decoding="async"
                       className="relative z-[1] h-full w-full"
                       style={{ objectFit: "contain" }}
                       onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
@@ -664,6 +666,8 @@ const BooksSection = () => {
                   <img
                     src={book.cover_image}
                     alt={`Cover of ${book.title}`}
+                    loading="lazy"
+                    decoding="async"
                     className="h-36 w-auto max-w-[7rem] object-cover rounded shadow-xl ring-1 ring-black/10"
                     onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
@@ -733,7 +737,7 @@ const BlogSection = () => {
           {featured && (
             <Link to={featured.slug ? `/blogs/${featured.slug}` : "/blogs"} className="group lg:col-span-3 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-200 overflow-hidden">
               <div className="relative h-56 lg:h-72 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
-                {featured.cover_image && <img src={featured.cover_image} alt={featured.title} className="absolute inset-0 h-full w-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-300" />}
+                {featured.cover_image && <img src={featured.cover_image} alt={featured.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-300" />}
                 <div className="absolute inset-0 flex flex-col justify-end p-6">
                   <span className="inline-block w-fit rounded-full px-3 py-0.5 text-xs font-bold mb-3" style={{ background: GOLD, color: NAVY }}>{featured.category}</span>
                   <h3 className="text-xl font-extrabold text-white leading-snug line-clamp-2" style={{ fontFamily: "'Sora',sans-serif" }}>{featured.title}</h3>

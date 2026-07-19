@@ -34,6 +34,7 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const NewspaperPage = lazy(() => import("./pages/NewspaperPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/newspaper" element={<NewspaperPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />

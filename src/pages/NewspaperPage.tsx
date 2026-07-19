@@ -117,7 +117,7 @@ const NewspaperPage = () => {
             {highlights.map((h) => (
               <div key={h.id} className="group overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
                 {h.image_url ? (
-                  <img src={h.image_url} alt={h.title} className="h-48 w-full object-cover" />
+                  <img src={h.image_url} alt={h.title} loading="lazy" decoding="async" className="h-48 w-full object-cover" />
                 ) : (
                   <div className="flex h-48 items-center justify-center bg-muted">
                     <Newspaper className="h-12 w-12 text-muted-foreground" />

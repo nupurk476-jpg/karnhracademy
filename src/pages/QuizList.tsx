@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -289,12 +290,16 @@ const QuizCard = ({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 const QuizList = () => {
+  const [searchParams] = useSearchParams();
+  // ?subject= lets topic pages and search results deep-link to one discipline.
+  const requestedSubject = searchParams.get("subject");
+  const validSubject = requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
   const [ratings, setRatings] = useState<Record<string, { avg: number; count: number }>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [subject, setSubject] = useState("all");
+  const [subject, setSubject] = useState(validSubject ? requestedSubject! : "all");
   const [topicSlug, setTopicSlug] = useState("all");
   const [difficulty, setDifficulty] = useState("All");
   const [duration, setDuration] = useState("any");
@@ -400,12 +405,8 @@ const QuizList = () => {
       {/* ── Hero ────────────────────────────────────────────────────────── */}
       <section className="bg-white border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-          {/* Breadcrumb */}
-          <nav className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-accent transition-colors">Home</Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground font-medium">MCQ Quizzes</span>
-          </nav>
+          {/* Breadcrumb (visual + BreadcrumbList schema) */}
+          <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes" }]} />
 
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>

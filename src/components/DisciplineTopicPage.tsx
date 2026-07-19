@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { ArrowLeft, FileText, Download } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { getDiscipline } from "@/lib/disciplines";
+import { ArrowLeft, FileText, Download, HelpCircle, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface DisciplineTopic {
@@ -63,11 +65,33 @@ const DisciplineTopicPage = ({
     );
   }
 
+  const discipline = getDiscipline(subject);
+  const relatedTopics = topics.filter((t) => t.slug !== topic.slug).slice(0, 6);
+
   return (
     <div className="min-h-screen bg-background">
-      <SEO title={topic.label} description={topic.desc} path={`/${routePrefix}/${topic.slug}`} />
+      <SEO
+        title={topic.label}
+        description={topic.desc}
+        path={`/${routePrefix}/${topic.slug}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "LearningResource",
+          name: topic.label,
+          description: topic.desc,
+          learningResourceType: "study notes",
+          educationalLevel: "postgraduate",
+          isAccessibleForFree: true,
+          provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
+        }}
+      />
       <Header />
       <main className="mx-auto max-w-4xl px-6 py-16">
+        <Breadcrumbs items={[
+          { label: "Home", to: "/" },
+          { label: discipline?.short ?? "Notes", to: `/notes?subject=${subject}` },
+          { label: topic.label },
+        ]} />
         <Link to={backLink} className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
           <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
@@ -89,7 +113,8 @@ const DisciplineTopicPage = ({
               No resources uploaded for <strong className="text-foreground">{topic.label}</strong> yet. Check back later.
             </p>
           </div>
-        ) : (
+        ) : null}
+        {notes.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2">
             {notes.map((note) => (
               <div key={note.id} className="group flex flex-col rounded-lg border border-border bg-card p-5 transition-shadow hover:shadow-md">
@@ -114,6 +139,33 @@ const DisciplineTopicPage = ({
             ))}
           </div>
         )}
+
+        {/* Related content — keeps every note within reach and gives crawlers
+            a dense internal-link mesh between sibling topics. */}
+        <section className="mt-12 border-t border-border pt-8">
+          <h2 className="mb-4 text-lg font-bold text-foreground">Continue studying {discipline?.short ?? "this subject"}</h2>
+          {relatedTopics.length > 0 && (
+            <div className="mb-5 flex flex-wrap gap-2">
+              {relatedTopics.map((t) => (
+                <Link
+                  key={t.slug}
+                  to={`/${routePrefix}/${t.slug}`}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-accent hover:text-accent"
+                >
+                  {t.label} <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap gap-3">
+            <Link to={`/notes?subject=${subject}`} className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+              <FileText className="h-4 w-4 text-accent" /> All {discipline?.short ?? ""} notes
+            </Link>
+            <Link to={`/quizzes?subject=${subject}`} className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
+              <HelpCircle className="h-4 w-4 text-accent" /> Practice {discipline?.short ?? ""} MCQs
+            </Link>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

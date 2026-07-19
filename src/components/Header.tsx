@@ -18,9 +18,20 @@ const navItems = [
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    if (!term) return;
+    navigate(`/search?q=${encodeURIComponent(term)}`);
+    setSearchTerm("");
+    setSearchOpen(false);
+    setMobileOpen(false);
+  };
 
   useEffect(() => {
     const {
@@ -121,15 +132,17 @@ const Header = () => {
           <div className="hidden md:flex items-center">
             {searchOpen ? (
               <div className="flex items-center gap-2">
-                <div className="relative">
+                <form onSubmit={submitSearch} className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <input
                     autoFocus
                     type="text"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
                     placeholder="Search…"
                     className="pl-8 pr-3 py-1.5 text-sm border border-border rounded-lg bg-slate-50 focus:outline-none focus:ring-2 w-48 focus:ring-accent/20"
                   />
-                </div>
+                </form>
                 <button
                   onClick={() => setSearchOpen(false)}
                   className="text-muted-foreground hover:text-foreground p-1"
@@ -198,14 +211,16 @@ const Header = () => {
         <div className="xl:hidden border-t border-border bg-white">
           {/* Mobile search */}
           <div className="px-4 pt-3 pb-2">
-            <div className="relative">
+            <form onSubmit={submitSearch} className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search notes, topics, subjects…"
                 className="w-full pl-10 pr-4 py-2 text-sm border border-border rounded-lg bg-slate-50 focus:outline-none"
               />
-            </div>
+            </form>
           </div>
 
           {/* Nav links */}

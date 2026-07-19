@@ -5,6 +5,7 @@ import DOMPurify from "dompurify";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { Share2, Linkedin, Twitter, Facebook, ArrowLeft } from "lucide-react";
@@ -73,13 +74,20 @@ const BlogPost = () => {
             description: post.excerpt || undefined,
             image: post.cover_image || undefined,
             author: { "@type": "Person", name: post.author_name },
+            publisher: {
+              "@type": "Organization",
+              name: "Karn HR Academy",
+              logo: { "@type": "ImageObject", url: "https://karnhracademy.com/og-image.png" },
+            },
             datePublished: post.created_at,
-            mainEntityOfPage: `https://karnhracademy.lovable.app/blogs/${post.slug}`,
+            dateModified: post.updated_at || post.created_at,
+            mainEntityOfPage: `https://karnhracademy.com/blogs/${post.slug}`,
           }}
         />
       )}
       <Header />
       <article className="mx-auto max-w-3xl px-6 py-16">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Blog", to: "/blogs" }, { label: post.title }]} />
         <Link to="/blogs" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Blogs
         </Link>

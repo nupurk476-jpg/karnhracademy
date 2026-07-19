@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -159,6 +160,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="My Profile" description="Manage your Karn HR Academy profile and view your quiz history." path="/profile" noindex />
       <Header />
       <main className="mx-auto max-w-4xl px-6 py-12">
         {/* Profile Card */}

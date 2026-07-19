@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X, GraduationCap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -45,6 +46,10 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-background md:flex">
+      <Helmet>
+        <title>Admin — Karn HR Academy</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-border bg-card p-4 md:hidden">
         <Link to="/" className="flex items-center gap-2 text-foreground">

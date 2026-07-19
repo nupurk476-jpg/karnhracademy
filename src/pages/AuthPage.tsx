@@ -94,6 +94,7 @@ const AuthPage = () => {
         title="Sign In"
         description="Sign in or create a free account to save your quiz results, rate quizzes, and comment on blog posts."
         path="/auth"
+        noindex
       />
       <Header />
       <main className="mx-auto max-w-md px-6 py-20">
