@@ -2,7 +2,7 @@ import {
   BookOpen, Briefcase, Users, Target,
   MessageSquare, Repeat, Globe, HandHeart,
 } from "lucide-react";
-import { LW_TOPICS } from "./labourWelfareUnits";
+import { LW_TOPICS, resolveLWTopicSlug } from "./labourWelfareUnits";
 
 export const DISCIPLINES = [
   {
@@ -178,7 +178,7 @@ export const DISCIPLINES = [
     activeColor: "bg-[#0D2A45] border-[#0D2A45] text-white",
     iconBg: "bg-[#DCE6F1]",
     iconColor: "text-[#0D2A45]",
-    description: "UGC NET Paper II (Subject Code 55) — Personnel Management, HRD, Industrial Relations, Trade Unions, Labour Legislation, Labour Welfare & Labour Market, Units I–X",
+    description: "UGC NET Paper II (Subject Code 55) — Management, HRM, HRD & IHRM, OB, Industrial Relations & Trade Unions, Industrial Disputes, Labour Legislation, Wages, Labour Welfare & Social Security, Labour Market, Units I–X",
     topics: LW_TOPICS,
   },
 ] as const;
@@ -190,8 +190,11 @@ export function getDiscipline(value: string) {
 }
 
 export function getTopicLabel(slug: string) {
+  // Labour Welfare content saved under a pre-2026 syllabus slug should show
+  // its current topic's label, not the raw legacy slug.
+  const resolved = resolveLWTopicSlug(slug);
   for (const d of DISCIPLINES) {
-    const t = d.topics.find(t => t.slug === slug);
+    const t = d.topics.find(t => t.slug === resolved);
     if (t) return t.label;
   }
   return slug;

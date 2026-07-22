@@ -406,9 +406,10 @@ const LabourWelfareBanner = () => {
                 UGC NET Labour Welfare — our only fully unit-wise study hub
               </h2>
               <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
-                Personnel Management, HRD, Industrial Relations, Trade Unions, Labour Legislation, Labour Welfare &amp;
-                Labour Market — every one of the 10 official units, with notes, MCQs, and previous year question
-                papers all organised unit-by-unit.
+                Management, HRM, HRD &amp; IHRM, Organisational Behaviour, Industrial Relations &amp; Trade Unions,
+                Industrial Disputes, Labour Legislation, Wages, Labour Welfare &amp; Social Security, and Labour
+                Market — every one of the 10 official units, with notes, MCQs, and previous year question papers
+                all organised unit-by-unit.
               </p>
               <Link
                 to="/ugc-net-labour-welfare"
