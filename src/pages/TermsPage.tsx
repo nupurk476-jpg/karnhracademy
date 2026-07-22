@@ -30,7 +30,7 @@ const TermsPage = () => {
             <h2 className="mb-2 text-lg font-semibold text-foreground">2. What we offer</h2>
             <p>
               Karn HR Academy provides free study notes, video lectures, practice MCQs, blog
-              articles, and book recommendations for HR & Management education (MBA, BBA, UGC NET,
+              articles, and book recommendations for HR & Management education (MBA, BBA, UGC NET/JRF,
               and working professionals). Content is provided for personal, non-commercial,
               educational use only.
             </p>

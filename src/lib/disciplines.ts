@@ -171,14 +171,14 @@ export const DISCIPLINES = [
   },
   {
     value: "lw",
-    label: "Labour Welfare (UGC NET)",
+    label: "Labour Welfare (UGC NET/JRF)",
     short: "Labour Welfare",
     icon: HandHeart,
     color: "bg-[#E9EEF5] border-[#C0CEDD] text-[#0D2A45]",
     activeColor: "bg-[#0D2A45] border-[#0D2A45] text-white",
     iconBg: "bg-[#DCE6F1]",
     iconColor: "text-[#0D2A45]",
-    description: "UGC NET Paper II (Subject Code 55) — Management, HRM, HRD & IHRM, OB, Industrial Relations & Trade Unions, Industrial Disputes, Labour Legislation, Wages, Labour Welfare & Social Security, Labour Market, Units I–X",
+    description: "UGC NET/JRF Paper II (Subject Code 55) — Management, HRM, HRD & IHRM, OB, Industrial Relations & Trade Unions, Industrial Disputes, Labour Legislation, Wages, Labour Welfare & Social Security, Labour Market, Units I–X",
     topics: LW_TOPICS,
   },
 ] as const;

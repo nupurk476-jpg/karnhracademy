@@ -31,7 +31,7 @@ const SORT_OPTIONS = [
 
 const TAGS = [
   "HRM", "Leadership", "Motivation", "Recruitment", "HR Analytics",
-  "Performance", "Training", "OB", "Strategic HRM", "UGC NET",
+  "Performance", "Training", "OB", "Strategic HRM", "UGC NET/JRF",
   "MBA", "Research", "Compensation", "Industrial Relations",
 ];
 
@@ -317,7 +317,7 @@ const BlogList = () => {
     <div className="min-h-screen bg-slate-50">
       <SEO
         title="Blog — HR & Management Insights"
-        description="In-depth articles on Human Resource Management, Organisational Behaviour, Strategic HRM, and academic research for MBA, BBA, and UGC NET aspirants."
+        description="In-depth articles on Human Resource Management, Organisational Behaviour, Strategic HRM, and academic research for MBA, BBA, and UGC NET/JRF aspirants."
         path="/blogs"
       />
       <Header />
@@ -340,7 +340,7 @@ const BlogList = () => {
               HR & Management<br />Knowledge Hub
             </h1>
             <p className="mb-8 text-base leading-relaxed text-muted-foreground">
-              Research-backed articles on Human Resource Management, Organisational Behaviour, Strategic HRM, and more — curated for MBA students, HR professionals, and UGC NET aspirants.
+              Research-backed articles on Human Resource Management, Organisational Behaviour, Strategic HRM, and more — curated for MBA students, HR professionals, and UGC NET/JRF aspirants.
             </p>
 
             {/* Value points */}

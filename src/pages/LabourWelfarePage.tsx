@@ -295,14 +295,14 @@ const LabourWelfarePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="UGC NET Labour Welfare — Unit-wise Notes, MCQs & PYQs"
-        description="UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X."
+        title="UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs"
+        description="UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X."
         path="/ugc-net-labour-welfare"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Course",
-          name: "UGC NET Labour Welfare (Subject Code 55) — Unit-wise Study Hub",
-          description: "Free unit-wise preparation covering all 10 official units of UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.",
+          name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub",
+          description: "Free unit-wise preparation covering all 10 official units of UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.",
           provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
           isAccessibleForFree: true,
           inLanguage: "en",
@@ -320,11 +320,11 @@ const LabourWelfarePage = () => {
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="border-b border-border bg-white">
           <div className="mx-auto max-w-6xl px-6 py-10">
-            <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET Labour Welfare" }]} />
+            <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET/JRF Labour Welfare" }]} />
 
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">UGC NET Paper II · Subject Code 55</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">UGC NET/JRF Paper II · Subject Code 55</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
-              UGC NET Labour Welfare — Unit-wise Study Hub
+              UGC NET/JRF Labour Welfare — Unit-wise Study Hub
             </h1>
             <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Labour Welfare / Personnel Management / Industrial Relations / Labour &amp; Social Welfare / Human Resource

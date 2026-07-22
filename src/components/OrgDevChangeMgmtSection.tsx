@@ -25,7 +25,7 @@ const OrgDevChangeMgmtSection = () => {
             Organisational Development & Change Management
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Explore frameworks, interventions & strategies driving organisational change — essential for MBA, BBA & UGC NET aspirants.
+            Explore frameworks, interventions & strategies driving organisational change — essential for MBA, BBA & UGC NET/JRF aspirants.
           </p>
         </div>
 

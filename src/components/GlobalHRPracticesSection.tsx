@@ -25,7 +25,7 @@ const GlobalHRPracticesSection = () => {
             International HRM Practices
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Understand international HRM, cross-cultural management & global workforce strategies — vital for MBA, BBA & UGC NET aspirants.
+            Understand international HRM, cross-cultural management & global workforce strategies — vital for MBA, BBA & UGC NET/JRF aspirants.
           </p>
         </div>
 

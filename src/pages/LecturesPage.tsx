@@ -109,7 +109,7 @@ const LecturesPage = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Video Lectures"
-        description="Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET preparation."
+        description="Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET/JRF preparation."
         path="/lectures"
       />
       <Header />

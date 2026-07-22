@@ -1,6 +1,6 @@
 # Karn HR Academy
 
-> Free academic learning platform for HR & Management — structured study notes, expert video lectures, topic-wise MCQ quizzes, curated books, and previous year question papers for MBA, BBA, HR professionals, and UGC NET aspirants. Built by HR educator Nupur Karn. All content is free.
+> Free academic learning platform for HR & Management — structured study notes, expert video lectures, topic-wise MCQ quizzes, curated books, and previous year question papers for MBA, BBA, HR professionals, and UGC NET/JRF aspirants. Built by HR educator Nupur Karn. All content is free.
 
 ## Main Pages
 
@@ -9,7 +9,7 @@
 - [MCQ Quizzes](/quizzes): Topic-wise practice quizzes with instant feedback, explanations, timers, and leaderboards.
 - [Video Lectures](/lectures): Concept-clarity video lectures by HR academics.
 - [Live Lectures](/live-lectures): Scheduled live teaching sessions.
-- [UGC NET Labour Welfare](/ugc-net-labour-welfare): Flagship unit-wise study hub for UGC NET Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM (Subject Code 55) — notes, MCQs, and previous year question papers organised across all 10 official units.
+- [UGC NET/JRF Labour Welfare](/ugc-net-labour-welfare): Flagship unit-wise study hub for UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM (Subject Code 55) — notes, MCQs, and previous year question papers organised across all 10 official units.
 - [Blog](/blogs): In-depth articles on HR, management, and exam preparation.
 - [Books](/books): Curated book recommendations with author notes.
 - [Newspaper Highlights](/newspaper): Current-affairs highlights for aspirants.
@@ -26,7 +26,7 @@
 - Business Communication (BC) — notes at [/notes?subject=bc](/notes?subject=bc), topic pages under /bc/
 - Organisation Development & Change Management (OD & CM) — notes at [/notes?subject=odcm](/notes?subject=odcm), topic pages under /odcm/
 - International HRM — notes at [/notes?subject=ghr](/notes?subject=ghr), topic pages under /ghr/
-- Labour Welfare (UGC NET) — full unit-wise hub at [/ugc-net-labour-welfare](/ugc-net-labour-welfare)
+- Labour Welfare (UGC NET/JRF) — full unit-wise hub at [/ugc-net-labour-welfare](/ugc-net-labour-welfare)
 
 ## Popular Topic Pages
 
