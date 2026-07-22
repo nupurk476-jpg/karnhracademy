@@ -195,7 +195,7 @@ const QuizTake = () => {
           "@type": "Quiz",
           name: quiz.title,
           about: quiz.topic || quiz.title,
-          description: quiz.description || `Topic-wise MCQ quiz on ${quiz.topic || quiz.title} for MBA, BBA and UGC NET preparation.`,
+          description: quiz.description || `Topic-wise MCQ quiz on ${quiz.topic || quiz.title} for MBA, BBA and UGC NET/JRF preparation.`,
           educationalUse: "assessment",
           isAccessibleForFree: true,
           numberOfQuestions: questions.length || undefined,

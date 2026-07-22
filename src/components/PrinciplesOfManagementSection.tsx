@@ -31,7 +31,7 @@ const PrinciplesOfManagementSection = () => {
             Principles of Management
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Master the classical functions and principles of management — essential for MBA, BBA & UGC NET aspirants.
+            Master the classical functions and principles of management — essential for MBA, BBA & UGC NET/JRF aspirants.
           </p>
         </div>
 

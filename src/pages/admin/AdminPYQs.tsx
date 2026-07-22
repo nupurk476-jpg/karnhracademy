@@ -127,7 +127,7 @@ const AdminPYQs = () => {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-[1fr_140px]">
-          <input placeholder="Title (e.g. UGC NET Labour Welfare — June 2024, Paper II)" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <input placeholder="Title (e.g. UGC NET/JRF Labour Welfare — June 2024, Paper II)" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
           <input type="number" placeholder="Year" value={year} onChange={e => setYear(Number(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         </div>
 

@@ -31,7 +31,7 @@ const StrategicManagementSection = () => {
             Strategic Management
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            Understand how organizations formulate, implement and evaluate strategies to achieve competitive advantage — essential for MBA, BBA & UGC NET aspirants.
+            Understand how organizations formulate, implement and evaluate strategies to achieve competitive advantage — essential for MBA, BBA & UGC NET/JRF aspirants.
           </p>
         </div>
 

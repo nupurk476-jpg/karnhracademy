@@ -59,7 +59,7 @@ const Footer = () => {
             </div>
             <p className="text-sm leading-relaxed text-primary-foreground/70 mb-5 max-w-xs">
               Academic resource hub for HR & Management — structured notes, video lectures,
-              MCQs and research content for MBA, BBA & UGC NET aspirants.
+              MCQs and research content for MBA, BBA & UGC NET/JRF aspirants.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ const Footer = () => {
                 { label: "Human Resource Management", to: "/notes?subject=hrm" },
                 { label: "Organisational Behaviour", to: "/notes?subject=ob" },
                 { label: "Strategic HRM", to: "/notes?subject=sm" },
-                { label: "UGC NET Labour Welfare", to: "/ugc-net-labour-welfare" },
+                { label: "UGC NET/JRF Labour Welfare", to: "/ugc-net-labour-welfare" },
                 { label: "HR Analytics", to: "/notes?subject=hrm" },
                 { label: "Performance Management", to: "/notes?subject=hrm" },
               ].map((link) => (

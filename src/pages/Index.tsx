@@ -50,7 +50,7 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 }));
 
 const WHY_CHOOSE = [
-  { icon: BadgeCheck, title: "Latest UGC NET Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1" },
+  { icon: BadgeCheck, title: "Latest UGC NET/JRF Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET/JRF syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1" },
   { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8" },
   { icon: Network,    title: "Premium Diagrams & Visual Learning",  desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2" },
   { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3" },
@@ -136,7 +136,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#4A6076" }}>
-            Empowering UGC NET Aspirants, MBA &amp; BBA Students, University Learners, Assistant
+            Empowering UGC NET/JRF Aspirants, MBA &amp; BBA Students, University Learners, Assistant
             Professors, Researchers and HR Professionals through Premium Notes, MCQs, Previous Year
             Questions, Case Studies, Blogs and Research Resources.
           </p>
@@ -154,7 +154,7 @@ const Hero = () => {
           {/* Trust badges — each with its own academic icon */}
           <ul className="flex flex-wrap gap-2 mb-10 max-w-xl" aria-label="Why learners trust Karn HR Academy">
             {[
-              { icon: BadgeCheck,    label: "Latest UGC NET Syllabus" },
+              { icon: BadgeCheck,    label: "Latest UGC NET/JRF Syllabus" },
               { icon: BookOpen,      label: "Research-Based Content" },
               { icon: GraduationCap, label: "University-Oriented Learning" },
               { icon: Network,       label: "Premium Visual Notes" },
@@ -399,17 +399,17 @@ const LabourWelfareBanner = () => {
                   <HandHeart className="h-4.5 w-4.5 text-white" />
                 </span>
                 <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: NAVY_DARK }}>
-                  UGC NET Paper II · Subject Code 55
+                  UGC NET/JRF Paper II · Subject Code 55
                 </span>
               </div>
               <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl" style={{ fontFamily: "'Sora',sans-serif" }}>
-                UGC NET Labour Welfare — our only fully unit-wise study hub
+                UGC NET/JRF Labour Welfare — our only fully unit-wise study hub
               </h2>
               <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
                 Management, HRM, HRD &amp; IHRM, Organisational Behaviour, Industrial Relations &amp; Trade Unions,
                 Industrial Disputes, Labour Legislation, Wages, Labour Welfare &amp; Social Security, and Labour
-                Market — every one of the 10 official units, with notes, MCQs, and previous year question papers
-                all organised unit-by-unit.
+                Market — every one of the 10 official UGC NET/JRF units, with notes, MCQs, and previous year
+                question papers all organised unit-by-unit.
               </p>
               <Link
                 to="/ugc-net-labour-welfare"
@@ -454,7 +454,7 @@ const FeaturedNotes = () => {
 
   const placeholders = [
     { title: "Introduction to HRM", description: "A comprehensive overview of Human Resource Management — its scope, objectives, and functions in modern organisations.", subject: "hrm" },
-    { title: "Motivation Theories", description: "Maslow, Herzberg, McGregor & Vroom's theories explained with examples relevant to MBA & UGC NET preparation.", subject: "ob" },
+    { title: "Motivation Theories", description: "Maslow, Herzberg, McGregor & Vroom's theories explained with examples relevant to MBA & UGC NET/JRF preparation.", subject: "ob" },
     { title: "Strategic Management Framework", description: "SWOT, Porter's Five Forces, and BCG Matrix explained with real corporate case studies.", subject: "sm" },
   ];
 
@@ -727,7 +727,7 @@ const BlogSection = () => {
     { title: "What is Strategic HRM? A Complete Guide",              excerpt: "Understanding how HR strategy aligns with organisational goals for sustainable competitive advantage.", category: "HRM Basics",      created_at: new Date().toISOString() },
     { title: "Motivation in the Workplace: Theories & Applications", excerpt: "Maslow, Herzberg, Vroom — how classic motivation theories apply to modern workplaces and exam questions.", category: "Organisational Behaviour", created_at: new Date().toISOString() },
     { title: "HR Analytics: Why Every HR Professional Needs It",     excerpt: "Data-driven HR is no longer optional. Here's why analytics skills are essential for modern HR professionals.", category: "HRM Basics", created_at: new Date().toISOString() },
-    { title: "UGC NET Management: Complete Preparation Strategy",    excerpt: "A structured 90-day roadmap for UGC NET Management aspirants — subjects, resources, and time allocation.", category: "Research Methodology", created_at: new Date().toISOString() },
+    { title: "UGC NET/JRF Management: Complete Preparation Strategy",    excerpt: "A structured 90-day roadmap for UGC NET/JRF Management aspirants — subjects, resources, and time allocation.", category: "Research Methodology", created_at: new Date().toISOString() },
   ];
 
   const items = posts.length > 0 ? posts : placeholders;
@@ -976,7 +976,7 @@ const Newsletter = () => {
           Join the HR Learning Community
         </h2>
         <p className="mb-8 leading-relaxed" style={{ color: "#4A6076" }}>
-          New notes, MCQs, video lectures, and articles every week — curated for MBA, BBA, and UGC NET preparation. Free forever.
+          New notes, MCQs, video lectures, and articles every week — curated for MBA, BBA, and UGC NET/JRF preparation. Free forever.
         </p>
 
         {done ? (
@@ -1021,7 +1021,7 @@ const Index = () => (
   <div className="min-h-screen bg-white">
     <SEO
       title="Karn HR Academy — Complete HR & Management Learning Platform"
-      description="Free study notes, video lectures, MCQs, and research resources for MBA, BBA & UGC NET aspirants in HR & Management. Built by an educator, for serious learners."
+      description="Free study notes, video lectures, MCQs, and research resources for MBA, BBA & UGC NET/JRF aspirants in HR & Management. Built by an educator, for serious learners."
       path="/"
     />
     <Header />

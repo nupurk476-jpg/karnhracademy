@@ -183,7 +183,7 @@ const QuizCard = ({
               {quiz.title}
             </h2>
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-              {quiz.description || `Test your understanding of ${quiz.topic || quiz.title}. This quiz covers key concepts aligned with MBA and UGC NET HR syllabi with instant feedback on every answer.`}
+              {quiz.description || `Test your understanding of ${quiz.topic || quiz.title}. This quiz covers key concepts aligned with MBA and UGC NET/JRF HR syllabi with instant feedback on every answer.`}
             </p>
             {/* Related Resources */}
             <div className="mb-6">
@@ -397,7 +397,7 @@ const QuizList = () => {
     <div className="min-h-screen bg-slate-50">
       <SEO
         title="MCQ Quizzes — HR & Management Assessment"
-        description="Topic-wise MCQ quizzes for MBA, BBA, and UGC NET HR exam preparation. Instant results, detailed explanations, and progress tracking."
+        description="Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking."
         path="/quizzes"
       />
       <Header />
@@ -415,7 +415,7 @@ const QuizList = () => {
                 Practice MCQs for<br />HR & Management
               </h1>
               <p className="mb-8 text-base leading-relaxed text-muted-foreground">
-                Topic-wise quizzes designed for MBA, BBA, HR professionals, and UGC NET aspirants. Test your knowledge, get instant feedback, and track progress across all major HR subjects.
+                Topic-wise quizzes designed for MBA, BBA, HR professionals, and UGC NET/JRF aspirants. Test your knowledge, get instant feedback, and track progress across all major HR subjects.
               </p>
 
               {/* Search */}
