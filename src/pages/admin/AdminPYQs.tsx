@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
 import { LW_UNITS, unitRoman } from "@/lib/labourWelfareUnits";
+import { useConfirm } from "@/hooks/use-confirm";
 
 // Which subjects have a unit structure to tag PYQ papers against. Only
 // Labour Welfare has one today; a future syllabus-based subject just adds
@@ -25,6 +26,7 @@ const AdminPYQs = () => {
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = () => {
     (supabase.from("pyq_papers" as any) as any)
@@ -94,8 +96,11 @@ const AdminPYQs = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    await (supabase.from("pyq_papers" as any) as any).delete().eq("id", id);
+  const handleDelete = async (id: string, title: string) => {
+    const ok = await confirm({ title: `Delete "${title}"?`, description: "This cannot be undone." });
+    if (!ok) return;
+    const { error } = await (supabase.from("pyq_papers" as any) as any).delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete paper", description: error.message, variant: "destructive" }); return; }
     if (editingId === id) resetForm();
     toast({ title: "Paper deleted" });
     load();
@@ -238,7 +243,7 @@ const AdminPYQs = () => {
               <button onClick={() => startEdit(paper)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${paper.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
-              <button onClick={() => handleDelete(paper.id)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${paper.title}`}>
+              <button onClick={() => handleDelete(paper.id, paper.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${paper.title}`}>
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
@@ -248,6 +253,7 @@ const AdminPYQs = () => {
           <p className="rounded-md border border-dashed border-border py-8 text-center text-sm text-muted-foreground">No previous year papers uploaded yet.</p>
         )}
       </div>
+      <ConfirmDialog />
     </div>
   );
 };

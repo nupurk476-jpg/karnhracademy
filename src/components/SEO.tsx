@@ -18,8 +18,19 @@ interface SEOProps {
 
 const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd, noindex = false }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
-  const fullTitle = title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
-  const trimmedTitle = fullTitle.length > 60 ? fullTitle.slice(0, 57) + "…" : fullTitle;
+  // Truncate the page's own title, not the combined string — otherwise a
+  // long page title can eat into (or fully drop) the "— Karn HR Academy"
+  // suffix, which should always survive.
+  const MAX_LEN = 60;
+  let trimmedTitle: string;
+  if (title.includes(SITE_NAME)) {
+    trimmedTitle = title.length > MAX_LEN ? title.slice(0, MAX_LEN - 1) + "…" : title;
+  } else {
+    const suffix = ` — ${SITE_NAME}`;
+    const budget = MAX_LEN - suffix.length;
+    const trimmedBase = title.length > budget ? title.slice(0, budget - 1) + "…" : title;
+    trimmedTitle = `${trimmedBase}${suffix}`;
+  }
   const trimmedDesc = description.length > 160 ? description.slice(0, 157) + "…" : description;
   const jsonLdArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 

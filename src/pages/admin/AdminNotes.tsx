@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Video, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
+import { useConfirm } from "@/hooks/use-confirm";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -21,6 +22,7 @@ const AdminNotes = () => {
   const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = () => {
     supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
@@ -96,8 +98,11 @@ const AdminNotes = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("notes").delete().eq("id", id);
+  const handleDelete = async (id: string, title: string) => {
+    const ok = await confirm({ title: `Delete "${title}"?`, description: "This cannot be undone." });
+    if (!ok) return;
+    const { error } = await supabase.from("notes").delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete note", description: error.message, variant: "destructive" }); return; }
     if (editingId === id) resetForm();
     toast({ title: "Note deleted" });
     load();
@@ -315,13 +320,14 @@ const AdminNotes = () => {
               <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${note.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
-              <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>
+              <button onClick={() => handleDelete(note.id, note.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
           </div>
         ))}
       </div>
+      <ConfirmDialog />
     </div>
   );
 };

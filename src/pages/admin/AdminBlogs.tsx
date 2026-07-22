@@ -4,6 +4,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, FileUp } from "lucide-react";
 import { generateCoverImage } from "@/lib/blogCover";
 import { parseHtmlBlog } from "@/lib/blogImport";
+import { compressImage } from "@/lib/compressImage";
+import { useConfirm } from "@/hooks/use-confirm";
 
 const categories = ["HRM Basics", "Organisational Behaviour", "Research Methodology", "Ethical HRM", "Quiet Quitting", "General Studies", "Current Affairs"];
 
@@ -19,6 +21,7 @@ const AdminBlogs = () => {
   const [publishImmediately, setPublishImmediately] = useState(true);
   const htmlInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = () => {
     supabase.from("blog_posts").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setPosts(data));
@@ -103,9 +106,10 @@ const AdminBlogs = () => {
     const slug = form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
     let cover_image = form.cover_image;
     if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
+      const compressed = await compressImage(imageFile);
+      const ext = compressed.name.split(".").pop();
       const path = `${slug}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("blog-images").upload(path, imageFile);
+      const { error } = await supabase.storage.from("blog-images").upload(path, compressed);
       if (!error) {
         const { data: urlData } = supabase.storage.from("blog-images").getPublicUrl(path);
         cover_image = urlData.publicUrl;
@@ -134,8 +138,11 @@ const AdminBlogs = () => {
     load();
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("blog_posts").delete().eq("id", id);
+  const handleDelete = async (id: string, title: string) => {
+    const ok = await confirm({ title: `Delete "${title}"?`, description: "This cannot be undone." });
+    if (!ok) return;
+    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete post", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Post deleted" });
     load();
   };
@@ -259,12 +266,13 @@ const AdminBlogs = () => {
               >
                 {post.published ? "Published" : "Draft"}
               </button>
-              <button onClick={() => startEdit(post)} className="text-muted-foreground hover:text-foreground"><Pencil className="h-4 w-4" /></button>
-              <button onClick={() => handleDelete(post.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => startEdit(post)} aria-label={`Edit ${post.title}`} className="text-muted-foreground hover:text-foreground"><Pencil className="h-4 w-4" /></button>
+              <button onClick={() => handleDelete(post.id, post.title)} aria-label={`Delete ${post.title}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
           </div>
         ))}
       </div>
+      <ConfirmDialog />
     </div>
   );
 };

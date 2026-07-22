@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, Trash2, HelpCircle, CheckCircle2, FileQuestion, Users, Percent, Trophy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useConfirm } from "@/hooks/use-confirm";
+import { compressImage } from "@/lib/compressImage";
 
 const AdminDashboard = () => {
   const [counts, setCounts] = useState({ blogs: 0, notes: 0, quizzes: 0, books: 0, comments: 0, subscribers: 0 });
@@ -14,6 +16,7 @@ const AdminDashboard = () => {
   const [educatorUrl, setEducatorUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
     Promise.all([
@@ -88,9 +91,10 @@ const AdminDashboard = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    const compressed = await compressImage(file);
     // Remove old file first (upsert)
     await supabase.storage.from("educator").remove(["profile.jpg"]);
-    const { error } = await supabase.storage.from("educator").upload("profile.jpg", file, { upsert: true });
+    const { error } = await supabase.storage.from("educator").upload("profile.jpg", compressed, { upsert: true });
     if (error) {
       toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     } else {
@@ -101,7 +105,10 @@ const AdminDashboard = () => {
   };
 
   const handleRemoveEducator = async () => {
-    await supabase.storage.from("educator").remove(["profile.jpg"]);
+    const ok = await confirm({ title: "Remove the educator photo?", description: "The homepage About section will show a placeholder until a new one is uploaded." });
+    if (!ok) return;
+    const { error } = await supabase.storage.from("educator").remove(["profile.jpg"]);
+    if (error) { toast({ title: "Failed to remove image", description: error.message, variant: "destructive" }); return; }
     setEducatorUrl(null);
     toast({ title: "Educator image removed" });
   };
@@ -203,6 +210,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+      <ConfirmDialog />
     </div>
   );
 };
