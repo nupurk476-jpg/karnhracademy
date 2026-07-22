@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Video, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
-import { LW_UNITS, getUnitForTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
+import { LW_UNITS, getUnitForTopicSlug, resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -43,7 +43,9 @@ const AdminNotes = () => {
     setTitle(note.title ?? "");
     setDescription(note.description ?? "");
     setSubject(note.subject ?? "hrm");
-    setTopicSlug(note.topic_slug ?? "");
+    // Legacy Labour Welfare slugs resolve to their current topic so the right
+    // chip is preselected — saving then migrates the row to the new slug.
+    setTopicSlug(resolveLWTopicSlug(note.topic_slug ?? ""));
     setTagsInput((note.tags ?? []).join(", "));
     setExistingFileUrl(note.file_url ?? null);
     setExistingVideoUrl(note.video_url ?? null);

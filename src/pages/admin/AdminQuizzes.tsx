@@ -7,6 +7,7 @@ import {
   ArrowUp, ArrowDown, CheckCircle2, FileUp,
 } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
+import { resolveLWTopicSlug } from "@/lib/labourWelfareUnits";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ImportQuestionsDialog from "@/components/admin/ImportQuestionsDialog";
 import type { ParsedMcq } from "@/lib/mcq-parser";
@@ -73,7 +74,9 @@ const AdminQuizzes = () => {
     setEditingQuizId(q.id);
     setSelectedQuiz(q.id);
     setTitle(q.title ?? ""); setTopic(q.topic ?? ""); setDescription(q.description ?? "");
-    setSubject(q.subject ?? "hrm"); setTopicSlug(q.topic_slug ?? "");
+    // Legacy Labour Welfare slugs resolve to their current topic so the right
+    // chip is preselected — saving then migrates the row to the new slug.
+    setSubject(q.subject ?? "hrm"); setTopicSlug(resolveLWTopicSlug(q.topic_slug ?? ""));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
