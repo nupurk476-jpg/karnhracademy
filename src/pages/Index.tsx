@@ -52,7 +52,7 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 const WHY_CHOOSE = [
   { icon: BadgeCheck, title: "Latest UGC NET/JRF Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET/JRF syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1" },
   { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: Network,    title: "Premium Diagrams & Visual Learning",  desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2" },
+  { icon: Network,    title: "Diagrams & Visual Learning",          desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2" },
   { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3" },
   { icon: RefreshCw,  title: "Regular Content Updates",             desc: "Notes are continuously updated with recent developments, reports and amendments.",                     color: STEEL,      bg: "#EEF0F8" },
   { icon: Smartphone, title: "Mobile & Print Friendly PDFs",        desc: "Professionally designed PDFs optimized for desktop, tablet and mobile reading.",                       color: GOLD,       bg: "#F7F1E3" },
@@ -130,25 +130,25 @@ const Hero = () => {
           </div>
 
           <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
-            India's Premier Learning Platform for{" "}
-            <span style={{ color: GOLD_DARK }}>Human Resource Management, Labour Welfare</span>{" "}
-            &amp; Management Studies
+            Notes, MCQs &amp; PYQs for{" "}
+            <span style={{ color: GOLD_DARK }}>UGC NET/JRF Labour Welfare</span>,{" "}
+            HRM &amp; Management Studies
           </h1>
 
           <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#4A6076" }}>
-            Empowering UGC NET/JRF Aspirants, MBA &amp; BBA Students, University Learners, Assistant
-            Professors, Researchers and HR Professionals through Premium Notes, MCQs, Previous Year
-            Questions, Case Studies, Blogs and Research Resources.
+            A syllabus-based academic resource platform for UGC NET/JRF aspirants, MBA &amp; BBA students,
+            university learners, and HR professionals — organised unit-by-unit, updated regularly, and free
+            to use.
           </p>
 
-          {/* CTAs */}
+          {/* CTAs — one primary, one secondary */}
           <div className="flex flex-wrap gap-3 mb-8">
             <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
               Start Learning <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <a href="#subjects" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
-              Explore Resources
-            </a>
+            <Link to="/ugc-net-labour-welfare" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
+              <ScrollText className="h-4 w-4" /> UGC NET/JRF Labour Welfare
+            </Link>
           </div>
 
           {/* Trust badges — each with its own academic icon */}
@@ -157,7 +157,7 @@ const Hero = () => {
               { icon: BadgeCheck,    label: "Latest UGC NET/JRF Syllabus" },
               { icon: BookOpen,      label: "Research-Based Content" },
               { icon: GraduationCap, label: "University-Oriented Learning" },
-              { icon: Network,       label: "Premium Visual Notes" },
+              { icon: Network,       label: "Diagram-Rich Visual Notes" },
               { icon: RefreshCw,     label: "Regularly Updated" },
               { icon: Smartphone,    label: "Mobile & Print Friendly" },
               { icon: FileText,      label: "Case Studies & Research Support" },
@@ -246,6 +246,48 @@ function useContentCounts() {
   return { notesCount, quizCount, lecturesCount, booksCount };
 }
 
+// ─────────────── Section: Quick Access ───────────────────────────────────────
+// The five student-facing formats the platform is actually organised
+// around — placed right after the hero so a first-time visitor can jump
+// straight to what they came for instead of scrolling through marketing
+// copy first.
+const QUICK_ACCESS = [
+  { icon: HandHeart,  label: "UGC NET/JRF Labour Welfare", desc: "Unit-wise notes, MCQs & PYQs for Subject Code 55", to: "/ugc-net-labour-welfare", color: NAVY_DARK, bg: "#E3EAF2" },
+  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",        to: "/notes",                 color: NAVY,      bg: "#DCE6F1" },
+  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",          to: "/quizzes",               color: STEEL_DARK, bg: "#EEF0F8" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",              to: "/pyqs",                  color: GOLD_DARK, bg: "#F7F1E3" },
+  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators",       to: "/lectures",              color: STEEL,     bg: "#EEF0F8" },
+];
+
+const QuickAccess = () => (
+  <section className="py-14 md:py-16 bg-white border-b border-slate-100" aria-label="Quick access">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {QUICK_ACCESS.map(item => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.label}
+              to={item.to}
+              className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+              style={{ background: item.bg, borderColor: `${item.color}20` }}
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: item.color }}>
+                <Icon className="h-5 w-5 text-white" />
+              </div>
+              <p className="mb-1 text-sm font-bold leading-snug text-slate-800" style={{ fontFamily: "'Sora',sans-serif" }}>{item.label}</p>
+              <p className="flex-1 text-xs leading-relaxed text-slate-500">{item.desc}</p>
+              <div className="mt-3 flex items-center gap-1 text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100" style={{ color: item.color }}>
+                Open <ChevronRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+);
+
 // ─────────────── Section: Compact "How It Works" strip ──────────────────────
 // Replaces the old raw stats grid (132 notes / 50 quizzes / ...) right below
 // the hero — a wall of numbers this early reads as "prove it to me" rather
@@ -282,7 +324,7 @@ const WhyChoose = () => (
       <div className="text-center mb-14">
         <GoldLabel text="Why Karn HR Academy?" />
         <div id="why-khr-heading">
-          <SectionHeading center title="Study Material Built to Premium Standards" sub="Every note, diagram, and PDF is researched, structured, and updated the way serious exam preparation demands — and it's all free." />
+          <SectionHeading center title="Study Material Built for Serious Exam Preparation" sub="Every note, diagram, and PDF is researched, structured, and updated the way serious exam preparation demands — and it's all free." />
         </div>
       </div>
       {/* flex-wrap + justify-center (rather than a fixed-column grid) so an
@@ -309,7 +351,7 @@ const WhyChoose = () => (
           className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
           style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}
         >
-          Explore Premium Notes <ArrowRight aria-hidden="true" className="h-4 w-4" />
+          Explore All Notes <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
       </div>
     </div>
@@ -452,14 +494,6 @@ const FeaturedNotes = () => {
     ghr:    { label: "International HRM", color: NAVY_DARK },
   };
 
-  const placeholders = [
-    { title: "Introduction to HRM", description: "A comprehensive overview of Human Resource Management — its scope, objectives, and functions in modern organisations.", subject: "hrm" },
-    { title: "Motivation Theories", description: "Maslow, Herzberg, McGregor & Vroom's theories explained with examples relevant to MBA & UGC NET/JRF preparation.", subject: "ob" },
-    { title: "Strategic Management Framework", description: "SWOT, Porter's Five Forces, and BCG Matrix explained with real corporate case studies.", subject: "sm" },
-  ];
-
-  const items = notes.length > 0 ? notes : placeholders;
-
   return (
     <section className="py-20 md:py-24 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -473,8 +507,11 @@ const FeaturedNotes = () => {
           </Link>
         </div>
 
+        {notes.length === 0 ? (
+          <p className="text-sm text-slate-500">New notes are added regularly — check back soon.</p>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map((note: any, i: number) => {
+          {notes.map((note: any, i: number) => {
             const sub = subjectLabel[note.subject] || { label: "HRM", color: NAVY };
             return (
               <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
@@ -489,7 +526,6 @@ const FeaturedNotes = () => {
                   <div className="flex items-center gap-2 mb-4">
                     <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
                     {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-[#DCE6F1] text-[#1F4E79]">New</span>}
-                    <span className="ml-auto flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" />5 min read</span>
                   </div>
                   <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
                     {note.title}
@@ -505,6 +541,7 @@ const FeaturedNotes = () => {
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );
@@ -517,14 +554,6 @@ const VideoLectures = () => {
   useEffect(() => {
     supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setLectures(data));
   }, []);
-
-  const placeholders = [
-    { title: "Introduction to HRM — Concepts & Functions",    subject: "hrm", duration_minutes: 28 },
-    { title: "Motivation Theories — Maslow to Vroom",        subject: "ob",  duration_minutes: 35 },
-    { title: "Porter's Five Forces Explained",               subject: "sm",  duration_minutes: 22 },
-  ];
-
-  const items = lectures.length > 0 ? lectures : placeholders;
 
   return (
     <section className="py-20 md:py-24" style={{ background: LIGHT }}>
@@ -539,8 +568,11 @@ const VideoLectures = () => {
           </Link>
         </div>
 
+        {lectures.length === 0 ? (
+          <p className="text-sm text-slate-500">New lectures are added regularly — check back soon.</p>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {items.map((lec: any, i: number) => {
+          {lectures.map((lec: any, i: number) => {
             const thumb = normalizeYouTubeThumbnail(lec.thumbnail_url);
             return (
             <button
@@ -607,6 +639,7 @@ const VideoLectures = () => {
             );
           })}
         </div>
+        )}
       </div>
 
       {/* Lightbox player — same pattern as /lectures */}
@@ -651,19 +684,6 @@ const BooksSection = () => {
     supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data }) => data && setBooks(data));
   }, []);
 
-  // OpenStax OB has a free open-access cover. Robbins, Dessler, Mello are
-  // commercially published — no free official cover image available online.
-  // Flag: add cover_image URLs via Supabase Admin for those three once you
-  // have permission to use the images (e.g. from Amazon product pages or
-  // publisher sites). The UI will automatically show them when present.
-  const placeholders = [
-    { title: "Human Resource Management",           author: "Gary Dessler",           description: "The definitive textbook covering all HRM functions, processes, and practices.",           cover_image: null },
-    { title: "Organisational Behaviour",             author: "Stephen P. Robbins",     description: "Comprehensive coverage of OB concepts — motivation, leadership, group dynamics.",          cover_image: "https://openstax.org/apps/image-cdn/v1/f=webp/apps/cms/images/OrganizationalBehavior-bookcover.jpg" },
-    { title: "Strategic Human Resource Management", author: "Jeffrey Mello",           description: "Connects HRM strategy to organisational goals and competitive advantage.",                 cover_image: null },
-    { title: "HR Analytics",                        author: "Martin Edwards & Kirsten Edwards", description: "Practical guide to data-driven HR decision-making and workforce analytics.",  cover_image: null },
-  ];
-
-  const items = books.length > 0 ? books : placeholders;
   const bookColors = [NAVY, STEEL_DARK, NAVY_DARK, GOLD];
 
   return (
@@ -678,8 +698,11 @@ const BooksSection = () => {
             View all books <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+        {books.length === 0 ? (
+          <p className="text-sm text-slate-500">Book recommendations are added regularly — check back soon.</p>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {items.map((book: any, i: number) => (
+          {books.map((book: any, i: number) => (
             <div key={book.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
               {/* Cover area: real image if available, styled fallback otherwise */}
               <div className="relative flex items-center justify-center pt-6 pb-5 px-6 overflow-hidden" style={{ background: `linear-gradient(160deg, ${bookColors[i % 4]}18, ${bookColors[i % 4]}06)`, minHeight: "10rem" }}>
@@ -711,92 +734,7 @@ const BooksSection = () => {
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-};
-
-// ─────────────── Section: Blog (magazine style) ───────────────────────────────
-const BlogSection = () => {
-  const [posts, setPosts] = useState<any[]>([]);
-  useEffect(() => {
-    supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(4).then(({ data }) => data && setPosts(data));
-  }, []);
-
-  const placeholders = [
-    { title: "What is Strategic HRM? A Complete Guide",              excerpt: "Understanding how HR strategy aligns with organisational goals for sustainable competitive advantage.", category: "HRM Basics",      created_at: new Date().toISOString() },
-    { title: "Motivation in the Workplace: Theories & Applications", excerpt: "Maslow, Herzberg, Vroom — how classic motivation theories apply to modern workplaces and exam questions.", category: "Organisational Behaviour", created_at: new Date().toISOString() },
-    { title: "HR Analytics: Why Every HR Professional Needs It",     excerpt: "Data-driven HR is no longer optional. Here's why analytics skills are essential for modern HR professionals.", category: "HRM Basics", created_at: new Date().toISOString() },
-    { title: "UGC NET/JRF Management: Complete Preparation Strategy",    excerpt: "A structured 90-day roadmap for UGC NET/JRF Management aspirants — subjects, resources, and time allocation.", category: "Research Methodology", created_at: new Date().toISOString() },
-  ];
-
-  const items = posts.length > 0 ? posts : placeholders;
-  const catColors: Record<string, string> = {
-    "HRM Basics": NAVY, "Organisational Behaviour": STEEL_DARK, "Research Methodology": NAVY_DARK,
-    "Ethical HRM": GOLD_DARK, "Quiet Quitting": GOLD, "General Studies": STEEL, "Current Affairs": NAVY,
-  };
-
-  const [featured, ...rest] = items;
-
-  const readTime = (content = "") => Math.max(3, Math.round((content || "").replace(/<[^>]+>/g, "").split(/\s+/).length / 200));
-
-  return (
-    <section className="py-20 md:py-24" style={{ background: LIGHT }}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
-          <div>
-            <GoldLabel text="Knowledge Articles" />
-            <SectionHeading title="Insights & Research Articles" sub="In-depth articles by HR educators and researchers — exam prep meets real-world application." />
-          </div>
-          <Link to="/blogs" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
-            All articles <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* Featured left */}
-          {featured && (
-            <Link to={featured.slug ? `/blogs/${featured.slug}` : "/blogs"} className="group lg:col-span-3 flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-200 overflow-hidden">
-              <div className="relative h-56 lg:h-72 overflow-hidden" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
-                {featured.cover_image && <img src={featured.cover_image} alt={featured.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-300" />}
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <span className="inline-block w-fit rounded-full px-3 py-0.5 text-xs font-bold mb-3" style={{ background: GOLD, color: NAVY }}>{featured.category}</span>
-                  <h3 className="text-xl font-extrabold text-white leading-snug line-clamp-2" style={{ fontFamily: "'Sora',sans-serif" }}>{featured.title}</h3>
-                </div>
-              </div>
-              <div className="p-6 flex flex-col flex-1">
-                <p className="text-sm leading-relaxed text-slate-500 line-clamp-3 mb-4 flex-1">{featured.excerpt || featured.description}</p>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span>{featured.author_name || "Nupur Karn"}</span>
-                  <span>·</span>
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{readTime(featured.content)} min read</span>
-                  <span className="ml-auto inline-flex items-center gap-1 font-bold" style={{ color: catColors[featured.category] || GOLD }}>
-                    Read Article <ChevronRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {/* Right stack */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            {rest.slice(0, 3).map((post: any, i: number) => (
-              <Link key={post.id || i} to={post.slug ? `/blogs/${post.slug}` : "/blogs"} className="group flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl" style={{ background: `${catColors[post.category] || GOLD}15` }}>
-                  <FileText className="h-5 w-5" style={{ color: catColors[post.category] || GOLD }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: catColors[post.category] || GOLD }}>{post.category}</span>
-                  <h4 className="text-sm font-bold text-slate-800 leading-snug line-clamp-2 mb-1 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>{post.title}</h4>
-                  <span className="text-xs text-slate-400 flex items-center gap-1"><Clock className="h-3 w-3" />{readTime(post.content)} min read</span>
-                </div>
-              </Link>
-            ))}
-            <Link to="/blogs" className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-4 text-sm font-bold transition-colors hover:border-solid" style={{ borderColor: `${GOLD}50`, color: GOLD }}>
-              View all articles <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
@@ -1020,13 +958,14 @@ const Newsletter = () => {
 const Index = () => (
   <div className="min-h-screen bg-white">
     <SEO
-      title="Karn HR Academy — Complete HR & Management Learning Platform"
-      description="Free study notes, video lectures, MCQs, and research resources for MBA, BBA & UGC NET/JRF aspirants in HR & Management. Built by an educator, for serious learners."
+      title="Karn HR Academy — HRM, Labour Welfare & Management Studies Resources"
+      description="Notes, MCQs, previous year questions, and video lectures for UGC NET/JRF Labour Welfare, HRM and Management Studies — organised by syllabus for aspirants, MBA/BBA students, and HR professionals. Free."
       path="/"
     />
     <Header />
     <main id="main-content">
       <Hero />
+      <QuickAccess />
       <CompactHowItWorks />
       <WhyChoose />
       <Subjects />
@@ -1034,7 +973,6 @@ const Index = () => (
       <FeaturedNotes />
       <VideoLectures />
       <BooksSection />
-      <BlogSection />
       <PopularTopics />
       <AboutAuthor />
       <Newsletter />

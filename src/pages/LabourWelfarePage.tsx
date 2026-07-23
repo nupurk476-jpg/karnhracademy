@@ -1,156 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useLabourWelfareContent } from "@/hooks/use-labour-welfare-content";
+import { useDownloadGate } from "@/hooks/use-download-gate";
 import {
-  ChevronRight, FileText, HelpCircle, ScrollText, Search, Eye, Download,
-  Calendar, Clock, Layers, BookOpen,
+  ChevronRight, FileText, HelpCircle, ScrollText, Search, Download,
+  Layers, BookOpen,
 } from "lucide-react";
 import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { fetchAllRows } from "@/lib/fetchAllRows";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
-
-const SUBJECT = "lw";
-const EMAIL_KEY = "khr_subscriber_email";
+import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
-
-// ── Content loading ──────────────────────────────────────────────────────────
-function useLabourWelfareContent() {
-  const [notes, setNotes] = useState<any[]>([]);
-  const [quizzes, setQuizzes] = useState<any[]>([]);
-  const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
-  const [pyqs, setPyqs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const [{ data: noteData }, { data: quizData }, { data: pyqData }] = await Promise.all([
-        supabase.from("notes").select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
-        (supabase.from("quizzes") as any).select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
-        (supabase.from("pyq_papers" as any) as any).select("*").eq("subject", SUBJECT).order("year", { ascending: false }),
-      ]);
-      if (cancelled) return;
-      const publishedQuizzes = (quizData ?? []).filter((q: any) => q.published !== false);
-      setNotes(noteData ?? []);
-      setQuizzes(publishedQuizzes);
-      setPyqs(pyqData ?? []);
-
-      if (publishedQuizzes.length > 0) {
-        const quizIds = publishedQuizzes.map((q: any) => q.id);
-        // Paged via fetchAllRows — a plain .select() here would silently
-        // truncate at Supabase's default row cap once the combined
-        // question count across every LW quiz grows large enough,
-        // undercounting exactly the quizzes with the most questions.
-        const questions = await fetchAllRows<{ quiz_id: string }>(() =>
-          supabase.from("quiz_questions").select("quiz_id").in("quiz_id", quizIds)
-        );
-        if (!cancelled) {
-          const counts: Record<string, number> = {};
-          questions.forEach((q) => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
-          setQuestionCounts(counts);
-        }
-      }
-      setLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  return { notes, quizzes, questionCounts, pyqs, loading };
-}
-
-// ── Email gate (view/download), same one-time-ask pattern as /notes ─────────
-// Notes and PYQ files live in private buckets, so `request` takes an async
-// URL resolver (a fresh signed URL, not a stored permanent one) rather than
-// a plain string — see src/lib/signedFileUrl.ts.
-function useDownloadGate() {
-  const [email, setEmail] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [gateOpen, setGateOpen] = useState(false);
-  const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
-
-  const request = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
-    const saved = localStorage.getItem(EMAIL_KEY);
-    if (saved) {
-      const win = window.open("", "_blank"); // synchronous within the click — popup-safe
-      resolveUrl().then((url) => {
-        if (!url) { win?.close(); return; }
-        onOpened();
-        if (win) win.location.href = url; else window.open(url, "_blank");
-      });
-      return;
-    }
-    pending.current = { resolveUrl, onOpened };
-    setGateOpen(true);
-  };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !pending.current) return;
-    const { resolveUrl, onOpened } = pending.current;
-    const win = window.open("", "_blank");
-    setSubmitting(true);
-    await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
-    setSubmitting(false);
-    localStorage.setItem(EMAIL_KEY, email.trim());
-    setGateOpen(false);
-    setEmail("");
-    pending.current = null;
-    const url = win ? await resolveUrl() : null;
-    if (url && win) { onOpened(); win.location.href = url; } else win?.close();
-  };
-
-  const GateDialog = () => (
-    <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) { setGateOpen(false); pending.current = null; } }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Enter your email to continue</DialogTitle>
-          <DialogDescription>One-time step — we'll remember you on this device and send occasional updates about new study materials.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={submit} className="space-y-3">
-          <input
-            type="email" required autoFocus placeholder="your@email.com"
-            value={email} onChange={e => setEmail(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <div className="flex gap-3">
-            <button type="submit" disabled={submitting} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
-              {submitting ? "..." : "Continue"}
-            </button>
-            <button type="button" onClick={() => { setGateOpen(false); pending.current = null; }} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
-              Cancel
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
-          </p>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-
-  return { request, GateDialog };
-}
-
-// ── Small shared bits ────────────────────────────────────────────────────────
-const TagChip = ({ tag }: { tag: string }) => (
-  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">#{tag}</span>
-);
-
-const EmptyState = ({ text }: { text: string }) => (
-  <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center">
-    <p className="text-sm text-muted-foreground">{text}</p>
-  </div>
-);
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const LabourWelfarePage = () => {
@@ -163,8 +31,6 @@ const LabourWelfarePage = () => {
   const [typeFilter, setTypeFilter] = useState<"all" | "notes" | "mcqs" | "pyq">("all");
   const [tagFilter, setTagFilter] = useState("all");
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
-
-  const unitSectionRef = useRef<HTMLDivElement>(null);
 
   const recordNoteView = (note: any) => {
     supabase.rpc("increment_note_views" as any, { _note_id: note.id }).then(({ error }) => {
@@ -239,11 +105,6 @@ const LabourWelfarePage = () => {
     return combined.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 6);
   }, [notes, quizzes, pyqs]);
 
-  const jumpToUnit = (n: number) => {
-    setUnitFilter(n);
-    unitSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const clearFilters = () => { setSearch(""); setUnitFilter("all"); setTypeFilter("all"); setTagFilter("all"); setYearFilter("all"); };
   const activeFilterCount = [unitFilter !== "all", typeFilter !== "all", tagFilter !== "all", yearFilter !== "all", search !== ""].filter(Boolean).length;
 
@@ -258,49 +119,6 @@ const LabourWelfarePage = () => {
   const unassignedQuizzes = useMemo(
     () => filteredQuizzes.filter(q => !getUnitForTopicSlug(q.topic_slug)),
     [filteredQuizzes],
-  );
-
-  const renderNoteRow = (note: any) => (
-    <div key={note.id} className="flex flex-col gap-2 rounded-md border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
-        <div className="mb-1 flex flex-wrap items-center gap-1.5">
-          <h3 className="text-sm font-semibold text-foreground">{note.title}</h3>
-          {note.topic_slug && (
-            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
-              {getTopicLabel(note.topic_slug)}
-            </span>
-          )}
-        </div>
-        {note.description && <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{formatDate(note.created_at)}</span>
-          {(note.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
-        </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <button onClick={() => openNote(note, "view")} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">
-          <Eye className="h-3.5 w-3.5" /> View Notes
-        </button>
-        <button onClick={() => openNote(note, "download")} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-          <Download className="h-3.5 w-3.5" /> Download
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderQuizCard = (q: any) => (
-    <div key={q.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <h3 className="text-sm font-semibold text-foreground">{q.title}</h3>
-        {q.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">{getTopicLabel(q.topic_slug)}</span>}
-      </div>
-      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Clock className="h-3 w-3" /> {questionCounts[q.id] || 0} questions
-      </p>
-      <Link to={`/quizzes/${q.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-        Take Quiz <ChevronRight className="h-3.5 w-3.5" />
-      </Link>
-    </div>
   );
 
   return (
@@ -360,31 +178,23 @@ const LabourWelfarePage = () => {
               {LW_UNITS.map(u => {
                 const noteCount = notes.filter(n => getUnitForTopicSlug(n.topic_slug)?.number === u.number).length;
                 const quizCount = quizzes.filter(q => getUnitForTopicSlug(q.topic_slug)?.number === u.number).length;
-                const active = unitFilter === u.number;
                 return (
-                  <button
+                  <Link
                     key={u.number}
-                    onClick={() => jumpToUnit(u.number)}
-                    className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
-                      active ? "border-accent bg-accent/5" : "border-border bg-white hover:border-accent/50"
-                    }`}
+                    to={`/ugc-net-labour-welfare/unit-${u.number}`}
+                    className="flex flex-col items-start gap-1 rounded-lg border border-border bg-white p-3 text-left transition-colors hover:border-accent/50"
                   >
                     <span className="text-[11px] font-bold uppercase tracking-wide text-accent">Unit {unitRoman(u.number)}</span>
                     <span className="text-sm font-semibold leading-snug text-foreground">{u.title}</span>
                     <span className="mt-1 text-[11px] text-muted-foreground">{noteCount} notes · {quizCount} MCQ sets</span>
-                  </button>
+                  </Link>
                 );
               })}
             </div>
-            {unitFilter !== "all" && (
-              <button onClick={() => setUnitFilter("all")} className="mt-3 text-xs font-medium text-accent hover:underline">
-                Clear unit filter — show all units
-              </button>
-            )}
           </div>
         </section>
 
-        {/* ── Search + filters ──────────────────────────────────────────── */}
+        {/* ── Search + filters (browse across every unit on one page) ────── */}
         <section className="border-b border-border bg-white py-6">
           <div className="mx-auto max-w-6xl px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -443,7 +253,7 @@ const LabourWelfarePage = () => {
         {loading ? (
           <div className="mx-auto max-w-6xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
         ) : (
-          <div ref={unitSectionRef} className="mx-auto max-w-6xl px-6 py-10 space-y-14">
+          <div className="mx-auto max-w-6xl px-6 py-10 space-y-14">
 
             {/* ── Unit-wise Notes ──────────────────────────────────────── */}
             <section id="notes">
@@ -468,7 +278,9 @@ const LabourWelfarePage = () => {
                           <EmptyState text={`No notes uploaded yet for Unit ${unitRoman(u.number)}: ${u.title}.`} />
                         ) : (
                           <div className="space-y-2.5">
-                            {unitNotes.map(renderNoteRow)}
+                            {unitNotes.map(note => (
+                              <NoteRow key={note.id} note={note} onView={() => openNote(note, "view")} onDownload={() => openNote(note, "download")} />
+                            ))}
                           </div>
                         )}
                       </div>
@@ -490,7 +302,9 @@ const LabourWelfarePage = () => {
                         Admin → Notes and pick the matching topic under Labour Welfare.
                       </p>
                       <div className="space-y-2.5">
-                        {unassignedNotes.map(renderNoteRow)}
+                        {unassignedNotes.map(note => (
+                          <NoteRow key={note.id} note={note} onView={() => openNote(note, "view")} onDownload={() => openNote(note, "download")} />
+                        ))}
                       </div>
                     </div>
                   </details>
@@ -521,7 +335,9 @@ const LabourWelfarePage = () => {
                           <EmptyState text={`No MCQs uploaded yet for Unit ${unitRoman(u.number)}: ${u.title}.`} />
                         ) : (
                           <div className="grid gap-3 sm:grid-cols-2">
-                            {unitQuizzes.map(renderQuizCard)}
+                            {unitQuizzes.map(q => (
+                              <QuizCard key={q.id} quiz={q} questionCount={questionCounts[q.id] || 0} />
+                            ))}
                           </div>
                         )}
                       </div>
@@ -543,7 +359,9 @@ const LabourWelfarePage = () => {
                         Admin → Quizzes and pick the matching topic under Labour Welfare.
                       </p>
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {unassignedQuizzes.map(renderQuizCard)}
+                        {unassignedQuizzes.map(q => (
+                          <QuizCard key={q.id} quiz={q} questionCount={questionCounts[q.id] || 0} />
+                        ))}
                       </div>
                     </div>
                   </details>

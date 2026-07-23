@@ -21,6 +21,8 @@ const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
 const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
+const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage"));
+const PYQsPage = lazy(() => import("./pages/PYQsPage"));
 const LecturesPage = lazy(() => import("./pages/LecturesPage"));
 const LiveLecturesPage = lazy(() => import("./pages/LiveLecturesPage"));
 const QuizList = lazy(() => import("./pages/QuizList"));
@@ -73,10 +75,12 @@ const App = () => (
             <Route path="/blogs/:slug" element={<BlogPost />} />
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/ugc-net-labour-welfare" element={<LabourWelfarePage />} />
+            <Route path="/ugc-net-labour-welfare/unit-:unitNumber" element={<LabourWelfareUnitPage />} />
             <Route path="/lectures" element={<LecturesPage />} />
             <Route path="/live-lectures" element={<LiveLecturesPage />} />
             <Route path="/quizzes" element={<QuizList />} />
             <Route path="/quizzes/:id" element={<QuizTake />} />
+            <Route path="/pyqs" element={<PYQsPage />} />
             <Route path="/books" element={<BooksPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
