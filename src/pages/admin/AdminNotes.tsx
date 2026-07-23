@@ -4,6 +4,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Video, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
+import { useConfirm } from "@/hooks/use-confirm";
+import { watermarkPdf } from "@/lib/watermarkPdf";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
 
 const AdminNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -21,6 +24,7 @@ const AdminNotes = () => {
   const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const load = () => {
     supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
@@ -68,7 +72,7 @@ const AdminNotes = () => {
       // New uploads replace whatever was there; otherwise keep (or drop) the existing URLs.
       let file_url: string | null = existingFileUrl;
       let video_url: string | null = existingVideoUrl;
-      if (file) file_url = await uploadFile("notes", file);
+      if (file) file_url = await uploadFile("notes", await watermarkPdf(file));
       if (videoFile) video_url = await uploadFile("note-videos", videoFile);
 
       const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
@@ -96,8 +100,11 @@ const AdminNotes = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("notes").delete().eq("id", id);
+  const handleDelete = async (id: string, title: string) => {
+    const ok = await confirm({ title: `Delete "${title}"?`, description: "This cannot be undone." });
+    if (!ok) return;
+    const { error } = await supabase.from("notes").delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete note", description: error.message, variant: "destructive" }); return; }
     if (editingId === id) resetForm();
     toast({ title: "Note deleted" });
     load();
@@ -235,7 +242,18 @@ const AdminNotes = () => {
           </label>
           {!file && existingFileUrl && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              Current: <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{fileName(existingFileUrl)}</a>
+              Current:{" "}
+              <a
+                href={existingFileUrl}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const url = await getSignedFileUrl(existingFileUrl, "notes");
+                  if (url) window.open(url, "_blank", "noopener,noreferrer");
+                }}
+                className="cursor-pointer text-accent hover:underline"
+              >
+                {fileName(existingFileUrl)}
+              </a>
               <button type="button" onClick={() => setExistingFileUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached file">
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -315,13 +333,14 @@ const AdminNotes = () => {
               <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${note.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
-              <button onClick={() => handleDelete(note.id)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>
+              <button onClick={() => handleDelete(note.id, note.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
           </div>
         ))}
       </div>
+      <ConfirmDialog />
     </div>
   );
 };

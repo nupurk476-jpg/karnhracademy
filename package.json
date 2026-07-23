@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-sitemap.mjs",
+    "build": "vite build && node scripts/generate-sitemap.mjs && node scripts/generate-og-previews.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -31,6 +31,7 @@
     "lucide-react": "^0.462.0",
     "mammoth": "^1.12.0",
     "next-themes": "^0.3.0",
+    "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.1.200",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

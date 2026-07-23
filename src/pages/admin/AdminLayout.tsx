@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X, GraduationCap } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X, GraduationCap, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const adminLinks = [
@@ -17,6 +17,7 @@ const adminLinks = [
   { label: "Subscribers", to: "/admin/subscribers", icon: Mail },
   { label: "Contact Messages", to: "/admin/contact-messages", icon: Mail },
   { label: "Newspaper", to: "/admin/newspaper", icon: Newspaper },
+  { label: "Error Logs", to: "/admin/error-logs", icon: AlertTriangle },
 ];
 
 const AdminLayout = () => {

@@ -26,22 +26,32 @@ const AdminLogin = () => {
           <LogIn className="h-5 w-5 text-accent" />
           <h1 className="text-xl font-bold">Admin Login</h1>
         </div>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-        />
+        <div>
+          <label htmlFor="admin-email" className="mb-1 block text-sm font-medium text-foreground">Email</label>
+          <input
+            id="admin-email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label htmlFor="admin-password" className="mb-1 block text-sm font-medium text-foreground">Password</label>
+          <input
+            id="admin-password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading}

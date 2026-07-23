@@ -1,0 +1,13 @@
+-- Notes and PYQ papers were served from fully public, never-expiring
+-- storage URLs — anyone who captured a file_url (via the network tab, or
+-- by querying the public `notes`/`pyq_papers` tables directly) could keep
+-- sharing that exact link forever, bypassing the email-gate UX entirely.
+--
+-- Flipping the bucket's `public` flag to false stops the permanent
+-- `/object/public/...` URL from working. The existing "Anyone can read"
+-- SELECT policies below are left untouched — they're exactly what's needed
+-- to keep issuing short-lived signed URLs (createSignedUrl) to anon and
+-- authenticated visitors alike, since all content here is still meant to be
+-- free. The app now generates a fresh signed URL at open/download time
+-- instead of storing a permanent one (see src/lib/signedFileUrl.ts).
+UPDATE storage.buckets SET public = false WHERE id IN ('notes', 'pyq-papers');

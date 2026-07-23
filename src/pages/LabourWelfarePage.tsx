@@ -14,6 +14,7 @@ import {
 import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { fetchAllRows } from "@/lib/fetchAllRows";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
 
 const SUBJECT = "lw";
 const EMAIL_KEY = "khr_subscriber_email";
@@ -67,24 +68,34 @@ function useLabourWelfareContent() {
 }
 
 // ── Email gate (view/download), same one-time-ask pattern as /notes ─────────
+// Notes and PYQ files live in private buckets, so `request` takes an async
+// URL resolver (a fresh signed URL, not a stored permanent one) rather than
+// a plain string — see src/lib/signedFileUrl.ts.
 function useDownloadGate() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
-  const pending = useRef<{ url: string; onOpened: () => void } | null>(null);
+  const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
 
-  const request = (url: string | null | undefined, onOpened: () => void) => {
-    if (!url) return;
+  const request = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
     const saved = localStorage.getItem(EMAIL_KEY);
-    if (saved) { onOpened(); window.open(url, "_blank"); return; }
-    pending.current = { url, onOpened };
+    if (saved) {
+      const win = window.open("", "_blank"); // synchronous within the click — popup-safe
+      resolveUrl().then((url) => {
+        if (!url) { win?.close(); return; }
+        onOpened();
+        if (win) win.location.href = url; else window.open(url, "_blank");
+      });
+      return;
+    }
+    pending.current = { resolveUrl, onOpened };
     setGateOpen(true);
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !pending.current) return;
-    const { url, onOpened } = pending.current;
+    const { resolveUrl, onOpened } = pending.current;
     const win = window.open("", "_blank");
     setSubmitting(true);
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
@@ -93,7 +104,8 @@ function useDownloadGate() {
     setGateOpen(false);
     setEmail("");
     pending.current = null;
-    if (win) { onOpened(); win.location.href = url; } else { onOpened(); window.open(url, "_blank"); }
+    const url = win ? await resolveUrl() : null;
+    if (url && win) { onOpened(); win.location.href = url; } else win?.close();
   };
 
   const GateDialog = () => (
@@ -167,12 +179,11 @@ const LabourWelfarePage = () => {
 
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    const url = mode === "download" ? `${note.file_url}?download` : note.file_url;
-    request(url, () => recordNoteView(note));
+    request(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };
   const openPyq = (pyq: any) => {
     if (!pyq.file_url) { toast({ title: "No file attached to this paper." }); return; }
-    request(`${pyq.file_url}?download`, () => recordPyqView(pyq));
+    request(() => getSignedFileUrl(pyq.file_url, "pyq-papers", true), () => recordPyqView(pyq));
   };
 
   const allTags = useMemo(() => {

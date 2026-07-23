@@ -9,6 +9,7 @@ import {
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { resolveLWTopicSlug } from "@/lib/labourWelfareUnits";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useConfirm } from "@/hooks/use-confirm";
 import ImportQuestionsDialog from "@/components/admin/ImportQuestionsDialog";
 import type { ParsedMcq } from "@/lib/mcq-parser";
 
@@ -45,6 +46,7 @@ const AdminQuizzes = () => {
   const [previewQuiz, setPreviewQuiz] = useState<any | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const { toast } = useToast();
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const loadQuizzes = () => {
     supabase.from("quizzes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
@@ -99,9 +101,14 @@ const AdminQuizzes = () => {
     loadQuizzes();
   };
 
-  const deleteQuiz = async (id: string) => {
-    if (!window.confirm("Delete this quiz and all its questions? This cannot be undone.")) return;
-    await supabase.from("quizzes").delete().eq("id", id);
+  const deleteQuiz = async (id: string, title: string) => {
+    const ok = await confirm({
+      title: `Delete "${title}"?`,
+      description: "This removes the quiz and all its questions. This cannot be undone.",
+    });
+    if (!ok) return;
+    const { error } = await supabase.from("quizzes").delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete quiz", description: error.message, variant: "destructive" }); return; }
     if (selectedQuiz === id) setSelectedQuiz(null);
     if (editingQuizId === id) resetQuizForm();
     toast({ title: "Quiz deleted" });
@@ -205,7 +212,10 @@ const AdminQuizzes = () => {
   };
 
   const deleteQuestion = async (id: string) => {
-    await supabase.from("quiz_questions").delete().eq("id", id);
+    const ok = await confirm({ title: "Delete this question?", description: "This cannot be undone." });
+    if (!ok) return;
+    const { error } = await supabase.from("quiz_questions").delete().eq("id", id);
+    if (error) { toast({ title: "Failed to delete question", description: error.message, variant: "destructive" }); return; }
     if (expandedQ === id) setExpandedQ(null);
     if (selectedQuiz) loadQuestions(selectedQuiz);
   };
@@ -430,7 +440,7 @@ const AdminQuizzes = () => {
                       className={isPublished ? "text-emerald-600 hover:text-amber-600" : "text-amber-600 hover:text-emerald-600"}>
                       {isPublished ? <CheckCircle2 className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
-                    <button onClick={() => deleteQuiz(q.id)} title="Delete" aria-label={`Delete ${q.title}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => deleteQuiz(q.id, q.title)} title="Delete" aria-label={`Delete ${q.title}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
@@ -527,6 +537,7 @@ const AdminQuizzes = () => {
         quizTitle={activeQuizObj?.title ?? ""}
         onImport={importQuestions}
       />
+      <ConfirmDialog />
     </div>
   );
 };
