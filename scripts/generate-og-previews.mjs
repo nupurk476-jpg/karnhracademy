@@ -41,9 +41,8 @@ function envVar(name) {
 // out per route. Kept as named constants so a future homepage-copy edit
 // makes this script fail loudly (nothing matches) rather than silently
 // mismatching.
-const DEFAULT_TITLE = "Karn HR Academy — Free HR &amp; Management Study Resources";
-const DEFAULT_DESC = "Free study notes, video lectures, MCQs, and research resources for MBA, BBA &amp; UGC NET/JRF aspirants in HR &amp; Management. Built by an educator, for serious learners.";
-const DEFAULT_OG_DESC = DEFAULT_DESC; // og:description and twitter:description in index.html both drop the trailing period-free variant identically today
+const DEFAULT_TITLE = "Karn HR Academy — HRM, Labour Welfare &amp; Management Studies Resources";
+const DEFAULT_DESC = "Notes, MCQs, previous year questions, and video lectures for UGC NET/JRF Labour Welfare, HRM and Management Studies — organised by syllabus for aspirants, MBA/BBA students, and HR professionals. Free.";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
 function buildHtml({ title, description, path, image = DEFAULT_IMAGE, type = "website", jsonLd }) {
@@ -63,7 +62,7 @@ function buildHtml({ title, description, path, image = DEFAULT_IMAGE, type = "we
     `<meta property="og:title" content="${fullTitle}" />`,
   );
   html = html.replace(
-    `<meta property="og:description" content="${DEFAULT_OG_DESC}" />`,
+    `<meta property="og:description" content="${DEFAULT_DESC}" />`,
     `<meta property="og:description" content="${safeDesc}" />`,
   );
   html = html.replace(
@@ -107,12 +106,52 @@ function writeRoute(path, html) {
 // <SEO> component (see each page's <SEO title=... description=... path=.../>
 // call), so a bot's snapshot always matches what a JS-executing visitor
 // sees a moment later.
+// Mirrors src/lib/labourWelfareUnits.ts's LW_UNITS titles — this plain Node
+// script can't import that TS module directly, so the ten titles are kept
+// in sync here by hand. If the syllabus structure ever changes, update
+// both places.
+const LW_UNIT_TITLES = [
+  "Principles and Practices of Management",
+  "Human Resource Management",
+  "Human Resource Development (HRD) & IHRM",
+  "Organisational Behaviour",
+  "Industrial Relations & Trade Unions",
+  "Industrial Disputes",
+  "Labour Legislation",
+  "Wages",
+  "Labour Welfare & Social Security",
+  "Labour Market",
+];
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+
+const LW_UNIT_ROUTES = LW_UNIT_TITLES.map((title, i) => {
+  const n = i + 1;
+  const roman = ROMAN[i];
+  return {
+    path: `/ugc-net-labour-welfare/unit-${n}`,
+    title: `UGC NET/JRF Labour Welfare Unit ${roman}: ${title} — Notes, MCQs & PYQs`,
+    description: `Unit ${roman} of the UGC NET/JRF Paper II Labour Welfare syllabus (Subject Code 55) — ${title}. Study notes, MCQs, previous year questions and video lectures.`,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      name: `UGC NET/JRF Labour Welfare — Unit ${roman}: ${title}`,
+      about: title,
+      isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
+      provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
+      isAccessibleForFree: true,
+      inLanguage: "en",
+    },
+  };
+});
+
 const STATIC_ROUTES = [
   { path: "/notes", title: "Study Notes", description: "Downloadable MBA study notes organised by discipline — HRM, Strategic Management, OB, POM, Business Communication and more." },
   { path: "/ugc-net-labour-welfare", title: "UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs", description: "UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X.", jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", description: "Free unit-wise preparation covering all 10 official units of UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
+  ...LW_UNIT_ROUTES,
   { path: "/lectures", title: "Video Lectures", description: "Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET/JRF preparation." },
   { path: "/live-lectures", title: "Live Lectures", description: "Join interactive live classes and Q&A sessions on HR & Management topics with Karn HR Academy." },
   { path: "/quizzes", title: "MCQ Quizzes — HR & Management Assessment", description: "Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking." },
+  { path: "/pyqs", title: "Previous Year Question Papers", description: "Previous year question papers for UGC NET/JRF Labour Welfare and MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by subject and year." },
   { path: "/books", title: "Book Recommendations", description: "Curated book recommendations on Human Resource Management for students, scholars, and HR researchers." },
   { path: "/newspaper", title: "Newspaper Highlights", description: "Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants." },
   { path: "/about", title: "About", description: "About the educator behind Karn HR Academy — PhD scholar specialising in Ethical HRM and Quiet Quitting." },

@@ -71,10 +71,15 @@ const Footer = () => {
             <div className="space-y-2.5">
               {[
                 { label: "Home", to: "/" },
+                { label: "UGC NET/JRF Labour Welfare", to: "/ugc-net-labour-welfare" },
                 { label: "Notes", to: "/notes" },
-                { label: "Video Lectures", to: "/lectures" },
-                { label: "Blogs", to: "/blogs" },
                 { label: "MCQs", to: "/quizzes" },
+                { label: "Previous Year Questions", to: "/pyqs" },
+                { label: "Video Lectures", to: "/lectures" },
+                { label: "Live Lectures", to: "/live-lectures" },
+                { label: "Books", to: "/books" },
+                { label: "Newspaper Highlights", to: "/newspaper" },
+                { label: "Blogs", to: "/blogs" },
               ].map((link) => (
                 <Link
                   key={link.label}

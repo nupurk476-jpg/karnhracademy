@@ -4,13 +4,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
+// Ordered by student intent, not by content type — Labour Welfare (the
+// flagship syllabus hub) and the three exam-prep formats (Notes, MCQs,
+// PYQs) lead; Blogs is deliberately not in this primary bar (still
+// reachable via the footer) since this is a study platform, not a
+// content-marketing site.
 const navItems = [
   { label: "Home", to: "/" },
-  { label: "Notes", to: "/notes" },
-  { label: "Video Lectures", to: "/lectures" },
-  { label: "Blogs", to: "/blogs" },
-  { label: "MCQs", to: "/quizzes" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
+  { label: "Notes", to: "/notes" },
+  { label: "MCQs", to: "/quizzes" },
+  { label: "PYQs", to: "/pyqs" },
+  { label: "Video Lectures", to: "/lectures" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
