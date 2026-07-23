@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  DollarSign, Target, Users, Settings, Handshake, 
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import {
+  DollarSign, Target, Users, Settings, Handshake,
   Monitor, TrendingUp, BarChart3, CalendarClock, History,
   FileText, Download
 } from "lucide-react";
@@ -82,7 +83,16 @@ const HRTopicsSection = () => {
                         <li key={note.id} className="flex items-center justify-between gap-2">
                           <span className="truncate text-xs text-muted-foreground">{note.title}</span>
                           {note.file_url && (
-                            <a href={note.file_url} target="_blank" rel="noopener noreferrer" aria-label={`Download ${note.title}`} className="shrink-0 text-accent hover:text-accent/80">
+                            <a
+                              href={note.file_url}
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                const url = await getSignedFileUrl(note.file_url, "notes", true);
+                                if (url) window.open(url, "_blank", "noopener,noreferrer");
+                              }}
+                              aria-label={`Download ${note.title}`}
+                              className="shrink-0 cursor-pointer text-accent hover:text-accent/80"
+                            >
                               <Download className="h-3.5 w-3.5" />
                             </a>
                           )}

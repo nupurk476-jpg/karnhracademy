@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getDiscipline } from "@/lib/disciplines";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { ArrowLeft, FileText, Download, HelpCircle, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -128,9 +129,12 @@ const DisciplineTopicPage = ({
                 {note.file_url && (
                   <a
                     href={note.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 self-start text-sm font-semibold text-accent hover:underline"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      const url = await getSignedFileUrl(note.file_url, "notes", true);
+                      if (url) window.open(url, "_blank", "noopener,noreferrer");
+                    }}
+                    className="inline-flex cursor-pointer items-center gap-2 self-start text-sm font-semibold text-accent hover:underline"
                   >
                     <Download className="h-4 w-4" /> Download
                   </a>

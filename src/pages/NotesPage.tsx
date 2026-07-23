@@ -10,6 +10,7 @@ import { FileText, Download, Eye, LayoutGrid, List, Calendar, PlayCircle } from 
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
 
 const PAGE_SIZE = 30;
 const EMAIL_KEY = "khr_subscriber_email";
@@ -115,17 +116,19 @@ const NotesPage = () => {
     });
   };
 
-  const noteUrl = (note: any, mode: "view" | "download") =>
-    // Supabase public storage supports ?download to force a file download.
-    mode === "download" && note.file_url ? `${note.file_url}?download` : note.file_url;
-
+  // Note files live in a private bucket — every open/download exchanges the
+  // stored (no-longer-directly-fetchable) URL for a short-lived signed one,
+  // so a captured link can't just be reshared and reused forever.
   const requestNote = (note: any, mode: "view" | "download") => {
-    const url = noteUrl(note, mode);
-    if (!url) { toast({ title: "No file attached to this note." }); return; }
+    if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
     const saved = localStorage.getItem(EMAIL_KEY);
     if (saved) {
-      recordView(note);
-      window.open(url, "_blank"); // synchronous within the click — popup-safe
+      const win = window.open("", "_blank"); // synchronous within the click — popup-safe
+      getSignedFileUrl(note.file_url, "notes", mode === "download").then((url) => {
+        if (!url) { win?.close(); return; }
+        recordView(note);
+        if (win) win.location.href = url; else window.open(url, "_blank");
+      });
       return;
     }
     pendingNote.current = { note, mode };
@@ -136,10 +139,9 @@ const NotesPage = () => {
     e.preventDefault();
     if (!email.trim() || !pendingNote.current) return;
     const { note, mode } = pendingNote.current;
-    const url = noteUrl(note, mode);
     // Open the tab synchronously (within the submit click's call stack) so the
-    // browser doesn't treat it as an unrequested popup after the await below.
-    const win = url ? window.open("", "_blank") : null;
+    // browser doesn't treat it as an unrequested popup after the awaits below.
+    const win = note.file_url ? window.open("", "_blank") : null;
     setSubmitting(true);
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
     setSubmitting(false);
@@ -147,8 +149,10 @@ const NotesPage = () => {
     setGateOpen(false);
     setEmail("");
     pendingNote.current = null;
-    if (url && win) { recordView(note); win.location.href = url; }
-    else win?.close();
+    if (win) {
+      const url = await getSignedFileUrl(note.file_url, "notes", mode === "download");
+      if (url) { recordView(note); win.location.href = url; } else win.close();
+    }
   };
 
   // ── Note renderers ───────────────────────────────────────────────────────

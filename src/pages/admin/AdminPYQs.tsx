@@ -5,6 +5,8 @@ import { Trash2, Upload, Pencil, X } from "lucide-react";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
 import { LW_UNITS, unitRoman } from "@/lib/labourWelfareUnits";
 import { useConfirm } from "@/hooks/use-confirm";
+import { watermarkPdf } from "@/lib/watermarkPdf";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
 
 // Which subjects have a unit structure to tag PYQ papers against. Only
 // Labour Welfare has one today; a future syllabus-based subject just adds
@@ -76,7 +78,7 @@ const AdminPYQs = () => {
     setUploading(true);
     try {
       let file_url: string | null = existingFileUrl;
-      if (file) file_url = await uploadFile(file);
+      if (file) file_url = await uploadFile(await watermarkPdf(file));
 
       const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
       const row: any = { title, year, subject, file_url, unit_tags: unitTags, tags };
@@ -194,7 +196,18 @@ const AdminPYQs = () => {
           </label>
           {!file && existingFileUrl && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              Current: <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{fileName(existingFileUrl)}</a>
+              Current:{" "}
+              <a
+                href={existingFileUrl}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const url = await getSignedFileUrl(existingFileUrl, "pyq-papers");
+                  if (url) window.open(url, "_blank", "noopener,noreferrer");
+                }}
+                className="cursor-pointer text-accent hover:underline"
+              >
+                {fileName(existingFileUrl)}
+              </a>
               <button type="button" onClick={() => setExistingFileUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached file">
                 <X className="h-3.5 w-3.5" />
               </button>
