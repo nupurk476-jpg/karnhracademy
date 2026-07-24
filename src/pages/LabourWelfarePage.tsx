@@ -16,6 +16,7 @@ import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
+import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
@@ -193,6 +194,9 @@ const LabourWelfarePage = () => {
             </div>
           </div>
         </section>
+
+        {/* ── High-Scoring Topics ──────────────────────────────────────── */}
+        <HighScoringTopicsSection notes={notes} quizzes={quizzes} pyqs={pyqs} />
 
         {/* ── Search + filters (browse across every unit on one page) ────── */}
         <section className="border-b border-border bg-white py-6">
