@@ -12,8 +12,8 @@ import { useBookmarks } from "@/hooks/use-bookmarks";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 import { resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
-import { getHighScoringTopicBySlug, getUnitsForTopic, FREQUENCY_LABEL } from "@/lib/highScoringTopics";
-import { ArrowLeft, FileText, HelpCircle, ScrollText, PlayCircle, Download, Bookmark, BookmarkCheck } from "lucide-react";
+import { getHighScoringTopicBySlug, getUnitsForTopic, FREQUENCY_LABEL, PYQ_FREQUENCY_LABEL } from "@/lib/highScoringTopics";
+import { ArrowLeft, FileText, HelpCircle, ScrollText, PlayCircle, Download, Bookmark, BookmarkCheck, Clock } from "lucide-react";
 
 const LabourWelfareTopicPage = () => {
   const { topicSlug } = useParams();
@@ -132,10 +132,15 @@ const LabourWelfareTopicPage = () => {
                 {bookmarked ? "Bookmarked" : "Bookmark"}
               </button>
             </div>
-            <p className="mb-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mb-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               Part of the UGC NET/JRF Paper II Labour Welfare syllabus (Subject Code 55). Notes, MCQs and previous
               year questions for this topic, pulled from every unit it touches.
             </p>
+
+            <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {topic.readTimeMinutes} min read</span>
+              <span>{PYQ_FREQUENCY_LABEL[topic.frequency]}</span>
+            </div>
 
             {units.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
