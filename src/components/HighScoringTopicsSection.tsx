@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Search, FileText, Presentation, HelpCircle, ScrollText, ClipboardList,
-  Bookmark, BookmarkCheck, Layers,
+  Bookmark, BookmarkCheck, Layers, Clock,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  HST_CATEGORIES, HIGH_SCORING_TOPICS, FREQUENCY_LABEL, getUnitsForTopic, unitsLabel,
-  type HighScoringTopic, type HSTFrequency,
+  HST_CATEGORIES, HST_FREQUENCIES, HIGH_SCORING_TOPICS, FREQUENCY_LABEL, PYQ_FREQUENCY_LABEL,
+  getUnitsForTopic, unitsLabel, type HighScoringTopic, type HSTFrequency,
 } from "@/lib/highScoringTopics";
 import { resolveLWTopicSlug } from "@/lib/labourWelfareUnits";
 import { useBookmarks } from "@/hooks/use-bookmarks";
@@ -22,7 +22,7 @@ const FREQUENCY_STYLE: Record<HSTFrequency, string> = {
 // PPT and Case Study have no dedicated content type in the database yet —
 // their icons render muted/"coming soon" rather than faking availability.
 const RESOURCE_TYPES = [
-  { key: "pdf", label: "Notes (PDF)", icon: FileText },
+  { key: "pdf", label: "Notes", icon: FileText },
   { key: "ppt", label: "PPT Slides", icon: Presentation },
   { key: "mcq", label: "MCQs", icon: HelpCircle },
   { key: "pyq", label: "Previous Year Questions", icon: ScrollText },
@@ -41,16 +41,18 @@ type Props = {
 const HighScoringTopicsSection = ({ notes = [], quizzes = [], pyqs = [], lectures = [] }: Props) => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<"all" | HighScoringTopic["category"]>("all");
+  const [frequency, setFrequency] = useState<"all" | HSTFrequency>("all");
   const { isBookmarked, toggle } = useBookmarks();
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return HIGH_SCORING_TOPICS.filter(t => {
       if (category !== "all" && t.category !== category) return false;
+      if (frequency !== "all" && t.frequency !== frequency) return false;
       if (!term) return true;
       return t.name.toLowerCase().includes(term) || unitsLabel(t).toLowerCase().includes(term);
     });
-  }, [search, category]);
+  }, [search, category, frequency]);
 
   return (
     <section className="border-b border-border bg-white py-10" id="high-scoring-topics">
@@ -64,33 +66,48 @@ const HighScoringTopicsSection = ({ notes = [], quizzes = [], pyqs = [], lecture
           the notes, MCQs and previous year questions that matter most.
         </p>
 
-        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="relative flex-1 lg:max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search high-scoring topics…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full rounded-md border border-border bg-slate-50 py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {HST_CATEGORIES.map(c => (
-              <button
-                key={c.value}
-                onClick={() => setCategory(c.value)}
-                aria-pressed={category === c.value}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                  category === c.value
-                    ? "bg-accent text-accent-foreground"
-                    : "border border-border bg-white text-muted-foreground hover:bg-slate-50"
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
+        <div className="mb-3 relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search high-scoring topics… (try “Maslow”)"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-md border border-border bg-slate-50 py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 sm:max-w-sm"
+          />
+        </div>
+
+        <div className="mb-2 flex flex-wrap gap-2">
+          {HST_CATEGORIES.map(c => (
+            <button
+              key={c.value}
+              onClick={() => setCategory(c.value)}
+              aria-pressed={category === c.value}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                category === c.value
+                  ? "bg-accent text-accent-foreground"
+                  : "border border-border bg-white text-muted-foreground hover:bg-slate-50"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {HST_FREQUENCIES.map(f => (
+            <button
+              key={f.value}
+              onClick={() => setFrequency(f.value)}
+              aria-pressed={frequency === f.value}
+              className={`rounded-full border px-3 py-1 text-[11px] font-medium transition-colors ${
+                frequency === f.value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-slate-50 text-muted-foreground hover:bg-white"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
         {filtered.length === 0 ? (
@@ -98,20 +115,23 @@ const HighScoringTopicsSection = ({ notes = [], quizzes = [], pyqs = [], lecture
             <p className="text-sm text-muted-foreground">No topics match your search.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map(topic => (
-              <TopicCard
-                key={topic.slug}
-                topic={topic}
-                notes={notes}
-                quizzes={quizzes}
-                pyqs={pyqs}
-                lectures={lectures}
-                bookmarked={isBookmarked(topic.slug)}
-                onToggleBookmark={() => toggle(topic.slug)}
-              />
-            ))}
-          </div>
+          <>
+            <p className="mb-3 text-xs text-muted-foreground">{filtered.length} topic{filtered.length !== 1 ? "s" : ""}</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map(topic => (
+                <TopicCard
+                  key={topic.slug}
+                  topic={topic}
+                  notes={notes}
+                  quizzes={quizzes}
+                  pyqs={pyqs}
+                  lectures={lectures}
+                  bookmarked={isBookmarked(topic.slug)}
+                  onToggleBookmark={() => toggle(topic.slug)}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </section>
@@ -158,9 +178,11 @@ const TopicCard = ({
       />
 
       <div className="flex items-start justify-between gap-2">
-        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${FREQUENCY_STYLE[topic.frequency]}`}>
-          {FREQUENCY_LABEL[topic.frequency]}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${FREQUENCY_STYLE[topic.frequency]}`}>
+            {FREQUENCY_LABEL[topic.frequency]}
+          </span>
+        </div>
         <button
           onClick={onToggleBookmark}
           aria-label={bookmarked ? "Remove bookmark" : "Bookmark this topic"}
@@ -173,8 +195,11 @@ const TopicCard = ({
 
       <h3 className="text-sm font-semibold leading-snug text-foreground group-hover:text-accent">{topic.name}</h3>
 
+      <p className="text-[11px] font-medium text-muted-foreground/80">{PYQ_FREQUENCY_LABEL[topic.frequency]}</p>
+
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
         <span>{units.length > 0 ? unitsLabel(topic) : "Unit not mapped"}</span>
+        <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> {topic.readTimeMinutes} min read</span>
         {topicPyqs.length > 0 && <span>{topicPyqs.length} PYQ{topicPyqs.length !== 1 ? "s" : ""}</span>}
       </div>
 
