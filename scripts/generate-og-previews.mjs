@@ -144,10 +144,57 @@ const LW_UNIT_ROUTES = LW_UNIT_TITLES.map((title, i) => {
   };
 });
 
+// Mirrors src/lib/highScoringTopics.ts's HIGH_SCORING_TOPICS — same
+// hand-sync caveat as LW_UNIT_ROUTES above. `units` is each topic's
+// derived unit-number list (ascending), used only for the description text.
+const HST_TOPICS = [
+  { slug: "recruitment-selection-placement", name: "Recruitment, Selection & Placement", frequency: "high", units: [2] },
+  { slug: "performance-management-appraisal", name: "Performance Management & Appraisal", frequency: "high", units: [2] },
+  { slug: "compensation-wages-incentives", name: "Compensation, Wages & Incentives", frequency: "high", units: [2, 8] },
+  { slug: "training-and-development", name: "Training & Development", frequency: "medium", units: [2] },
+  { slug: "hr-planning-job-analysis", name: "HR Planning & Job Analysis", frequency: "medium", units: [2] },
+  { slug: "labour-welfare-concept-theories", name: "Concept, Scope & Theories of Labour Welfare", frequency: "high", units: [9] },
+  { slug: "social-security-schemes", name: "Social Security: Concept, Assistance & Assurance", frequency: "high", units: [9] },
+  { slug: "industrial-health-safety-welfare", name: "Industrial Health, Safety & Occupational Diseases", frequency: "medium", units: [9] },
+  { slug: "collective-bargaining", name: "Collective Bargaining", frequency: "high", units: [5] },
+  { slug: "trade-unions-evolution-law", name: "Trade Unions: Evolution, Structure & Law", frequency: "high", units: [5] },
+  { slug: "workers-participation-grievance", name: "Workers' Participation & Grievance Handling", frequency: "medium", units: [5] },
+  { slug: "motivation-theories", name: "Motivation Theories", frequency: "high", units: [4] },
+  { slug: "leadership-styles-theories", name: "Leadership Styles & Theories", frequency: "high", units: [4] },
+  { slug: "group-dynamics-power-change", name: "Group Dynamics, Power & Organisational Change", frequency: "medium", units: [4] },
+  { slug: "factories-act-1948", name: "The Factories Act, 1948", frequency: "high", units: [7] },
+  { slug: "minimum-wages-payment-of-wages-acts", name: "Minimum Wages Act & Payment of Wages Act", frequency: "high", units: [8] },
+  { slug: "industrial-disputes-act-strikes-lockouts", name: "Industrial Disputes Act, 1947 & Strikes/Lockouts", frequency: "high", units: [6] },
+  { slug: "pf-gratuity-bonus-acts", name: "Provident Fund, Gratuity & Bonus Acts", frequency: "medium", units: [8] },
+  { slug: "hr-analytics-hris-emerging-trends", name: "HR Analytics, HRIS & Emerging HRM Trends", frequency: "medium", units: [2, 3] },
+  { slug: "ihrm-cross-cultural-global-hr", name: "IHRM, Cross-Cultural Management & Global HR Trends", frequency: "medium", units: [3] },
+  { slug: "ir-changing-scenario", name: "Industrial Relations in the Changing Scenario", frequency: "low", units: [5] },
+];
+
+const HST_ROUTES = HST_TOPICS.map((t) => {
+  const unitsLabel = t.units.map((n) => `Unit ${ROMAN[n - 1]}`).join(", ");
+  return {
+    path: `/ugc-net-labour-welfare/topic/${t.slug}`,
+    title: `${t.name} — UGC NET/JRF Labour Welfare Notes, MCQs & PYQs`,
+    description: `${t.name} — a ${t.frequency}-frequency UGC NET/JRF Paper II Labour Welfare (Subject Code 55) topic covering ${unitsLabel}. Study notes, MCQs, previous year questions and video lectures.`,
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      name: `UGC NET/JRF Labour Welfare — ${t.name}`,
+      about: t.name,
+      isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
+      provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
+      isAccessibleForFree: true,
+      inLanguage: "en",
+    },
+  };
+});
+
 const STATIC_ROUTES = [
   { path: "/notes", title: "Study Notes", description: "Downloadable MBA study notes organised by discipline — HRM, Strategic Management, OB, POM, Business Communication and more." },
   { path: "/ugc-net-labour-welfare", title: "UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs", description: "UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X.", jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", description: "Free unit-wise preparation covering all 10 official units of UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
   ...LW_UNIT_ROUTES,
+  ...HST_ROUTES,
   { path: "/lectures", title: "Video Lectures", description: "Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET/JRF preparation." },
   { path: "/live-lectures", title: "Live Lectures", description: "Join interactive live classes and Q&A sessions on HR & Management topics with Karn HR Academy." },
   { path: "/quizzes", title: "MCQ Quizzes — HR & Management Assessment", description: "Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking." },

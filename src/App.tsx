@@ -22,6 +22,7 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
 const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
 const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage"));
+const LabourWelfareTopicPage = lazy(() => import("./pages/LabourWelfareTopicPage"));
 const PYQsPage = lazy(() => import("./pages/PYQsPage"));
 const LecturesPage = lazy(() => import("./pages/LecturesPage"));
 const LiveLecturesPage = lazy(() => import("./pages/LiveLecturesPage"));
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/ugc-net-labour-welfare" element={<LabourWelfarePage />} />
             <Route path="/ugc-net-labour-welfare/unit-:unitNumber" element={<LabourWelfareUnitPage />} />
+            <Route path="/ugc-net-labour-welfare/topic/:topicSlug" element={<LabourWelfareTopicPage />} />
             <Route path="/lectures" element={<LecturesPage />} />
             <Route path="/live-lectures" element={<LiveLecturesPage />} />
             <Route path="/quizzes" element={<QuizList />} />
