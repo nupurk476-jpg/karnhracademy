@@ -14,7 +14,7 @@ import {
   CheckCircle2, ChevronRight, Clock, Award,
   PlayCircle, BookMarked, Search,
   Mail, HandHeart, ScrollText, Linkedin,
-  BadgeCheck, Network, History, RefreshCw, Smartphone, GraduationCap,
+  BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -48,15 +48,6 @@ const SUBJECTS = DISCIPLINES.map(d => ({
   value: d.value,
   ...SUBJECT_HEX[d.value],
 }));
-
-const WHY_CHOOSE = [
-  { icon: BadgeCheck, title: "Latest UGC NET/JRF Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET/JRF syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1", to: "/ugc-net-labour-welfare" },
-  { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8", to: "/notes" },
-  { icon: Network,    title: "Diagrams & Visual Learning",          desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2", to: "/notes" },
-  { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3", to: "/pyqs" },
-  { icon: RefreshCw,  title: "Regular Content Updates",             desc: "Notes are continuously updated with recent developments, reports and amendments.",                     color: STEEL,      bg: "#EEF0F8", to: "/notes" },
-  { icon: Smartphone, title: "Mobile & Print Friendly PDFs",        desc: "Professionally designed PDFs optimized for desktop, tablet and mobile reading.",                       color: GOLD,       bg: "#F7F1E3", to: "/notes" },
-];
 
 const ROADMAP = [
   { step: "01", icon: Search,        title: "Choose a Subject",  desc: "Pick an HR & Management discipline — HRM and OB have full content now; more are being added." },
@@ -312,52 +303,6 @@ const CompactHowItWorks = () => (
             </div>
           );
         })}
-      </div>
-    </div>
-  </section>
-);
-
-// ─────────────── Section: Why Karn HR Academy ────────────────────────────────
-const WhyChoose = () => (
-  <section className="py-20 md:py-24 bg-white" aria-labelledby="why-khr-heading">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-14">
-        <GoldLabel text="Why Karn HR Academy?" />
-        <div id="why-khr-heading">
-          <SectionHeading center title="Study Material Built for Serious Exam Preparation" sub="Every note, diagram, and PDF is researched, structured, and updated the way serious exam preparation demands — and it's all free." />
-        </div>
-      </div>
-      {/* flex-wrap + justify-center (rather than a fixed-column grid) so an
-          odd card count centers its last row instead of leaving a gap */}
-      <div className="flex flex-wrap justify-center gap-5">
-        {WHY_CHOOSE.map(f => {
-          const Icon = f.icon;
-          return (
-            <Link
-              key={f.title}
-              to={f.to}
-              className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]"
-              style={{ borderColor: `${f.color}18`, background: "#fafafa" }}
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110" style={{ background: f.bg }}>
-                <Icon aria-hidden="true" className="h-6 w-6" style={{ color: f.color }} />
-              </div>
-              <h3 className="mb-2 text-base font-bold text-slate-800" style={{ fontFamily: "'Sora',sans-serif" }}>
-                {f.title}
-              </h3>
-              <p className="text-sm leading-relaxed text-slate-500">{f.desc}</p>
-            </Link>
-          );
-        })}
-      </div>
-      <div className="mt-12 text-center">
-        <Link
-          to="/notes"
-          className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
-          style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}
-        >
-          Explore All Notes <ArrowRight aria-hidden="true" className="h-4 w-4" />
-        </Link>
       </div>
     </div>
   </section>
@@ -972,7 +917,6 @@ const Index = () => (
       <Hero />
       <QuickAccess />
       <CompactHowItWorks />
-      <WhyChoose />
       <Subjects />
       <LabourWelfareBanner />
       <FeaturedNotes />
