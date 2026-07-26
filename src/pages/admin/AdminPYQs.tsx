@@ -2,18 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Upload, Pencil, X } from "lucide-react";
-import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
-import { LW_UNITS, unitRoman } from "@/lib/labourWelfareUnits";
+import { getDiscipline } from "@/lib/disciplines";
+import { unitRoman } from "@/lib/labourWelfareUnits";
 import { useConfirm } from "@/hooks/use-confirm";
 import { watermarkPdf } from "@/lib/watermarkPdf";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
-
-// Which subjects have a unit structure to tag PYQ papers against. Only
-// Labour Welfare has one today; a future syllabus-based subject just adds
-// its own entry here (and its own units data file, same as labourWelfareUnits.ts).
-const SUBJECT_UNITS: Record<string, { number: number; title: string }[]> = {
-  lw: LW_UNITS.map(u => ({ number: u.number, title: u.title })),
-};
 
 const AdminPYQs = () => {
   const [papers, setPapers] = useState<any[]>([]);
@@ -21,9 +14,6 @@ const AdminPYQs = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [year, setYear] = useState(() => new Date().getFullYear());
-  const [subject, setSubject] = useState("lw");
-  const [unitTags, setUnitTags] = useState<number[]>([]);
-  const [tagsInput, setTagsInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [answerKeyFile, setAnswerKeyFile] = useState<File | null>(null);
@@ -47,8 +37,8 @@ const AdminPYQs = () => {
 
   const resetForm = () => {
     setEditingId(null);
-    setTitle(""); setYear(new Date().getFullYear()); setSubject("lw");
-    setUnitTags([]); setTagsInput(""); setFile(null); setExistingFileUrl(null);
+    setTitle(""); setYear(new Date().getFullYear());
+    setFile(null); setExistingFileUrl(null);
     setAnswerKeyFile(null); setExistingAnswerKeyUrl(null);
   };
 
@@ -56,18 +46,11 @@ const AdminPYQs = () => {
     setEditingId(paper.id);
     setTitle(paper.title ?? "");
     setYear(paper.year ?? new Date().getFullYear());
-    setSubject(paper.subject ?? "lw");
-    setUnitTags(paper.unit_tags ?? []);
-    setTagsInput((paper.tags ?? []).join(", "));
     setExistingFileUrl(paper.file_url ?? null);
     setFile(null);
     setExistingAnswerKeyUrl(paper.answer_key_url ?? null);
     setAnswerKeyFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const toggleUnit = (n: number) => {
-    setUnitTags(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n].sort((a, b) => a - b));
   };
 
   const uploadFile = async (f: File) => {
@@ -88,8 +71,7 @@ const AdminPYQs = () => {
       let answer_key_url: string | null = existingAnswerKeyUrl;
       if (answerKeyFile) answer_key_url = await uploadFile(await watermarkPdf(answerKeyFile));
 
-      const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
-      const row: any = { title, year, subject, file_url, answer_key_url, unit_tags: unitTags, tags };
+      const row: any = { title, year, file_url, answer_key_url };
       const write = (r: any) => editingId
         ? (supabase.from("pyq_papers" as any) as any).update(r).eq("id", editingId)
         : (supabase.from("pyq_papers" as any) as any).insert(r);
@@ -116,15 +98,12 @@ const AdminPYQs = () => {
     load();
   };
 
-  const availableUnits = SUBJECT_UNITS[subject] ?? [];
   const fileName = (url: string) => decodeURIComponent(url.split("/").pop() || "").slice(0, 40);
 
   const term = search.trim().toLowerCase();
   const filteredPapers = papers.filter(p => {
     if (!term) return true;
-    const unitTitles = (p.unit_tags ?? []).map((n: number) => (SUBJECT_UNITS[p.subject] ?? []).find(u => u.number === n)?.title);
-    const haystack = [p.title, String(p.year), getDiscipline(p.subject)?.label, ...(p.tags ?? []), ...unitTitles]
-      .filter(Boolean).join(" ").toLowerCase();
+    const haystack = [p.title, String(p.year)].filter(Boolean).join(" ").toLowerCase();
     return haystack.includes(term);
   });
 
@@ -145,55 +124,6 @@ const AdminPYQs = () => {
           <input placeholder="Title (e.g. UGC NET/JRF Labour Welfare — June 2024, Paper II)" value={title} onChange={e => setTitle(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
           <input type="number" placeholder="Year" value={year} onChange={e => setYear(Number(e.target.value))} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
         </div>
-
-        {/* Subject selector */}
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Select Subject</p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {DISCIPLINES.map(d => {
-              const Icon = d.icon;
-              const isActive = subject === d.value;
-              return (
-                <button
-                  key={d.value}
-                  type="button"
-                  onClick={() => { setSubject(d.value); setUnitTags([]); }}
-                  className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-left text-sm transition-all ${
-                    isActive ? d.activeColor : d.color + " hover:brightness-95"
-                  }`}
-                >
-                  <div className={`flex-shrink-0 rounded p-1 ${isActive ? "bg-white/20" : "bg-white"}`}>
-                    <Icon className={`h-4 w-4 ${isActive ? "text-white" : d.iconColor}`} />
-                  </div>
-                  <span className="font-semibold leading-tight">{d.short}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Unit tags — only for subjects with a unit structure */}
-        {availableUnits.length > 0 && (
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Tag Relevant Unit(s)</p>
-            <div className="flex flex-wrap gap-2">
-              {availableUnits.map(u => (
-                <button
-                  key={u.number}
-                  type="button"
-                  onClick={() => toggleUnit(u.number)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    unitTags.includes(u.number) ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  Unit {unitRoman(u.number)}: {u.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <input placeholder="Tags (comma-separated, e.g. solved, with-answer-key)" value={tagsInput} onChange={e => setTagsInput(e.target.value)} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
 
         {/* PDF attachment */}
         <div className="flex flex-wrap items-center gap-3">
@@ -260,7 +190,7 @@ const AdminPYQs = () => {
       {papers.length > 0 && (
         <input
           type="text"
-          placeholder="Search papers by title, year, or tag..."
+          placeholder="Search papers by title or year..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="mb-3 w-full max-w-sm rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
