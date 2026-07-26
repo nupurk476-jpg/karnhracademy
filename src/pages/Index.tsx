@@ -50,12 +50,12 @@ const SUBJECTS = DISCIPLINES.map(d => ({
 }));
 
 const WHY_CHOOSE = [
-  { icon: BadgeCheck, title: "Latest UGC NET/JRF Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET/JRF syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1" },
-  { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: Network,    title: "Diagrams & Visual Learning",          desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2" },
-  { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3" },
-  { icon: RefreshCw,  title: "Regular Content Updates",             desc: "Notes are continuously updated with recent developments, reports and amendments.",                     color: STEEL,      bg: "#EEF0F8" },
-  { icon: Smartphone, title: "Mobile & Print Friendly PDFs",        desc: "Professionally designed PDFs optimized for desktop, tablet and mobile reading.",                       color: GOLD,       bg: "#F7F1E3" },
+  { icon: BadgeCheck, title: "Latest UGC NET/JRF Code 55 Syllabus",     desc: "Always aligned with the latest UGC NET/JRF syllabus and examination trends.",                              color: NAVY,       bg: "#DCE6F1", to: "/ugc-net-labour-welfare" },
+  { icon: BookOpen,   title: "Research-Based Notes",                desc: "Comprehensive notes developed from authentic books, journals and government reports.",                  color: STEEL_DARK, bg: "#EEF0F8", to: "/notes" },
+  { icon: Network,    title: "Diagrams & Visual Learning",          desc: "Flowcharts, comparison tables, concept maps and infographics for faster understanding.",               color: NAVY_DARK,  bg: "#E3EAF2", to: "/notes" },
+  { icon: History,    title: "PYQ Integrated Learning",             desc: "Important concepts linked with previous year examination trends.",                                     color: GOLD_DARK,  bg: "#F7F1E3", to: "/pyqs" },
+  { icon: RefreshCw,  title: "Regular Content Updates",             desc: "Notes are continuously updated with recent developments, reports and amendments.",                     color: STEEL,      bg: "#EEF0F8", to: "/notes" },
+  { icon: Smartphone, title: "Mobile & Print Friendly PDFs",        desc: "Professionally designed PDFs optimized for desktop, tablet and mobile reading.",                       color: GOLD,       bg: "#F7F1E3", to: "/notes" },
 ];
 
 const ROADMAP = [
@@ -333,7 +333,12 @@ const WhyChoose = () => (
         {WHY_CHOOSE.map(f => {
           const Icon = f.icon;
           return (
-            <div key={f.title} className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]" style={{ borderColor: `${f.color}18`, background: "#fafafa" }}>
+            <Link
+              key={f.title}
+              to={f.to}
+              className="group w-full rounded-2xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)]"
+              style={{ borderColor: `${f.color}18`, background: "#fafafa" }}
+            >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110" style={{ background: f.bg }}>
                 <Icon aria-hidden="true" className="h-6 w-6" style={{ color: f.color }} />
               </div>
@@ -341,7 +346,7 @@ const WhyChoose = () => (
                 {f.title}
               </h3>
               <p className="text-sm leading-relaxed text-slate-500">{f.desc}</p>
-            </div>
+            </Link>
           );
         })}
       </div>
