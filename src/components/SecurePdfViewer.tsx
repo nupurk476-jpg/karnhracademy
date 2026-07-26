@@ -30,24 +30,41 @@ function loadPdfjs(): Promise<PdfjsModule> {
 // Burns the watermark directly into the rendered page's pixels (not a DOM
 // overlay) so it survives a screenshot the same way the rest of the page
 // does, and can't be peeled off with a devtools "delete element".
+//
+// Mirrors the two-part design already proven in src/lib/watermarkPdf.ts
+// (the downloaded-copy watermark) rather than a dense tiled grid: a dense
+// grid of full-sentence text at readable size crossed directly through
+// every line of question text and made pages hard to read. Instead:
+//   1. a small, steady footer label in the same low-traffic spot on every
+//      page — always legible, so any screenshot is unambiguously marked
+//      even if it misses the marks below;
+//   2. a few large, very faint diagonal marks (short text, not the full
+//      sentence — full-length text at a size big enough to notice would be
+//      wider than the page) spread down the page, so a crop of any single
+//      question still very likely catches one, without the collision
+//      density of a full grid.
 function drawWatermarkTiles(ctx: CanvasRenderingContext2D, width: number, height: number, text: string) {
   ctx.save();
-  ctx.font = "13px 'Source Sans 3', sans-serif";
-  ctx.fillStyle = "rgba(31, 78, 121, 0.14)"; // NAVY, low opacity
+  ctx.font = "11px 'Source Sans 3', sans-serif";
+  ctx.fillStyle = "rgba(31, 78, 121, 0.5)";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(text, 12, height - 8);
+  ctx.restore();
+
+  const shortMark = "KARN HR ACADEMY";
+  const diagSize = Math.max(24, Math.min(46, width * 0.065));
+  ctx.save();
+  ctx.font = `${diagSize}px 'Source Sans 3', sans-serif`;
+  ctx.fillStyle = "rgba(31, 78, 121, 0.07)";
+  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  const tileW = 260;
-  const tileH = 150;
-  let row = 0;
-  for (let y = -tileH; y < height + tileH; y += tileH) {
-    const offsetX = row % 2 === 0 ? 0 : tileW / 2;
-    for (let x = -tileW; x < width + tileW; x += tileW) {
-      ctx.save();
-      ctx.translate(x + offsetX, y);
-      ctx.rotate(-Math.PI / 8);
-      ctx.fillText(text, 0, 0);
-      ctx.restore();
-    }
-    row++;
+  for (const frac of [0.18, 0.5, 0.82]) {
+    ctx.save();
+    ctx.translate(width / 2, height * frac);
+    ctx.rotate(-Math.PI / 8);
+    ctx.fillText(shortMark, 0, 0);
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -94,7 +111,14 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
         if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
         const bytes = await res.arrayBuffer();
         if (cancelled) return;
-        const doc = await pdfjs.getDocument({ data: bytes }).promise;
+        const doc = await pdfjs.getDocument({
+          data: bytes,
+          // Scanned exam papers are frequently JBIG2/JPX-compressed; without
+          // this, pdfjs silently fails to decode those images (and, since
+          // that failure happens mid-render, everything drawn after it on
+          // the same canvas — including our watermark — never lands either).
+          wasmUrl: "/pdfjs-wasm/",
+        }).promise;
         if (cancelled) return;
         pdfDocRef.current = doc;
         setNumPages(doc.numPages);
@@ -136,13 +160,17 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
       const page = await doc.getPage(pageNum);
       if (cancelled) return;
       const canvas = canvasRef.current!;
-      // Render at devicePixelRatio for retina crispness, then constrain the
-      // on-screen size back down to the unscaled viewport via CSS — the
-      // canvas param (not canvasContext) is pdfjs's current recommended
-      // API, so it owns setting canvas.width/height itself.
+      // Render at devicePixelRatio for retina crispness: the backing store
+      // (canvas.width/height) is sized to the DPR-scaled viewport, then
+      // constrained back down to the unscaled viewport via CSS. pdfjs does
+      // NOT size the canvas itself even when given the `canvas` param — the
+      // caller owns canvas.width/height, or rendering silently draws into
+      // whatever the element's default (300×150) backing store already is.
       const dpr = window.devicePixelRatio || 1;
       const cssViewport = page.getViewport({ scale });
       const renderViewport = page.getViewport({ scale: scale * dpr });
+      canvas.width = Math.ceil(renderViewport.width);
+      canvas.height = Math.ceil(renderViewport.height);
       canvas.style.width = `${cssViewport.width}px`;
       canvas.style.height = `${cssViewport.height}px`;
 
@@ -157,6 +185,10 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
       }
       if (cancelled) return;
       const ctx = canvas.getContext("2d")!;
+      // page.render() leaves its own PDF-space-to-pixel transform on the
+      // context — reset to identity before laying down our own, or the
+      // watermark compounds on top of pdfjs's transform and lands off-canvas.
+      ctx.resetTransform();
       // Watermark is drawn in CSS-pixel space (matching its font-size units)
       // over the DPR-scaled canvas, so it reads the same size on any screen.
       ctx.save();
