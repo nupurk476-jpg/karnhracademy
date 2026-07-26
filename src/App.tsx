@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Route-level code splitting: everything except the homepage loads on demand,
 // so a first-time visitor to "/" doesn't have to download the admin panel,
@@ -24,6 +25,7 @@ const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
 const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage"));
 const LabourWelfareTopicPage = lazy(() => import("./pages/LabourWelfareTopicPage"));
 const PYQsPage = lazy(() => import("./pages/PYQsPage"));
+const PYQViewerPage = lazy(() => import("./pages/PYQViewerPage"));
 const LecturesPage = lazy(() => import("./pages/LecturesPage"));
 const LiveLecturesPage = lazy(() => import("./pages/LiveLecturesPage"));
 const QuizList = lazy(() => import("./pages/QuizList"));
@@ -83,6 +85,7 @@ const App = () => (
             <Route path="/quizzes" element={<QuizList />} />
             <Route path="/quizzes/:id" element={<QuizTake />} />
             <Route path="/pyqs" element={<PYQsPage />} />
+            <Route path="/pyqs/view/:id" element={<ProtectedRoute><PYQViewerPage /></ProtectedRoute>} />
             <Route path="/books" element={<BooksPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />

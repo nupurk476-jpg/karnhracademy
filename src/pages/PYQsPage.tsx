@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { useToast } from "@/hooks/use-toast";
-import { useDownloadGate } from "@/hooks/use-download-gate";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState } from "@/components/LabourWelfareShared";
 import { DISCIPLINES } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { ScrollText, Download, Eye } from "lucide-react";
+import { ScrollText, BookOpenCheck, Eye } from "lucide-react";
 
 // General, all-subjects Previous Year Question paper browser. The Labour
 // Welfare hub (and its per-unit subpages) already show LW's own papers
@@ -30,9 +27,6 @@ const PYQsPage = () => {
   const [touched, setTouched] = useState(false);
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
   const [tagFilter, setTagFilter] = useState("all");
-
-  const { request, GateDialog } = useDownloadGate();
-  const { toast } = useToast();
 
   useEffect(() => {
     (supabase.from("pyq_papers" as any) as any)
@@ -78,16 +72,6 @@ const PYQsPage = () => {
   }), [subjectPyqs, search, yearFilter, tagFilter]);
 
   const activeDiscipline = DISCIPLINES.find(d => d.value === activeSubject);
-
-  const recordPyqView = (pyq: any) => {
-    supabase.rpc("increment_pyq_views" as any, { _pyq_id: pyq.id }).then(({ error }: any) => {
-      if (error) console.error("view count failed", error);
-    });
-  };
-  const openPyq = (pyq: any) => {
-    if (!pyq.file_url) { toast({ title: "No file attached to this paper." }); return; }
-    request(() => getSignedFileUrl(pyq.file_url, "pyq-papers", true), () => recordPyqView(pyq));
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -201,9 +185,9 @@ const PYQsPage = () => {
                             {(pyq.view_count ?? 0) > 0 ? (
                               <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" /> {pyq.view_count} views</span>
                             ) : <span />}
-                            <button onClick={() => openPyq(pyq)} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                              <Download className="h-3.5 w-3.5" /> Download
-                            </button>
+                            <Link to={`/pyqs/view/${pyq.id}`} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+                              <BookOpenCheck className="h-3.5 w-3.5" /> View Online
+                            </Link>
                           </div>
                         </div>
                       ))}
@@ -216,7 +200,6 @@ const PYQsPage = () => {
         )}
       </main>
 
-      <GateDialog />
       <Footer />
     </div>
   );

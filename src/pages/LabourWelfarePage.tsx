@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLabourWelfareContent } from "@/hooks/use-labour-welfare-content";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 import {
-  ChevronRight, FileText, HelpCircle, ScrollText, Search, Download,
+  ChevronRight, FileText, HelpCircle, ScrollText, Search, BookOpenCheck,
   Layers, BookOpen,
 } from "lucide-react";
 import { getTopicLabel } from "@/lib/disciplines";
@@ -38,19 +38,10 @@ const LabourWelfarePage = () => {
       if (error) console.error("view count failed", error);
     });
   };
-  const recordPyqView = (pyq: any) => {
-    supabase.rpc("increment_pyq_views" as any, { _pyq_id: pyq.id }).then(({ error }: any) => {
-      if (error) console.error("view count failed", error);
-    });
-  };
 
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
     request(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
-  };
-  const openPyq = (pyq: any) => {
-    if (!pyq.file_url) { toast({ title: "No file attached to this paper." }); return; }
-    request(() => getSignedFileUrl(pyq.file_url, "pyq-papers", true), () => recordPyqView(pyq));
   };
 
   const allTags = useMemo(() => {
@@ -396,9 +387,9 @@ const LabourWelfarePage = () => {
                               ))}
                               {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
                             </div>
-                            <button onClick={() => openPyq(pyq)} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                              <Download className="h-3.5 w-3.5" /> Download Paper
-                            </button>
+                            <Link to={`/pyqs/view/${pyq.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+                              <BookOpenCheck className="h-3.5 w-3.5" /> View Online
+                            </Link>
                           </div>
                         ))}
                       </div>
