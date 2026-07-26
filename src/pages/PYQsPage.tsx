@@ -6,25 +6,21 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { TagChip, EmptyState } from "@/components/LabourWelfareShared";
-import { DISCIPLINES } from "@/lib/disciplines";
+import { getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { ScrollText, BookOpenCheck, Eye } from "lucide-react";
 
-// General, all-subjects Previous Year Question paper browser. The Labour
-// Welfare hub (and its per-unit subpages) already show LW's own papers
-// inline for people studying that syllabus specifically — this page is the
-// other half: a real, indexable home for PYQs across every subject, since
-// previously the only public PYQ surface on the whole site was hardcoded to
-// subject="lw", leaving MBA/BBA-discipline papers with no page to live on.
+// General Previous Year Question paper browser — every paper, across every
+// subject, in one flat list grouped by year. Not split into per-subject
+// tabs: with one subject actually having content at a time, tabs just
+// produced a wall of empty "0 papers" states. Each card still carries its
+// own subject badge, so a mix of disciplines stays easy to tell apart once
+// more than one has real papers.
 const PYQsPage = () => {
   const [searchParams] = useSearchParams();
   const [pyqs, setPyqs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
-  const requestedSubject = searchParams.get("subject");
-  const hadUrlParam = !!(requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject));
-  const [activeSubject, setActiveSubject] = useState<string>(hadUrlParam ? requestedSubject! : "lw");
-  const [touched, setTouched] = useState(false);
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
   const [tagFilter, setTagFilter] = useState("all");
 
@@ -39,28 +35,14 @@ const PYQsPage = () => {
       });
   }, []);
 
-  const countFor = (value: string) => pyqs.filter(p => p.subject === value).length;
-
-  // Content-first: land on whichever subject actually has papers if the
-  // default (Labour Welfare, today's only real source) turns out empty.
-  useEffect(() => {
-    if (touched || hadUrlParam || loading) return;
-    if (countFor(activeSubject) > 0) return;
-    const firstWithContent = DISCIPLINES.find(d => pyqs.some(p => p.subject === d.value));
-    if (firstWithContent) setActiveSubject(firstWithContent.value);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pyqs, loading]);
-
-  const subjectPyqs = useMemo(() => pyqs.filter(p => p.subject === activeSubject), [pyqs, activeSubject]);
-
-  const allYears = useMemo(() => Array.from(new Set(subjectPyqs.map(p => p.year))).sort((a, b) => b - a), [subjectPyqs]);
+  const allYears = useMemo(() => Array.from(new Set(pyqs.map(p => p.year))).sort((a, b) => b - a), [pyqs]);
   const allTags = useMemo(() => {
     const set = new Set<string>();
-    subjectPyqs.forEach(p => (p.tags ?? []).forEach((t: string) => set.add(t)));
+    pyqs.forEach(p => (p.tags ?? []).forEach((t: string) => set.add(t)));
     return Array.from(set).sort();
-  }, [subjectPyqs]);
+  }, [pyqs]);
 
-  const filtered = useMemo(() => subjectPyqs.filter(p => {
+  const filtered = useMemo(() => pyqs.filter(p => {
     if (search) {
       const term = search.toLowerCase();
       const haystack = [p.title, String(p.year), ...(p.tags ?? [])].filter(Boolean).join(" ").toLowerCase();
@@ -69,21 +51,19 @@ const PYQsPage = () => {
     if (yearFilter !== "all" && p.year !== yearFilter) return false;
     if (tagFilter !== "all" && !(p.tags ?? []).includes(tagFilter)) return false;
     return true;
-  }), [subjectPyqs, search, yearFilter, tagFilter]);
-
-  const activeDiscipline = DISCIPLINES.find(d => d.value === activeSubject);
+  }), [pyqs, search, yearFilter, tagFilter]);
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
         title="Previous Year Question Papers"
-        description="Previous year question papers for UGC NET/JRF Labour Welfare and MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by subject and year."
+        description="Previous year question papers for UGC NET/JRF Labour Welfare, MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by year."
         path="/pyqs"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "Previous Year Question Papers — Karn HR Academy",
-          description: "Previous year question papers across UGC NET/JRF Labour Welfare and MBA/BBA HR disciplines, organised by subject and year.",
+          description: "Previous year question papers across UGC NET/JRF Labour Welfare and MBA/BBA HR disciplines, organised by year.",
           isAccessibleForFree: true,
         }}
       />
@@ -94,7 +74,7 @@ const PYQsPage = () => {
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Previous Year Questions</h1>
-            <p className="mt-1 text-muted-foreground">Real exam papers, organised by subject and year — pick a subject to browse.</p>
+            <p className="mt-1 text-muted-foreground">Real exam papers, organised by year.</p>
           </div>
           <input
             type="text"
@@ -105,44 +85,16 @@ const PYQsPage = () => {
           />
         </div>
 
-        {/* Subject selector */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {DISCIPLINES.map(d => {
-            const Icon = d.icon;
-            const count = countFor(d.value);
-            const isActive = activeSubject === d.value;
-            return (
-              <button
-                key={d.value}
-                onClick={() => { setActiveSubject(d.value); setTouched(true); setYearFilter("all"); setTagFilter("all"); }}
-                aria-pressed={isActive}
-                className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-all ${
-                  isActive ? d.activeColor + " shadow-sm" : count > 0 ? d.color + " hover:brightness-95" : "border-border bg-card text-muted-foreground/70 hover:bg-muted"
-                }`}
-              >
-                <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : count > 0 ? d.iconColor : ""}`} />
-                <span className="whitespace-nowrap">{d.short}</span>
-                {count > 0 && (
-                  <span className={`rounded-full px-1.5 text-xs font-semibold ${isActive ? "bg-white/25 text-white" : "bg-white/80 text-foreground"}`}>{count}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
         {loading ? (
           <div className="py-16 text-center text-sm text-muted-foreground">Loading…</div>
-        ) : activeDiscipline && (
+        ) : (
           <section>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
               <div className="flex items-center gap-3">
-                <div className={`rounded-lg p-2 ${activeDiscipline.color}`}>
-                  <ScrollText className={`h-5 w-5 ${activeDiscipline.iconColor}`} />
+                <div className="rounded-lg bg-accent/10 p-2">
+                  <ScrollText className="h-5 w-5 text-accent" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-foreground">{activeDiscipline.label} — Previous Year Questions</h2>
-                  <p className="text-sm text-muted-foreground">{subjectPyqs.length} paper{subjectPyqs.length !== 1 ? "s" : ""}</p>
-                </div>
+                <p className="text-sm text-muted-foreground">{filtered.length} paper{filtered.length !== 1 ? "s" : ""}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {allYears.length > 0 && (
@@ -163,34 +115,40 @@ const PYQsPage = () => {
             </div>
 
             {filtered.length === 0 ? (
-              <EmptyState text={`No previous year papers uploaded yet for ${activeDiscipline.label}. Check back soon.`} />
+              <EmptyState text="No previous year papers uploaded yet. Check back soon." />
             ) : (
               <div className="space-y-6">
                 {Array.from(new Set(filtered.map(p => p.year))).sort((a, b) => b - a).map(year => (
                   <div key={year}>
                     <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{year}</p>
                     <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                      {filtered.filter(p => p.year === year).map(pyq => (
-                        <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
-                          <h3 className="text-sm font-semibold text-foreground">{pyq.title}</h3>
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {(pyq.unit_tags ?? []).map((n: number) => (
-                              <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
-                                Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
-                              </span>
-                            ))}
-                            {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+                      {filtered.filter(p => p.year === year).map(pyq => {
+                        const discipline = getDiscipline(pyq.subject);
+                        return (
+                          <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
+                            <h3 className="text-sm font-semibold text-foreground">{pyq.title}</h3>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {discipline && (
+                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>
+                              )}
+                              {(pyq.unit_tags ?? []).map((n: number) => (
+                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+                                  Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
+                                </span>
+                              ))}
+                              {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+                            </div>
+                            <div className="mt-1 flex items-center justify-between gap-2">
+                              {(pyq.view_count ?? 0) > 0 ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" /> {pyq.view_count} views</span>
+                              ) : <span />}
+                              <Link to={`/pyqs/view/${pyq.id}`} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+                                <BookOpenCheck className="h-3.5 w-3.5" /> View Online
+                              </Link>
+                            </div>
                           </div>
-                          <div className="mt-1 flex items-center justify-between gap-2">
-                            {(pyq.view_count ?? 0) > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" /> {pyq.view_count} views</span>
-                            ) : <span />}
-                            <Link to={`/pyqs/view/${pyq.id}`} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                              <BookOpenCheck className="h-3.5 w-3.5" /> View Online
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

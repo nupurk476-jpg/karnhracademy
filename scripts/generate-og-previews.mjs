@@ -272,7 +272,7 @@ const STATIC_ROUTES = [
   { path: "/lectures", title: "Video Lectures", description: "Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET/JRF preparation." },
   { path: "/live-lectures", title: "Live Lectures", description: "Join interactive live classes and Q&A sessions on HR & Management topics with Karn HR Academy." },
   { path: "/quizzes", title: "MCQ Quizzes — HR & Management Assessment", description: "Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking." },
-  { path: "/pyqs", title: "Previous Year Question Papers", description: "Previous year question papers for UGC NET/JRF Labour Welfare and MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by subject and year." },
+  { path: "/pyqs", title: "Previous Year Question Papers", description: "Previous year question papers for UGC NET/JRF Labour Welfare, MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by year." },
   { path: "/books", title: "Book Recommendations", description: "Curated book recommendations on Human Resource Management for students, scholars, and HR researchers." },
   { path: "/newspaper", title: "Newspaper Highlights", description: "Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants." },
   { path: "/about", title: "About", description: "About the educator behind Karn HR Academy — PhD scholar specialising in Ethical HRM and Quiet Quitting." },
