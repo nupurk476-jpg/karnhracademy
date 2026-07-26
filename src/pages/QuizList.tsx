@@ -1,400 +1,190 @@
-import { useEffect, useState, useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { HelpCircle, ChevronRight, Clock, Calendar, LayoutGrid, List } from "lucide-react";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
-import { NAVY_HEX, GOLD_HEX, SUBJECT_GRADIENT } from "@/lib/subjectGradients";
 import { fetchAllRows } from "@/lib/fetchAllRows";
-import {
-  Search, ChevronRight, HelpCircle, Clock, BarChart3, Star,
-  Layers, TrendingUp, BookOpen,
-  CheckCircle2, Lightbulb, Award, Zap, Filter, ArrowRight,
-  FileText, Video, Download, FolderOpen, PlayCircle,
-} from "lucide-react";
 
-// ── Subject config ────────────────────────────────────────────────────────────
-// Sourced from disciplines.ts so this can never drift out of sync with Notes/Admin.
-const SUBJECTS = [
-  { value: "all", label: "All Subjects", icon: Layers },
-  ...DISCIPLINES.map(d => ({ value: d.value, label: d.label, icon: d.icon })),
-];
+const PAGE_SIZE = 30;
 
-const DIFFICULTIES = ["All", "Beginner", "Intermediate", "Advanced"];
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-const DURATIONS = [
-  { label: "Any Duration", value: "any" },
-  { label: "Under 10 min",  value: "short" },
-  { label: "10–20 min",     value: "medium" },
-  { label: "20+ min",       value: "long" },
-];
+const SORTS = [
+  { value: "latest", label: "Latest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "alpha", label: "A–Z" },
+  { value: "questions", label: "Most Questions" },
+] as const;
 
-const FEATURE_HIGHLIGHTS = [
-  { icon: Zap,          title: "Instant Results",       desc: "Get your score and feedback immediately after each quiz." },
-  { icon: Lightbulb,    title: "Detailed Explanations", desc: "Every question includes an expert explanation to reinforce learning." },
-  { icon: Layers,       title: "Topic-wise Practice",   desc: "Filter quizzes by subject, topic, and difficulty level." },
-  { icon: Award,        title: "Progress Tracking",     desc: "Track your performance over time on the leaderboard." },
-];
-
-const RELATED_RESOURCES = [
-  { icon: FileText, label: "Study Notes",     to: "/notes" },
-  { icon: Video,    label: "Video Lecture",   to: "/lectures" },
-  { icon: Download, label: "Download PDF",    to: "/notes" },
-  { icon: FolderOpen, label: "Case Study",   to: "/blogs" },
-];
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function estimateMinutes(questionCount: number) {
-  return Math.max(1, Math.round((questionCount * 60) / 60));
-}
-
-function getDifficulty(topic: string): "Beginner" | "Intermediate" | "Advanced" {
-  const t = (topic || "").toLowerCase();
-  if (t.includes("advanc") || t.includes("analytics") || t.includes("research") || t.includes("strategic")) return "Advanced";
-  if (t.includes("intermedi") || t.includes("compensation") || t.includes("industrial") || t.includes("training")) return "Intermediate";
-  return "Beginner";
-}
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  Beginner:     "bg-[#F2F6FA] text-[#3D6C98] border-[#C9D8E8]",
-  Intermediate: "bg-[#FAF5EA] text-[#8F6D33] border-[#E8DCC0]",
-  Advanced:     "bg-[#E9EEF5] text-[#0D2A45] border-[#C0CEDD]",
-};
-
-// Solid text color per difficulty, for badges placed on a white/translucent
-// chip over a cover image (rather than the tinted DIFFICULTY_COLOR pairing).
-const DIFFICULTY_TEXT: Record<string, string> = {
-  Beginner: "#3D6C98",
-  Intermediate: "#8F6D33",
-  Advanced: "#0D2A45",
-};
-
-function getSubjectForTopic(topic: string) {
-  const t = (topic || "").toLowerCase();
-  if (t.includes("behaviour") || t.includes("motivation") || t.includes("perception") || t.includes("personality") || t.includes("leadership") || t.includes("group dynamics")) return "ob";
-  if (t.includes("strateg")) return "sm";
-  if (t.includes("global") || t.includes("international") || t.includes("expatriate") || t.includes("mnc")) return "ghr";
-  if (t.includes("change") || t.includes(" od ") || t.includes("organisation development") || t.includes("organizational development")) return "odcm";
-  if (t.includes("planning") || t.includes("organiz") || t.includes("direct") || t.includes("control") || t.includes("fayol") || t.includes("taylor") || t.includes("management theor")) return "pom";
-  if (t.includes("communication") || t.includes("business letter") || t.includes("presentation") || t.includes("negotiation")) return "bc";
-  if (t.includes("compensation") || t.includes("payroll") || t.includes("recruitment") || t.includes("training") || t.includes("industrial") || t.includes("analytics") || t.includes("hrm") || t.includes("talent") || t.includes("employee")) return "hrm";
-  return "hrm";
-}
-
-// Quizzes created after the "subject" column was added carry a real discipline value
-// (picked in Admin > Quizzes, same taxonomy as Notes). Older rows fall back to the
-// keyword heuristic above.
-function resolveSubject(quiz: any) {
-  return quiz.subject || getSubjectForTopic(quiz.topic || "");
-}
-
-// Decorative gradient + pattern layer shared by the featured and grid quiz
-// covers — diamonds echo the brand mark, the icon watermark ties the cover
-// back to the subject without repeating text.
-const CoverBackdrop = ({ subjectValue, icon: Icon }: { subjectValue: string; icon: any }) => {
-  const [from, to] = SUBJECT_GRADIENT[subjectValue] || SUBJECT_GRADIENT.hrm;
-  return (
-    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
-      <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(circle,#fff 1px,transparent 1px)", backgroundSize: "20px 20px" }} />
-      <div className="absolute -right-5 -top-5 h-20 w-20 rotate-45 rounded-lg bg-white/10" />
-      <div className="absolute right-10 top-16 h-8 w-8 rotate-45 rounded bg-white/15" />
-      <Icon className="absolute -bottom-5 -right-5 h-32 w-32 text-white/10" strokeWidth={1.5} />
-    </div>
-  );
-};
-
-// ── QuizCard ──────────────────────────────────────────────────────────────────
-const QuizCard = ({
-  quiz,
-  questionCount,
-  rating,
-  featured = false,
-}: {
-  quiz: any;
-  questionCount: number;
-  rating: { avg: number; count: number } | undefined;
-  featured?: boolean;
-}) => {
-  const mins = estimateMinutes(questionCount);
-  const difficulty = getDifficulty(quiz.topic || quiz.title);
-  const subject = SUBJECTS.find(s => s.value === resolveSubject(quiz)) || SUBJECTS[1];
-  const SubjectIcon = subject.icon;
-
-  if (featured) {
-    return (
-      <div className="group grid lg:grid-cols-5 gap-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm hover:shadow-lg transition-all">
-        {/* Cover panel */}
-        <Link
-          to={`/quizzes/${quiz.id}`}
-          className="lg:col-span-2 relative flex min-h-[260px] flex-col items-center justify-center gap-4 p-10"
-        >
-          <CoverBackdrop subjectValue={subject.value} icon={SubjectIcon} />
-          <div className="relative z-10 flex flex-col items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-              <SubjectIcon className="h-10 w-10 text-white" />
-            </div>
-            <span className="rounded-full px-3 py-1 text-xs font-bold shadow" style={{ background: GOLD_HEX, color: NAVY_HEX }}>
-              Featured Quiz
-            </span>
-            {/* Stats */}
-            <div className="flex gap-4 text-center">
-              <div>
-                <p className="text-xl font-bold text-white">{questionCount}</p>
-                <p className="text-xs text-white/70">Questions</p>
-              </div>
-              <div className="w-px bg-white/20" />
-              <div>
-                <p className="text-xl font-bold text-white">{mins}</p>
-                <p className="text-xs text-white/70">Minutes</p>
-              </div>
-              {rating && (
-                <>
-                  <div className="w-px bg-white/20" />
-                  <div>
-                    <p className="text-xl font-bold text-white">{rating.avg.toFixed(1)}</p>
-                    <p className="text-xs text-white/70">Rating</p>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-          {/* Hover invite */}
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-hover:opacity-100">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold shadow-lg" style={{ color: NAVY_HEX }}>
-              <PlayCircle className="h-3.5 w-3.5" /> Start Quiz
-            </span>
-          </div>
-        </Link>
-
-        {/* Right content */}
-        <div className="lg:col-span-3 flex flex-col justify-between p-8">
-          <div>
-            <div className="mb-3 flex flex-wrap gap-2">
-              <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-0.5 text-xs font-semibold ${DIFFICULTY_COLOR[difficulty]}`}>
-                {difficulty}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary/5 px-3 py-0.5 text-xs font-semibold text-primary">
-                <SubjectIcon className="h-3 w-3" />{subject.label}
-              </span>
-            </div>
-            <h2 className="mb-3 text-2xl font-bold text-foreground group-hover:text-accent transition-colors">
-              {quiz.title}
-            </h2>
-            <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-              {quiz.description || `Test your understanding of ${quiz.topic || quiz.title}. This quiz covers key concepts aligned with MBA and UGC NET/JRF HR syllabi with instant feedback on every answer.`}
-            </p>
-            {/* Related Resources */}
-            <div className="mb-6">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Related Resources</p>
-              <div className="flex flex-wrap gap-2">
-                {RELATED_RESOURCES.map(r => (
-                  <Link key={r.label} to={r.to} onClick={e => e.stopPropagation()} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-slate-50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent transition-colors">
-                    <r.icon className="h-3.5 w-3.5" />{r.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-          <Link
-            to={`/quizzes/${quiz.id}`}
-            className="inline-flex w-fit items-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:brightness-110 transition-all"
-          >
-            Start Quiz <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-      {/* Cover */}
-      <Link to={`/quizzes/${quiz.id}`} className="relative block h-40 w-full overflow-hidden">
-        <CoverBackdrop subjectValue={subject.value} icon={SubjectIcon} />
-        <div className="relative z-10 flex h-full flex-col justify-between p-4">
-          <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold" style={{ color: DIFFICULTY_TEXT[difficulty] }}>
-              {difficulty}
-            </span>
-            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
-              <SubjectIcon className="h-4 w-4 text-white" />
-            </span>
-          </div>
-          <div>
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
-              {subject.label} • {questionCount} Qs • ~{mins} min
-            </p>
-            <h3 className="text-base font-bold leading-snug text-white line-clamp-2" style={{ fontFamily: "'Sora',sans-serif" }}>
-              {quiz.title}
-            </h3>
-          </div>
-        </div>
-        {/* Hover invite */}
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-hover:opacity-100">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold shadow-lg" style={{ color: NAVY_HEX }}>
-            <PlayCircle className="h-3.5 w-3.5" /> Start Quiz
-          </span>
-        </div>
-      </Link>
-
-      {/* Description */}
-      <p className="flex-1 px-5 pb-4 text-sm leading-relaxed text-muted-foreground line-clamp-2">
-        {quiz.description || `Test your knowledge of ${quiz.topic || quiz.title} with this topic-focused MCQ quiz.`}
-      </p>
-
-      {/* Stats row */}
-      <div className="mx-5 mb-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg bg-slate-50 px-4 py-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <HelpCircle className="h-3.5 w-3.5 text-accent" />
-          <span><strong className="text-foreground">{questionCount}</strong> questions</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5 text-accent" />
-          <span>~{mins} min</span>
-        </span>
-        {rating && (
-          <span className="flex items-center gap-1">
-            <Star className="h-3.5 w-3.5 fill-[#C7994A] text-[#C7994A]" />
-            <strong className="text-foreground">{rating.avg.toFixed(1)}</strong>
-            <span>({rating.count})</span>
-          </span>
-        )}
-      </div>
-
-      {/* Related resources */}
-      <div className="px-5 pb-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Related</p>
-        <div className="flex flex-wrap gap-1.5">
-          {RELATED_RESOURCES.map(r => (
-            <Link key={r.label} to={r.to} onClick={e => e.stopPropagation()} className="inline-flex items-center gap-1 rounded border border-border bg-slate-50 px-2 py-1 text-xs text-muted-foreground hover:border-accent hover:text-accent transition-colors">
-              <r.icon className="h-3 w-3" />{r.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer CTA */}
-      <div className="border-t border-border p-4">
-        <Link
-          to={`/quizzes/${quiz.id}`}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110 transition-all"
-        >
-          Start Quiz <ChevronRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </div>
-  );
-};
-
-// ── Main page ─────────────────────────────────────────────────────────────────
 const QuizList = () => {
   const [searchParams] = useSearchParams();
-  // ?subject= lets topic pages and search results deep-link to one discipline.
-  const requestedSubject = searchParams.get("subject");
-  const validSubject = requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [questionCounts, setQuestionCounts] = useState<Record<string, number>>({});
-  const [ratings, setRatings] = useState<Record<string, { avg: number; count: number }>>({});
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [subject, setSubject] = useState(validSubject ? requestedSubject! : "all");
-  const [topicSlug, setTopicSlug] = useState("all");
-  const [difficulty, setDifficulty] = useState("All");
-  const [duration, setDuration] = useState("any");
-  const [showFilters, setShowFilters] = useState(false);
+  // ?q= lets the sitewide /search page deep-link to a specific quiz here.
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
+  const requestedSubject = searchParams.get("subject");
+  const hadUrlParam = !!(requestedSubject && DISCIPLINES.some(d => d.value === requestedSubject));
+  const [activeSubject, setActiveSubject] = useState<string>(hadUrlParam ? requestedSubject! : "hrm");
+  const [activeTopic, setActiveTopic] = useState("all");
+  const [touched, setTouched] = useState(false);
+  const [sort, setSort] = useState<(typeof SORTS)[number]["value"]>("latest");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      // quiz_questions/quiz_ratings are fetched across every quiz at once to
-      // build per-quiz counts — a plain .select() silently truncates at
-      // Supabase's default row cap once the combined total grows large
-      // enough, undercounting exactly the quizzes with the most questions.
-      // fetchAllRows pages through with .range() so the count is always
-      // the real total, however many rows there are.
-      const [{ data: quizData }, questions, ratingData] = await Promise.all([
-        supabase.from("quizzes").select("*").order("created_at", { ascending: false }),
-        fetchAllRows<{ quiz_id: string }>(() => supabase.from("quiz_questions").select("quiz_id")),
-        fetchAllRows<{ quiz_id: string; rating: number }>(() => supabase.from("quiz_ratings").select("quiz_id, rating")),
-      ]);
-
+    (async () => {
+      const { data: quizData, error } = await supabase.from("quizzes").select("*").order("created_at", { ascending: false });
+      if (error) { console.error("QuizList: failed to load quizzes", error); return; }
       // Drafts stay admin-only; rows predating the "published" column count as published.
-      if (quizData) setQuizzes(quizData.filter((q: any) => q.published !== false));
+      const published = (quizData ?? []).filter((q: any) => q.published !== false);
+      setQuizzes(published);
 
-      const counts: Record<string, number> = {};
-      questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
-      setQuestionCounts(counts);
-
-      const r: Record<string, { total: number; count: number }> = {};
-      ratingData.forEach(rd => {
-        if (!r[rd.quiz_id]) r[rd.quiz_id] = { total: 0, count: 0 };
-        r[rd.quiz_id].total += rd.rating;
-        r[rd.quiz_id].count++;
-      });
-      const mapped: Record<string, { avg: number; count: number }> = {};
-      Object.entries(r).forEach(([id, v]) => { mapped[id] = { avg: v.total / v.count, count: v.count }; });
-      setRatings(mapped);
-
-      setLoading(false);
-    };
-    load();
+      if (published.length > 0) {
+        // A plain .select() silently truncates at Supabase's default row cap
+        // once the combined question count grows large enough — fetchAllRows
+        // pages through with .range() so counts stay accurate however many
+        // questions exist across every quiz.
+        const questions = await fetchAllRows<{ quiz_id: string }>(() =>
+          supabase.from("quiz_questions").select("quiz_id").in("quiz_id", published.map((q: any) => q.id))
+        );
+        const counts: Record<string, number> = {};
+        questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
+        setQuestionCounts(counts);
+      }
+    })();
   }, []);
 
-  const totalQuestions = useMemo(() => Object.values(questionCounts).reduce((a, b) => a + b, 0), [questionCounts]);
-  const subjectsCovered = useMemo(() => new Set(quizzes.map(q => resolveSubject(q))).size, [quizzes]);
+  // Single source of truth for "does this quiz belong to this discipline?"
+  // (legacy quizzes were saved with subject = null before the column existed).
+  const quizMatchesSubject = (q: any, value: string) =>
+    value === "hrm" ? (!q.subject || q.subject === "hrm") : q.subject === value;
 
-  const filtered = useMemo(() => quizzes.filter(q => {
-    if (search) {
-      const term = search.toLowerCase();
-      // Match against everything actually shown on the card — the free-text
-      // topic field can be blank or generic while the quiz is still tagged
-      // with a specific topic_slug/subject, whose label only shows up as a
-      // badge; searching that exact term should still find it.
-      const haystack = [q.title, q.topic, q.description, getTopicLabel(q.topic_slug), getDiscipline(q.subject)?.label]
-        .filter(Boolean).join(" ").toLowerCase();
-      if (!haystack.includes(term)) return false;
-    }
-    if (subject !== "all" && resolveSubject(q) !== subject) return false;
-    if (topicSlug !== "all" && q.topic_slug !== topicSlug) return false;
-    if (difficulty !== "All" && getDifficulty(q.topic || q.title) !== difficulty) return false;
-    if (duration !== "any") {
-      const mins = estimateMinutes(questionCounts[q.id] || 10);
-      if (duration === "short" && mins >= 10) return false;
-      if (duration === "medium" && (mins < 10 || mins > 20)) return false;
-      if (duration === "long" && mins <= 20) return false;
-    }
-    return true;
-  }), [quizzes, search, subject, topicSlug, difficulty, duration, questionCounts]);
+  const countFor = (value: string) => quizzes.filter(q => quizMatchesSubject(q, value)).length;
 
-  // Sub-topic chips for the selected subject — only topics that actually have quizzes.
-  const subTopics = useMemo(() => {
-    if (subject === "all") return [];
-    const d = DISCIPLINES.find(x => x.value === subject);
-    if (!d) return [];
-    const subjQuizzes = quizzes.filter(q => resolveSubject(q) === subject);
-    return d.topics.filter(t => subjQuizzes.some(q => q.topic_slug === t.slug));
-  }, [subject, quizzes]);
+  // Content-first: if the visitor didn't request a subject and the default has no
+  // quizzes, auto-select the first discipline that does, so they land on content.
+  useEffect(() => {
+    if (touched || hadUrlParam || quizzes.length === 0) return;
+    if (countFor(activeSubject) > 0) return;
+    const firstWithContent = DISCIPLINES.find(d => quizzes.some(q => quizMatchesSubject(q, d.value)));
+    if (firstWithContent) setActiveSubject(firstWithContent.value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizzes]);
 
-  const featured = filtered[0] ?? null;
-  const rest = filtered.slice(1);
-
-  // Group rest by subject
-  const grouped = useMemo(() => {
-    const g: Record<string, any[]> = {};
-    rest.forEach(q => {
-      const s = resolveSubject(q);
-      if (!g[s]) g[s] = [];
-      g[s].push(q);
+  const filtered = useMemo(() => {
+    const list = quizzes.filter(q => {
+      if (search) {
+        const term = search.toLowerCase();
+        // Include the resolved topic label — a quiz's topic_slug shows up as
+        // a badge on the card even when the title/description don't
+        // literally contain that topic's name.
+        const haystack = [q.title, q.description, q.topic, getTopicLabel(q.topic_slug)]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      if (!quizMatchesSubject(q, activeSubject)) return false;
+      if (activeTopic !== "all" && q.topic_slug !== activeTopic) return false;
+      return true;
     });
-    return g;
-  }, [rest]);
+    const sorted = [...list];
+    if (sort === "latest") sorted.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+    if (sort === "oldest") sorted.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
+    if (sort === "alpha") sorted.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+    if (sort === "questions") sorted.sort((a, b) => (questionCounts[b.id] ?? 0) - (questionCounts[a.id] ?? 0));
+    return sorted;
+  }, [quizzes, search, activeSubject, activeTopic, sort, questionCounts]);
 
-  const activeFiltersCount = [subject !== "all", topicSlug !== "all", difficulty !== "All", duration !== "any"].filter(Boolean).length;
+  // Reset pagination whenever the result set changes shape.
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [search, activeSubject, activeTopic, sort]);
+  const visible = filtered.slice(0, visibleCount);
+
+  const activeDiscipline = DISCIPLINES.find(d => d.value === activeSubject);
+  const subjectQuizzes = quizzes.filter(q => quizMatchesSubject(q, activeSubject));
+  const topicsWithQuizzes = activeDiscipline
+    ? activeDiscipline.topics.filter(t => subjectQuizzes.some(q => q.topic_slug === t.slug))
+    : [];
+
+  // ── Quiz renderers ───────────────────────────────────────────────────────
+  const Badges = ({ quiz }: { quiz: any }) => (
+    <>
+      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+        {getDiscipline(quiz.subject || "hrm")?.short ?? "HRM"}
+      </span>
+      {quiz.topic_slug && (
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+          {getTopicLabel(quiz.topic_slug)}
+        </span>
+      )}
+    </>
+  );
+
+  const Meta = ({ quiz }: { quiz: any }) => {
+    const count = questionCounts[quiz.id] || 0;
+    return (
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(quiz.created_at)}</span>
+        <span>{count} question{count !== 1 ? "s" : ""}</span>
+        {count > 0 && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" /> ~{count} min</span>}
+      </span>
+    );
+  };
+
+  const Actions = ({ quiz }: { quiz: any }) => (
+    <div className="flex shrink-0 items-center gap-2">
+      <Link to={`/quizzes/${quiz.id}`}
+        className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground hover:brightness-110">
+        Take Quiz <ChevronRight className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+
+  const CoverFallback = ({ size }: { size: "sm" | "lg" }) => (
+    <div className={`flex h-full w-full items-center justify-center ${activeDiscipline?.iconBg ?? "bg-muted"}`}>
+      <HelpCircle className={`${size === "lg" ? "h-10 w-10" : "h-5 w-5"} ${activeDiscipline?.iconColor ?? "text-muted-foreground"}`} />
+    </div>
+  );
+
+  const ListRow = ({ quiz }: { quiz: any }) => (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card px-5 py-4 transition-shadow hover:shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 flex-1 items-start gap-4">
+        <div className="hidden h-16 w-12 flex-shrink-0 overflow-hidden rounded border border-border sm:block">
+          <CoverFallback size="sm" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-semibold leading-snug text-foreground">{quiz.title}</h3>
+            <Badges quiz={quiz} />
+          </div>
+          {quiz.description && <p className="mb-1.5 line-clamp-1 text-xs text-muted-foreground">{quiz.description}</p>}
+          <Meta quiz={quiz} />
+        </div>
+      </div>
+      <Actions quiz={quiz} />
+    </div>
+  );
+
+  const GridCard = ({ quiz }: { quiz: any }) => (
+    <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-shadow hover:shadow-md">
+      <div className="relative h-40 w-full overflow-hidden border-b border-border">
+        <CoverFallback size="lg" />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-1.5 flex flex-wrap items-center gap-2"><Badges quiz={quiz} /></div>
+        <h3 className="mb-1.5 text-base font-semibold leading-snug text-foreground">{quiz.title}</h3>
+        {quiz.description && <p className="mb-3 line-clamp-2 flex-1 text-sm text-muted-foreground">{quiz.description}</p>}
+        <div className="mb-3"><Meta quiz={quiz} /></div>
+        <Actions quiz={quiz} />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <SEO
         title="MCQ Quizzes — HR & Management Assessment"
         description="Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking."
@@ -402,271 +192,134 @@ const QuizList = () => {
       />
       <Header />
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section id="main-content" className="bg-white border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-          {/* Breadcrumb (visual + BreadcrumbList schema) */}
-          <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes" }]} />
-
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">Academic Assessment</p>
-              <h1 className="mb-4 text-4xl font-bold leading-tight text-foreground" style={{ fontFamily: "'Sora', sans-serif" }}>
-                Practice MCQs for<br />HR & Management
-              </h1>
-              <p className="mb-8 text-base leading-relaxed text-muted-foreground">
-                Topic-wise quizzes designed for MBA, BBA, HR professionals, and UGC NET/JRF aspirants. Test your knowledge, get instant feedback, and track progress across all major HR subjects.
-              </p>
-
-              {/* Search */}
-              <div className="relative max-w-lg mb-8">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search quizzes, topics, subjects…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-border bg-slate-50 pl-11 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent shadow-sm"
-                />
-              </div>
-
-              {/* CTAs */}
-              <div className="flex flex-wrap gap-3">
-                <a href="#quizzes" className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110 transition-all">
-                  Start Practicing <ArrowRight className="h-4 w-4" />
-                </a>
-                <a href="#subjects" className="inline-flex items-center gap-2 rounded-lg border border-border bg-white px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-slate-50 transition-all">
-                  Browse Subjects
-                </a>
-              </div>
-            </div>
-
-            {/* Feature highlights */}
-            <div className="grid grid-cols-2 gap-4">
-              {FEATURE_HIGHLIGHTS.map(f => (
-                <div key={f.title} className="rounded-xl border border-border bg-slate-50 p-5">
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
-                    <f.icon className="h-5 w-5 text-accent" />
-                  </div>
-                  <h3 className="mb-1 text-sm font-bold text-foreground">{f.title}</h3>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{f.desc}</p>
-                </div>
-              ))}
-            </div>
+      <main id="main-content" className="mx-auto max-w-6xl px-6 py-10">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQs" }]} />
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl">MCQs</h1>
+            <p className="mt-1 text-muted-foreground">Pick your subject to practice topic-wise MCQs.</p>
           </div>
+          <input
+            type="text"
+            placeholder="Search MCQs..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"
+          />
         </div>
-      </section>
 
-      {/* ── Stats bar ───────────────────────────────────────────────────── */}
-      <div className="bg-[#DCE6F1] border-y border-[#C9D8E8]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 divide-x divide-[#C9D8E8] sm:grid-cols-4">
-            {[
-              { value: quizzes.length,    label: "Quizzes Available",  icon: HelpCircle },
-              { value: totalQuestions,    label: "Total Questions",    icon: BarChart3 },
-              { value: subjectsCovered,   label: "Subjects Covered",  icon: BookOpen },
-              { value: `${Math.round(totalQuestions * 1.5)}+`, label: "Practice Minutes", icon: Clock },
-            ].map(stat => (
-              <div key={stat.label} className="flex items-center gap-3 px-6 py-5">
-                <stat.icon className="h-8 w-8 text-[#A9823F] flex-shrink-0" />
-                <div>
-                  <p className="text-2xl font-bold text-[#1F4E79]">{stat.value}</p>
-                  <p className="text-xs text-[#4A6076]">{stat.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Subject filter tabs ──────────────────────────────────────────── */}
-      <div id="subjects" className="sticky top-16 z-30 bg-white border-b border-border shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-none">
-            {SUBJECTS.map(s => {
-              const Icon = s.icon;
-              const active = subject === s.value;
-              return (
-                <button
-                  key={s.value}
-                  onClick={() => { setSubject(s.value); setTopicSlug("all"); }}
-                  className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
-                    active
-                      ? "bg-accent text-accent-foreground shadow-sm"
-                      : "bg-slate-100 text-muted-foreground hover:bg-slate-200 hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
-          {/* Sub-topic row — only when the selected subject has quizzes filed under topics */}
-          {subTopics.length > 0 && (
-            <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none">
-              <span className="flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sub topic:</span>
+        {/* Compact discipline selector */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {DISCIPLINES.map(d => {
+            const Icon = d.icon;
+            const count = countFor(d.value);
+            const isActive = activeSubject === d.value;
+            return (
               <button
-                onClick={() => setTopicSlug("all")}
-                className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  topicSlug === "all" ? "bg-primary text-primary-foreground" : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                key={d.value}
+                onClick={() => { setActiveSubject(d.value); setActiveTopic("all"); setTouched(true); }}
+                aria-pressed={isActive}
+                className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-all ${
+                  isActive ? d.activeColor + " shadow-sm" : count > 0 ? d.color + " hover:brightness-95" : "border-border bg-card text-muted-foreground/70 hover:bg-muted"
                 }`}
               >
-                All
+                <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-white" : count > 0 ? d.iconColor : ""}`} />
+                <span className="whitespace-nowrap">{d.short}</span>
+                {count > 0 && (
+                  <span className={`rounded-full px-1.5 text-xs font-semibold ${isActive ? "bg-white/25 text-white" : "bg-white/80 text-foreground"}`}>{count}</span>
+                )}
               </button>
-              {subTopics.map(t => (
+            );
+          })}
+        </div>
+
+        {activeDiscipline && (
+          <section>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+              <div className="flex items-center gap-3">
+                <div className={`rounded-lg p-2 ${activeDiscipline.color}`}>
+                  <activeDiscipline.icon className={`h-5 w-5 ${activeDiscipline.iconColor}`} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">{activeDiscipline.label}</h2>
+                  <p className="text-sm text-muted-foreground">{activeDiscipline.description}</p>
+                </div>
+              </div>
+              {/* Sort + view toggle */}
+              <div className="flex items-center gap-2">
+                <select value={sort} onChange={e => setSort(e.target.value as any)} aria-label="Sort MCQs"
+                  className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">
+                  {SORTS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+                <div className="flex overflow-hidden rounded-md border border-border">
+                  <button onClick={() => setViewMode("list")} aria-label="List view" aria-pressed={viewMode === "list"}
+                    className={`p-2 ${viewMode === "list" ? "bg-accent text-accent-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>
+                    <List className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => setViewMode("grid")} aria-label="Grid view" aria-pressed={viewMode === "grid"}
+                    className={`p-2 ${viewMode === "grid" ? "bg-accent text-accent-foreground" : "bg-card text-muted-foreground hover:bg-muted"}`}>
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Topic filter — only surface topics that actually have quizzes */}
+            {topicsWithQuizzes.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-2">
                 <button
-                  key={t.slug}
-                  onClick={() => setTopicSlug(t.slug)}
-                  className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    topicSlug === t.slug ? "bg-primary text-primary-foreground" : "bg-slate-100 text-muted-foreground hover:bg-slate-200"
+                  onClick={() => setActiveTopic("all")}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                    activeTopic === "all" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  {t.label}
+                  All
                 </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Main content ─────────────────────────────────────────────────── */}
-      <div id="quizzes" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-
-        {/* Filters + count bar */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            {loading ? "Loading…" : `${filtered.length} quiz${filtered.length !== 1 ? "zes" : ""}`}
-            {subject !== "all" && <span> in <strong className="text-foreground">{SUBJECTS.find(s => s.value === subject)?.label}</strong></span>}
-          </p>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-                activeFiltersCount > 0
-                  ? "border-accent bg-accent/5 text-accent"
-                  : "border-border bg-white text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Filter className="h-3.5 w-3.5" />
-              Filters {activeFiltersCount > 0 && <span className="rounded-full bg-accent px-1.5 text-xs text-accent-foreground">{activeFiltersCount}</span>}
-            </button>
-          </div>
-        </div>
-
-        {/* Expanded filters */}
-        {showFilters && (
-          <div className="mb-6 rounded-xl border border-border bg-white p-5 shadow-sm">
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Difficulty</label>
-                <div className="flex flex-wrap gap-2">
-                  {DIFFICULTIES.map(d => (
-                    <button key={d} onClick={() => setDifficulty(d)} className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${difficulty === d ? "border-accent bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:border-accent hover:text-accent"}`}>
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Duration</label>
-                <div className="flex flex-wrap gap-2">
-                  {DURATIONS.map(d => (
-                    <button key={d.value} onClick={() => setDuration(d.value)} className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${duration === d.value ? "border-accent bg-accent text-accent-foreground" : "border-border text-muted-foreground hover:border-accent hover:text-accent"}`}>
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => { setDifficulty("All"); setDuration("any"); setSubject("all"); setTopicSlug("all"); setSearch(""); }}
-                  className="text-sm text-accent hover:underline"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="space-y-6">
-            <div className="h-64 w-full animate-pulse rounded-2xl bg-slate-200" />
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[1,2,3,4,5,6].map(i => <div key={i} className="h-72 animate-pulse rounded-xl bg-slate-200" />)}
-            </div>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-white py-20 text-center">
-            <HelpCircle className="mb-3 h-10 w-10 text-slate-300" />
-            <p className="font-medium text-muted-foreground">No quizzes found</p>
-            <p className="mt-1 text-sm text-muted-foreground">Try adjusting your filters or search term.</p>
-            <button
-              onClick={() => { setSearch(""); setSubject("all"); setTopicSlug("all"); setDifficulty("All"); setDuration("any"); }}
-              className="mt-4 text-sm font-medium text-accent hover:underline"
-            >
-              Clear all filters
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Featured quiz */}
-            {featured && (
-              <div className="mb-10">
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-widest text-accent">Featured</span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
-                <QuizCard
-                  quiz={featured}
-                  questionCount={questionCounts[featured.id] || 0}
-                  rating={ratings[featured.id]}
-                  featured
-                />
+                {topicsWithQuizzes.map(t => (
+                  <button
+                    key={t.slug}
+                    onClick={() => setActiveTopic(t.slug)}
+                    className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                      activeTopic === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* Grouped by subject */}
-            {Object.keys(grouped).length > 0 && (
-              Object.entries(grouped).map(([subjectValue, subjectQuizzes]) => {
-                const subjectInfo = SUBJECTS.find(s => s.value === subjectValue) || SUBJECTS[1];
-                const SubIcon = subjectInfo.icon;
-                return (
-                  <div key={subjectValue} className="mb-10">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10">
-                          <SubIcon className="h-4 w-4 text-accent" />
-                        </div>
-                        <h2 className="text-base font-bold text-foreground">{subjectInfo.label}</h2>
-                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                          {subjectQuizzes.length} quiz{subjectQuizzes.length !== 1 ? "zes" : ""}
-                        </span>
-                      </div>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                      {subjectQuizzes.map(q => (
-                        <QuizCard
-                          key={q.id}
-                          quiz={q}
-                          questionCount={questionCounts[q.id] || 0}
-                          rating={ratings[q.id]}
-                        />
-                      ))}
-                    </div>
+            {filtered.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
+                <HelpCircle className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+                <p className="font-medium text-muted-foreground">No MCQs uploaded yet for {activeDiscipline.label}.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Check back soon — new material is added regularly.</p>
+              </div>
+            ) : (
+              <>
+                <p className="mb-3 text-xs text-muted-foreground">{filtered.length} {filtered.length === 1 ? "quiz" : "quizzes"}</p>
+                {viewMode === "list" ? (
+                  <div className="space-y-2.5">
+                    {visible.map(quiz => <ListRow key={quiz.id} quiz={quiz} />)}
                   </div>
-                );
-              })
+                ) : (
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {visible.map(quiz => <GridCard key={quiz.id} quiz={quiz} />)}
+                  </div>
+                )}
+                {visibleCount < filtered.length && (
+                  <div className="mt-6 text-center">
+                    <button onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                      className="rounded-md border border-border px-6 py-2.5 text-sm font-medium text-foreground hover:bg-muted">
+                      Load more ({filtered.length - visibleCount} remaining)
+                    </button>
+                  </div>
+                )}
+              </>
             )}
-
-            {/* If no grouping (single subject selected), show flat grid */}
-            {Object.keys(grouped).length === 0 && rest.length === 0 && filtered.length === 1 && null}
-          </>
+          </section>
         )}
-      </div>
+      </main>
 
       <Footer />
     </div>
