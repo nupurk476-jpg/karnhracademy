@@ -26,6 +26,8 @@ const AdminPYQs = () => {
   const [tagsInput, setTagsInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
+  const [answerKeyFile, setAnswerKeyFile] = useState<File | null>(null);
+  const [existingAnswerKeyUrl, setExistingAnswerKeyUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
@@ -47,6 +49,7 @@ const AdminPYQs = () => {
     setEditingId(null);
     setTitle(""); setYear(new Date().getFullYear()); setSubject("lw");
     setUnitTags([]); setTagsInput(""); setFile(null); setExistingFileUrl(null);
+    setAnswerKeyFile(null); setExistingAnswerKeyUrl(null);
   };
 
   const startEdit = (paper: any) => {
@@ -58,6 +61,8 @@ const AdminPYQs = () => {
     setTagsInput((paper.tags ?? []).join(", "));
     setExistingFileUrl(paper.file_url ?? null);
     setFile(null);
+    setExistingAnswerKeyUrl(paper.answer_key_url ?? null);
+    setAnswerKeyFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -80,8 +85,11 @@ const AdminPYQs = () => {
       let file_url: string | null = existingFileUrl;
       if (file) file_url = await uploadFile(await watermarkPdf(file));
 
+      let answer_key_url: string | null = existingAnswerKeyUrl;
+      if (answerKeyFile) answer_key_url = await uploadFile(await watermarkPdf(answerKeyFile));
+
       const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
-      const row: any = { title, year, subject, file_url, unit_tags: unitTags, tags };
+      const row: any = { title, year, subject, file_url, answer_key_url, unit_tags: unitTags, tags };
       const write = (r: any) => editingId
         ? (supabase.from("pyq_papers" as any) as any).update(r).eq("id", editingId)
         : (supabase.from("pyq_papers" as any) as any).insert(r);
@@ -215,6 +223,35 @@ const AdminPYQs = () => {
           )}
         </div>
 
+        {/* Answer key attachment — optional second PDF, gives the viewer a
+            Question Paper / Answer Key tab switcher when present. */}
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
+            <Upload className="h-4 w-4" />
+            {answerKeyFile ? answerKeyFile.name : existingAnswerKeyUrl ? "Replace Answer Key PDF" : "Choose Answer Key PDF (optional)"}
+            <input type="file" accept=".pdf" onChange={e => setAnswerKeyFile(e.target.files?.[0] || null)} className="hidden" />
+          </label>
+          {!answerKeyFile && existingAnswerKeyUrl && (
+            <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+              Current:{" "}
+              <a
+                href={existingAnswerKeyUrl}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  const url = await getSignedFileUrl(existingAnswerKeyUrl, "pyq-papers");
+                  if (url) window.open(url, "_blank", "noopener,noreferrer");
+                }}
+                className="cursor-pointer text-accent hover:underline"
+              >
+                {fileName(existingAnswerKeyUrl)}
+              </a>
+              <button type="button" onClick={() => setExistingAnswerKeyUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached answer key">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          )}
+        </div>
+
         <button onClick={handleSave} disabled={uploading || !title || !year} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
           {uploading ? (editingId ? "Saving..." : "Uploading...") : editingId ? "Save Changes" : "Add Paper"}
         </button>
@@ -251,6 +288,7 @@ const AdminPYQs = () => {
                 <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
               ))}
               {paper.file_url && <span className="ml-2 text-xs text-muted-foreground">PDF</span>}
+              {paper.answer_key_url && <span className="ml-2 text-xs text-muted-foreground">+ Answer Key</span>}
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <button onClick={() => startEdit(paper)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${paper.title}`}>

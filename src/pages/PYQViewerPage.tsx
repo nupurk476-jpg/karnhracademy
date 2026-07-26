@@ -10,7 +10,7 @@ import { TagChip } from "@/components/LabourWelfareShared";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { getDiscipline } from "@/lib/disciplines";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, FileText, FileCheck2, Loader2 } from "lucide-react";
 
 const PYQViewerPage = () => {
   const { id } = useParams();
@@ -18,6 +18,9 @@ const PYQViewerPage = () => {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [initialPage, setInitialPage] = useState(1);
   const [status, setStatus] = useState<"loading" | "ready" | "not-found" | "error">("loading");
+  const [activeView, setActiveView] = useState<"paper" | "answerKey">("paper");
+  const [answerKeyUrl, setAnswerKeyUrl] = useState<string | null>(null);
+  const [resolvingAnswerKey, setResolvingAnswerKey] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +61,17 @@ const PYQViewerPage = () => {
       { user_id: session.user.id, pyq_id: id, last_page: page, total_pages: totalPages },
       { onConflict: "user_id,pyq_id" },
     );
+  };
+
+  // Answer key URL is only minted on demand — most readers never open it,
+  // so there's no reason to spend a signed-URL request on it up front.
+  const showAnswerKey = async () => {
+    setActiveView("answerKey");
+    if (answerKeyUrl || !pyq?.answer_key_url) return;
+    setResolvingAnswerKey(true);
+    const url = await getSignedFileUrl(pyq.answer_key_url, "pyq-papers", false);
+    setResolvingAnswerKey(false);
+    setAnswerKeyUrl(url);
   };
 
   if (status === "loading") {
@@ -130,7 +144,40 @@ const PYQViewerPage = () => {
           {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
         </div>
 
-        <SecurePdfViewer fileUrl={fileUrl!} initialPage={initialPage} onPageChange={saveProgress} />
+        {pyq.answer_key_url && (
+          <div className="mb-4 flex gap-2">
+            <button
+              onClick={() => setActiveView("paper")}
+              aria-pressed={activeView === "paper"}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeView === "paper" ? "bg-accent text-accent-foreground" : "border border-border bg-white text-muted-foreground hover:bg-slate-50"
+              }`}
+            >
+              <FileText className="h-3.5 w-3.5" /> Question Paper
+            </button>
+            <button
+              onClick={showAnswerKey}
+              aria-pressed={activeView === "answerKey"}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                activeView === "answerKey" ? "bg-accent text-accent-foreground" : "border border-border bg-white text-muted-foreground hover:bg-slate-50"
+              }`}
+            >
+              <FileCheck2 className="h-3.5 w-3.5" /> Answer Key
+            </button>
+          </div>
+        )}
+
+        {activeView === "answerKey" && resolvingAnswerKey ? (
+          <div className="flex min-h-[420px] items-center justify-center rounded-xl border border-border bg-card">
+            <p className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading answer key…
+            </p>
+          </div>
+        ) : activeView === "answerKey" && answerKeyUrl ? (
+          <SecurePdfViewer key={answerKeyUrl} fileUrl={answerKeyUrl} />
+        ) : (
+          <SecurePdfViewer key={fileUrl} fileUrl={fileUrl!} initialPage={initialPage} onPageChange={saveProgress} />
+        )}
 
         <div className="mt-6 text-center">
           <Link to="/pyqs" className="text-sm font-medium text-accent hover:underline">

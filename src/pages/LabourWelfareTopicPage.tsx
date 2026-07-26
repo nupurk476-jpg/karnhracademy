@@ -13,7 +13,7 @@ import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 import { resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
 import { getHighScoringTopicBySlug, getUnitsForTopic, FREQUENCY_LABEL, PYQ_FREQUENCY_LABEL } from "@/lib/highScoringTopics";
-import { ArrowLeft, FileText, HelpCircle, ScrollText, PlayCircle, BookOpenCheck, Bookmark, BookmarkCheck, Clock } from "lucide-react";
+import { ArrowLeft, FileText, HelpCircle, ScrollText, PlayCircle, BookOpenCheck, Bookmark, BookmarkCheck, Clock, FileCheck2 } from "lucide-react";
 
 const LabourWelfareTopicPage = () => {
   const { topicSlug } = useParams();
@@ -203,6 +203,11 @@ const LabourWelfareTopicPage = () => {
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{pyq.year}</span>
                         {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+                        {pyq.answer_key_url && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                            <FileCheck2 className="h-3 w-3" /> Answer key included
+                          </span>
+                        )}
                       </div>
                       <Link to={`/pyqs/view/${pyq.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
                         <BookOpenCheck className="h-3.5 w-3.5" /> View Online

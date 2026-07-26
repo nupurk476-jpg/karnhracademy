@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { TagChip, EmptyState } from "@/components/LabourWelfareShared";
 import { getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { ScrollText, BookOpenCheck, Eye } from "lucide-react";
+import { ScrollText, BookOpenCheck, Eye, FileCheck2 } from "lucide-react";
 
 // General Previous Year Question paper browser — every paper, across every
 // subject, in one flat list grouped by year. Not split into per-subject
@@ -137,6 +137,11 @@ const PYQsPage = () => {
                                 </span>
                               ))}
                               {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+                              {pyq.answer_key_url && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                                  <FileCheck2 className="h-3 w-3" /> Answer key included
+                                </span>
+                              )}
                             </div>
                             <div className="mt-1 flex items-center justify-between gap-2">
                               {(pyq.view_count ?? 0) > 0 ? (
