@@ -201,7 +201,7 @@ const QuizList = () => {
           </div>
           <input
             type="text"
-            placeholder="Search MCQs..."
+            aria-label="Search MCQs" placeholder="Search MCQs..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"

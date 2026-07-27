@@ -17,7 +17,9 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = (location.state as any)?.from || "/quizzes";
+  // Gated flows pass the page they came from; a direct header sign-in goes
+  // home rather than to an arbitrary section.
+  const redirectTo = (location.state as any)?.from || "/";
 
   // Translate raw Supabase auth errors into messages a student can act on.
   const friendlyAuthError = (message: string): { title: string; description: string } => {

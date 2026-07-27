@@ -60,13 +60,29 @@ const ROADMAP = [
   { step: "05", icon: Award,         title: "Master the Topic",  desc: "Achieve exam readiness and subject mastery." },
 ];
 
-const TOPICS = [
-  "Recruitment & Selection", "Performance Appraisal", "Motivation Theories",
-  "Leadership Styles", "Job Analysis", "HR Planning", "HR Analytics",
-  "Compensation & Benefits", "Training & Development", "OD & Change",
-  "Talent Management", "Industrial Relations", "Business Ethics",
-  "Strategic HRM", "Organisational Culture", "Employee Relations",
-  "HR Metrics", "Collective Bargaining",
+// Each chip goes to its real topic page — a chip that promises
+// "Motivation Theories" and lands on a generic list breaks trust on the
+// first click. Destinations mix discipline topic pages and UGC NET
+// high-scoring topic pages, whichever fits the phrase best.
+const TOPICS: { label: string; to: string }[] = [
+  { label: "Recruitment & Selection",  to: "/hr/recruitment-and-selection" },
+  { label: "Performance Appraisal",    to: "/ugc-net-labour-welfare/topic/performance-appraisal" },
+  { label: "Motivation Theories",      to: "/ob/motivation" },
+  { label: "Leadership Styles",        to: "/ob/leadership" },
+  { label: "Job Analysis",             to: "/ugc-net-labour-welfare/topic/job-analysis" },
+  { label: "HR Planning",              to: "/hr/human-resource-planning" },
+  { label: "HR Analytics",             to: "/hr/hr-analytics" },
+  { label: "Compensation & Benefits",  to: "/hr/compensation-and-benefits" },
+  { label: "Training & Development",   to: "/hr/training-and-development" },
+  { label: "OD & Change",              to: "/odcm/introduction-to-od" },
+  { label: "Talent Management",        to: "/hr/talent-management" },
+  { label: "Industrial Relations",     to: "/hr/industrial-relations" },
+  { label: "Business Ethics",          to: "/pom/business-ethics" },
+  { label: "Strategic HRM",            to: "/ugc-net-labour-welfare/topic/strategic-hrm" },
+  { label: "Organisational Culture",   to: "/ob/organizational-culture" },
+  { label: "Employee Relations",       to: "/hr/employee-relations" },
+  { label: "HR Metrics",               to: "/hr/hr-analytics" },
+  { label: "Collective Bargaining",    to: "/ugc-net-labour-welfare/topic/collective-bargaining" },
 ];
 
 // ─────────────── Tiny reusable pieces ────────────────────────────────────────
@@ -701,8 +717,8 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#8A6A28] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
-              {t}
+            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#8A6A28] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
+              {t.label}
             </Link>
           ))}
         </div>

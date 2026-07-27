@@ -202,7 +202,7 @@ const LabourWelfarePage = () => {
               <div className="relative flex-1 lg:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
-                  type="text" placeholder="Search notes, MCQs, papers…"
+                  type="text" aria-label="Search this page" placeholder="Search notes, MCQs, papers…"
                   value={search} onChange={e => setSearch(e.target.value)}
                   className="w-full rounded-md border border-border bg-slate-50 py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
@@ -221,14 +221,14 @@ const LabourWelfarePage = () => {
                   </button>
                 ))}
 
-                <select value={unitFilter} onChange={e => setUnitFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
+                <select aria-label="Filter by unit" value={unitFilter} onChange={e => setUnitFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
                   className="rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-foreground">
                   <option value="all">All Units</option>
                   {LW_UNITS.map(u => <option key={u.number} value={u.number}>Unit {unitRoman(u.number)}</option>)}
                 </select>
 
                 {allYears.length > 0 && (
-                  <select value={yearFilter} onChange={e => setYearFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
+                  <select aria-label="Filter by year" value={yearFilter} onChange={e => setYearFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
                     className="rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-foreground">
                     <option value="all">All Years</option>
                     {allYears.map(y => <option key={y} value={y}>{y}</option>)}
@@ -236,7 +236,7 @@ const LabourWelfarePage = () => {
                 )}
 
                 {allTags.length > 0 && (
-                  <select value={tagFilter} onChange={e => setTagFilter(e.target.value)}
+                  <select aria-label="Filter by tag" value={tagFilter} onChange={e => setTagFilter(e.target.value)}
                     className="rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-foreground">
                     <option value="all">All Tags</option>
                     {allTags.map(t => <option key={t} value={t}>#{t}</option>)}

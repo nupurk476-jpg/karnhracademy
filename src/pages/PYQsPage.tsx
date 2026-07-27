@@ -101,7 +101,7 @@ const PYQsPage = () => {
           </div>
           <input
             type="text"
-            placeholder="Search papers..."
+            aria-label="Search papers" placeholder="Search papers..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"
@@ -155,14 +155,14 @@ const PYQsPage = () => {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {allYears.length > 0 && (
-                  <select value={yearFilter} onChange={e => setYearFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
+                  <select aria-label="Filter by year" value={yearFilter} onChange={e => setYearFilter(e.target.value === "all" ? "all" : Number(e.target.value))}
                     className="rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-foreground">
                     <option value="all">All Years</option>
                     {allYears.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 )}
                 {allTags.length > 0 && (
-                  <select value={tagFilter} onChange={e => setTagFilter(e.target.value)}
+                  <select aria-label="Filter by tag" value={tagFilter} onChange={e => setTagFilter(e.target.value)}
                     className="rounded-md border border-border bg-white px-2.5 py-1.5 text-xs text-foreground">
                     <option value="all">All Tags</option>
                     {allTags.map(t => <option key={t} value={t}>#{t}</option>)}

@@ -342,7 +342,7 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
             type="text"
             value={search}
             onChange={e => runSearch(e.target.value)}
-            placeholder="Search this paper…"
+            aria-label="Search this paper" placeholder="Search this paper…"
             disabled={status !== "ready"}
             className="w-full rounded-md border border-border bg-white py-1.5 pl-8 pr-7 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
