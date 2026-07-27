@@ -229,3 +229,37 @@ export function unitsLabel(topic: HighScoringTopic): string {
 export function getHighScoringTopicBySlug(slug: string | undefined): HighScoringTopic | undefined {
   return HIGH_SCORING_TOPICS.find(t => t.slug === slug);
 }
+
+// Question/answer pairs for the topic page's visible FAQ section and its
+// FAQPage structured data. Every answer is derived from the curated data
+// above (frequency rating, syllabus units, read-time estimate) — no
+// fabricated statistics. The prerender script mirrors this same template
+// (scripts/generate-og-previews.mjs) so crawler and visitor copy match.
+export function getTopicFaqs(topic: HighScoringTopic): { question: string; answer: string }[] {
+  const units = getUnitsForTopic(topic);
+  const unitText = units.length
+    ? units.map(u => `Unit ${unitRoman(u.number)} (${u.title})`).join(" and ")
+    : "the UGC NET Paper II Labour Welfare syllabus";
+
+  const importance =
+    topic.frequency === "high"
+      ? `Yes — ${topic.name} is one of the most frequently asked areas in UGC NET Paper II Labour Welfare (Subject Code 55). Questions from it recur across exam cycles, so treat it as a must-prepare topic.`
+      : topic.frequency === "medium"
+        ? `${topic.name} appears occasionally in UGC NET Paper II Labour Welfare (Subject Code 55). It's a solid-return topic: prepare it after the very-high-frequency areas are covered.`
+        : `${topic.name} is asked relatively rarely in UGC NET Paper II Labour Welfare (Subject Code 55), but it belongs to the official syllabus — cover it for completeness once the higher-frequency topics are done.`;
+
+  return [
+    {
+      question: `Is ${topic.name} important for UGC NET Paper II (Labour Welfare / HRM)?`,
+      answer: importance,
+    },
+    {
+      question: `Which unit of the UGC NET Labour Welfare syllabus covers ${topic.name}?`,
+      answer: `${topic.name} falls under ${unitText} of the official UGC NET/JRF Paper II syllabus for Labour Welfare / Personnel Management / Industrial Relations / HRM (Subject Code 55).`,
+    },
+    {
+      question: `How should I prepare ${topic.name} for UGC NET?`,
+      answer: `Start with the unit-wise study notes for ${topic.name} (roughly ${topic.readTimeMinutes} minutes of focused reading), then attempt the matching topic-wise MCQ sets, and finish by checking how it has been asked in previous year question papers. All three are free on Karn HR Academy.`,
+    },
+  ];
+}

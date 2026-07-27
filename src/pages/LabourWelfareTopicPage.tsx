@@ -12,7 +12,7 @@ import { useBookmarks } from "@/hooks/use-bookmarks";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 import { resolveLWTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
-import { getHighScoringTopicBySlug, getUnitsForTopic, FREQUENCY_LABEL, PYQ_FREQUENCY_LABEL } from "@/lib/highScoringTopics";
+import { getHighScoringTopicBySlug, getUnitsForTopic, getTopicFaqs, FREQUENCY_LABEL, PYQ_FREQUENCY_LABEL } from "@/lib/highScoringTopics";
 import { ArrowLeft, FileText, HelpCircle, ScrollText, PlayCircle, BookOpenCheck, Bookmark, BookmarkCheck, Clock, FileCheck2 } from "lucide-react";
 
 const LabourWelfareTopicPage = () => {
@@ -75,6 +75,7 @@ const LabourWelfareTopicPage = () => {
 
   const unitsLabel = units.map(u => `Unit ${unitRoman(u.number)}: ${u.title}`).join(" · ");
   const bookmarked = isBookmarked(topic.slug);
+  const faqs = getTopicFaqs(topic);
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,16 +83,27 @@ const LabourWelfareTopicPage = () => {
         title={`${topic.name} — UGC NET/JRF Labour Welfare Notes, MCQs & PYQs`}
         description={`${topic.name} — a ${topic.frequency}-frequency UGC NET/JRF Paper II Labour Welfare (Subject Code 55) topic${units.length ? ` covering ${unitsLabel}` : ""}. Study notes, MCQs, previous year questions and video lectures.`}
         path={`/ugc-net-labour-welfare/topic/${topic.slug}`}
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "LearningResource",
-          name: `UGC NET/JRF Labour Welfare — ${topic.name}`,
-          about: topic.name,
-          isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: "https://karnhracademy.com/ugc-net-labour-welfare" },
-          provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
-          isAccessibleForFree: true,
-          inLanguage: "en",
-        }}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "LearningResource",
+            name: `UGC NET/JRF Labour Welfare — ${topic.name}`,
+            about: topic.name,
+            isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: "https://karnhracademy.com/ugc-net-labour-welfare" },
+            provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
+            isAccessibleForFree: true,
+            inLanguage: "en",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map(f => ({
+              "@type": "Question",
+              name: f.question,
+              acceptedAnswer: { "@type": "Answer", text: f.answer },
+            })),
+          },
+        ]}
       />
       <Header />
 
@@ -246,6 +258,24 @@ const LabourWelfareTopicPage = () => {
                 </div>
               </section>
             )}
+
+            {/* ── FAQs — visible copy matches the FAQPage structured data ── */}
+            <section aria-labelledby="faq-heading">
+              <div className="mb-4 flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-accent" />
+                <h2 id="faq-heading" className="text-xl font-bold text-foreground">Frequently Asked Questions</h2>
+              </div>
+              <div className="space-y-2.5">
+                {faqs.map(f => (
+                  <details key={f.question} className="group rounded-lg border border-border bg-white">
+                    <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-foreground">
+                      {f.question}
+                    </summary>
+                    <p className="border-t border-border px-4 py-3 text-sm leading-relaxed text-muted-foreground">{f.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
 
             <div className="border-t border-border pt-8 text-center">
               <Link to="/ugc-net-labour-welfare#high-scoring-topics" className="text-sm font-medium text-accent hover:underline">

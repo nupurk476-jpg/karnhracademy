@@ -329,9 +329,30 @@ const HST_TOPICS = [
 
 const FREQ_TEXT = { high: "very frequently asked", medium: "occasionally asked", low: "rarely asked" };
 
+// Same honest, data-derived FAQ template as getTopicFaqs in
+// src/lib/highScoringTopics.ts — visible copy and structured data must
+// match what the live page shows once React mounts.
+function topicFaqs(t) {
+  const unitText = t.units.length
+    ? t.units.map((n) => `Unit ${ROMAN[n - 1]} (${LW_UNIT_TITLES[n - 1]})`).join(" and ")
+    : "the UGC NET Paper II Labour Welfare syllabus";
+  const importance =
+    t.frequency === "high"
+      ? `Yes — ${t.name} is one of the most frequently asked areas in UGC NET Paper II Labour Welfare (Subject Code 55). Questions from it recur across exam cycles, so treat it as a must-prepare topic.`
+      : t.frequency === "medium"
+        ? `${t.name} appears occasionally in UGC NET Paper II Labour Welfare (Subject Code 55). It's a solid-return topic: prepare it after the very-high-frequency areas are covered.`
+        : `${t.name} is asked relatively rarely in UGC NET Paper II Labour Welfare (Subject Code 55), but it belongs to the official syllabus — cover it for completeness once the higher-frequency topics are done.`;
+  return [
+    { question: `Is ${t.name} important for UGC NET Paper II (Labour Welfare / HRM)?`, answer: importance },
+    { question: `Which unit of the UGC NET Labour Welfare syllabus covers ${t.name}?`, answer: `${t.name} falls under ${unitText} of the official UGC NET/JRF Paper II syllabus for Labour Welfare / Personnel Management / Industrial Relations / HRM (Subject Code 55).` },
+    { question: `How should I prepare ${t.name} for UGC NET?`, answer: `Start with the unit-wise study notes for ${t.name}, then attempt the matching topic-wise MCQ sets, and finish by checking how it has been asked in previous year question papers. All three are free on Karn HR Academy.` },
+  ];
+}
+
 const HST_ROUTES = HST_TOPICS.map((t) => {
   const unitsLabel = t.units.map((n) => `Unit ${ROMAN[n - 1]}`).join(", ");
   const path = `/ugc-net-labour-welfare/topic/${t.slug}`;
+  const faqs = topicFaqs(t);
 
   const unitLinks = t.units
     .map((n) => `<li><a href="/ugc-net-labour-welfare/unit-${n}">Unit ${ROMAN[n - 1]}: ${escapeHtml(LW_UNIT_TITLES[n - 1])}</a></li>`)
@@ -344,6 +365,8 @@ const HST_ROUTES = HST_TOPICS.map((t) => {
     <ul>${unitLinks}</ul>
     <h2>How to prepare this topic</h2>
     <p>Read the unit-wise <a href="/notes">study notes</a> for ${escapeHtml(t.name)}, practice the matching <a href="/quizzes">topic-wise MCQ sets</a>, and check how it has appeared in <a href="/pyqs">previous year question papers</a> — all free on Karn HR Academy.</p>
+    <h2>Frequently Asked Questions</h2>
+    ${faqs.map((f) => `<h3>${escapeHtml(f.question)}</h3><p>${escapeHtml(f.answer)}</p>`).join("")}
     <p><a href="/ugc-net-labour-welfare">← Back to the full UGC NET/JRF Labour Welfare study hub</a></p>
   `);
 
@@ -368,6 +391,15 @@ const HST_ROUTES = HST_TOPICS.map((t) => {
         { name: "UGC NET/JRF Labour Welfare", path: "/ugc-net-labour-welfare" },
         { name: t.name, path },
       ]),
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
+      },
     ],
   };
 });
