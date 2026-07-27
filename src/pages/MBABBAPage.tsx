@@ -5,10 +5,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { DISCIPLINES } from "@/lib/disciplines";
+import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { useDownloadGate } from "@/hooks/use-download-gate";
 import {
   ArrowRight, FileText, HelpCircle, PlayCircle, BookOpen,
-  GraduationCap, Layers, ChevronRight,
+  GraduationCap, Layers, ChevronRight, Presentation,
 } from "lucide-react";
 
 // Same mapping SearchPage uses — discipline value → topic-page route prefix.
@@ -42,14 +44,18 @@ const SEMESTER_GUIDE = [
   },
 ];
 
+const isPpt = (url: string | null) => !!url && /\.pptx?$/i.test(url.split("?")[0]);
+
 const MBABBAPage = () => {
   const [counts, setCounts] = useState<{ notes: Record<string, number>; quizzes: Record<string, number>; lectures: Record<string, number> } | null>(null);
+  const [pptNotes, setPptNotes] = useState<any[]>([]);
+  const { request, GateDialog } = useDownloadGate();
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const [{ data: noteRows }, { data: quizRows }, { data: lectureRows }] = await Promise.all([
-        supabase.from("notes").select("subject"),
+        supabase.from("notes").select("id, title, description, file_url, subject, created_at"),
         (supabase.from("quizzes") as any).select("subject, published"),
         (supabase.from("lectures" as any) as any).select("subject"),
       ]);
@@ -67,9 +73,27 @@ const MBABBAPage = () => {
         quizzes: tally(quizRows, (q: any) => q.published !== false),
         lectures: tally(lectureRows),
       });
+      setPptNotes(
+        (noteRows ?? [])
+          .filter((n: any) => isPpt(n.file_url))
+          .sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at)),
+      );
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Same gated open flow as the Notes page: one-time email gate, then a
+  // fresh short-lived signed URL (the bucket is private), plus a view count.
+  const openPpt = (note: any) => {
+    request(
+      () => getSignedFileUrl(note.file_url, "notes", false),
+      () => {
+        supabase.rpc("increment_note_views" as any, { _note_id: note.id }).then(({ error }) => {
+          if (error) console.error("view count failed", error);
+        });
+      },
+    );
+  };
 
   const total = (kind: "notes" | "quizzes" | "lectures") =>
     counts ? PROGRAMME_DISCIPLINES.reduce((sum, d) => sum + (counts[kind][d.value] || 0), 0) : null;
@@ -201,6 +225,42 @@ const MBABBAPage = () => {
           </div>
         </section>
 
+        {/* ── PPT notes ────────────────────────────────────────────────── */}
+        {pptNotes.length > 0 && (
+          <section className="border-t border-border bg-slate-50 py-10" aria-labelledby="ppt-notes-heading">
+            <div className="mx-auto max-w-6xl px-6">
+              <div className="mb-1 flex items-center gap-2">
+                <Presentation className="h-5 w-5 text-accent" />
+                <h2 id="ppt-notes-heading" className="text-lg font-bold text-foreground">PPT Notes</h2>
+              </div>
+              <p className="mb-4 text-xs text-muted-foreground">
+                Slide-format notes — quick to revise from, ready for classroom presentations and seminars.
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {pptNotes.map((note: any) => (
+                  <button
+                    key={note.id}
+                    type="button"
+                    onClick={() => openPpt(note)}
+                    className="group flex flex-col gap-1.5 rounded-lg border border-border bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="mb-1 flex h-8 w-8 items-center justify-center rounded-lg bg-[#F7F1E3]">
+                      <Presentation className="h-4 w-4 text-[#A9823F]" />
+                    </span>
+                    <h3 className="text-sm font-bold leading-snug text-foreground line-clamp-2">{note.title}</h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      {getDiscipline(note.subject)?.short ?? note.subject?.toUpperCase() ?? ""}
+                    </p>
+                    <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-[#A9823F]">
+                      View PPT <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── CTA strip ────────────────────────────────────────────────── */}
         <section className="border-t border-border bg-slate-50 py-10">
           <div className="mx-auto flex max-w-6xl flex-col items-start gap-4 px-6 sm:flex-row sm:items-center sm:justify-between">
@@ -223,6 +283,7 @@ const MBABBAPage = () => {
         </section>
       </main>
 
+      <GateDialog />
       <Footer />
     </div>
   );
