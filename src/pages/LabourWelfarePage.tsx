@@ -384,7 +384,9 @@ const LabourWelfarePage = () => {
                       <div className="grid gap-2.5 sm:grid-cols-2">
                         {filteredPyqs.filter(p => p.year === year).map(pyq => (
                           <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
-                            <h3 className="text-sm font-semibold text-foreground">{pyq.title}</h3>
+                            <h3 className="text-sm font-semibold text-foreground">
+                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent hover:underline">{pyq.title}</Link>
+                            </h3>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {(pyq.unit_tags ?? []).map((n: number) => (
                                 <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">Unit {unitRoman(n)}</span>

@@ -27,6 +27,7 @@ const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage")
 const LabourWelfareTopicPage = lazy(() => import("./pages/LabourWelfareTopicPage"));
 const PYQsPage = lazy(() => import("./pages/PYQsPage"));
 const PYQViewerPage = lazy(() => import("./pages/PYQViewerPage"));
+const PYQPaperPage = lazy(() => import("./pages/PYQPaperPage"));
 const LecturesPage = lazy(() => import("./pages/LecturesPage"));
 const LiveLecturesPage = lazy(() => import("./pages/LiveLecturesPage"));
 const QuizList = lazy(() => import("./pages/QuizList"));
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/quizzes" element={<QuizList />} />
             <Route path="/quizzes/:id" element={<QuizTake />} />
             <Route path="/pyqs" element={<PYQsPage />} />
+            <Route path="/pyqs/paper/:id" element={<PYQPaperPage />} />
             <Route path="/pyqs/view/:id" element={<ProtectedRoute><PYQViewerPage /></ProtectedRoute>} />
             <Route path="/books" element={<BooksPage />} />
             <Route path="/auth" element={<AuthPage />} />

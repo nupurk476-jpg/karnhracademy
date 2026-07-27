@@ -59,3 +59,37 @@ try {
 } catch (e) {
   console.warn(`sitemap: dynamic blog URLs skipped — ${e.message}`);
 }
+
+// PYQ paper landing pages — same fetch-and-append pattern, same fail-soft.
+try {
+  const base = envVar("VITE_SUPABASE_URL");
+  const key = envVar("VITE_SUPABASE_PUBLISHABLE_KEY");
+  if (!base || !key) throw new Error("Supabase env vars not set");
+
+  const res = await fetch(
+    `${base}/rest/v1/pyq_papers?select=id,created_at`,
+    { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+  );
+  if (!res.ok) throw new Error(`pyq_papers fetch returned ${res.status}`);
+  const papers = await res.json();
+
+  let xml = readFileSync(OUT, "utf8");
+  const fresh = papers.filter(
+    (p) => p.id && !xml.includes(`<loc>${SITE_URL}/pyqs/paper/${p.id}</loc>`),
+  );
+  if (fresh.length > 0) {
+    const entries = fresh
+      .map((p) => {
+        const lastmod = (p.created_at || "").slice(0, 10);
+        return `  <url><loc>${SITE_URL}/pyqs/paper/${p.id}</loc>${
+          lastmod ? `<lastmod>${lastmod}</lastmod>` : ""
+        }<changefreq>monthly</changefreq><priority>0.7</priority></url>`;
+      })
+      .join("\n");
+    xml = xml.replace("</urlset>", `${entries}\n</urlset>`);
+    writeFileSync(OUT, xml);
+  }
+  console.log(`sitemap: ${fresh.length} PYQ paper URL(s) appended (${papers.length} total)`);
+} catch (e) {
+  console.warn(`sitemap: dynamic PYQ paper URLs skipped — ${e.message}`);
+}

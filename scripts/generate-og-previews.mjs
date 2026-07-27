@@ -480,3 +480,60 @@ try {
 } catch (e) {
   console.warn(`og-previews: dynamic blog posts skipped — ${e.message}`);
 }
+
+// PYQ paper landing pages — dynamic, same pattern. Each shell carries the
+// paper's real title/year meta plus a crawlable content block; papers
+// uploaded after this deploy get their shells on the next one.
+try {
+  const base = envVar("VITE_SUPABASE_URL");
+  const key = envVar("VITE_SUPABASE_PUBLISHABLE_KEY");
+  if (!base || !key) throw new Error("Supabase env vars not set");
+
+  const res = await fetch(
+    `${base}/rest/v1/pyq_papers?select=id,title,year,subject,answer_key_url`,
+    { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+  );
+  if (!res.ok) throw new Error(`pyq_papers fetch returned ${res.status}`);
+  const papers = await res.json();
+
+  let count = 0;
+  for (const p of papers) {
+    if (!p.id || !p.title) continue;
+    const path = `/pyqs/paper/${p.id}`;
+    const withKey = p.answer_key_url ? ", with answer key" : "";
+    const description = `${p.title} — ${p.year} previous year question paper${withKey}. Read online free on Karn HR Academy (sign-in required).`;
+    writeRoute(path, buildHtml({
+      title: `${p.title} (${p.year})`,
+      description,
+      path,
+      content: contentWrap(`
+        <nav><a href="/">Home</a> › <a href="/pyqs">Previous Year Questions</a> › ${escapeHtml(p.title)}</nav>
+        <h1>${escapeHtml(p.title)} (${p.year})</h1>
+        <p>Original ${p.year} previous year question paper${withKey ? " complete with its official answer key" : ""}, free to read in our secure online viewer with page navigation, zoom, in-paper search and saved reading progress. A free account is required to read.</p>
+        <p><a href="/pyqs">Browse all previous year question papers</a> · <a href="/ugc-net-labour-welfare">UGC NET/JRF Labour Welfare study hub</a> · <a href="/notes">Study notes</a> · <a href="/quizzes">Practice MCQs</a></p>
+      `),
+      jsonLd: [
+        {
+          "@context": "https://schema.org",
+          "@type": "LearningResource",
+          name: p.title,
+          description,
+          learningResourceType: "Previous year question paper",
+          datePublished: String(p.year),
+          provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
+          isAccessibleForFree: true,
+          inLanguage: "en",
+        },
+        breadcrumbLd([
+          { name: "Home", path: "/" },
+          { name: "Previous Year Questions", path: "/pyqs" },
+          { name: p.title, path },
+        ]),
+      ],
+    }));
+    count += 1;
+  }
+  console.log(`og-previews: ${count} PYQ paper page(s) prerendered`);
+} catch (e) {
+  console.warn(`og-previews: dynamic PYQ paper pages skipped — ${e.message}`);
+}
