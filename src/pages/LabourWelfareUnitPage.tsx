@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { useLabourWelfareContent } from "@/hooks/use-labour-welfare-content";
 import { useDownloadGate } from "@/hooks/use-download-gate";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
 import { getUnitByNumber, getUnitForTopicSlug, unitRoman } from "@/lib/labourWelfareUnits";
 import { ArrowLeft, ArrowRight, FileText, HelpCircle, ScrollText, PlayCircle } from "lucide-react";
@@ -25,6 +25,7 @@ const LabourWelfareUnitPage = () => {
   const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useLabourWelfareContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const recordNoteView = (note: any) => {
     supabase.rpc("increment_note_views" as any, { _note_id: note.id }).then(({ error }) => {
@@ -33,7 +34,10 @@ const LabourWelfareUnitPage = () => {
   };
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    // Viewing stays friction-free; the email ask applies to downloads only.
+    // PDFs read in the branded in-app viewer; PPTs (which browsers can't
+    // render inline) and downloads use a signed URL — downloads keep the
+    // one-time email gate.
+    if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
     const open = mode === "download" ? request : openFree;
     open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };

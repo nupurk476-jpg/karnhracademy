@@ -37,3 +37,9 @@ export async function getSignedFileUrl(
   }
   return data.signedUrl;
 }
+
+// Whether a stored file URL points at a PDF (vs .ppt/.pptx and friends,
+// which browsers can't render inline and the in-app viewer can't open).
+export function isPdfFile(url: string | null | undefined): boolean {
+  return !!url && url.split("?")[0].toLowerCase().endsWith(".pdf");
+}

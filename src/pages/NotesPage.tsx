@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,7 +10,7 @@ import { FileText, Download, Eye, LayoutGrid, List, Calendar, PlayCircle } from 
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 
 const PAGE_SIZE = 30;
@@ -46,6 +46,7 @@ const NotesPage = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: noteData } = useQuery({
     queryKey: ["notes-all"],
@@ -123,6 +124,9 @@ const NotesPage = () => {
   // this page used to carry its own diverging copy).
   const requestNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
+    // PDFs read in the branded in-app viewer; PPTs and downloads use a
+    // signed URL — downloads keep the one-time email gate.
+    if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
     const open = mode === "download" ? request : openFree;
     open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordView(note));
   };

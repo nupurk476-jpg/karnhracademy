@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
 import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
 import ExamInfoSection from "@/components/ExamInfoSection";
@@ -27,6 +27,7 @@ const LabourWelfarePage = () => {
   const { notes, quizzes, questionCounts, pyqs, loading } = useLabourWelfareContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [unitFilter, setUnitFilter] = useState<number | "all">("all");
@@ -42,7 +43,10 @@ const LabourWelfarePage = () => {
 
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    // Viewing stays friction-free; the email ask applies to downloads only.
+    // PDFs read in the branded in-app viewer; PPTs (which browsers can't
+    // render inline) and downloads use a signed URL — downloads keep the
+    // one-time email gate.
+    if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
     const open = mode === "download" ? request : openFree;
     open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };

@@ -21,6 +21,7 @@ const GHRTopicPage = lazy(() => import("./pages/GHRTopicPage"));
 const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
+const NotesViewerPage = lazy(() => import("./pages/NotesViewerPage"));
 const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
 const MBABBAPage = lazy(() => import("./pages/MBABBAPage"));
 const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage"));
@@ -80,6 +81,7 @@ const App = () => (
             <Route path="/blogs" element={<BlogList />} />
             <Route path="/blogs/:slug" element={<BlogPost />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/notes/view/:id" element={<NotesViewerPage />} />
             <Route path="/ugc-net-labour-welfare" element={<LabourWelfarePage />} />
             <Route path="/mba-bba" element={<MBABBAPage />} />
             {/* React Router v6 has no partial-segment params ("unit-:n" never
