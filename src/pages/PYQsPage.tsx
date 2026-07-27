@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { TagChip, EmptyState } from "@/components/LabourWelfareShared";
 import { getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { ScrollText, BookOpenCheck, Eye, FileCheck2 } from "lucide-react";
+import { ScrollText, BookOpenCheck, Eye, FileCheck2, History } from "lucide-react";
 
 // General Previous Year Question paper browser — every paper, across every
 // subject, in one flat list grouped by year. Not split into per-subject
@@ -23,6 +23,7 @@ const PYQsPage = () => {
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
   const [tagFilter, setTagFilter] = useState("all");
+  const [progress, setProgress] = useState<any[]>([]);
 
   useEffect(() => {
     (supabase.from("pyq_papers" as any) as any)
@@ -33,7 +34,29 @@ const PYQsPage = () => {
         setPyqs(data ?? []);
         setLoading(false);
       });
+
+    // Signed-in readers get a "continue where you left off" strip. RLS
+    // already scopes rows to the current user; signed-out visitors just
+    // get an empty result and no strip.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) return;
+      (supabase.from("pyq_reading_progress" as any) as any)
+        .select("pyq_id, last_page, total_pages, updated_at")
+        .order("updated_at", { ascending: false })
+        .limit(3)
+        .then(({ data }: any) => { if (data) setProgress(data); });
+    });
   }, []);
+
+  // Only show papers that are genuinely mid-read — a finished paper (or a
+  // one-page glance) isn't worth resurfacing.
+  const continueReading = useMemo(
+    () =>
+      progress
+        .map(pr => ({ ...pr, paper: pyqs.find(p => p.id === pr.pyq_id) }))
+        .filter(pr => pr.paper && pr.last_page > 1 && (!pr.total_pages || pr.last_page < pr.total_pages)),
+    [progress, pyqs],
+  );
 
   const allYears = useMemo(() => Array.from(new Set(pyqs.map(p => p.year))).sort((a, b) => b - a), [pyqs]);
   const allTags = useMemo(() => {
@@ -84,6 +107,40 @@ const PYQsPage = () => {
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-64"
           />
         </div>
+
+        {continueReading.length > 0 && (
+          <section aria-labelledby="continue-reading-heading" className="mb-8">
+            <div className="mb-3 flex items-center gap-2">
+              <History className="h-4 w-4 text-accent" />
+              <h2 id="continue-reading-heading" className="text-sm font-bold uppercase tracking-wide text-foreground">Continue where you left off</h2>
+            </div>
+            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+              {continueReading.map(pr => {
+                const pct = pr.total_pages ? Math.round((pr.last_page / pr.total_pages) * 100) : null;
+                return (
+                  <Link
+                    key={pr.pyq_id}
+                    to={`/pyqs/view/${pr.pyq_id}`}
+                    className="group flex flex-col gap-2 rounded-md border border-accent/40 bg-accent/5 p-4 transition-all hover:border-accent hover:shadow-sm"
+                  >
+                    <h3 className="text-sm font-semibold text-foreground line-clamp-1">{pr.paper.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-accent/15">
+                        <div className="h-full rounded-full bg-accent" style={{ width: `${pct ?? 15}%` }} />
+                      </div>
+                      <span className="shrink-0 text-[11px] font-medium text-muted-foreground">
+                        Page {pr.last_page}{pr.total_pages ? ` of ${pr.total_pages}` : ""}
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent">
+                      <BookOpenCheck className="h-3.5 w-3.5" /> Resume reading
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {loading ? (
           <div className="py-16 text-center text-sm text-muted-foreground">Loading…</div>
