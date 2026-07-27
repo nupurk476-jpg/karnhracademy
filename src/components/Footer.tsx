@@ -102,10 +102,10 @@ const Footer = () => {
               {[
                 { label: "Human Resource Management", to: "/notes?subject=hrm" },
                 { label: "Organisational Behaviour", to: "/notes?subject=ob" },
-                { label: "Strategic HRM", to: "/notes?subject=sm" },
-                { label: "UGC NET/JRF Labour Welfare", to: "/ugc-net-labour-welfare" },
-                { label: "HR Analytics", to: "/notes?subject=hrm" },
-                { label: "Performance Management", to: "/notes?subject=hrm" },
+                { label: "Strategic Management", to: "/notes?subject=sm" },
+                { label: "International HRM", to: "/notes?subject=ghr" },
+                { label: "HR Analytics", to: "/hr/hr-analytics" },
+                { label: "Performance Management", to: "/hr/performance-management" },
               ].map((link) => (
                 <Link
                   key={link.label}

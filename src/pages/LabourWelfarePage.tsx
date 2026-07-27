@@ -176,7 +176,8 @@ const LabourWelfarePage = () => {
         <section className="border-b border-border bg-slate-50 py-10">
           <div className="mx-auto max-w-6xl px-6">
             <h2 className="mb-4 text-lg font-bold text-foreground">Browse by Unit</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {/* Single column below 380px — see ExamInfoSection for the same fix. */}
+            <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
               {LW_UNITS.map(u => {
                 const noteCount = notes.filter(n => getUnitForTopicSlug(n.topic_slug)?.number === u.number).length;
                 const quizCount = quizzes.filter(q => getUnitForTopicSlug(q.topic_slug)?.number === u.number).length;

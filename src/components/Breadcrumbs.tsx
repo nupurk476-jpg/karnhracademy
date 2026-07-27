@@ -15,6 +15,16 @@ export interface Crumb {
 // the hand-rolled trails that already existed on the quiz and Labour Welfare
 // pages (text-xs muted with chevrons) — this just makes it shared and adds
 // the structured data.
+//
+// Almost every page below the homepage renders this as its first element,
+// which makes it as good a place as any to note the page-container-width
+// convention new pages should follow (`mx-auto max-w-_xl px-…` on the
+// element wrapping this component):
+//   max-w-7xl — full marketing pages (homepage, blog index)
+//   max-w-6xl — listing/hub pages (notes, quizzes, PYQs, LW hub, MBA hub)
+//   max-w-4xl — single-item reading/detail pages (unit, topic, paper, profile)
+// Narrower widths (max-w-3xl and below) are for long-form article bodies
+// only, where shorter line length aids reading.
 const Breadcrumbs = ({ items }: { items: Crumb[] }) => {
   const jsonLd = {
     "@context": "https://schema.org",

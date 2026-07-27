@@ -57,7 +57,13 @@ export const PYQCard = ({ pyq, showSubject = false, showViews = false }: { pyq: 
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
       <h3 className="text-sm font-semibold text-foreground">
-        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
+        {/* Title and button are two different destinations (paper details
+            vs. the reader) — the chevron signals the title itself goes
+            somewhere, not just styled text. */}
+        <Link to={`/pyqs/paper/${pyq.id}`} className="group/title inline-flex items-center gap-1 hover:text-accent-deep hover:underline">
+          {pyq.title}
+          <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/title:opacity-100" />
+        </Link>
       </h3>
       <div className="flex flex-wrap items-center gap-1.5">
         {discipline && (

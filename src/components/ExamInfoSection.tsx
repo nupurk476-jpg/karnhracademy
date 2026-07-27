@@ -96,7 +96,9 @@ const ExamInfoSection = () => {
         <p className="mb-4 text-xs text-muted-foreground">
           Syllabus, notifications, cut-offs and everything else you need to know about the exam.
         </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {/* Single column below 380px — two columns there crushed titles to
+            3–4 lines and made the CTA row collide with the card edge. */}
+        <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((card, idx) => {
             const href = card.link_url || card.file_url!;
             const isInternal = href.startsWith("/");
