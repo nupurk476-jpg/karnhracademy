@@ -389,7 +389,7 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
             />
             {pageRendering && (
               <div className="absolute inset-0 flex items-center justify-center bg-white/40">
-                <Loader2 className="h-6 w-6 animate-spin text-accent" />
+                <Loader2 className="h-6 w-6 animate-spin text-accent-deep" />
               </div>
             )}
           </div>

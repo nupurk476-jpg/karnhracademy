@@ -129,7 +129,7 @@ const AdminExamInfo = () => {
           {!file && existingFileUrl && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
               Current:{" "}
-              <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+              <a href={existingFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent-deep hover:underline">
                 {fileName(existingFileUrl)}
               </a>
               <button type="button" onClick={() => setExistingFileUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached file">
@@ -161,7 +161,7 @@ const AdminExamInfo = () => {
               )}
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <button onClick={() => startEdit(card)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${card.title}`}>
+              <button onClick={() => startEdit(card)} className="text-muted-foreground hover:text-accent-deep" aria-label={`Edit ${card.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
               <button onClick={() => handleDelete(card.id, card.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${card.title}`}>

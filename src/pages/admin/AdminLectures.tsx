@@ -278,14 +278,14 @@ const AdminLectures = () => {
                 </span>
               )}
               {lec.topic_slug && (
-                <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
+                <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">
                   {getDiscipline(lec.subject)?.topics.find((t: any) => t.slug === lec.topic_slug)?.label ?? lec.topic_slug}
                 </span>
               )}
               {lec.duration_minutes && <span className="ml-2 text-xs text-muted-foreground">{lec.duration_minutes} min</span>}
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <button onClick={() => startEdit(lec)} aria-label={`Edit ${lec.title}`} className="text-muted-foreground hover:text-accent">
+              <button onClick={() => startEdit(lec)} aria-label={`Edit ${lec.title}`} className="text-muted-foreground hover:text-accent-deep">
                 <Pencil className="h-4 w-4" />
               </button>
               <button onClick={() => handleDelete(lec.id, lec.title)} aria-label={`Delete ${lec.title}`} className="text-muted-foreground hover:text-destructive">

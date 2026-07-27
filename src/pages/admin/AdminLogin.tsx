@@ -23,7 +23,7 @@ const AdminLogin = () => {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-card p-8">
         <div className="flex items-center gap-2 text-foreground">
-          <LogIn className="h-5 w-5 text-accent" />
+          <LogIn className="h-5 w-5 text-accent-deep" />
           <h1 className="text-xl font-bold">Admin Login</h1>
         </div>
         <div>
@@ -74,7 +74,7 @@ const AdminLogin = () => {
             if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
             else toast({ title: "Check your email for a password reset link." });
           }}
-          className="text-sm text-accent hover:underline"
+          className="text-sm text-accent-deep hover:underline"
         >
           Forgot password?
         </button>

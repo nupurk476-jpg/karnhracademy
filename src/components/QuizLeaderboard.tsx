@@ -51,7 +51,7 @@ const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
   return (
     <div className="mt-8">
       <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-foreground">
-        <Trophy className="h-6 w-6 text-accent" /> Leaderboard
+        <Trophy className="h-6 w-6 text-accent-deep" /> Leaderboard
       </h2>
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <table className="w-full">
@@ -79,9 +79,9 @@ const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`font-medium ${isMe ? "text-accent" : "text-foreground"}`}>
+                    <span className={`font-medium ${isMe ? "text-accent-deep" : "text-foreground"}`}>
                       {entry.display_name}
-                      {isMe && <span className="ml-2 text-xs text-accent">(You)</span>}
+                      {isMe && <span className="ml-2 text-xs text-accent-deep">(You)</span>}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">

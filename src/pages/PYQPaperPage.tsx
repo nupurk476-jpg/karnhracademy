@@ -116,11 +116,11 @@ const PYQPaperPage = () => {
           {discipline && (
             <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{discipline.short}</span>
           )}
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent-deep">
             <CalendarDays className="h-3 w-3" /> {paper.year}
           </span>
           {(paper.unit_tags ?? []).map((n: number) => (
-            <span key={n} className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+            <span key={n} className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent-deep">
               Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
             </span>
           ))}
@@ -170,7 +170,7 @@ const PYQPaperPage = () => {
         </div>
 
         <div className="mb-10 flex items-start gap-2.5 rounded-lg border border-border bg-slate-50 p-4">
-          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+          <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent-deep" />
           <p className="text-xs leading-relaxed text-muted-foreground">
             Papers are provided for online viewing only, to keep them freely available for every aspirant.
             Your reading position is saved automatically so you can continue any time from any device.
@@ -182,9 +182,9 @@ const PYQPaperPage = () => {
           <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Attempt the paper under exam timing first, then check your answers
             {paper.answer_key_url ? " against the included answer key" : ""}. Revise weak areas with the{" "}
-            <Link to="/ugc-net-labour-welfare" className="text-accent hover:underline">unit-wise study hub</Link>, read the matching{" "}
-            <Link to="/notes" className="text-accent hover:underline">study notes</Link>, and drill{" "}
-            <Link to="/quizzes" className="text-accent hover:underline">topic-wise MCQs</Link> until the pattern sticks.
+            <Link to="/ugc-net-labour-welfare" className="text-accent-deep hover:underline">unit-wise study hub</Link>, read the matching{" "}
+            <Link to="/notes" className="text-accent-deep hover:underline">study notes</Link>, and drill{" "}
+            <Link to="/quizzes" className="text-accent-deep hover:underline">topic-wise MCQs</Link> until the pattern sticks.
           </p>
         </section>
 
@@ -204,7 +204,7 @@ const PYQPaperPage = () => {
                       {r.year}{r.answer_key_url ? " · answer key included" : ""}
                     </p>
                   </div>
-                  <ScrollText className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-accent" />
+                  <ScrollText className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-accent-deep" />
                 </Link>
               ))}
             </div>

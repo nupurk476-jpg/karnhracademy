@@ -159,7 +159,7 @@ Answer: B`}</pre>
             {!pasteMode ? (
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button onClick={() => fileRef.current?.click()} disabled={parsing}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-dashed border-accent/50 bg-accent/5 px-4 py-8 text-sm font-semibold text-accent hover:bg-accent/10 disabled:opacity-50">
+                  className="flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-dashed border-accent/50 bg-accent/5 px-4 py-8 text-sm font-semibold text-accent-deep hover:bg-accent/10 disabled:opacity-50">
                   {parsing ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileUp className="h-5 w-5" />}
                   {parsing ? "Reading file…" : "Choose PDF or Word file"}
                 </button>

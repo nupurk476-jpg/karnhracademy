@@ -142,7 +142,7 @@ const AdminPYQs = () => {
                   const url = await getSignedFileUrl(existingFileUrl, "pyq-papers");
                   if (url) window.open(url, "_blank", "noopener,noreferrer");
                 }}
-                className="cursor-pointer text-accent hover:underline"
+                className="cursor-pointer text-accent-deep hover:underline"
               >
                 {fileName(existingFileUrl)}
               </a>
@@ -171,7 +171,7 @@ const AdminPYQs = () => {
                   const url = await getSignedFileUrl(existingAnswerKeyUrl, "pyq-papers");
                   if (url) window.open(url, "_blank", "noopener,noreferrer");
                 }}
-                className="cursor-pointer text-accent hover:underline"
+                className="cursor-pointer text-accent-deep hover:underline"
               >
                 {fileName(existingAnswerKeyUrl)}
               </a>
@@ -212,7 +212,7 @@ const AdminPYQs = () => {
                 </span>
               )}
               {(paper.unit_tags ?? []).map((n: number) => (
-                <span key={n} className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">Unit {unitRoman(n)}</span>
+                <span key={n} className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">Unit {unitRoman(n)}</span>
               ))}
               {(paper.tags ?? []).map((tag: string) => (
                 <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
@@ -221,7 +221,7 @@ const AdminPYQs = () => {
               {paper.answer_key_url && <span className="ml-2 text-xs text-muted-foreground">+ Answer Key</span>}
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <button onClick={() => startEdit(paper)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${paper.title}`}>
+              <button onClick={() => startEdit(paper)} className="text-muted-foreground hover:text-accent-deep" aria-label={`Edit ${paper.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
               <button onClick={() => handleDelete(paper.id, paper.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${paper.title}`}>

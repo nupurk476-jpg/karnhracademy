@@ -108,7 +108,7 @@ const LabourWelfareUnitPage = () => {
               { label: `Unit ${roman}` },
             ]} />
 
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">UGC NET/JRF Paper II · Subject Code 55 · Unit {roman} of X</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">UGC NET/JRF Paper II · Subject Code 55 · Unit {roman} of X</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
               Unit {roman}: {unit.title}
             </h1>
@@ -132,7 +132,7 @@ const LabourWelfareUnitPage = () => {
             {/* ── Notes ─────────────────────────────────────────────────── */}
             <section id="notes">
               <div className="mb-4 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-accent" />
+                <FileText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit {roman} Notes</h2>
               </div>
               {unitNotes.length === 0 ? (
@@ -149,7 +149,7 @@ const LabourWelfareUnitPage = () => {
             {/* ── MCQs ──────────────────────────────────────────────────── */}
             <section id="mcqs">
               <div className="mb-4 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-accent" />
+                <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit {roman} MCQs</h2>
               </div>
               {unitQuizzes.length === 0 ? (
@@ -166,7 +166,7 @@ const LabourWelfareUnitPage = () => {
             {/* ── PYQs ──────────────────────────────────────────────────── */}
             <section id="pyq">
               <div className="mb-4 flex items-center gap-2">
-                <ScrollText className="h-5 w-5 text-accent" />
+                <ScrollText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit {roman} Previous Year Questions</h2>
               </div>
               {unitPyqs.length === 0 ? (
@@ -176,7 +176,7 @@ const LabourWelfareUnitPage = () => {
                   {unitPyqs.map(pyq => (
                     <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
                       <h3 className="text-sm font-semibold text-foreground">
-                        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent hover:underline">{pyq.title}</Link>
+                        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
                       </h3>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{pyq.year}</span>
@@ -200,7 +200,7 @@ const LabourWelfareUnitPage = () => {
             {unitLectures.length > 0 && (
               <section id="lectures">
                 <div className="mb-4 flex items-center gap-2">
-                  <PlayCircle className="h-5 w-5 text-accent" />
+                  <PlayCircle className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Unit {roman} Video Lectures</h2>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -212,7 +212,7 @@ const LabourWelfareUnitPage = () => {
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 rounded-md border border-border p-4 hover:border-accent/50"
                     >
-                      <PlayCircle className="h-8 w-8 shrink-0 text-accent" />
+                      <PlayCircle className="h-8 w-8 shrink-0 text-accent-deep" />
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold text-foreground">{lec.title}</h3>
                         {lec.duration_minutes && <p className="text-xs text-muted-foreground">{lec.duration_minutes} min</p>}
@@ -226,15 +226,15 @@ const LabourWelfareUnitPage = () => {
             {/* ── Prev / Next unit ──────────────────────────────────────── */}
             <nav className="flex items-center justify-between gap-3 border-t border-border pt-8">
               {prevUnit ? (
-                <Link to={`/ugc-net-labour-welfare/unit-${prevUnit.number}`} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-accent">
+                <Link to={`/ugc-net-labour-welfare/unit-${prevUnit.number}`} className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-accent-deep">
                   <ArrowLeft className="h-4 w-4" /> Unit {unitRoman(prevUnit.number)}: {prevUnit.title}
                 </Link>
               ) : <span />}
-              <Link to="/ugc-net-labour-welfare" className="text-sm font-medium text-accent hover:underline">
+              <Link to="/ugc-net-labour-welfare" className="text-sm font-medium text-accent-deep hover:underline">
                 All Units
               </Link>
               {nextUnit ? (
-                <Link to={`/ugc-net-labour-welfare/unit-${nextUnit.number}`} className="flex items-center gap-2 text-right text-sm font-medium text-muted-foreground hover:text-accent">
+                <Link to={`/ugc-net-labour-welfare/unit-${nextUnit.number}`} className="flex items-center gap-2 text-right text-sm font-medium text-muted-foreground hover:text-accent-deep">
                   Unit {unitRoman(nextUnit.number)}: {nextUnit.title} <ArrowRight className="h-4 w-4" />
                 </Link>
               ) : <span />}

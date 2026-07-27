@@ -127,7 +127,7 @@ const PYQViewerPage = () => {
           { label: pyq.title },
         ]} />
 
-        <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent">
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent-deep">
           <ShieldCheck className="h-3.5 w-3.5" /> Secure Online Viewer
         </div>
         <h1 className="mb-3 text-2xl font-bold leading-tight text-foreground sm:text-3xl" style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -137,7 +137,7 @@ const PYQViewerPage = () => {
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{pyq.year}</span>
           {discipline && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>}
           {(pyq.unit_tags ?? []).map((n: number) => (
-            <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+            <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
               Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
             </span>
           ))}
@@ -180,7 +180,7 @@ const PYQViewerPage = () => {
         )}
 
         <div className="mt-6 text-center">
-          <Link to="/pyqs" className="text-sm font-medium text-accent hover:underline">
+          <Link to="/pyqs" className="text-sm font-medium text-accent-deep hover:underline">
             ← Back to Previous Year Questions
           </Link>
         </div>

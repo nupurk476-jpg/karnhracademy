@@ -307,12 +307,12 @@ const ProfilePage = () => {
         {/* Quiz Activity */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8">
           <h2 className="mb-6 text-xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
-            <Trophy className="mr-2 inline h-5 w-5 text-accent" />
+            <Trophy className="mr-2 inline h-5 w-5 text-accent-deep" />
             Quiz Activity
           </h2>
 
           {attempts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">You haven't attempted any quizzes yet. <a href="/quizzes" className="text-accent hover:underline">Browse quizzes →</a></p>
+            <p className="text-sm text-muted-foreground">You haven't attempted any quizzes yet. <a href="/quizzes" className="text-accent-deep hover:underline">Browse quizzes →</a></p>
           ) : (
             <>
               {/* Stats summary */}
@@ -322,7 +322,7 @@ const ProfilePage = () => {
                   <p className="text-xs text-muted-foreground">Quizzes Taken</p>
                 </div>
                 <div className="rounded-md border border-border bg-muted/30 p-4 text-center">
-                  <p className="text-2xl font-bold text-accent">
+                  <p className="text-2xl font-bold text-accent-deep">
                     {attempts.length > 0
                       ? Math.round(attempts.reduce((a, b) => a + (b.score / b.total_questions) * 100, 0) / attempts.length)
                       : 0}%
@@ -348,7 +348,7 @@ const ProfilePage = () => {
               {subjectStats.length > 0 && (
                 <div className="mb-6">
                   <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-foreground">
-                    <BarChart3 className="h-4 w-4 text-accent" /> Performance by Subject
+                    <BarChart3 className="h-4 w-4 text-accent-deep" /> Performance by Subject
                   </h3>
                   <div className="space-y-2.5">
                     {subjectStats.map((s, i) => (
@@ -362,10 +362,10 @@ const ProfilePage = () => {
                         {i === 0 && subjectStats.length > 1 && s.accuracy < 70 && (
                           <span className="flex shrink-0 items-center gap-2 text-xs">
                             <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">Focus area</span>
-                            <Link to="/notes" className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">
+                            <Link to="/notes" className="inline-flex items-center gap-1 font-semibold text-accent-deep hover:underline">
                               <BookOpen className="h-3 w-3" /> Revise notes
                             </Link>
-                            <Link to="/quizzes" className="font-semibold text-accent hover:underline">Practice more →</Link>
+                            <Link to="/quizzes" className="font-semibold text-accent-deep hover:underline">Practice more →</Link>
                           </span>
                         )}
                       </div>
@@ -387,7 +387,7 @@ const ProfilePage = () => {
                       <p className="text-xs text-muted-foreground">{a.quiz?.topic}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm">
-                      <span className="flex items-center gap-1 text-accent font-semibold">
+                      <span className="flex items-center gap-1 text-accent-deep font-semibold">
                         <Trophy className="h-3.5 w-3.5" /> {a.score}/{a.total_questions}
                       </span>
                       <span className="flex items-center gap-1 text-muted-foreground">

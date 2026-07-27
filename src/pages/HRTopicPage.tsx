@@ -8,7 +8,7 @@ const HRTopicPage = () => (
     backLink="/notes?subject=hrm"
     backLabel="All HR Topics"
     accentBg="bg-accent/10"
-    accentText="text-accent"
+    accentText="text-accent-deep"
     routePrefix="hr"
   />
 );

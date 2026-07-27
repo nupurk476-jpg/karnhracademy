@@ -175,7 +175,7 @@ const AdminLiveLectures = () => {
               <select value={l.status} onChange={e => updateStatus(l.id, e.target.value)} aria-label={`Status for ${l.title}`} className="rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground">
                 {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
-              <button onClick={() => startEdit(l)} aria-label={`Edit ${l.title}`} className="text-muted-foreground hover:text-accent"><Pencil className="h-4 w-4" /></button>
+              <button onClick={() => startEdit(l)} aria-label={`Edit ${l.title}`} className="text-muted-foreground hover:text-accent-deep"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => handleDelete(l.id, l.title)} aria-label={`Delete ${l.title}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
           </div>

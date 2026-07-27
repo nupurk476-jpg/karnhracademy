@@ -60,7 +60,7 @@ const AboutPage = () => {
             <div className="space-y-3">
               {highlights.map((item) => (
                 <div key={item} className="flex items-center gap-3">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-accent-deep" />
                   <span className="text-sm font-medium text-foreground">{item}</span>
                 </div>
               ))}

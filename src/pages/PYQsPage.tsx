@@ -111,7 +111,7 @@ const PYQsPage = () => {
         {continueReading.length > 0 && (
           <section aria-labelledby="continue-reading-heading" className="mb-8">
             <div className="mb-3 flex items-center gap-2">
-              <History className="h-4 w-4 text-accent" />
+              <History className="h-4 w-4 text-accent-deep" />
               <h2 id="continue-reading-heading" className="text-sm font-bold uppercase tracking-wide text-foreground">Continue where you left off</h2>
             </div>
             <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -132,7 +132,7 @@ const PYQsPage = () => {
                         Page {pr.last_page}{pr.total_pages ? ` of ${pr.total_pages}` : ""}
                       </span>
                     </div>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent-deep">
                       <BookOpenCheck className="h-3.5 w-3.5" /> Resume reading
                     </span>
                   </Link>
@@ -149,7 +149,7 @@ const PYQsPage = () => {
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
               <div className="flex items-center gap-3">
                 <div className="rounded-lg bg-accent/10 p-2">
-                  <ScrollText className="h-5 w-5 text-accent" />
+                  <ScrollText className="h-5 w-5 text-accent-deep" />
                 </div>
                 <p className="text-sm text-muted-foreground">{filtered.length} paper{filtered.length !== 1 ? "s" : ""}</p>
               </div>
@@ -184,14 +184,14 @@ const PYQsPage = () => {
                         return (
                           <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
                             <h3 className="text-sm font-semibold text-foreground">
-                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent hover:underline">{pyq.title}</Link>
+                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
                             </h3>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {discipline && (
                                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>
                               )}
                               {(pyq.unit_tags ?? []).map((n: number) => (
-                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
                                   Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
                                 </span>
                               ))}

@@ -123,7 +123,7 @@ const MBABBAPage = () => {
           <div className="mx-auto max-w-6xl px-6 py-10">
             <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MBA / BBA Hub" }]} />
 
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">MBA · BBA · PGDM · B.Com</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">MBA · BBA · PGDM · B.Com</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
               MBA / BBA Management Studies Hub
             </h1>
@@ -134,10 +134,10 @@ const MBABBAPage = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><Layers className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{PROGRAMME_DISCIPLINES.length}</strong>&nbsp;Subjects</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><FileText className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{total("notes") ?? "…"}</strong>&nbsp;Notes</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><HelpCircle className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{total("quizzes") ?? "…"}</strong>&nbsp;MCQ Sets</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><PlayCircle className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{total("lectures") ?? "…"}</strong>&nbsp;Video Lectures</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><Layers className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{PROGRAMME_DISCIPLINES.length}</strong>&nbsp;Subjects</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><FileText className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{total("notes") ?? "…"}</strong>&nbsp;Notes</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><HelpCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{total("quizzes") ?? "…"}</strong>&nbsp;MCQ Sets</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><PlayCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{total("lectures") ?? "…"}</strong>&nbsp;Video Lectures</span>
             </div>
           </div>
         </section>
@@ -153,12 +153,12 @@ const MBABBAPage = () => {
               {SEMESTER_GUIDE.map(g => (
                 <div key={g.programme} className="rounded-lg border border-border bg-white p-5">
                   <p className="mb-3 inline-flex items-center gap-1.5 text-sm font-bold text-foreground">
-                    <GraduationCap className="h-4 w-4 text-accent" /> {g.programme}
+                    <GraduationCap className="h-4 w-4 text-accent-deep" /> {g.programme}
                   </p>
                   <div className="space-y-2.5">
                     {g.rows.map(r => (
                       <div key={r.sem} className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
-                        <span className="w-40 flex-shrink-0 text-xs font-bold uppercase tracking-wide text-accent">{r.sem}</span>
+                        <span className="w-40 flex-shrink-0 text-xs font-bold uppercase tracking-wide text-accent-deep">{r.sem}</span>
                         <span className="text-sm text-muted-foreground">{r.subjects.join(" · ")}</span>
                       </div>
                     ))}
@@ -199,22 +199,22 @@ const MBABBAPage = () => {
                         <Link
                           key={t.slug}
                           to={`/${prefix}/${t.slug}`}
-                          className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-accent/60 hover:text-accent"
+                          className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-accent/60 hover:text-accent-deep"
                         >
                           {t.label}
                         </Link>
                       ))}
                       {d.topics.length > shownTopics.length && (
-                        <Link to="/notes" className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-accent hover:underline">
+                        <Link to="/notes" className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-accent-deep hover:underline">
                           +{d.topics.length - shownTopics.length} more
                         </Link>
                       )}
                     </div>
                     <div className="mt-auto flex flex-wrap gap-3 text-xs font-semibold">
-                      <Link to="/notes" className="inline-flex items-center gap-1 text-accent hover:underline">
+                      <Link to="/notes" className="inline-flex items-center gap-1 text-accent-deep hover:underline">
                         <FileText className="h-3.5 w-3.5" /> Notes <ChevronRight className="h-3 w-3" />
                       </Link>
-                      <Link to="/quizzes" className="inline-flex items-center gap-1 text-accent hover:underline">
+                      <Link to="/quizzes" className="inline-flex items-center gap-1 text-accent-deep hover:underline">
                         <HelpCircle className="h-3.5 w-3.5" /> Practice MCQs <ChevronRight className="h-3 w-3" />
                       </Link>
                     </div>
@@ -230,7 +230,7 @@ const MBABBAPage = () => {
           <section className="border-t border-border bg-slate-50 py-10" aria-labelledby="ppt-notes-heading">
             <div className="mx-auto max-w-6xl px-6">
               <div className="mb-1 flex items-center gap-2">
-                <Presentation className="h-5 w-5 text-accent" />
+                <Presentation className="h-5 w-5 text-accent-deep" />
                 <h2 id="ppt-notes-heading" className="text-lg font-bold text-foreground">PPT Notes</h2>
               </div>
               <p className="mb-4 text-xs text-muted-foreground">

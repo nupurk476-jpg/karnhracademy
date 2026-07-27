@@ -42,9 +42,9 @@ const BooksPage = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((book) => (
               <div key={book.id} className="flex flex-col rounded-lg border border-border bg-card p-6">
-                <BookOpen className="mb-3 h-10 w-10 text-accent" />
+                <BookOpen className="mb-3 h-10 w-10 text-accent-deep" />
                 <h3 className="mb-1 text-lg font-semibold text-foreground">{book.title}</h3>
-                <p className="mb-2 text-sm font-medium text-accent">by {book.author}</p>
+                <p className="mb-2 text-sm font-medium text-accent-deep">by {book.author}</p>
                 <p className="mb-4 flex-1 text-sm text-muted-foreground">{book.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {book.pdf_url && (

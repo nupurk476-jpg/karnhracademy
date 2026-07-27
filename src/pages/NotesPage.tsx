@@ -165,7 +165,7 @@ const NotesPage = () => {
         {getDiscipline(note.subject || "hrm")?.short ?? "HRM"}
       </span>
       {note.topic_slug && (
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
           {getTopicLabel(note.topic_slug)}
         </span>
       )}
@@ -421,7 +421,7 @@ const NotesPage = () => {
             </div>
             <p className="text-xs text-muted-foreground">
               By continuing, you agree to our{" "}
-              <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
+              <Link to="/privacy-policy" className="text-accent-deep hover:underline">Privacy Policy</Link>.
             </p>
           </form>
         </DialogContent>

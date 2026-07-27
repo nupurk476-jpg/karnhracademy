@@ -25,7 +25,7 @@ export const NoteRow = ({ note, onView, onDownload }: { note: any; onView: () =>
       <div className="mb-1 flex flex-wrap items-center gap-1.5">
         <h3 className="text-sm font-semibold text-foreground">{note.title}</h3>
         {note.topic_slug && (
-          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
             {getTopicLabel(note.topic_slug)}
           </span>
         )}
@@ -51,7 +51,7 @@ export const QuizCard = ({ quiz, questionCount }: { quiz: any; questionCount: nu
   <div className="flex flex-col gap-2 rounded-md border border-border p-4">
     <div className="flex flex-wrap items-center gap-1.5">
       <h3 className="text-sm font-semibold text-foreground">{quiz.title}</h3>
-      {quiz.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">{getTopicLabel(quiz.topic_slug)}</span>}
+      {quiz.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">{getTopicLabel(quiz.topic_slug)}</span>}
     </div>
     <p className="flex items-center gap-1 text-xs text-muted-foreground">
       <Clock className="h-3 w-3" /> {questionCount} questions

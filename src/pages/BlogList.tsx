@@ -47,7 +47,7 @@ function formatDate(iso: string) {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 const CategoryBadge = ({ label }: { label: string }) => (
-  <span className="inline-block rounded-full bg-accent/10 px-3 py-0.5 text-xs font-semibold text-accent">
+  <span className="inline-block rounded-full bg-accent/10 px-3 py-0.5 text-xs font-semibold text-accent-deep">
     {label}
   </span>
 );
@@ -81,7 +81,7 @@ const ArticleCard = ({ post }: { post: any }) => {
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
-        <h2 className="mb-2 text-base font-bold leading-snug text-foreground group-hover:text-accent transition-colors line-clamp-2">
+        <h2 className="mb-2 text-base font-bold leading-snug text-foreground group-hover:text-accent-deep transition-colors line-clamp-2">
           {post.title}
         </h2>
         <p className="mb-4 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">
@@ -95,7 +95,7 @@ const ArticleCard = ({ post }: { post: any }) => {
           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{mins} min read</span>
         </div>
 
-        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent group-hover:gap-2 transition-all">
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-accent-deep group-hover:gap-2 transition-all">
           Read Article <ChevronRight className="h-3.5 w-3.5" />
         </span>
       </div>
@@ -119,7 +119,7 @@ const FeaturedArticle = ({ post }: { post: any }) => {
           />
         ) : (
           <div className="flex h-full min-h-64 items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-            <BookOpen className="h-16 w-16 text-accent/30" />
+            <BookOpen className="h-16 w-16 text-accent-deep/30" />
           </div>
         )}
         <div className="absolute top-4 left-4">
@@ -133,7 +133,7 @@ const FeaturedArticle = ({ post }: { post: any }) => {
         <div className="mb-3">
           <CategoryBadge label={post.category} />
         </div>
-        <h2 className="mb-3 text-2xl font-bold leading-snug text-foreground group-hover:text-accent transition-colors">
+        <h2 className="mb-3 text-2xl font-bold leading-snug text-foreground group-hover:text-accent-deep transition-colors">
           {post.title}
         </h2>
         <p className="mb-6 text-sm leading-relaxed text-muted-foreground line-clamp-4">
@@ -171,13 +171,13 @@ const Sidebar = ({
       {/* Popular Articles */}
       <div className="rounded-xl border border-border bg-white p-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground">
-          <Flame className="h-4 w-4 text-accent" /> Popular Articles
+          <Flame className="h-4 w-4 text-accent-deep" /> Popular Articles
         </h3>
         <ol className="space-y-3">
           {popular.map((p, i) => (
             <li key={p.id}>
               <Link to={`/blogs/${p.slug}`} className="group flex items-start gap-3">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-accent/10 text-xs font-bold text-accent-deep">
                   {i + 1}
                 </span>
                 <span className="text-sm text-muted-foreground leading-snug group-hover:text-foreground transition-colors line-clamp-2">
@@ -192,7 +192,7 @@ const Sidebar = ({
       {/* Latest Posts */}
       <div className="rounded-xl border border-border bg-white p-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground">
-          <Clock className="h-4 w-4 text-accent" /> Latest Posts
+          <Clock className="h-4 w-4 text-accent-deep" /> Latest Posts
         </h3>
         <div className="space-y-3">
           {latest.map((p) => (
@@ -204,7 +204,7 @@ const Sidebar = ({
                 }
               </div>
               <div>
-                <p className="text-sm font-medium text-foreground leading-snug group-hover:text-accent transition-colors line-clamp-2">{p.title}</p>
+                <p className="text-sm font-medium text-foreground leading-snug group-hover:text-accent-deep transition-colors line-clamp-2">{p.title}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(p.created_at)}</p>
               </div>
             </Link>
@@ -215,7 +215,7 @@ const Sidebar = ({
       {/* Categories */}
       <div className="rounded-xl border border-border bg-white p-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground">
-          <LayoutList className="h-4 w-4 text-accent" /> Categories
+          <LayoutList className="h-4 w-4 text-accent-deep" /> Categories
         </h3>
         <div className="space-y-1">
           {CATEGORIES.filter(c => c.label !== "All").map((cat) => {
@@ -227,7 +227,7 @@ const Sidebar = ({
                 onClick={() => onCategory(cat.label)}
                 className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-slate-50 hover:text-foreground transition-colors"
               >
-                <span className="flex items-center gap-2"><Icon className="h-3.5 w-3.5 text-accent" />{cat.label}</span>
+                <span className="flex items-center gap-2"><Icon className="h-3.5 w-3.5 text-accent-deep" />{cat.label}</span>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium">{count}</span>
               </button>
             );
@@ -238,11 +238,11 @@ const Sidebar = ({
       {/* Tags */}
       <div className="rounded-xl border border-border bg-white p-5">
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-foreground">
-          <Tag className="h-4 w-4 text-accent" /> Tags
+          <Tag className="h-4 w-4 text-accent-deep" /> Tags
         </h3>
         <div className="flex flex-wrap gap-2">
           {TAGS.map(tag => (
-            <span key={tag} className="cursor-pointer rounded-full border border-border bg-slate-50 px-3 py-1 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent transition-colors">
+            <span key={tag} className="cursor-pointer rounded-full border border-border bg-slate-50 px-3 py-1 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent-deep transition-colors">
               {tag}
             </span>
           ))}
@@ -252,7 +252,7 @@ const Sidebar = ({
       {/* Newsletter */}
       <div className="rounded-xl border border-accent/20 bg-gradient-to-br from-primary/5 to-accent/5 p-5">
         <div className="mb-1 flex items-center gap-2">
-          <Mail className="h-4 w-4 text-accent" />
+          <Mail className="h-4 w-4 text-accent-deep" />
           <h3 className="text-sm font-bold text-foreground">Stay Updated</h3>
         </div>
         <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
@@ -327,13 +327,13 @@ const BlogList = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
           {/* Breadcrumb */}
           <nav className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-accent transition-colors">Home</Link>
+            <Link to="/" className="hover:text-accent-deep transition-colors">Home</Link>
             <ChevronRight className="h-3 w-3" />
             <span className="text-foreground font-medium">Blog</span>
           </nav>
 
           <div className="max-w-2xl">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">
               Academic Insights
             </p>
             <h1 className="mb-4 text-4xl font-bold leading-tight text-foreground" style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -351,7 +351,7 @@ const BlogList = () => {
                 { icon: BarChart3, text: "Research-backed" },
               ].map(({ icon: Icon, text }) => (
                 <span key={text} className="flex items-center gap-1.5">
-                  <Icon className="h-4 w-4 text-accent" /> {text}
+                  <Icon className="h-4 w-4 text-accent-deep" /> {text}
                 </span>
               ))}
             </div>
@@ -444,7 +444,7 @@ const BlogList = () => {
                 <BookOpen className="mb-3 h-10 w-10 text-slate-300" />
                 <p className="font-medium text-muted-foreground">No articles found</p>
                 <p className="mt-1 text-sm text-muted-foreground">Try a different search term or category.</p>
-                <button onClick={() => { setSearch(""); setCategory("All"); }} className="mt-4 text-sm font-medium text-accent hover:underline">
+                <button onClick={() => { setSearch(""); setCategory("All"); }} className="mt-4 text-sm font-medium text-accent-deep hover:underline">
                   Clear filters
                 </button>
               </div>

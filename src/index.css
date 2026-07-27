@@ -27,6 +27,11 @@
 
     --accent: 38 53% 54%;
     --accent-foreground: 209 68% 14%;
+    /* Gold used AS TEXT on light grounds. The brand gold above sits at
+       ~2.5:1 on white — fine for fills/borders/large display type, but a
+       WCAG AA failure for link- and label-sized text (needs 4.5:1). This
+       darker cut measures ~5:1 on white. */
+    --accent-deep: 40 55% 35%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -62,6 +67,8 @@
     --muted-foreground: 211 25% 65%;
     --accent: 38 53% 54%;
     --accent-foreground: 209 68% 12%;
+    /* On dark grounds the readable gold goes lighter, not darker. */
+    --accent-deep: 38 55% 66%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 209 35% 24%;

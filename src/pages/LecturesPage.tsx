@@ -85,7 +85,7 @@ const LecturesPage = () => {
           </>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-primary/10">
-            <PlayCircle className="h-14 w-14 text-accent" />
+            <PlayCircle className="h-14 w-14 text-accent-deep" />
           </div>
         )}
         <div className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors group-hover:bg-foreground/30">

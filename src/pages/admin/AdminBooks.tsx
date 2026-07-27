@@ -104,7 +104,7 @@ const AdminBooks = () => {
           <input type="file" accept=".pdf" onChange={e => setPdfFile(e.target.files?.[0] || null)} className="text-sm text-muted-foreground" />
           {!pdfFile && existingPdfUrl && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Current: <a href={existingPdfUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{decodeURIComponent(existingPdfUrl.split("/").pop() || "").slice(0, 40)}</a>
+              Current: <a href={existingPdfUrl} target="_blank" rel="noopener noreferrer" className="text-accent-deep hover:underline">{decodeURIComponent(existingPdfUrl.split("/").pop() || "").slice(0, 40)}</a>
             </p>
           )}
         </div>
@@ -132,7 +132,7 @@ const AdminBooks = () => {
               <span className="ml-2 text-sm text-muted-foreground">by {b.author}</span>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <button onClick={() => startEdit(b)} aria-label={`Edit ${b.title}`} className="text-muted-foreground hover:text-accent"><Pencil className="h-4 w-4" /></button>
+              <button onClick={() => startEdit(b)} aria-label={`Edit ${b.title}`} className="text-muted-foreground hover:text-accent-deep"><Pencil className="h-4 w-4" /></button>
               <button onClick={() => handleDelete(b.id, b.title)} aria-label={`Delete ${b.title}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>
           </div>

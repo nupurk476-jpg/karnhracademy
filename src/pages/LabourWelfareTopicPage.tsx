@@ -120,7 +120,7 @@ const LabourWelfareTopicPage = () => {
             ]} />
 
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <p className="text-xs font-semibold uppercase tracking-widest text-accent">High-Scoring Topic · {FREQUENCY_LABEL[topic.frequency]}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-accent-deep">High-Scoring Topic · {FREQUENCY_LABEL[topic.frequency]}</p>
             </div>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
@@ -130,7 +130,7 @@ const LabourWelfareTopicPage = () => {
                 onClick={() => toggle(topic.slug)}
                 aria-pressed={bookmarked}
                 className={`inline-flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
-                  bookmarked ? "border-accent/40 bg-accent/10 text-accent" : "border-border text-muted-foreground hover:bg-slate-50"
+                  bookmarked ? "border-accent/40 bg-accent/10 text-accent-deep" : "border-border text-muted-foreground hover:bg-slate-50"
                 }`}
               >
                 {bookmarked ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
@@ -153,7 +153,7 @@ const LabourWelfareTopicPage = () => {
                   <Link
                     key={u.number}
                     to={`/ugc-net-labour-welfare/unit-${u.number}`}
-                    className="rounded-full border border-border bg-slate-50 px-2.5 py-1 text-xs text-muted-foreground hover:border-accent/50 hover:text-accent"
+                    className="rounded-full border border-border bg-slate-50 px-2.5 py-1 text-xs text-muted-foreground hover:border-accent/50 hover:text-accent-deep"
                   >
                     Unit {unitRoman(u.number)}: {u.title}
                   </Link>
@@ -170,7 +170,7 @@ const LabourWelfareTopicPage = () => {
             {/* ── Notes ─────────────────────────────────────────────────── */}
             <section id="notes">
               <div className="mb-4 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-accent" />
+                <FileText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Notes</h2>
               </div>
               {topicNotes.length === 0 ? (
@@ -187,7 +187,7 @@ const LabourWelfareTopicPage = () => {
             {/* ── MCQs ──────────────────────────────────────────────────── */}
             <section id="mcqs">
               <div className="mb-4 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-accent" />
+                <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">MCQs</h2>
               </div>
               {topicQuizzes.length === 0 ? (
@@ -204,7 +204,7 @@ const LabourWelfareTopicPage = () => {
             {/* ── PYQs ──────────────────────────────────────────────────── */}
             <section id="pyq">
               <div className="mb-4 flex items-center gap-2">
-                <ScrollText className="h-5 w-5 text-accent" />
+                <ScrollText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Previous Year Questions</h2>
               </div>
               {topicPyqs.length === 0 ? (
@@ -214,7 +214,7 @@ const LabourWelfareTopicPage = () => {
                   {topicPyqs.map((pyq: any) => (
                     <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
                       <h3 className="text-sm font-semibold text-foreground">
-                        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent hover:underline">{pyq.title}</Link>
+                        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
                       </h3>
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{pyq.year}</span>
@@ -238,7 +238,7 @@ const LabourWelfareTopicPage = () => {
             {topicLectures.length > 0 && (
               <section id="lectures">
                 <div className="mb-4 flex items-center gap-2">
-                  <PlayCircle className="h-5 w-5 text-accent" />
+                  <PlayCircle className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Video Lectures</h2>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -250,7 +250,7 @@ const LabourWelfareTopicPage = () => {
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 rounded-md border border-border p-4 hover:border-accent/50"
                     >
-                      <PlayCircle className="h-8 w-8 shrink-0 text-accent" />
+                      <PlayCircle className="h-8 w-8 shrink-0 text-accent-deep" />
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold text-foreground">{lec.title}</h3>
                         {lec.duration_minutes && <p className="text-xs text-muted-foreground">{lec.duration_minutes} min</p>}
@@ -264,7 +264,7 @@ const LabourWelfareTopicPage = () => {
             {/* ── FAQs — visible copy matches the FAQPage structured data ── */}
             <section aria-labelledby="faq-heading">
               <div className="mb-4 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-accent" />
+                <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 id="faq-heading" className="text-xl font-bold text-foreground">Frequently Asked Questions</h2>
               </div>
               <div className="space-y-2.5">
@@ -280,7 +280,7 @@ const LabourWelfareTopicPage = () => {
             </section>
 
             <div className="border-t border-border pt-8 text-center">
-              <Link to="/ugc-net-labour-welfare#high-scoring-topics" className="text-sm font-medium text-accent hover:underline">
+              <Link to="/ugc-net-labour-welfare#high-scoring-topics" className="text-sm font-medium text-accent-deep hover:underline">
                 ← Back to all High-Scoring Topics
               </Link>
             </div>

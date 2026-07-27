@@ -58,7 +58,7 @@ const HighScoringTopicsSection = ({ notes = [], quizzes = [], pyqs = [], lecture
     <section className="border-b border-border bg-white py-10" id="high-scoring-topics">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-1 flex items-center gap-2">
-          <Layers className="h-5 w-5 text-accent" />
+          <Layers className="h-5 w-5 text-accent-deep" />
           <h2 className="text-xl font-bold text-foreground">High-Scoring Topics</h2>
         </div>
         <p className="mb-6 max-w-2xl text-sm text-muted-foreground">
@@ -187,13 +187,13 @@ const TopicCard = ({
           onClick={onToggleBookmark}
           aria-label={bookmarked ? "Remove bookmark" : "Bookmark this topic"}
           aria-pressed={bookmarked}
-          className={`relative z-10 shrink-0 rounded-md p-1.5 transition-colors ${bookmarked ? "text-accent" : "text-muted-foreground/50 hover:text-accent"}`}
+          className={`relative z-10 shrink-0 rounded-md p-1.5 transition-colors ${bookmarked ? "text-accent-deep" : "text-muted-foreground/50 hover:text-accent-deep"}`}
         >
           {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
         </button>
       </div>
 
-      <h3 className="text-sm font-semibold leading-snug text-foreground group-hover:text-accent">{topic.name}</h3>
+      <h3 className="text-sm font-semibold leading-snug text-foreground group-hover:text-accent-deep">{topic.name}</h3>
 
       <p className="text-[11px] font-medium text-muted-foreground/80">{PYQ_FREQUENCY_LABEL[topic.frequency]}</p>
 
@@ -209,7 +209,7 @@ const TopicCard = ({
             <TooltipTrigger asChild>
               <span
                 className={`inline-flex h-6 w-6 items-center justify-center rounded-md border ${
-                  available[r.key] ? "border-accent/40 bg-accent/10 text-accent" : "border-border bg-muted/40 text-muted-foreground/30"
+                  available[r.key] ? "border-accent/40 bg-accent/10 text-accent-deep" : "border-border bg-muted/40 text-muted-foreground/30"
                 }`}
               >
                 <r.icon className="h-3.5 w-3.5" />

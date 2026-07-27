@@ -93,7 +93,7 @@ const DisciplineTopicPage = ({
           { label: discipline?.short ?? "Notes", to: `/notes?subject=${subject}` },
           { label: topic.label },
         ]} />
-        <Link to={backLink} className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
+        <Link to={backLink} className="mb-6 inline-flex items-center gap-1 text-sm text-accent-deep hover:underline">
           <ArrowLeft className="h-4 w-4" /> {backLabel}
         </Link>
         <div className="mb-8 flex items-center gap-4">
@@ -122,7 +122,7 @@ const DisciplineTopicPage = ({
                 {note.video_url ? (
                   <video src={note.video_url} controls className="mb-3 w-full rounded-md bg-black aspect-video" />
                 ) : (
-                  <FileText className="mb-3 h-8 w-8 text-accent" />
+                  <FileText className="mb-3 h-8 w-8 text-accent-deep" />
                 )}
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{note.title}</h3>
                 {note.description && <p className="mb-3 text-xs text-muted-foreground">{note.description}</p>}
@@ -134,7 +134,7 @@ const DisciplineTopicPage = ({
                       const url = await getSignedFileUrl(note.file_url, "notes", true);
                       if (url) window.open(url, "_blank", "noopener,noreferrer");
                     }}
-                    className="inline-flex cursor-pointer items-center gap-2 self-start text-sm font-semibold text-accent hover:underline"
+                    className="inline-flex cursor-pointer items-center gap-2 self-start text-sm font-semibold text-accent-deep hover:underline"
                   >
                     <Download className="h-4 w-4" /> Download
                   </a>
@@ -154,7 +154,7 @@ const DisciplineTopicPage = ({
                 <Link
                   key={t.slug}
                   to={`/${routePrefix}/${t.slug}`}
-                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-accent hover:text-accent"
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-muted-foreground transition-colors hover:border-accent hover:text-accent-deep"
                 >
                   {t.label} <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
@@ -163,10 +163,10 @@ const DisciplineTopicPage = ({
           )}
           <div className="flex flex-wrap gap-3">
             <Link to={`/notes?subject=${subject}`} className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
-              <FileText className="h-4 w-4 text-accent" /> All {discipline?.short ?? ""} notes
+              <FileText className="h-4 w-4 text-accent-deep" /> All {discipline?.short ?? ""} notes
             </Link>
             <Link to={`/quizzes?subject=${subject}`} className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted">
-              <HelpCircle className="h-4 w-4 text-accent" /> Practice {discipline?.short ?? ""} MCQs
+              <HelpCircle className="h-4 w-4 text-accent-deep" /> Practice {discipline?.short ?? ""} MCQs
             </Link>
           </div>
         </section>

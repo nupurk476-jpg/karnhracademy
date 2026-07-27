@@ -182,19 +182,19 @@ const SearchPage = () => {
               return (
                 <section key={kind} className="mb-8">
                   <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                    <Icon className="h-4 w-4 text-accent" /> {label}
+                    <Icon className="h-4 w-4 text-accent-deep" /> {label}
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium">{items.length}</span>
                   </h2>
                   <div className="space-y-2">
                     {items.slice(0, 10).map((r, i) => (
                       <Link key={`${r.to}-${i}`} to={r.to} className="group flex items-start justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 transition-shadow hover:shadow-sm">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">{r.title}</p>
+                          <p className="text-sm font-semibold text-foreground group-hover:text-accent-deep transition-colors">{r.title}</p>
                           {r.description && <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{r.description}</p>}
                         </div>
                         <span className="flex shrink-0 items-center gap-2">
                           {r.badge && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{r.badge}</span>}
-                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-accent" />
+                          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-accent-deep" />
                         </span>
                       </Link>
                     ))}

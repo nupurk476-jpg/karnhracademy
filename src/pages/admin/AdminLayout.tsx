@@ -55,7 +55,7 @@ const AdminLayout = () => {
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-border bg-card p-4 md:hidden">
         <Link to="/" className="flex items-center gap-2 text-foreground">
-          <BookOpen className="h-5 w-5 text-accent" />
+          <BookOpen className="h-5 w-5 text-accent-deep" />
           <span className="text-sm font-bold">Admin Panel</span>
         </Link>
         <button
@@ -84,7 +84,7 @@ const AdminLayout = () => {
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-border bg-card p-6 md:block">
         <Link to="/" className="mb-8 flex items-center gap-2 text-foreground">
-          <BookOpen className="h-5 w-5 text-accent" />
+          <BookOpen className="h-5 w-5 text-accent-deep" />
           <span className="text-sm font-bold">Admin Panel</span>
         </Link>
         <NavLinks />

@@ -77,7 +77,7 @@ export function useDownloadGate() {
           </div>
           <p className="text-xs text-muted-foreground">
             By continuing, you agree to our{" "}
-            <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
+            <Link to="/privacy-policy" className="text-accent-deep hover:underline">Privacy Policy</Link>.
           </p>
         </form>
       </DialogContent>

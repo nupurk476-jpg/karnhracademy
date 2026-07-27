@@ -38,6 +38,9 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          // Gold-as-text on light grounds (WCAG AA ~5:1); the DEFAULT gold
+          // stays for fills, borders, and large display type.
+          deep: "hsl(var(--accent-deep))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

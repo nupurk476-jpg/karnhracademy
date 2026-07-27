@@ -146,7 +146,7 @@ const LabourWelfarePage = () => {
           <div className="mx-auto max-w-6xl px-6 py-10">
             <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET/JRF Labour Welfare" }]} />
 
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent">UGC NET/JRF Paper II · Subject Code 55</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">UGC NET/JRF Paper II · Subject Code 55</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
               UGC NET/JRF Labour Welfare — Unit-wise Study Hub
             </h1>
@@ -157,10 +157,10 @@ const LabourWelfarePage = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><FileText className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{notes.length}</strong>&nbsp;Notes</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><HelpCircle className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{quizzes.length}</strong>&nbsp;MCQ Sets</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><ScrollText className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">{pyqs.length}</strong>&nbsp;Previous Year Papers</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><Layers className="h-3.5 w-3.5 text-accent" /><strong className="text-foreground">10</strong>&nbsp;Units</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><FileText className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{notes.length}</strong>&nbsp;Notes</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><HelpCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{quizzes.length}</strong>&nbsp;MCQ Sets</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><ScrollText className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{pyqs.length}</strong>&nbsp;Previous Year Papers</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><Layers className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">10</strong>&nbsp;Units</span>
             </div>
           </div>
         </section>
@@ -182,7 +182,7 @@ const LabourWelfarePage = () => {
                     to={`/ugc-net-labour-welfare/unit-${u.number}`}
                     className="flex flex-col items-start gap-1 rounded-lg border border-border bg-white p-3 text-left transition-colors hover:border-accent/50"
                   >
-                    <span className="text-[11px] font-bold uppercase tracking-wide text-accent">Unit {unitRoman(u.number)}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-accent-deep">Unit {unitRoman(u.number)}</span>
                     <span className="text-sm font-semibold leading-snug text-foreground">{u.title}</span>
                     <span className="mt-1 text-[11px] text-muted-foreground">{noteCount} notes · {quizCount} MCQ sets</span>
                   </Link>
@@ -244,7 +244,7 @@ const LabourWelfarePage = () => {
                 )}
 
                 {activeFilterCount > 0 && (
-                  <button onClick={clearFilters} className="text-xs font-medium text-accent hover:underline">Clear filters</button>
+                  <button onClick={clearFilters} className="text-xs font-medium text-accent-deep hover:underline">Clear filters</button>
                 )}
               </div>
             </div>
@@ -259,7 +259,7 @@ const LabourWelfarePage = () => {
             {/* ── Unit-wise Notes ──────────────────────────────────────── */}
             <section id="notes">
               <div className="mb-4 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-accent" />
+                <FileText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit-wise Notes</h2>
               </div>
               <div className="space-y-2.5">
@@ -316,7 +316,7 @@ const LabourWelfarePage = () => {
             {/* ── Unit-wise MCQs ───────────────────────────────────────── */}
             <section id="mcqs">
               <div className="mb-4 flex items-center gap-2">
-                <HelpCircle className="h-5 w-5 text-accent" />
+                <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit-wise MCQs</h2>
               </div>
               <div className="space-y-2.5">
@@ -373,7 +373,7 @@ const LabourWelfarePage = () => {
             {/* ── Previous Year Questions ──────────────────────────────── */}
             <section id="pyq">
               <div className="mb-4 flex items-center gap-2">
-                <ScrollText className="h-5 w-5 text-accent" />
+                <ScrollText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Previous Year Questions</h2>
               </div>
               {filteredPyqs.length === 0 ? (
@@ -387,11 +387,11 @@ const LabourWelfarePage = () => {
                         {filteredPyqs.filter(p => p.year === year).map(pyq => (
                           <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
                             <h3 className="text-sm font-semibold text-foreground">
-                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent hover:underline">{pyq.title}</Link>
+                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
                             </h3>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {(pyq.unit_tags ?? []).map((n: number) => (
-                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">Unit {unitRoman(n)}</span>
+                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">Unit {unitRoman(n)}</span>
                               ))}
                               {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
                               {pyq.answer_key_url && (
@@ -416,13 +416,13 @@ const LabourWelfarePage = () => {
             {latest.length > 0 && (
               <section>
                 <div className="mb-4 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-accent" />
+                  <BookOpen className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Latest Uploads</h2>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {latest.map(({ kind, item }) => (
                     <div key={`${kind}-${item.id}`} className="flex flex-col gap-1.5 rounded-md border border-border p-4">
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-accent">
+                      <span className="text-[11px] font-bold uppercase tracking-wide text-accent-deep">
                         {kind === "note" ? "Note" : kind === "quiz" ? "MCQ Set" : "Previous Year Paper"}
                       </span>
                       <h3 className="text-sm font-semibold leading-snug text-foreground line-clamp-2">{item.title}</h3>

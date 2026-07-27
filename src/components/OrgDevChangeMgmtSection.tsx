@@ -18,7 +18,7 @@ const OrgDevChangeMgmtSection = () => {
     <section className="border-t border-border bg-background py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-12 text-center">
-          <span className="mb-2 inline-block rounded-full bg-accent/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-accent">
+          <span className="mb-2 inline-block rounded-full bg-accent/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-accent-deep">
             Transformation & Growth
           </span>
           <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -36,7 +36,7 @@ const OrgDevChangeMgmtSection = () => {
               to={`/odcm/${topic.slug}`}
               className="group flex flex-col rounded-lg border border-border bg-card p-6 transition-all hover:border-accent hover:shadow-lg hover:shadow-accent/5"
             >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent-deep transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
                 <topic.icon className="h-5 w-5" />
               </div>
               <h3 className="mb-1 text-base font-semibold text-foreground">{topic.label}</h3>

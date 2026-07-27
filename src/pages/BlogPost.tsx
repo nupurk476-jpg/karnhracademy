@@ -88,10 +88,10 @@ const BlogPost = () => {
       <Header />
       <article className="mx-auto max-w-3xl px-6 py-16">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Blog", to: "/blogs" }, { label: post.title }]} />
-        <Link to="/blogs" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
+        <Link to="/blogs" className="mb-6 inline-flex items-center gap-1 text-sm text-accent-deep hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Blogs
         </Link>
-        <span className="mb-3 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">{post.category}</span>
+        <span className="mb-3 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent-deep">{post.category}</span>
         <h1 className="mb-4 text-4xl font-bold text-foreground">{post.title}</h1>
         {post.cover_image && <img src={post.cover_image} alt={post.title} className="mb-6 w-full rounded-lg object-cover max-h-96" />}
         <div className="mb-8 flex items-center gap-3 text-sm text-muted-foreground">
@@ -125,9 +125,9 @@ const BlogPost = () => {
         <div className="mt-10 flex items-center gap-4 border-t border-border pt-6">
           <Share2 className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Share:</span>
-          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent"><Twitter className="h-5 w-5" /></a>
-          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent"><Linkedin className="h-5 w-5" /></a>
-          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent"><Facebook className="h-5 w-5" /></a>
+          <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent-deep"><Twitter className="h-5 w-5" /></a>
+          <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent-deep"><Linkedin className="h-5 w-5" /></a>
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-accent-deep"><Facebook className="h-5 w-5" /></a>
         </div>
 
         {/* Comments */}

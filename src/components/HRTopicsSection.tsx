@@ -43,7 +43,7 @@ const HRTopicsSection = () => {
     <section className="border-t border-border bg-card py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-12 text-center">
-          <span className="mb-2 inline-block rounded-full bg-accent/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-accent">
+          <span className="mb-2 inline-block rounded-full bg-accent/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-accent-deep">
             Explore HR Domains
           </span>
           <h2
@@ -66,7 +66,7 @@ const HRTopicsSection = () => {
                 className="group flex flex-col rounded-lg border border-border bg-background p-6 transition-all hover:border-accent hover:shadow-lg hover:shadow-accent/5"
               >
                 <Link to={`/hr/${topic.slug}`} className="flex-1">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-accent/10 text-accent-deep transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
                     <topic.icon className="h-5 w-5" />
                   </div>
                   <h3 className="mb-1 text-base font-semibold text-foreground">{topic.label}</h3>
@@ -75,7 +75,7 @@ const HRTopicsSection = () => {
 
                 {topicNotes.length > 0 && (
                   <div className="mt-4 border-t border-border pt-3">
-                    <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-accent">
+                    <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-accent-deep">
                       <FileText className="h-3 w-3" /> Notes ({topicNotes.length})
                     </p>
                     <ul className="space-y-1.5">
@@ -91,7 +91,7 @@ const HRTopicsSection = () => {
                                 if (url) window.open(url, "_blank", "noopener,noreferrer");
                               }}
                               aria-label={`Download ${note.title}`}
-                              className="shrink-0 cursor-pointer text-accent hover:text-accent/80"
+                              className="shrink-0 cursor-pointer text-accent-deep hover:text-accent-deep/80"
                             >
                               <Download className="h-3.5 w-3.5" />
                             </a>
@@ -100,7 +100,7 @@ const HRTopicsSection = () => {
                       ))}
                       {topicNotes.length > 3 && (
                         <li>
-                          <Link to={`/hr/${topic.slug}`} className="text-xs font-medium text-accent hover:underline">
+                          <Link to={`/hr/${topic.slug}`} className="text-xs font-medium text-accent-deep hover:underline">
                             +{topicNotes.length - 3} more
                           </Link>
                         </li>

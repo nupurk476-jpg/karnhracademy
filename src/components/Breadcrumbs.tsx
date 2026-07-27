@@ -37,7 +37,7 @@ const Breadcrumbs = ({ items }: { items: Crumb[] }) => {
           <span key={`${c.label}-${i}`} className="flex items-center gap-1.5">
             {i > 0 && <ChevronRight className="h-3 w-3" />}
             {c.to ? (
-              <Link to={c.to} className="hover:text-accent transition-colors">{c.label}</Link>
+              <Link to={c.to} className="hover:text-accent-deep transition-colors">{c.label}</Link>
             ) : (
               <span className="font-medium text-foreground">{c.label}</span>
             )}

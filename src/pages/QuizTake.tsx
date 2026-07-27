@@ -165,7 +165,7 @@ const QuizTake = () => {
       <Header />
       <div className="py-20 text-center">
         <p className="mb-4 text-muted-foreground">This quiz doesn't exist or may have been removed.</p>
-        <Link to="/quizzes" className="text-sm font-semibold text-accent hover:underline">
+        <Link to="/quizzes" className="text-sm font-semibold text-accent-deep hover:underline">
           <ArrowLeft className="mr-1 inline h-4 w-4" /> Back to Quizzes
         </Link>
       </div>
@@ -205,7 +205,7 @@ const QuizTake = () => {
       <Header />
       <main id="main-content" className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MCQ Quizzes", to: "/quizzes" }, { label: quiz.title }]} />
-        <Link to="/quizzes" className="mb-6 inline-flex items-center gap-1 text-sm text-accent hover:underline">
+        <Link to="/quizzes" className="mb-6 inline-flex items-center gap-1 text-sm text-accent-deep hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to Quizzes
         </Link>
         <h1 className="mb-1 text-2xl font-bold text-foreground sm:text-3xl">{quiz.title}</h1>
@@ -216,7 +216,7 @@ const QuizTake = () => {
         ) : !started ? (
           /* ── Start screen ─────────────────────────────────────────────── */
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <Clock className="mx-auto mb-4 h-12 w-12 text-accent" />
+            <Clock className="mx-auto mb-4 h-12 w-12 text-accent-deep" />
             <h2 className="mb-2 text-xl font-bold text-foreground">Ready to begin?</h2>
             <p className="mb-1 text-muted-foreground">{questions.length} questions · {totalMarks} marks</p>
             <p className="mb-2 text-muted-foreground">
@@ -230,7 +230,7 @@ const QuizTake = () => {
             )}
             {totalRatings === 0 && <div className="mb-6" />}
             {!user && (
-              <p className="mb-4 flex items-center justify-center gap-1 text-sm text-accent">
+              <p className="mb-4 flex items-center justify-center gap-1 text-sm text-accent-deep">
                 <LogIn className="h-4 w-4" /> You'll need to sign in to save your score
               </p>
             )}
@@ -246,7 +246,7 @@ const QuizTake = () => {
               <div className="sticky top-16 z-10 mb-4 rounded-lg border border-border bg-card p-4 shadow-sm">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Clock className={`h-5 w-5 ${timeLeft <= 30 ? "text-destructive animate-pulse" : "text-accent"}`} />
+                    <Clock className={`h-5 w-5 ${timeLeft <= 30 ? "text-destructive animate-pulse" : "text-accent-deep"}`} />
                     <span className={`text-lg font-bold tabular-nums ${timeLeft <= 30 ? "text-destructive" : "text-foreground"}`}>
                       {formatTime(timeLeft)}
                     </span>
@@ -353,7 +353,7 @@ const QuizTake = () => {
             <div className="mb-8 rounded-xl border border-border bg-card p-6 sm:p-8">
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/10">
-                  <Trophy className="h-10 w-10 text-accent" />
+                  <Trophy className="h-10 w-10 text-accent-deep" />
                 </div>
                 <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-4">
                   <div>

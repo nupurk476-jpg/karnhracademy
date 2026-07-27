@@ -24,6 +24,9 @@ const STEEL = "#5B8AB8";
 const STEEL_DARK = "#3D6C98";
 const GOLD  = "#C7994A";
 const GOLD_DARK = "#A9823F";
+// Gold for TEXT on light grounds — the display golds above sit under 3.5:1
+// on white and fail WCAG AA for link/label-sized text; this cut passes.
+const GOLD_TEXT = "#8A6A28";
 const LIGHT = "#EEF0F8";
 
 // ─────────────── Data ────────────────────────────────────────────────────────
@@ -33,10 +36,10 @@ const LIGHT = "#EEF0F8";
 const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   hrm:     { color: NAVY,       bg: "#DCE6F1" },
   ob:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  sm:      { color: GOLD_DARK,  bg: "#F7F1E3" },
+  sm:      { color: GOLD_TEXT,  bg: "#F7F1E3" },
   pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
-  bc:      { color: STEEL,      bg: "#EEF0F8" },
-  odcm:    { color: GOLD,       bg: "#F7F1E3" },
+  bc:      { color: STEEL_DARK, bg: "#EEF0F8" },
+  odcm:    { color: GOLD_TEXT,  bg: "#F7F1E3" },
   ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
   lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
 };
@@ -70,7 +73,7 @@ const TOPICS = [
 const GoldLabel = ({ text }: { text: string }) => (
   <div className="flex items-center gap-2 mb-3">
     <span className="block h-px w-6 rounded-full" style={{ background: GOLD }} />
-    <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD }}>{text}</span>
+    <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_TEXT }}>{text}</span>
   </div>
 );
 
@@ -117,7 +120,7 @@ const Hero = () => {
         <div className="flex flex-col justify-center">
           <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
             <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-            <span className="text-xs font-semibold" style={{ color: GOLD_DARK }}>100% Free Academic Resource Platform</span>
+            <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>100% Free Academic Resource Platform</span>
           </div>
 
           <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
@@ -155,7 +158,7 @@ const Hero = () => {
               { icon: Award,         label: "Designed by Academic Experts" },
             ].map(({ icon: Icon, label }) => (
               <li key={label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
-                <Icon aria-hidden="true" className="h-3 w-3 flex-shrink-0" style={{ color: GOLD }} />{label}
+                <Icon aria-hidden="true" className="h-3 w-3 flex-shrink-0" style={{ color: GOLD_TEXT }} />{label}
               </li>
             ))}
           </ul>
@@ -246,7 +249,7 @@ const QUICK_ACCESS = [
   { icon: HandHeart,  label: "UGC NET/JRF Labour Welfare", desc: "Unit-wise notes, MCQs & PYQs for Subject Code 55", to: "/ugc-net-labour-welfare", color: NAVY_DARK, bg: "#E3EAF2" },
   { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",        to: "/notes",                 color: NAVY,      bg: "#DCE6F1" },
   { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",          to: "/quizzes",               color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",              to: "/pyqs",                  color: GOLD_DARK, bg: "#F7F1E3" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",              to: "/pyqs",                  color: GOLD_TEXT, bg: "#F7F1E3" },
   { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators",       to: "/lectures",              color: STEEL,     bg: "#EEF0F8" },
 ];
 
@@ -317,7 +320,7 @@ const Subjects = () => (
           <GoldLabel text="Browse by Discipline" />
           <SectionHeading title="HR & Management. One Platform." sub="Deep resources for HRM and OB now live — more disciplines actively being added. Check the Notes page for availability." />
         </div>
-        <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
+        <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
           View all notes <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
@@ -437,10 +440,10 @@ const FeaturedNotes = () => {
   const subjectLabel: Record<string, { label: string; color: string }> = {
     hrm:    { label: "HRM",       color: NAVY },
     ob:     { label: "OB",        color: STEEL_DARK },
-    sm:     { label: "SM",        color: GOLD_DARK },
+    sm:     { label: "SM",        color: GOLD_TEXT },
     pom:    { label: "POM",       color: NAVY_DARK },
-    bc:     { label: "BC",        color: STEEL },
-    odcm:   { label: "OD & CM",   color: GOLD },
+    bc:     { label: "BC",        color: STEEL_DARK },
+    odcm:   { label: "OD & CM",   color: GOLD_TEXT },
     ghr:    { label: "International HRM", color: NAVY_DARK },
   };
 
@@ -452,7 +455,7 @@ const FeaturedNotes = () => {
             <GoldLabel text="Study Notes" />
             <SectionHeading title="Featured Study Notes" sub="Exam-aligned, topic-wise notes for every major HR subject." />
           </div>
-          <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
+          <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             Browse all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -513,7 +516,7 @@ const VideoLectures = () => {
             <GoldLabel text="Video Lectures" />
             <SectionHeading title="Expert Video Lectures" sub="Watch, pause, and master concepts with our subject-expert lectures." />
           </div>
-          <Link to="/lectures" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
+          <Link to="/lectures" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             All lectures <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -644,7 +647,7 @@ const BooksSection = () => {
             <GoldLabel text="Recommended Reading" />
             <SectionHeading title="Curated Book Library" sub="Hand-picked books for HR students, professionals, and researchers." />
           </div>
-          <Link to="/books" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD }}>
+          <Link to="/books" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             View all books <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -698,7 +701,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#A9823F] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
+            <Link key={t} to="/notes" className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#8A6A28] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
               {t}
             </Link>
           ))}
@@ -749,7 +752,7 @@ const MBABBABanner = () => {
                 <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: GOLD_DARK }}>
                   <GraduationCap className="h-4.5 w-4.5 text-white" />
                 </span>
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD_DARK }}>
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD_TEXT }}>
                   MBA · BBA · PGDM · B.Com
                 </span>
               </div>
@@ -841,7 +844,7 @@ const AboutAuthor = () => {
               </div>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: GOLD }}>Meet the Founder</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: GOLD_TEXT }}>Meet the Founder</p>
               <h3 id="founder-heading" className="text-2xl font-extrabold text-slate-900" style={{ fontFamily: "'Sora',sans-serif" }}>Ms. Nupur Karn</h3>
               <p className="text-sm text-slate-500">Founder, Karn HR Academy</p>
             </div>
@@ -934,7 +937,7 @@ const Newsletter = () => {
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
           <Mail className="h-5 w-5" style={{ color: GOLD_DARK }} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_DARK }}>Stay Updated</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_TEXT }}>Stay Updated</span>
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
         </div>
         <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>

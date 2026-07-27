@@ -54,8 +54,8 @@ const ContactPage = () => {
         </p>
 
         <div className="mb-8 flex items-center gap-3">
-          <Mail className="h-5 w-5 text-accent" />
-          <a href="mailto:contact@karnhracademy.com" className="text-foreground hover:text-accent transition-colors">
+          <Mail className="h-5 w-5 text-accent-deep" />
+          <a href="mailto:contact@karnhracademy.com" className="text-foreground hover:text-accent-deep transition-colors">
             contact@karnhracademy.com
           </a>
         </div>
@@ -110,7 +110,7 @@ const ContactPage = () => {
             </button>
             <p className="text-xs text-muted-foreground">
               By submitting, you agree to our{" "}
-              <Link to="/privacy-policy" className="text-accent hover:underline">Privacy Policy</Link>.
+              <Link to="/privacy-policy" className="text-accent-deep hover:underline">Privacy Policy</Link>.
             </p>
           </form>
         )}

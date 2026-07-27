@@ -8,7 +8,7 @@ const OBTopicPage = () => (
     backLink="/notes?subject=ob"
     backLabel="All OB Topics"
     accentBg="bg-accent/10"
-    accentText="text-accent"
+    accentText="text-accent-deep"
     routePrefix="ob"
   />
 );

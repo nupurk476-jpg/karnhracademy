@@ -154,7 +154,7 @@ const AuthPage = () => {
                   if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
                   else toast({ title: "Check your email for a password reset link." });
                 }}
-                className="text-sm text-accent hover:underline"
+                className="text-sm text-accent-deep hover:underline"
               >
                 Forgot password?
               </button>
@@ -164,7 +164,7 @@ const AuthPage = () => {
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="font-medium text-accent hover:underline"
+              className="font-medium text-accent-deep hover:underline"
             >
               {isLogin ? "Sign Up" : "Sign In"}
             </button>

@@ -433,9 +433,9 @@ const AdminQuizzes = () => {
                     {!isPublished && <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Draft</span>}
                   </div>
                   <div className="flex shrink-0 items-center gap-2.5" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setPreviewQuiz(q)} title="Preview" aria-label={`Preview ${q.title}`} className="text-muted-foreground hover:text-accent"><Eye className="h-4 w-4" /></button>
-                    <button onClick={() => startEditQuiz(q)} title="Edit" aria-label={`Edit ${q.title}`} className="text-muted-foreground hover:text-accent"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => duplicateQuiz(q)} title="Duplicate" aria-label={`Duplicate ${q.title}`} className="text-muted-foreground hover:text-accent"><Copy className="h-4 w-4" /></button>
+                    <button onClick={() => setPreviewQuiz(q)} title="Preview" aria-label={`Preview ${q.title}`} className="text-muted-foreground hover:text-accent-deep"><Eye className="h-4 w-4" /></button>
+                    <button onClick={() => startEditQuiz(q)} title="Edit" aria-label={`Edit ${q.title}`} className="text-muted-foreground hover:text-accent-deep"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => duplicateQuiz(q)} title="Duplicate" aria-label={`Duplicate ${q.title}`} className="text-muted-foreground hover:text-accent-deep"><Copy className="h-4 w-4" /></button>
                     <button onClick={() => togglePublish(q)} title={isPublished ? "Unpublish" : "Publish"} aria-label={`${isPublished ? "Unpublish" : "Publish"} ${q.title}`}
                       className={isPublished ? "text-emerald-600 hover:text-amber-600" : "text-amber-600 hover:text-emerald-600"}>
                       {isPublished ? <CheckCircle2 className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -446,7 +446,7 @@ const AdminQuizzes = () => {
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                   <span className="text-muted-foreground">{q.topic}</span>
                   {q.subject && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">{getDiscipline(q.subject)?.short ?? q.subject.toUpperCase()}</span>}
-                  {q.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-accent">{getTopicLabel(q.topic_slug)}</span>}
+                  {q.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-accent-deep">{getTopicLabel(q.topic_slug)}</span>}
                 </div>
               </div>
             );
@@ -462,7 +462,7 @@ const AdminQuizzes = () => {
               </h2>
               <div className="flex items-center gap-2">
                 <button onClick={() => setImportOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-accent px-3 py-2 text-sm font-semibold text-accent hover:bg-accent/10">
+                  className="inline-flex items-center gap-1.5 rounded-md border border-accent px-3 py-2 text-sm font-semibold text-accent-deep hover:bg-accent/10">
                   <FileUp className="h-4 w-4" /> Import PDF
                 </button>
                 <button onClick={openNewQuestion}
@@ -490,7 +490,7 @@ const AdminQuizzes = () => {
                       <button onClick={() => (isOpen ? setExpandedQ(null) : openEditQuestion(q))}
                         className="flex min-w-0 flex-1 items-center gap-2 text-left"
                         aria-expanded={isOpen} aria-label={`Question ${i + 1}: ${isOpen ? "collapse" : "expand"}`}>
-                        {isOpen ? <ChevronDown className="h-4 w-4 shrink-0 text-accent" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                        {isOpen ? <ChevronDown className="h-4 w-4 shrink-0 text-accent-deep" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
                         <span className="shrink-0 text-xs font-bold text-muted-foreground">Q{i + 1}</span>
                         <span className="truncate text-sm text-foreground">{q.question}</span>
                         {q.difficulty && <span className="hidden shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground sm:inline">{q.difficulty}</span>}
@@ -499,7 +499,7 @@ const AdminQuizzes = () => {
                       <div className="flex shrink-0 items-center gap-1.5">
                         <button onClick={() => moveQuestion(i, -1)} disabled={i === 0} aria-label="Move up" className="text-muted-foreground hover:text-foreground disabled:opacity-25"><ArrowUp className="h-3.5 w-3.5" /></button>
                         <button onClick={() => moveQuestion(i, 1)} disabled={i === questions.length - 1} aria-label="Move down" className="text-muted-foreground hover:text-foreground disabled:opacity-25"><ArrowDown className="h-3.5 w-3.5" /></button>
-                        <button onClick={() => duplicateQuestion(q)} aria-label="Duplicate question" className="text-muted-foreground hover:text-accent"><Copy className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => duplicateQuestion(q)} aria-label="Duplicate question" className="text-muted-foreground hover:text-accent-deep"><Copy className="h-3.5 w-3.5" /></button>
                         <button onClick={() => deleteQuestion(q.id)} aria-label="Delete question" className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                       </div>
                     </div>

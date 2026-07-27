@@ -178,7 +178,7 @@ const AdminDashboard = () => {
               return (
                 <div key={s.label} className="rounded-lg border border-border bg-card p-5">
                   <div className="mb-1 flex items-center gap-2">
-                    <Icon className="h-4 w-4 text-accent" />
+                    <Icon className="h-4 w-4 text-accent-deep" />
                     <p className="text-sm text-muted-foreground">{s.label}</p>
                   </div>
                   <p className="text-2xl font-bold text-foreground">{s.value}</p>
@@ -189,7 +189,7 @@ const AdminDashboard = () => {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-card p-5">
               <div className="mb-1 flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-accent" />
+                <Trophy className="h-4 w-4 text-accent-deep" />
                 <p className="text-sm text-muted-foreground">Top Performing Quiz</p>
               </div>
               <p className="font-semibold text-foreground">
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
             </div>
             <div className="rounded-lg border border-border bg-card p-5">
               <div className="mb-1 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-accent" />
+                <Clock className="h-4 w-4 text-accent-deep" />
                 <p className="text-sm text-muted-foreground">Recently Added</p>
               </div>
               <p className="font-semibold text-foreground">{quizStats.latestQuiz?.title ?? "No quizzes yet"}</p>

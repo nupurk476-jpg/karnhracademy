@@ -105,7 +105,7 @@ const TermsPage = () => {
             <h2 className="mb-2 text-lg font-semibold text-foreground">10. Contact us</h2>
             <p>
               Questions about these Terms? Email{" "}
-              <a href="mailto:contact@karnhracademy.com" className="text-accent hover:underline">
+              <a href="mailto:contact@karnhracademy.com" className="text-accent-deep hover:underline">
                 contact@karnhracademy.com
               </a>.
             </p>

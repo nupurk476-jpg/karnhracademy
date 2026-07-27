@@ -194,7 +194,7 @@ const AdminNotes = () => {
               <div className="space-y-3">
                 {LW_UNITS.map(u => (
                   <div key={u.number}>
-                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-accent">
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-accent-deep">
                       Unit {unitRoman(u.number)} · {u.title}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -250,7 +250,7 @@ const AdminNotes = () => {
                   const url = await getSignedFileUrl(existingFileUrl, "notes");
                   if (url) window.open(url, "_blank", "noopener,noreferrer");
                 }}
-                className="cursor-pointer text-accent hover:underline"
+                className="cursor-pointer text-accent-deep hover:underline"
               >
                 {fileName(existingFileUrl)}
               </a>
@@ -270,7 +270,7 @@ const AdminNotes = () => {
           </label>
           {!videoFile && existingVideoUrl && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              Current: <a href={existingVideoUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">{fileName(existingVideoUrl)}</a>
+              Current: <a href={existingVideoUrl} target="_blank" rel="noopener noreferrer" className="text-accent-deep hover:underline">{fileName(existingVideoUrl)}</a>
               <button type="button" onClick={() => setExistingVideoUrl(null)} className="text-muted-foreground hover:text-destructive" aria-label="Remove attached video">
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -322,15 +322,15 @@ const AdminNotes = () => {
                   </span>
                 );
               })()}
-              {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">{getTopicLabel(note.topic_slug)}</span>}
+              {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
-              {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">VIDEO</span>}
+              {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">VIDEO</span>}
               {(note.tags ?? []).map((tag: string) => (
                 <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
               ))}
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent" aria-label={`Edit ${note.title}`}>
+              <button onClick={() => startEdit(note)} className="text-muted-foreground hover:text-accent-deep" aria-label={`Edit ${note.title}`}>
                 <Pencil className="h-4 w-4" />
               </button>
               <button onClick={() => handleDelete(note.id, note.title)} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${note.title}`}>

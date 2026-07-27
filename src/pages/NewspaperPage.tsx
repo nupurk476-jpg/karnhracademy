@@ -79,7 +79,7 @@ const NewspaperPage = () => {
       <Header />
       <main id="main-content" className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-8">
-          <p className="mb-1 text-sm font-semibold uppercase tracking-[0.15em] text-accent">Stay Informed</p>
+          <p className="mb-1 text-sm font-semibold uppercase tracking-[0.15em] text-accent-deep">Stay Informed</p>
           <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
             Newspaper Highlights
           </h1>
@@ -124,7 +124,7 @@ const NewspaperPage = () => {
                   </div>
                 )}
                 <div className="p-5">
-                  <span className="mb-2 inline-block rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-semibold capitalize text-accent">
+                  <span className="mb-2 inline-block rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-semibold capitalize text-accent-deep">
                     {h.section}
                   </span>
                   <h3 className="mb-2 text-lg font-semibold text-foreground">{h.title}</h3>

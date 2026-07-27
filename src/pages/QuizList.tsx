@@ -116,7 +116,7 @@ const QuizList = () => {
         {getDiscipline(quiz.subject || "hrm")?.short ?? "HRM"}
       </span>
       {quiz.topic_slug && (
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
           {getTopicLabel(quiz.topic_slug)}
         </span>
       )}

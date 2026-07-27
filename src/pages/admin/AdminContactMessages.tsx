@@ -66,7 +66,7 @@ const AdminContactMessages = () => {
               <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <span className="font-semibold text-foreground">{m.name}</span>
-                  <a href={`mailto:${m.email}`} onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center gap-1 text-xs text-accent hover:underline">
+                  <a href={`mailto:${m.email}`} onClick={e => e.stopPropagation()} className="ml-2 inline-flex items-center gap-1 text-xs text-accent-deep hover:underline">
                     <Mail className="h-3 w-3" /> {m.email}
                   </a>
                 </div>
