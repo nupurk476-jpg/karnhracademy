@@ -26,15 +26,21 @@ export function useLabourWelfareContent() {
       ]);
       const publishedQuizzes = (quizData ?? []).filter((q: any) => q.published !== false);
 
-      // Question counts, paged — a naive .select() would silently truncate
-      // once the combined question count across every LW quiz grows large.
+      // Question counts — grouped server-side (one small result set instead
+      // of downloading every question row). Falls back to the old paged
+      // row-fetch if the RPC hasn't been applied to the database yet.
       const questionCounts: Record<string, number> = {};
       if (publishedQuizzes.length > 0) {
         const quizIds = publishedQuizzes.map((q: any) => q.id);
-        const questions = await fetchAllRows<{ quiz_id: string }>(() =>
-          supabase.from("quiz_questions").select("quiz_id").in("quiz_id", quizIds)
-        );
-        questions.forEach((q) => { questionCounts[q.quiz_id] = (questionCounts[q.quiz_id] || 0) + 1; });
+        const { data: counts, error } = await (supabase.rpc as any)("quiz_question_counts", { _quiz_ids: quizIds });
+        if (!error && counts) {
+          counts.forEach((c: any) => { questionCounts[c.quiz_id] = Number(c.question_count); });
+        } else {
+          const questions = await fetchAllRows<{ quiz_id: string }>(() =>
+            supabase.from("quiz_questions").select("quiz_id").in("quiz_id", quizIds)
+          );
+          questions.forEach((q) => { questionCounts[q.quiz_id] = (questionCounts[q.quiz_id] || 0) + 1; });
+        }
       }
 
       return {

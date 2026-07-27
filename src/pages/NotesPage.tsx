@@ -338,8 +338,22 @@ const NotesPage = () => {
             {filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+                {search.trim() ? (
+                  <>
+                    <p className="font-medium text-muted-foreground">No notes here match "{search}".</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      This box only filters notes —{" "}
+                      <Link to={`/search?q=${encodeURIComponent(search)}`} className="font-semibold text-accent-deep hover:underline">
+                        search all of Karn HR Academy →
+                      </Link>
+                    </p>
+                  </>
+                ) : (
+                <>
                 <p className="font-medium text-muted-foreground">No notes uploaded yet for {activeDiscipline.label}.</p>
                 <p className="mt-1 text-sm text-muted-foreground">Check back soon — new material is added regularly.</p>
+                </>
+                )}
               </div>
             ) : (
               <>

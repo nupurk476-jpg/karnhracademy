@@ -174,7 +174,19 @@ const PYQsPage = () => {
             </div>
 
             {filtered.length === 0 ? (
-              <EmptyState text="No previous year papers uploaded yet. Check back soon." />
+              search.trim() ? (
+                <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center">
+                  <p className="text-sm font-medium text-muted-foreground">No papers here match "{search}".</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    This box only filters papers —{" "}
+                    <Link to={`/search?q=${encodeURIComponent(search)}`} className="font-semibold text-accent-deep hover:underline">
+                      search all of Karn HR Academy →
+                    </Link>
+                  </p>
+                </div>
+              ) : (
+                <EmptyState text="No previous year papers uploaded yet. Check back soon." />
+              )
             ) : (
               <div className="space-y-6">
                 {Array.from(new Set(filtered.map(p => p.year))).sort((a, b) => b - a).map(year => (

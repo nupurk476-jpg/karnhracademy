@@ -45,15 +45,19 @@ const QuizList = () => {
       setQuizzes(published);
 
       if (published.length > 0) {
-        // A plain .select() silently truncates at Supabase's default row cap
-        // once the combined question count grows large enough — fetchAllRows
-        // pages through with .range() so counts stay accurate however many
-        // questions exist across every quiz.
-        const questions = await fetchAllRows<{ quiz_id: string }>(() =>
-          supabase.from("quiz_questions").select("quiz_id").in("quiz_id", published.map((q: any) => q.id))
-        );
+        // Grouped server-side count (one small result set) with a fallback
+        // to the old paged row-fetch when the RPC isn't applied yet.
+        const quizIds = published.map((q: any) => q.id);
         const counts: Record<string, number> = {};
-        questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
+        const { data: grouped, error } = await (supabase.rpc as any)("quiz_question_counts", { _quiz_ids: quizIds });
+        if (!error && grouped) {
+          grouped.forEach((c: any) => { counts[c.quiz_id] = Number(c.question_count); });
+        } else {
+          const questions = await fetchAllRows<{ quiz_id: string }>(() =>
+            supabase.from("quiz_questions").select("quiz_id").in("quiz_id", quizIds)
+          );
+          questions.forEach(q => { counts[q.quiz_id] = (counts[q.quiz_id] || 0) + 1; });
+        }
         setQuestionCounts(counts);
       }
     })();
@@ -292,8 +296,22 @@ const QuizList = () => {
             {filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <HelpCircle className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+                {search.trim() ? (
+                  <>
+                    <p className="font-medium text-muted-foreground">No MCQs here match "{search}".</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      This box only filters MCQs —{" "}
+                      <Link to={`/search?q=${encodeURIComponent(search)}`} className="font-semibold text-accent-deep hover:underline">
+                        search all of Karn HR Academy →
+                      </Link>
+                    </p>
+                  </>
+                ) : (
+                  <>
                 <p className="font-medium text-muted-foreground">No MCQs uploaded yet for {activeDiscipline.label}.</p>
                 <p className="mt-1 text-sm text-muted-foreground">Check back soon — new material is added regularly.</p>
+                  </>
+                )}
               </div>
             ) : (
               <>
