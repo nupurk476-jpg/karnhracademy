@@ -9,6 +9,7 @@ import { HelpCircle, ChevronRight, Clock, Calendar, LayoutGrid, List } from "luc
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { formatDate } from "@/lib/format";
+import { Badge } from "@/components/ui/badge";
 
 const PAGE_SIZE = 30;
 
@@ -115,14 +116,8 @@ const QuizList = () => {
   // ── Quiz renderers ───────────────────────────────────────────────────────
   const Badges = ({ quiz }: { quiz: any }) => (
     <>
-      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-        {getDiscipline(quiz.subject || "hrm")?.short ?? "HRM"}
-      </span>
-      {quiz.topic_slug && (
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
-          {getTopicLabel(quiz.topic_slug)}
-        </span>
-      )}
+      <Badge variant="subject" size="sm">{getDiscipline(quiz.subject || "hrm")?.short ?? "HRM"}</Badge>
+      {quiz.topic_slug && <Badge variant="unit" size="sm">{getTopicLabel(quiz.topic_slug)}</Badge>}
     </>
   );
 

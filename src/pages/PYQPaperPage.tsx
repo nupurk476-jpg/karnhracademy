@@ -10,6 +10,7 @@ import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import {
   ScrollText, BookOpenCheck, LogIn, FileCheck2, Eye, ShieldCheck, CalendarDays,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Public, indexable landing page for one previous-year paper — the SEO
 // front door for searches like "UGC NET labour welfare June 2014 paper".
@@ -114,20 +115,16 @@ const PYQPaperPage = () => {
 
         <div className="mb-3 flex flex-wrap items-center gap-1.5">
           {discipline && (
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{discipline.short}</span>
+            <Badge variant="subject">{discipline.short}</Badge>
           )}
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent-deep">
-            <CalendarDays className="h-3 w-3" /> {paper.year}
-          </span>
+          <Badge variant="unit"><CalendarDays className="h-3 w-3" /> {paper.year}</Badge>
           {(paper.unit_tags ?? []).map((n: number) => (
-            <span key={n} className="rounded-full bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent-deep">
+            <Badge key={n} variant="unit">
               Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
-            </span>
+            </Badge>
           ))}
           {paper.answer_key_url && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-              <FileCheck2 className="h-3 w-3" /> Answer key included
-            </span>
+            <Badge variant="success"><FileCheck2 className="h-3 w-3" /> Answer key included</Badge>
           )}
         </div>
 

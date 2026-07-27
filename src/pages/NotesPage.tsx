@@ -12,6 +12,7 @@ import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { formatDate } from "@/lib/format";
+import { Badge } from "@/components/ui/badge";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 
 const PAGE_SIZE = 30;
@@ -133,14 +134,8 @@ const NotesPage = () => {
   // ── Note renderers ───────────────────────────────────────────────────────
   const Badges = ({ note }: { note: any }) => (
     <>
-      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-        {getDiscipline(note.subject || "hrm")?.short ?? "HRM"}
-      </span>
-      {note.topic_slug && (
-        <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
-          {getTopicLabel(note.topic_slug)}
-        </span>
-      )}
+      <Badge variant="subject" size="sm">{getDiscipline(note.subject || "hrm")?.short ?? "HRM"}</Badge>
+      {note.topic_slug && <Badge variant="unit" size="sm">{getTopicLabel(note.topic_slug)}</Badge>}
       {note.video_url && (
         <span className="inline-flex items-center gap-0.5 rounded-full bg-brand-light px-2 py-0.5 text-[11px] font-semibold text-brand-steel-deep">
           <PlayCircle className="h-3 w-3" /> Video

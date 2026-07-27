@@ -9,6 +9,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { HIGH_SCORING_TOPICS, getUnitsForTopic } from "@/lib/highScoringTopics";
 import { Search, FileText, HelpCircle, Newspaper, BookOpen, ChevronRight, GraduationCap, ScrollText, PlayCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Route prefix for each discipline's static topic pages (lw has no per-topic
 // pages — its content lives on the unit-wise hub instead).
@@ -237,7 +238,7 @@ const SearchPage = () => {
                           {r.description && <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{r.description}</p>}
                         </div>
                         <span className="flex shrink-0 items-center gap-2">
-                          {r.badge && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{r.badge}</span>}
+                          {r.badge && <Badge variant="subject" size="sm">{r.badge}</Badge>}
                           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-accent-deep" />
                         </span>
                       </Link>

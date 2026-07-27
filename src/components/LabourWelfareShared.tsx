@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronRight, Calendar, Clock, Eye, Download, BookOpenCheck, FileCheck2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { formatDate } from "@/lib/format";
@@ -10,7 +11,7 @@ import { formatDate } from "@/lib/format";
 
 
 export const TagChip = ({ tag }: { tag: string }) => (
-  <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">#{tag}</span>
+  <Badge variant="tag" size="sm" className="font-normal">#{tag}</Badge>
 );
 
 export const EmptyState = ({ text }: { text: string }) => (
@@ -24,11 +25,7 @@ export const NoteRow = ({ note, onView, onDownload }: { note: any; onView: () =>
     <div className="min-w-0">
       <div className="mb-1 flex flex-wrap items-center gap-1.5">
         <h3 className="text-sm font-semibold text-foreground">{note.title}</h3>
-        {note.topic_slug && (
-          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
-            {getTopicLabel(note.topic_slug)}
-          </span>
-        )}
+        {note.topic_slug && <Badge variant="unit" size="sm">{getTopicLabel(note.topic_slug)}</Badge>}
       </div>
       {note.description && <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">{note.description}</p>}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
@@ -65,19 +62,15 @@ export const PYQCard = ({ pyq, showSubject = false, showViews = false }: { pyq: 
         </Link>
       </h3>
       <div className="flex flex-wrap items-center gap-1.5">
-        {discipline && (
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>
-        )}
+        {discipline && <Badge variant="subject" size="sm">{discipline.short}</Badge>}
         {(pyq.unit_tags ?? []).map((n: number) => (
-          <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
+          <Badge key={n} variant="unit" size="sm">
             Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
-          </span>
+          </Badge>
         ))}
         {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
         {pyq.answer_key_url && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-            <FileCheck2 className="h-3 w-3" /> Answer key included
-          </span>
+          <Badge variant="success" size="sm"><FileCheck2 className="h-3 w-3" /> Answer key included</Badge>
         )}
       </div>
       <div className="mt-1 flex items-center justify-between gap-2">
@@ -96,7 +89,7 @@ export const QuizCard = ({ quiz, questionCount }: { quiz: any; questionCount: nu
   <div className="flex flex-col gap-2 rounded-md border border-border p-4">
     <div className="flex flex-wrap items-center gap-1.5">
       <h3 className="text-sm font-semibold text-foreground">{quiz.title}</h3>
-      {quiz.topic_slug && <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">{getTopicLabel(quiz.topic_slug)}</span>}
+      {quiz.topic_slug && <Badge variant="unit" size="sm">{getTopicLabel(quiz.topic_slug)}</Badge>}
     </div>
     <p className="flex items-center gap-1 text-xs text-muted-foreground">
       <Clock className="h-3 w-3" /> {questionCount} questions
