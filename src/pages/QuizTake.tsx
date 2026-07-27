@@ -14,14 +14,10 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
+import { formatClock as formatTime } from "@/lib/format";
 
 const SECONDS_PER_QUESTION = 60;
 
-const formatTime = (s: number) => {
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, "0")}`;
-};
 
 const QuizTake = () => {
   const { id } = useParams();

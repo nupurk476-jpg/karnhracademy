@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { User, Mail, Phone, MapPin, FileText, Trophy, Clock, CalendarDays, Pencil, Save, X, BarChart3, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getDiscipline } from "@/lib/disciplines";
+import { formatDuration as formatTime } from "@/lib/format";
 
 type Profile = {
   id: string;
@@ -142,12 +143,6 @@ const ProfilePage = () => {
     } else {
       toast({ title: "No changes saved", description: "Please try again.", variant: "destructive" });
     }
-  };
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
   };
 
   // Accuracy per subject, weakest first — attempts on quizzes whose subject

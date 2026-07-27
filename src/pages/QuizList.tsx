@@ -8,11 +8,10 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { HelpCircle, ChevronRight, Clock, Calendar, LayoutGrid, List } from "lucide-react";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { fetchAllRows } from "@/lib/fetchAllRows";
+import { formatDate } from "@/lib/format";
 
 const PAGE_SIZE = 30;
 
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
 const SORTS = [
   { value: "latest", label: "Latest" },

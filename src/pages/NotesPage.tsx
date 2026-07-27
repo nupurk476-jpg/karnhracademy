@@ -11,6 +11,7 @@ import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
+import { formatDate } from "@/lib/format";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 
 const PAGE_SIZE = 30;
@@ -21,8 +22,6 @@ const formatSize = (bytes?: number | null) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
 const SORTS = [
   { value: "latest", label: "Latest" },

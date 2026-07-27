@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Medal, Clock } from "lucide-react";
+import { formatClock as formatTime } from "@/lib/format";
 
 interface LeaderboardEntry {
   user_id: string;
@@ -11,11 +12,6 @@ interface LeaderboardEntry {
   created_at: string;
 }
 
-const formatTime = (s: number) => {
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, "0")}`;
-};
 
 const rankIcons = [
   <Trophy key="1" className="h-5 w-5 text-[#C7994A]" />,

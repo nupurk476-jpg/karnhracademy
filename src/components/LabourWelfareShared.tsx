@@ -2,13 +2,12 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Calendar, Clock, Eye, Download, BookOpenCheck, FileCheck2 } from "lucide-react";
 import { getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
+import { formatDate } from "@/lib/format";
 
 // Small display bits shared by the Labour Welfare hub and its per-unit
 // subpages, so a note/quiz card looks and behaves identically wherever a
 // student encounters it.
 
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
 export const TagChip = ({ tag }: { tag: string }) => (
   <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">#{tag}</span>

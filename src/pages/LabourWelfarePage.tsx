@@ -16,11 +16,10 @@ import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
+import { formatDate } from "@/lib/format";
 import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
 import ExamInfoSection from "@/components/ExamInfoSection";
 
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const LabourWelfarePage = () => {
