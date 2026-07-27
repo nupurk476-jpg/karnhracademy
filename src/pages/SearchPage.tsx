@@ -6,7 +6,8 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
-import { Search, FileText, HelpCircle, Newspaper, BookOpen, ChevronRight } from "lucide-react";
+import { HIGH_SCORING_TOPICS, getUnitsForTopic } from "@/lib/highScoringTopics";
+import { Search, FileText, HelpCircle, Newspaper, BookOpen, ChevronRight, GraduationCap, ScrollText, PlayCircle } from "lucide-react";
 
 // Route prefix for each discipline's static topic pages (lw has no per-topic
 // pages — its content lives on the unit-wise hub instead).
@@ -15,7 +16,7 @@ const TOPIC_ROUTE_PREFIX: Record<string, string> = {
 };
 
 type Result = {
-  kind: "note" | "quiz" | "blog" | "topic";
+  kind: "note" | "quiz" | "pyq" | "blog" | "topic" | "lwtopic" | "lecture";
   title: string;
   description?: string;
   badge?: string;
@@ -44,10 +45,13 @@ function scoreItem(term: string, title: string, secondary: string, body: string)
 }
 
 const KIND_META = {
-  note:  { label: "Study Notes",  icon: FileText },
-  quiz:  { label: "MCQ Quizzes",  icon: HelpCircle },
-  blog:  { label: "Articles",     icon: Newspaper },
-  topic: { label: "Topic Pages",  icon: BookOpen },
+  lwtopic: { label: "UGC NET Topics",        icon: GraduationCap },
+  topic:   { label: "Topic Pages",           icon: BookOpen },
+  note:    { label: "Study Notes",           icon: FileText },
+  pyq:     { label: "Previous Year Papers",  icon: ScrollText },
+  quiz:    { label: "MCQ Quizzes",           icon: HelpCircle },
+  lecture: { label: "Video Lectures",        icon: PlayCircle },
+  blog:    { label: "Articles",              icon: Newspaper },
 } as const;
 
 const SearchPage = () => {
@@ -57,6 +61,8 @@ const SearchPage = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
+  const [pyqs, setPyqs] = useState<any[]>([]);
+  const [lectures, setLectures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { setInput(q); }, [q]);
@@ -66,10 +72,14 @@ const SearchPage = () => {
       supabase.from("notes").select("id, title, description, subject, topic_slug, tags"),
       supabase.from("quizzes").select("id, title, topic, description, subject, topic_slug, published"),
       supabase.from("blog_posts").select("id, title, excerpt, slug, category, published"),
-    ]).then(([n, qz, b]) => {
+      (supabase.from("pyq_papers" as any) as any).select("id, title, year, subject, answer_key_url"),
+      (supabase.from("lectures" as any) as any).select("id, title, subject, topic_slug"),
+    ]).then(([n, qz, b, p, l]) => {
       if (n.data) setNotes(n.data);
       if (qz.data) setQuizzes(qz.data.filter((x: any) => x.published !== false));
       if (b.data) setBlogs(b.data.filter((x: any) => x.published !== false));
+      if (p.data) setPyqs(p.data);
+      if (l.data) setLectures(l.data);
       setLoading(false);
     });
   }, []);
@@ -125,8 +135,39 @@ const SearchPage = () => {
       }
     }
 
+    // The 97 curated UGC NET high-scoring topic pages — previously
+    // invisible to search despite being the site's richest static content.
+    for (const t of HIGH_SCORING_TOPICS) {
+      const unitText = getUnitsForTopic(t).map(u => u.title).join(" ");
+      const score = scoreItem(term, t.name, unitText, "labour welfare ugc net");
+      if (score > 0) out.push({
+        kind: "lwtopic", title: t.name, badge: "UGC NET",
+        description: getUnitsForTopic(t).map(u => `Unit ${u.number}: ${u.title}`).join(" · "),
+        to: `/ugc-net-labour-welfare/topic/${t.slug}`, score,
+      });
+    }
+
+    for (const p of pyqs) {
+      const score = scoreItem(term, p.title, String(p.year), "previous year question paper pyq");
+      if (score > 0) out.push({
+        kind: "pyq", title: p.title,
+        description: `${p.year}${p.answer_key_url ? " · answer key included" : ""}`,
+        badge: p.subject ? getDiscipline(p.subject)?.short : undefined,
+        to: `/pyqs/paper/${p.id}`, score,
+      });
+    }
+
+    for (const l of lectures) {
+      const score = scoreItem(term, l.title, getTopicLabel(l.topic_slug) || "", "video lecture");
+      if (score > 0) out.push({
+        kind: "lecture", title: l.title,
+        badge: l.subject ? getDiscipline(l.subject)?.short : undefined,
+        to: "/lectures", score,
+      });
+    }
+
     return out.sort((a, b) => b.score - a.score);
-  }, [q, notes, quizzes, blogs]);
+  }, [q, notes, quizzes, blogs, pyqs, lectures]);
 
   const grouped = useMemo(() => {
     const g: Partial<Record<Result["kind"], Result[]>> = {};
