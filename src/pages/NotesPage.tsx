@@ -1,19 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Download, Eye, LayoutGrid, List, Calendar, PlayCircle } from "lucide-react";
 import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { useDownloadGate } from "@/hooks/use-download-gate";
 
 const PAGE_SIZE = 30;
-const EMAIL_KEY = "khr_subscriber_email";
 
 const formatSize = (bytes?: number | null) => {
   if (!bytes || bytes <= 0) return null;
@@ -34,8 +33,6 @@ const SORTS = [
 const NotesPage = () => {
   const [searchParams] = useSearchParams();
   const [notes, setNotes] = useState<any[]>([]);
-  const [email, setEmail] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   // ?q= lets the sitewide /search page deep-link to a specific note here.
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const requestedSubject = searchParams.get("subject");
@@ -46,9 +43,7 @@ const NotesPage = () => {
   const [sort, setSort] = useState<(typeof SORTS)[number]["value"]>("latest");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  // Email gate: asked once, remembered locally. pendingNote is opened after the gate.
-  const [gateOpen, setGateOpen] = useState(false);
-  const pendingNote = useRef<{ note: any; mode: "view" | "download" } | null>(null);
+  const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -117,45 +112,14 @@ const NotesPage = () => {
   };
 
   // Note files live in a private bucket — every open/download exchanges the
-  // stored (no-longer-directly-fetchable) URL for a short-lived signed one,
-  // so a captured link can't just be reshared and reused forever.
+  // stored (no-longer-directly-fetchable) URL for a short-lived signed one.
+  // Viewing is friction-free; downloads go through the shared one-time
+  // email gate (the same use-download-gate hook every other page uses —
+  // this page used to carry its own diverging copy).
   const requestNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    const saved = localStorage.getItem(EMAIL_KEY);
-    // In-browser viewing stays friction-free for first-time visitors — the
-    // email ask is reserved for downloads (keeping the lead capture where
-    // the taken-away copy is).
-    if (saved || mode === "view") {
-      const win = window.open("", "_blank"); // synchronous within the click — popup-safe
-      getSignedFileUrl(note.file_url, "notes", mode === "download").then((url) => {
-        if (!url) { win?.close(); return; }
-        recordView(note);
-        if (win) win.location.href = url; else window.open(url, "_blank");
-      });
-      return;
-    }
-    pendingNote.current = { note, mode };
-    setGateOpen(true);
-  };
-
-  const handleGateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !pendingNote.current) return;
-    const { note, mode } = pendingNote.current;
-    // Open the tab synchronously (within the submit click's call stack) so the
-    // browser doesn't treat it as an unrequested popup after the awaits below.
-    const win = note.file_url ? window.open("", "_blank") : null;
-    setSubmitting(true);
-    await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
-    setSubmitting(false);
-    localStorage.setItem(EMAIL_KEY, email.trim());
-    setGateOpen(false);
-    setEmail("");
-    pendingNote.current = null;
-    if (win) {
-      const url = await getSignedFileUrl(note.file_url, "notes", mode === "download");
-      if (url) { recordView(note); win.location.href = url; } else win.close();
-    }
+    const open = mode === "download" ? request : openFree;
+    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordView(note));
   };
 
   // ── Note renderers ───────────────────────────────────────────────────────
@@ -394,39 +358,7 @@ const NotesPage = () => {
         )}
       </main>
 
-      {/* One-time email gate */}
-      <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) { setGateOpen(false); pendingNote.current = null; } }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Enter your email to continue</DialogTitle>
-            <DialogDescription>One-time step — we'll remember you on this device and send occasional updates about new study materials.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleGateSubmit} className="space-y-3">
-            <input
-              type="email"
-              required
-              autoFocus
-              placeholder="your@email.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <div className="flex gap-3">
-              <button type="submit" disabled={submitting} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
-                {submitting ? "..." : "Continue"}
-              </button>
-              <button type="button" onClick={() => { setGateOpen(false); pendingNote.current = null; }} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
-                Cancel
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              By continuing, you agree to our{" "}
-              <Link to="/privacy-policy" className="text-accent-deep hover:underline">Privacy Policy</Link>.
-            </p>
-          </form>
-        </DialogContent>
-      </Dialog>
-
+      <GateDialog />
       <Footer />
     </div>
   );
