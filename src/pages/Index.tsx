@@ -343,7 +343,7 @@ const Subjects = () => (
         </Link>
       </div>
       {/* Labour Welfare is deliberately left out of this grid — the
-          LabourWelfareBanner section immediately below already gives it a
+          AudienceSplit section immediately below already gives it a
           full, dedicated promotion, so a plain tile here just repeated the
           same "go to the Labour Welfare hub" link a second time in a row. */}
       <div className="flex flex-wrap justify-center gap-4">
@@ -367,86 +367,117 @@ const Subjects = () => (
   </section>
 );
 
-// ─────────────── Section: Labour Welfare feature banner ─────────────────────
-// A framed callout for the one subject that has a full unit-wise hub (notes +
-// MCQs + previous year papers across all 10 official units) rather than just
-// a filtered notes view, so it doesn't get lost among the plain subject tiles.
-const LabourWelfareBanner = () => {
-  const [notesCount, setNotesCount] = useState<number | null>(null);
-  const [quizCount, setQuizCount] = useState<number | null>(null);
-  const [pyqCount, setPyqCount] = useState<number | null>(null);
+// ─────────────── Section: audience split ────────────────────────────────────
+// One "who are you?" section replaces the two stacked full-width promo
+// banners (UGC NET + MBA/BBA) — the same framed style, half the height,
+// side-by-side so a first-time visitor self-selects in one glance instead
+// of scrolling through two screens of promotion.
+const AudienceSplit = () => {
+  const [lw, setLw] = useState<{ notes: number | null; quizzes: number | null; pyqs: number | null }>({ notes: null, quizzes: null, pyqs: null });
+  const [mba, setMba] = useState<{ notes: number | null; quizzes: number | null; lectures: number | null }>({ notes: null, quizzes: null, lectures: null });
 
-  // Three independent queries (not Promise.all) — same pattern as
-  // useContentCounts above, which avoids TypeScript trying to infer one
-  // combined tuple type across differently-shaped Supabase query builders.
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("subject", "lw")
-      .then(({ count }) => setNotesCount(count ?? 0));
+      .then(({ count }) => setLw(v => ({ ...v, notes: count ?? 0 })));
     (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).eq("subject", "lw")
-      .then(({ count }: any) => setQuizCount(count ?? 0));
+      .then(({ count }: any) => setLw(v => ({ ...v, quizzes: count ?? 0 })));
     (supabase.from("pyq_papers" as any) as any).select("id", { count: "exact", head: true }).eq("subject", "lw")
-      .then(({ count }: any) => setPyqCount(count ?? 0));
+      .then(({ count }: any) => setLw(v => ({ ...v, pyqs: count ?? 0 })));
+    supabase.from("notes").select("id", { count: "exact", head: true }).neq("subject", "lw")
+      .then(({ count }) => setMba(v => ({ ...v, notes: count ?? 0 })));
+    (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).neq("subject", "lw")
+      .then(({ count }: any) => setMba(v => ({ ...v, quizzes: count ?? 0 })));
+    (supabase.from("lectures" as any) as any).select("id", { count: "exact", head: true })
+      .then(({ count }: any) => setMba(v => ({ ...v, lectures: count ?? 0 })));
   }, []);
 
-  const stats = [
-    { label: "Units", value: "10" },
-    { label: "Notes", value: notesCount !== null ? String(notesCount) : "…" },
-    { label: "MCQ Sets", value: quizCount !== null ? String(quizCount) : "…" },
-    { label: "PYQ Papers", value: pyqCount !== null ? String(pyqCount) : "…" },
-  ];
+  const n = (v: number | null) => (v !== null ? String(v) : "…");
+
+  const AudienceCard = ({
+    accent, eyebrowColor, eyebrow, icon: Icon, title, body, stats, to, cta,
+  }: {
+    accent: string; eyebrowColor: string; eyebrow: string; icon: any; title: string; body: string;
+    stats: { label: string; value: string }[]; to: string; cta: string;
+  }) => (
+    <div
+      className="relative flex flex-col overflow-hidden rounded-3xl border-2 p-7 md:p-9"
+      style={{ borderColor: accent, background: `linear-gradient(135deg, ${accent}0a, ${accent}14)` }}
+    >
+      <div className="absolute -right-7 -top-7 h-24 w-24 rotate-45 rounded-2xl opacity-[0.07]" style={{ background: accent }} />
+      <div className="mb-3 flex items-center gap-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: accent }}>
+          <Icon className="h-4.5 w-4.5 text-white" />
+        </span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: eyebrowColor }}>
+          {eyebrow}
+        </span>
+      </div>
+      <h3 className="mb-2 font-display text-xl font-extrabold leading-tight text-slate-900 sm:text-2xl">{title}</h3>
+      <p className="mb-5 text-sm leading-relaxed text-slate-600">{body}</p>
+      <div className="mb-6 flex flex-wrap gap-x-6 gap-y-2">
+        {stats.map(st => (
+          <div key={st.label}>
+            <p className="font-display text-xl font-extrabold" style={{ color: accent }}>{st.value}</p>
+            <p className="text-[11px] font-semibold text-slate-500">{st.label}</p>
+          </div>
+        ))}
+      </div>
+      <Link
+        to={to}
+        className="mt-auto inline-flex w-fit items-center gap-2 rounded-lg px-5 py-2.5 font-display text-sm font-bold text-white transition-all hover:opacity-90"
+        style={{ background: accent }}
+      >
+        {cta} <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
 
   return (
     <section className="py-16 md:py-20 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          className="relative overflow-hidden rounded-3xl border-2 p-8 md:p-12"
-          style={{ borderColor: NAVY_DARK, background: `linear-gradient(135deg, ${NAVY_DARK}0a, ${STEEL}0a)` }}
-        >
-          <div className="absolute -right-8 -top-8 h-32 w-32 rotate-45 rounded-2xl opacity-[0.06]" style={{ background: NAVY_DARK }} />
-          <div className="absolute right-16 bottom-10 h-14 w-14 rotate-45 rounded-xl opacity-[0.10]" style={{ background: GOLD }} />
-
-          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: NAVY_DARK }}>
-                  <HandHeart className="h-4.5 w-4.5 text-white" />
-                </span>
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: NAVY_DARK }}>
-                  UGC NET/JRF Paper II · Subject Code 55
-                </span>
-              </div>
-              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
-                UGC NET/JRF Labour Welfare — our only fully unit-wise study hub
-              </h2>
-              <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
-                Management, HRM, HRD &amp; IHRM, Organisational Behaviour, Industrial Relations &amp; Trade Unions,
-                Industrial Disputes, Labour Legislation, Wages, Labour Welfare &amp; Social Security, and Labour
-                Market — every one of the 10 official UGC NET/JRF units, with notes, MCQs, and previous year
-                question papers all organised unit-by-unit.
-              </p>
-              <Link
-                to="/ugc-net-labour-welfare"
-                className="font-display inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
-                style={{ background: NAVY_DARK }}
-              >
-                <ScrollText className="h-4 w-4" /> Explore the Unit-wise Hub <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${NAVY_DARK}25` }}>
-              {stats.map(s => (
-                <div key={s.label} className="text-center">
-                  <p className="font-display text-2xl font-extrabold" style={{ color: NAVY_DARK }}>{s.value}</p>
-                  <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="mb-10 flex flex-col items-center text-center">
+          <GoldLabel text="Choose your path" />
+          <SectionHeading center title="Two kinds of learners. One platform." sub="Pick the track that matches your goal — everything on it is free." />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <AudienceCard
+            accent={NAVY_DARK}
+            eyebrowColor={NAVY_DARK}
+            eyebrow="UGC NET/JRF Paper II · Code 55"
+            icon={HandHeart}
+            title="Preparing for UGC NET/JRF Labour Welfare?"
+            body="All 10 official units with notes, MCQs and previous year papers — the only fully unit-wise hub for Subject Code 55."
+            stats={[
+              { label: "Units", value: "10" },
+              { label: "Notes", value: n(lw.notes) },
+              { label: "MCQ Sets", value: n(lw.quizzes) },
+              { label: "PYQ Papers", value: n(lw.pyqs) },
+            ]}
+            to="/ugc-net-labour-welfare"
+            cta="Explore the Unit-wise Hub"
+          />
+          <AudienceCard
+            accent={GOLD_DARK}
+            eyebrowColor={GOLD_TEXT}
+            eyebrow="MBA · BBA · PGDM · B.Com"
+            icon={GraduationCap}
+            title="Studying HR & Management this semester?"
+            body="Seven core subjects with semester-wise guidance — Principles of Management through OD & Change and International HRM."
+            stats={[
+              { label: "Subjects", value: "7" },
+              { label: "Notes", value: n(mba.notes) },
+              { label: "MCQ Sets", value: n(mba.quizzes) },
+              { label: "Lectures", value: n(mba.lectures) },
+            ]}
+            to="/mba-bba"
+            cta="Explore the MBA/BBA Hub"
+          />
         </div>
       </div>
     </section>
   );
 };
+
 
 // ─────────────── Section: Featured Notes (live from DB) ──────────────────────
 const FeaturedNotes = () => {
@@ -729,82 +760,6 @@ const PopularTopics = () => (
   </section>
 );
 
-// ─────────────── Section: MBA/BBA feature banner ─────────────────────────────
-// Gold-accent sibling of the Labour Welfare banner above — same framed-callout
-// shape so they read as a pair of audience entry points (UGC NET aspirants vs
-// semester students), different palette so the page doesn't repeat itself.
-const MBABBABanner = () => {
-  const [notesCount, setNotesCount] = useState<number | null>(null);
-  const [quizCount, setQuizCount] = useState<number | null>(null);
-  const [lecturesCount, setLecturesCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    supabase.from("notes").select("id", { count: "exact", head: true }).neq("subject", "lw")
-      .then(({ count }) => setNotesCount(count ?? 0));
-    (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).neq("subject", "lw")
-      .then(({ count }: any) => setQuizCount(count ?? 0));
-    (supabase.from("lectures" as any) as any).select("id", { count: "exact", head: true })
-      .then(({ count }: any) => setLecturesCount(count ?? 0));
-  }, []);
-
-  const stats = [
-    { label: "Subjects", value: "7" },
-    { label: "Notes", value: notesCount !== null ? String(notesCount) : "…" },
-    { label: "MCQ Sets", value: quizCount !== null ? String(quizCount) : "…" },
-    { label: "Lectures", value: lecturesCount !== null ? String(lecturesCount) : "…" },
-  ];
-
-  return (
-    <section className="pb-16 md:pb-20 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          className="relative overflow-hidden rounded-3xl border-2 p-8 md:p-12"
-          style={{ borderColor: GOLD_DARK, background: `linear-gradient(135deg, ${GOLD}0d, ${GOLD_DARK}0a)` }}
-        >
-          <div className="absolute -right-8 -top-8 h-32 w-32 rotate-45 rounded-2xl opacity-[0.06]" style={{ background: GOLD_DARK }} />
-          <div className="absolute right-16 bottom-10 h-14 w-14 rotate-45 rounded-xl opacity-[0.10]" style={{ background: NAVY_DARK }} />
-
-          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: GOLD_DARK }}>
-                  <GraduationCap className="h-4.5 w-4.5 text-white" />
-                </span>
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD_TEXT }}>
-                  MBA · BBA · PGDM · B.Com
-                </span>
-              </div>
-              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
-                MBA / BBA Management Studies — semester-wise resources
-              </h2>
-              <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
-                Principles of Management, Organisational Behaviour, Business Communication, HRM, Strategic
-                Management, OD &amp; Change Management, and International HRM — notes, MCQ practice and video
-                lectures for every semester, with a guide to which subject falls where.
-              </p>
-              <Link
-                to="/mba-bba"
-                className="font-display inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
-                style={{ background: GOLD_DARK }}
-              >
-                <GraduationCap className="h-4 w-4" /> Explore the MBA/BBA Hub <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${GOLD_DARK}30` }}>
-              {stats.map(s => (
-                <div key={s.label} className="text-center">
-                  <p className="font-display text-2xl font-extrabold" style={{ color: GOLD_DARK }}>{s.value}</p>
-                  <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
 
 // ─────────────── Section: Meet the Founder ───────────────────────────────────
 // Set this to the founder's exact LinkedIn profile URL when available; the
@@ -1016,8 +971,7 @@ const Index = () => (
       <QuickAccess />
       <CompactHowItWorks />
       <Subjects />
-      <LabourWelfareBanner />
-      <MBABBABanner />
+      <AudienceSplit />
       <FeaturedNotes />
       <VideoLectures />
       <BooksSection />
