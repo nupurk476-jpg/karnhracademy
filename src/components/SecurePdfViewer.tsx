@@ -82,6 +82,7 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
   const [pageNum, setPageNum] = useState(initialPage);
   const [scale, setScale] = useState(1.1);
   const [pageRendering, setPageRendering] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [matchPages, setMatchPages] = useState<number[]>([]);
   const [searching, setSearching] = useState(false);
@@ -282,6 +283,11 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      {/* The canvas renders pixels only (deliberately — no selectable text
+          layer), so narrate position changes for screen-reader users. */}
+      <p className="sr-only" role="status">
+        {status === "ready" ? `Page ${pageNum} of ${numPages}` : "Loading document"}
+      </p>
       {/* ── Toolbar ─────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-slate-50 px-3 py-2.5">
         <div className="flex items-center gap-1">
@@ -334,9 +340,22 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
           </button>
         </div>
 
-        <div className="mx-1 h-5 w-px bg-border" />
+        {/* On phones the search field hides behind a toggle and, when open,
+            wraps to its own full-width row — it used to fight the page and
+            zoom controls for one cramped line. */}
+        <button
+          onClick={() => setMobileSearchOpen(o => !o)}
+          aria-label={mobileSearchOpen ? "Hide search" : "Search this paper"}
+          aria-expanded={mobileSearchOpen}
+          disabled={status !== "ready"}
+          className="ml-auto rounded-md p-2 text-muted-foreground hover:bg-white hover:text-foreground disabled:opacity-30 sm:hidden"
+        >
+          <Search className="h-4 w-4" />
+        </button>
 
-        <div className="relative flex-1 min-w-[160px] max-w-xs">
+        <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
+
+        <div className={`relative order-last basis-full sm:order-none sm:basis-auto sm:flex-1 sm:min-w-[160px] sm:max-w-xs ${mobileSearchOpen ? "" : "hidden sm:block"}`}>
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"

@@ -100,6 +100,25 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Sora', sans-serif;
   }
+
+  /* One keyboard-focus treatment for everything — the hand-rolled buttons
+     and links relied on the UA default, which disappears against navy
+     surfaces. shadcn components keep their own ring (more specific). */
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent-deep));
+    outline-offset: 2px;
+  }
+
+  /* Vestibular safety: kill decorative motion (card lifts, hover slides,
+     pulse dots) for users who asked the OS for reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 /* ============================================================
