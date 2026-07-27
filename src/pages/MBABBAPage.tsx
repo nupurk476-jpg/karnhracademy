@@ -252,7 +252,7 @@ const MBABBAPage = () => {
                       {getDiscipline(note.subject)?.short ?? note.subject?.toUpperCase() ?? ""}
                     </p>
                     <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-[#A9823F]">
-                      View PPT <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      Open PPT <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </button>
                 ))}

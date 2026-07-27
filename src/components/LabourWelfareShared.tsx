@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, Calendar, Clock, Eye, Download } from "lucide-react";
-import { getTopicLabel } from "@/lib/disciplines";
+import { ChevronRight, Calendar, Clock, Eye, Download, BookOpenCheck, FileCheck2 } from "lucide-react";
+import { getTopicLabel, getDiscipline } from "@/lib/disciplines";
+import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 
 // Small display bits shared by the Labour Welfare hub and its per-unit
 // subpages, so a note/quiz card looks and behaves identically wherever a
@@ -38,7 +39,7 @@ export const NoteRow = ({ note, onView, onDownload }: { note: any; onView: () =>
     </div>
     <div className="flex shrink-0 items-center gap-2">
       <button onClick={onView} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">
-        <Eye className="h-3.5 w-3.5" /> View Notes
+        <Eye className="h-3.5 w-3.5" /> Read Notes
       </button>
       <button onClick={onDownload} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
         <Download className="h-3.5 w-3.5" /> Download
@@ -46,6 +47,45 @@ export const NoteRow = ({ note, onView, onDownload }: { note: any; onView: () =>
     </div>
   </div>
 );
+
+// One PYQ card for every surface that lists papers (the general /pyqs
+// browser, the LW hub, unit pages, topic pages) — the markup used to be
+// copy-pasted four times and had already drifted (view counts showed on
+// one page only). Title → public paper landing page; button → reader.
+export const PYQCard = ({ pyq, showSubject = false, showViews = false }: { pyq: any; showSubject?: boolean; showViews?: boolean }) => {
+  const discipline = showSubject ? getDiscipline(pyq.subject) : null;
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
+      <h3 className="text-sm font-semibold text-foreground">
+        <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
+      </h3>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {discipline && (
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>
+        )}
+        {(pyq.unit_tags ?? []).map((n: number) => (
+          <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
+            Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
+          </span>
+        ))}
+        {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
+        {pyq.answer_key_url && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+            <FileCheck2 className="h-3 w-3" /> Answer key included
+          </span>
+        )}
+      </div>
+      <div className="mt-1 flex items-center justify-between gap-2">
+        {showViews && (pyq.view_count ?? 0) > 0 ? (
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" /> {pyq.view_count} views</span>
+        ) : <span />}
+        <Link to={`/pyqs/view/${pyq.id}`} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
+          <BookOpenCheck className="h-3.5 w-3.5" /> Read Online
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 export const QuizCard = ({ quiz, questionCount }: { quiz: any; questionCount: number }) => (
   <div className="flex flex-col gap-2 rounded-md border border-border p-4">

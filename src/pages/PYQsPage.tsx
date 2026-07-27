@@ -6,10 +6,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { TagChip, EmptyState } from "@/components/LabourWelfareShared";
+import { EmptyState, PYQCard } from "@/components/LabourWelfareShared";
 import { getDiscipline } from "@/lib/disciplines";
-import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { ScrollText, BookOpenCheck, Eye, FileCheck2, History } from "lucide-react";
+import { ScrollText, BookOpenCheck, Eye, History } from "lucide-react";
 
 // General Previous Year Question paper browser — every paper, across every
 // subject, in one flat list grouped by year. Not split into per-subject
@@ -182,40 +181,9 @@ const PYQsPage = () => {
                   <div key={year}>
                     <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{year}</p>
                     <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                      {filtered.filter(p => p.year === year).map(pyq => {
-                        const discipline = getDiscipline(pyq.subject);
-                        return (
-                          <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
-                            <h3 className="text-sm font-semibold text-foreground">
-                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              {discipline && (
-                                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">{discipline.short}</span>
-                              )}
-                              {(pyq.unit_tags ?? []).map((n: number) => (
-                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">
-                                  Unit {unitRoman(n)}{getUnitByNumber(n) ? `: ${getUnitByNumber(n)!.title}` : ""}
-                                </span>
-                              ))}
-                              {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
-                              {pyq.answer_key_url && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                  <FileCheck2 className="h-3 w-3" /> Answer key included
-                                </span>
-                              )}
-                            </div>
-                            <div className="mt-1 flex items-center justify-between gap-2">
-                              {(pyq.view_count ?? 0) > 0 ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"><Eye className="h-3 w-3" /> {pyq.view_count} views</span>
-                              ) : <span />}
-                              <Link to={`/pyqs/view/${pyq.id}`} className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                                <BookOpenCheck className="h-3.5 w-3.5" /> View Online
-                              </Link>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {filtered.filter(p => p.year === year).map(pyq => (
+                        <PYQCard key={pyq.id} pyq={pyq} showSubject showViews />
+                      ))}
                     </div>
                   </div>
                 ))}

@@ -15,7 +15,7 @@ import {
 import { getTopicLabel } from "@/lib/disciplines";
 import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
-import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
+import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
 import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
 import ExamInfoSection from "@/components/ExamInfoSection";
 
@@ -385,25 +385,7 @@ const LabourWelfarePage = () => {
                       <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{year}</p>
                       <div className="grid gap-2.5 sm:grid-cols-2">
                         {filteredPyqs.filter(p => p.year === year).map(pyq => (
-                          <div key={pyq.id} className="flex flex-col gap-2 rounded-md border border-border p-4">
-                            <h3 className="text-sm font-semibold text-foreground">
-                              <Link to={`/pyqs/paper/${pyq.id}`} className="hover:text-accent-deep hover:underline">{pyq.title}</Link>
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              {(pyq.unit_tags ?? []).map((n: number) => (
-                                <span key={n} className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent-deep">Unit {unitRoman(n)}</span>
-                              ))}
-                              {(pyq.tags ?? []).map((t: string) => <TagChip key={t} tag={t} />)}
-                              {pyq.answer_key_url && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                                  <FileCheck2 className="h-3 w-3" /> Answer key included
-                                </span>
-                              )}
-                            </div>
-                            <Link to={`/pyqs/view/${pyq.id}`} className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110">
-                              <BookOpenCheck className="h-3.5 w-3.5" /> View Online
-                            </Link>
-                          </div>
+                          <PYQCard key={pyq.id} pyq={pyq} />
                         ))}
                       </div>
                     </div>
