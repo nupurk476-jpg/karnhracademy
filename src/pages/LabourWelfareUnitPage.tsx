@@ -14,12 +14,16 @@ import { getUnitByNumber, getUnitForTopicSlug, unitRoman } from "@/lib/labourWel
 import { ArrowLeft, ArrowRight, FileText, HelpCircle, ScrollText, PlayCircle, BookOpenCheck, FileCheck2 } from "lucide-react";
 
 const LabourWelfareUnitPage = () => {
-  const { unitNumber } = useParams();
+  // Route param is the whole segment ("unit-2") — parse the number out; any
+  // other segment under /ugc-net-labour-welfare falls into the not-found
+  // branch below.
+  const { unitSlug } = useParams();
+  const unitNumber = /^unit-(\d+)$/.exec(unitSlug ?? "")?.[1];
   const n = Number(unitNumber);
-  const unit = getUnitByNumber(n);
+  const unit = unitNumber ? getUnitByNumber(n) : undefined;
 
   const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useLabourWelfareContent();
-  const { request, GateDialog } = useDownloadGate();
+  const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
 
   const recordNoteView = (note: any) => {
@@ -29,7 +33,9 @@ const LabourWelfareUnitPage = () => {
   };
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    request(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    // Viewing stays friction-free; the email ask applies to downloads only.
+    const open = mode === "download" ? request : openFree;
+    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };
 
   const unitNotes = useMemo(

@@ -82,7 +82,10 @@ const App = () => (
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/ugc-net-labour-welfare" element={<LabourWelfarePage />} />
             <Route path="/mba-bba" element={<MBABBAPage />} />
-            <Route path="/ugc-net-labour-welfare/unit-:unitNumber" element={<LabourWelfareUnitPage />} />
+            {/* React Router v6 has no partial-segment params ("unit-:n" never
+                matches), so the whole segment is the param and the page parses
+                the "unit-" prefix out itself. URLs stay /unit-2 etc. */}
+            <Route path="/ugc-net-labour-welfare/:unitSlug" element={<LabourWelfareUnitPage />} />
             <Route path="/ugc-net-labour-welfare/topic/:topicSlug" element={<LabourWelfareTopicPage />} />
             <Route path="/lectures" element={<LecturesPage />} />
             <Route path="/live-lectures" element={<LiveLecturesPage />} />
