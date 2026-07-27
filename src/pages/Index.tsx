@@ -14,7 +14,7 @@ import {
   CheckCircle2, ChevronRight, Clock, Award,
   PlayCircle, BookMarked, Search,
   Mail, HandHeart, ScrollText, Linkedin,
-  BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap,
+  BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap, History,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -110,6 +110,11 @@ const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color
 const Hero = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [totalNotes, setTotalNotes] = useState<number | null>(null);
+  // Signed-in students with a paper mid-read get a "Resume reading" pill in
+  // place of the generic sign-up pitch — the same reading-progress data the
+  // PYQs page's "Continue where you left off" strip uses, surfaced at the
+  // very first thing a returning visitor sees instead of only on /pyqs.
+  const [resume, setResume] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     supabase.from("notes").select("subject").then(({ data }) => {
@@ -122,6 +127,24 @@ const Hero = () => {
       });
       setCounts(map);
     });
+
+    let cancelled = false;
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user || cancelled) return;
+      const { data: progress } = await (supabase.from("pyq_reading_progress" as any) as any)
+        .select("pyq_id, last_page, total_pages")
+        .order("updated_at", { ascending: false })
+        .limit(1);
+      const pr = progress?.[0];
+      if (!pr || cancelled) return;
+      const midRead = pr.last_page > 1 && (!pr.total_pages || pr.last_page < pr.total_pages);
+      if (!midRead) return;
+      const { data: paper } = await (supabase.from("pyq_papers" as any) as any)
+        .select("title").eq("id", pr.pyq_id).maybeSingle();
+      if (!paper || cancelled) return;
+      setResume({ id: pr.pyq_id, title: paper.title });
+    });
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -136,10 +159,24 @@ const Hero = () => {
 
         {/* Left */}
         <div className="flex flex-col justify-center">
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-            <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>100% Free Academic Resource Platform</span>
-          </div>
+          {resume ? (
+            <Link
+              to={`/pyqs/view/${resume.id}`}
+              className="group inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit max-w-full transition-colors hover:opacity-90"
+              style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}
+            >
+              <History aria-hidden="true" className="h-3.5 w-3.5 flex-shrink-0" style={{ color: GOLD_TEXT }} />
+              <span className="truncate text-xs font-semibold" style={{ color: GOLD_TEXT }}>
+                Resume reading: {resume.title}
+              </span>
+              <ArrowRight aria-hidden="true" className="h-3 w-3 flex-shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: GOLD_TEXT }} />
+            </Link>
+          ) : (
+            <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
+              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
+              <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>100% Free Academic Resource Platform</span>
+            </div>
+          )}
 
           <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
             Notes, MCQs &amp; PYQs for{" "}
