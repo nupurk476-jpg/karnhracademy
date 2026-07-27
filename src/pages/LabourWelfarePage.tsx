@@ -25,7 +25,7 @@ const formatDate = (iso: string) =>
 // ── Page ──────────────────────────────────────────────────────────────────────
 const LabourWelfarePage = () => {
   const { notes, quizzes, questionCounts, pyqs, loading } = useLabourWelfareContent();
-  const { request, GateDialog } = useDownloadGate();
+  const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
 
   const [search, setSearch] = useState("");
@@ -42,7 +42,9 @@ const LabourWelfarePage = () => {
 
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    request(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    // Viewing stays friction-free; the email ask applies to downloads only.
+    const open = mode === "download" ? request : openFree;
+    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };
 
   const allTags = useMemo(() => {

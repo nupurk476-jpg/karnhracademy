@@ -17,15 +17,21 @@ export function useDownloadGate() {
   const [gateOpen, setGateOpen] = useState(false);
   const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
 
+  // Ungated open — used for in-browser *viewing*, which stays friction-free
+  // for first-time visitors; the email ask is reserved for downloads.
+  const openFree = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
+    const win = window.open("", "_blank"); // synchronous within the click — popup-safe
+    resolveUrl().then((url) => {
+      if (!url) { win?.close(); return; }
+      onOpened();
+      if (win) win.location.href = url; else window.open(url, "_blank");
+    });
+  };
+
   const request = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
     const saved = localStorage.getItem(EMAIL_KEY);
     if (saved) {
-      const win = window.open("", "_blank"); // synchronous within the click — popup-safe
-      resolveUrl().then((url) => {
-        if (!url) { win?.close(); return; }
-        onOpened();
-        if (win) win.location.href = url; else window.open(url, "_blank");
-      });
+      openFree(resolveUrl, onOpened);
       return;
     }
     pending.current = { resolveUrl, onOpened };
@@ -78,5 +84,5 @@ export function useDownloadGate() {
     </Dialog>
   );
 
-  return { request, GateDialog };
+  return { request, openFree, GateDialog };
 }

@@ -122,7 +122,10 @@ const NotesPage = () => {
   const requestNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
     const saved = localStorage.getItem(EMAIL_KEY);
-    if (saved) {
+    // In-browser viewing stays friction-free for first-time visitors — the
+    // email ask is reserved for downloads (keeping the lead capture where
+    // the taken-away copy is).
+    if (saved || mode === "view") {
       const win = window.open("", "_blank"); // synchronous within the click — popup-safe
       getSignedFileUrl(note.file_url, "notes", mode === "download").then((url) => {
         if (!url) { win?.close(); return; }

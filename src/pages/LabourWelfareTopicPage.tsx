@@ -20,7 +20,7 @@ const LabourWelfareTopicPage = () => {
   const topic = getHighScoringTopicBySlug(topicSlug);
 
   const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useLabourWelfareContent();
-  const { request, GateDialog } = useDownloadGate();
+  const { request, openFree, GateDialog } = useDownloadGate();
   const { isBookmarked, toggle } = useBookmarks();
   const { toast } = useToast();
 
@@ -31,7 +31,9 @@ const LabourWelfareTopicPage = () => {
   };
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
-    request(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    // Viewing stays friction-free; the email ask applies to downloads only.
+    const open = mode === "download" ? request : openFree;
+    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
   };
 
   const units = useMemo(() => (topic ? getUnitsForTopic(topic) : []), [topic]);
