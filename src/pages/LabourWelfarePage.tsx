@@ -17,6 +17,7 @@ import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { TagChip, EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
+import ExamInfoSection from "@/components/ExamInfoSection";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
@@ -161,6 +162,9 @@ const LabourWelfarePage = () => {
             </div>
           </div>
         </section>
+
+        {/* ── Exam Essentials (admin-managed quick-reference cards) ─────── */}
+        <ExamInfoSection />
 
         {/* ── Browse by Unit ────────────────────────────────────────────── */}
         <section className="border-b border-border bg-slate-50 py-10">
