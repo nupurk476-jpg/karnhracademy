@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { label: "Home", to: "/" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
+  { label: "MBA/BBA", to: "/mba-bba" },
   { label: "Notes", to: "/notes" },
   { label: "MCQs", to: "/quizzes" },
   { label: "PYQs", to: "/pyqs" },

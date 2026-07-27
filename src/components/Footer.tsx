@@ -72,6 +72,7 @@ const Footer = () => {
               {[
                 { label: "Home", to: "/" },
                 { label: "UGC NET/JRF Labour Welfare", to: "/ugc-net-labour-welfare" },
+                { label: "MBA / BBA Hub", to: "/mba-bba" },
                 { label: "Notes", to: "/notes" },
                 { label: "MCQs", to: "/quizzes" },
                 { label: "Previous Year Questions", to: "/pyqs" },
