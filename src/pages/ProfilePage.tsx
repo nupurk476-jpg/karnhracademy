@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { User, Mail, Phone, MapPin, FileText, Trophy, Clock, CalendarDays, Pencil, Save, X } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Trophy, Clock, CalendarDays, Pencil, Save, X, BarChart3, BookOpen } from "lucide-react";
+import { Link } from "react-router-dom";
+import { getDiscipline } from "@/lib/disciplines";
 
 type Profile = {
   id: string;
@@ -26,7 +28,7 @@ type QuizAttempt = {
   total_questions: number;
   time_taken_seconds: number;
   created_at: string;
-  quiz: { title: string; topic: string } | null;
+  quiz: { title: string; topic: string; subject: string | null } | null;
 };
 
 const ProfilePage = () => {
@@ -80,7 +82,7 @@ const ProfilePage = () => {
 
       const { data: att } = await supabase
         .from("quiz_attempts")
-        .select("id, score, total_questions, time_taken_seconds, created_at, quiz:quizzes(title, topic)")
+        .select("id, score, total_questions, time_taken_seconds, created_at, quiz:quizzes(title, topic, subject)")
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
 
@@ -147,6 +149,31 @@ const ProfilePage = () => {
     const sec = s % 60;
     return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
   };
+
+  // Accuracy per subject, weakest first — attempts on quizzes whose subject
+  // is missing fall back to the quiz's HRM default (same as elsewhere).
+  const subjectStats = (() => {
+    const bySubject: Record<string, { correct: number; total: number; attempts: number }> = {};
+    attempts.forEach((a) => {
+      if (!a.total_questions) return;
+      const s = a.quiz?.subject || "hrm";
+      bySubject[s] ??= { correct: 0, total: 0, attempts: 0 };
+      bySubject[s].correct += a.score;
+      bySubject[s].total += a.total_questions;
+      bySubject[s].attempts += 1;
+    });
+    return Object.entries(bySubject)
+      .map(([subject, s]) => ({
+        subject,
+        label: getDiscipline(subject)?.short ?? subject.toUpperCase(),
+        accuracy: Math.round((s.correct / s.total) * 100),
+        attempts: s.attempts,
+      }))
+      .sort((a, b) => a.accuracy - b.accuracy);
+  })();
+
+  const accuracyColor = (pct: number) =>
+    pct < 50 ? "#B4552D" : pct < 70 ? "#A9823F" : "#3D7A50";
 
   if (loading) {
     return (
@@ -316,9 +343,44 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Attempt list */}
+              {/* Performance by subject — weakest first so the next study
+                  session has an obvious starting point. */}
+              {subjectStats.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-foreground">
+                    <BarChart3 className="h-4 w-4 text-accent" /> Performance by Subject
+                  </h3>
+                  <div className="space-y-2.5">
+                    {subjectStats.map((s, i) => (
+                      <div key={s.subject} className="flex flex-wrap items-center gap-3 rounded-md border border-border p-3">
+                        <span className="w-28 shrink-0 text-sm font-semibold text-foreground">{s.label}</span>
+                        <div className="h-2 min-w-24 flex-1 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full rounded-full" style={{ width: `${s.accuracy}%`, background: accuracyColor(s.accuracy) }} />
+                        </div>
+                        <span className="w-12 shrink-0 text-right text-sm font-bold" style={{ color: accuracyColor(s.accuracy) }}>{s.accuracy}%</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">{s.attempts} quiz{s.attempts !== 1 ? "zes" : ""}</span>
+                        {i === 0 && subjectStats.length > 1 && s.accuracy < 70 && (
+                          <span className="flex shrink-0 items-center gap-2 text-xs">
+                            <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">Focus area</span>
+                            <Link to="/notes" className="inline-flex items-center gap-1 font-semibold text-accent hover:underline">
+                              <BookOpen className="h-3 w-3" /> Revise notes
+                            </Link>
+                            <Link to="/quizzes" className="font-semibold text-accent hover:underline">Practice more →</Link>
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Attempt list — recent only; a long-time user's full history
+                  would otherwise grow into an unbounded wall. */}
               <div className="space-y-3">
-                {attempts.map((a) => (
+                {attempts.length > 10 && (
+                  <p className="text-xs text-muted-foreground">Showing your 10 most recent attempts of {attempts.length}.</p>
+                )}
+                {attempts.slice(0, 10).map((a) => (
                   <div key={a.id} className="flex flex-col gap-2 rounded-md border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="font-medium text-foreground">{a.quiz?.title || "Unknown Quiz"}</p>
