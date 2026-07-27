@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -18,23 +19,25 @@ import { ScrollText, BookOpenCheck, Eye, FileCheck2, History } from "lucide-reac
 // more than one has real papers.
 const PYQsPage = () => {
   const [searchParams] = useSearchParams();
-  const [pyqs, setPyqs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [yearFilter, setYearFilter] = useState<number | "all">("all");
   const [tagFilter, setTagFilter] = useState("all");
   const [progress, setProgress] = useState<any[]>([]);
 
-  useEffect(() => {
-    (supabase.from("pyq_papers" as any) as any)
-      .select("*")
-      .order("year", { ascending: false })
-      .then(({ data, error }: any) => {
-        if (error) { console.error("PYQsPage: failed to load papers", error); setLoading(false); return; }
-        setPyqs(data ?? []);
-        setLoading(false);
-      });
+  // Cached sitewide — the same list backs search and the paper pages.
+  const { data: pyqData, isPending: loading } = useQuery({
+    queryKey: ["pyq-papers-all"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("pyq_papers" as any) as any)
+        .select("*").order("year", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const pyqs = useMemo(() => pyqData ?? [], [pyqData]);
 
+  useEffect(() => {
     // Signed-in readers get a "continue where you left off" strip. RLS
     // already scopes rows to the current user; signed-out visitors just
     // get an empty result and no strip.

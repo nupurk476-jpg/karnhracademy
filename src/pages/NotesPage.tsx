@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -32,7 +33,7 @@ const SORTS = [
 
 const NotesPage = () => {
   const [searchParams] = useSearchParams();
-  const [notes, setNotes] = useState<any[]>([]);
+
   // ?q= lets the sitewide /search page deep-link to a specific note here.
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const requestedSubject = searchParams.get("subject");
@@ -46,12 +47,16 @@ const NotesPage = () => {
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
-      if (error) { console.error("NotesPage: failed to load notes", error); return; }
-      if (data) setNotes(data);
-    });
-  }, []);
+  const { data: noteData } = useQuery({
+    queryKey: ["notes-all"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("notes").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const notes = useMemo(() => noteData ?? [], [noteData]);
 
   // Single source of truth for "does this note belong to this discipline?"
   // (legacy HRM notes were saved with subject = null before the column existed).

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight, FileText, BookOpen, Bell, BarChart3, UserCheck,
@@ -44,19 +44,18 @@ const TINTS = [
 // notification, cut-offs, eligibility etc. Cards come from the admin-managed
 // exam_info_cards table; the whole section disappears when none exist.
 const ExamInfoSection = () => {
-  const [cards, setCards] = useState<ExamInfoCard[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (supabase.from("exam_info_cards" as any) as any)
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true })
-      .then(({ data }: any) => {
-        if (!cancelled && data) setCards(data);
-      });
-    return () => { cancelled = true; };
-  }, []);
+  const { data } = useQuery({
+    queryKey: ["exam-info-cards"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data: rows } = await (supabase.from("exam_info_cards" as any) as any)
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+      return (rows ?? []) as ExamInfoCard[];
+    },
+  });
+  const cards = data ?? [];
 
   const visible = cards.filter(c => c.link_url || c.file_url);
   if (visible.length === 0) return null;

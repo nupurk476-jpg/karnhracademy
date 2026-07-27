@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -47,19 +48,17 @@ const SEMESTER_GUIDE = [
 const isPpt = (url: string | null) => !!url && /\.pptx?$/i.test(url.split("?")[0]);
 
 const MBABBAPage = () => {
-  const [counts, setCounts] = useState<{ notes: Record<string, number>; quizzes: Record<string, number>; lectures: Record<string, number> } | null>(null);
-  const [pptNotes, setPptNotes] = useState<any[]>([]);
   const { request, GateDialog } = useDownloadGate();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const { data: bundle } = useQuery({
+    queryKey: ["mba-content"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
       const [{ data: noteRows }, { data: quizRows }, { data: lectureRows }] = await Promise.all([
         supabase.from("notes").select("id, title, description, file_url, subject, created_at"),
         (supabase.from("quizzes") as any).select("subject, published"),
         (supabase.from("lectures" as any) as any).select("subject"),
       ]);
-      if (cancelled) return;
       const tally = (rows: any[] | null, filter?: (r: any) => boolean) => {
         const out: Record<string, number> = {};
         (rows ?? []).filter(r => !filter || filter(r)).forEach((r: any) => {
@@ -68,19 +67,20 @@ const MBABBAPage = () => {
         });
         return out;
       };
-      setCounts({
-        notes: tally(noteRows),
-        quizzes: tally(quizRows, (q: any) => q.published !== false),
-        lectures: tally(lectureRows),
-      });
-      setPptNotes(
-        (noteRows ?? [])
+      return {
+        counts: {
+          notes: tally(noteRows),
+          quizzes: tally(quizRows, (q: any) => q.published !== false),
+          lectures: tally(lectureRows),
+        },
+        pptNotes: (noteRows ?? [])
           .filter((n: any) => isPpt(n.file_url))
           .sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at)),
-      );
-    })();
-    return () => { cancelled = true; };
-  }, []);
+      };
+    },
+  });
+  const counts = bundle?.counts ?? null;
+  const pptNotes = useMemo(() => bundle?.pptNotes ?? [], [bundle]);
 
   // Same gated open flow as the Notes page: one-time email gate, then a
   // fresh short-lived signed URL (the bucket is private), plus a view count.

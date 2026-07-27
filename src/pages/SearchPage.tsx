@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -58,31 +59,33 @@ const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get("q") ?? "";
   const [input, setInput] = useState(q);
-  const [notes, setNotes] = useState<any[]>([]);
-  const [quizzes, setQuizzes] = useState<any[]>([]);
-  const [blogs, setBlogs] = useState<any[]>([]);
-  const [pyqs, setPyqs] = useState<any[]>([]);
-  const [lectures, setLectures] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => { setInput(q); }, [q]);
 
-  useEffect(() => {
-    Promise.all([
-      supabase.from("notes").select("id, title, description, subject, topic_slug, tags"),
-      supabase.from("quizzes").select("id, title, topic, description, subject, topic_slug, published"),
-      supabase.from("blog_posts").select("id, title, excerpt, slug, category, published"),
-      (supabase.from("pyq_papers" as any) as any).select("id, title, year, subject, answer_key_url"),
-      (supabase.from("lectures" as any) as any).select("id, title, subject, topic_slug"),
-    ]).then(([n, qz, b, p, l]) => {
-      if (n.data) setNotes(n.data);
-      if (qz.data) setQuizzes(qz.data.filter((x: any) => x.published !== false));
-      if (b.data) setBlogs(b.data.filter((x: any) => x.published !== false));
-      if (p.data) setPyqs(p.data);
-      if (l.data) setLectures(l.data);
-      setLoading(false);
-    });
-  }, []);
+  const { data: index, isPending: loading } = useQuery({
+    queryKey: ["search-index"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const [n, qz, b, p, l] = await Promise.all([
+        supabase.from("notes").select("id, title, description, subject, topic_slug, tags"),
+        supabase.from("quizzes").select("id, title, topic, description, subject, topic_slug, published"),
+        supabase.from("blog_posts").select("id, title, excerpt, slug, category, published"),
+        (supabase.from("pyq_papers" as any) as any).select("id, title, year, subject, answer_key_url"),
+        (supabase.from("lectures" as any) as any).select("id, title, subject, topic_slug"),
+      ]);
+      return {
+        notes: n.data ?? [],
+        quizzes: (qz.data ?? []).filter((x: any) => x.published !== false),
+        blogs: (b.data ?? []).filter((x: any) => x.published !== false),
+        pyqs: p.data ?? [],
+        lectures: l.data ?? [],
+      };
+    },
+  });
+  const notes = index?.notes ?? [];
+  const quizzes = index?.quizzes ?? [];
+  const blogs = index?.blogs ?? [];
+  const pyqs = index?.pyqs ?? [];
+  const lectures = index?.lectures ?? [];
 
   const results = useMemo<Result[]>(() => {
     const term = q.trim();
