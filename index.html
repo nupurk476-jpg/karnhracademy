@@ -14,23 +14,10 @@
 
     <meta name="theme-color" content="#1F4E79" />
 
-    <!-- Fonts: preconnect + non-render-blocking load (print-media swap trick) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts are self-hosted (@fontsource imports in src/main.tsx) — no
+         Google Fonts round-trips. -->
     <!-- Supabase: every page's first data fetch goes here — warm up DNS+TLS early -->
     <link rel="preconnect" href="https://miynvbkcufwrofgdrtap.supabase.co" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700;800&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700;800&display=swap"
-      />
-    </noscript>
 
     <meta name="google-site-verification" content="y4MdPlJryulwOqCqnji2213KcdY8PKZgVLS8umqy_oo" />
 

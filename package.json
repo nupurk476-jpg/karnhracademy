@@ -14,6 +14,10 @@
     "publish-blog": "node publish-blog.mjs"
   },
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/sora": "^5.3.0",
+    "@fontsource/source-sans-3": "^5.3.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-progress": "^1.1.7",
