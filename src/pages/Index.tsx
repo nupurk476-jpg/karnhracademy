@@ -708,6 +708,83 @@ const PopularTopics = () => (
   </section>
 );
 
+// ─────────────── Section: MBA/BBA feature banner ─────────────────────────────
+// Gold-accent sibling of the Labour Welfare banner above — same framed-callout
+// shape so they read as a pair of audience entry points (UGC NET aspirants vs
+// semester students), different palette so the page doesn't repeat itself.
+const MBABBABanner = () => {
+  const [notesCount, setNotesCount] = useState<number | null>(null);
+  const [quizCount, setQuizCount] = useState<number | null>(null);
+  const [lecturesCount, setLecturesCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.from("notes").select("id", { count: "exact", head: true }).neq("subject", "lw")
+      .then(({ count }) => setNotesCount(count ?? 0));
+    (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).neq("subject", "lw")
+      .then(({ count }: any) => setQuizCount(count ?? 0));
+    (supabase.from("lectures" as any) as any).select("id", { count: "exact", head: true })
+      .then(({ count }: any) => setLecturesCount(count ?? 0));
+  }, []);
+
+  const stats = [
+    { label: "Subjects", value: "7" },
+    { label: "Notes", value: notesCount !== null ? String(notesCount) : "…" },
+    { label: "MCQ Sets", value: quizCount !== null ? String(quizCount) : "…" },
+    { label: "Lectures", value: lecturesCount !== null ? String(lecturesCount) : "…" },
+  ];
+
+  return (
+    <section className="pb-16 md:pb-20 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div
+          className="relative overflow-hidden rounded-3xl border-2 p-8 md:p-12"
+          style={{ borderColor: GOLD_DARK, background: `linear-gradient(135deg, ${GOLD}0d, ${GOLD_DARK}0a)` }}
+        >
+          <div className="absolute -right-8 -top-8 h-32 w-32 rotate-45 rounded-2xl opacity-[0.06]" style={{ background: GOLD_DARK }} />
+          <div className="absolute right-16 bottom-10 h-14 w-14 rotate-45 rounded-xl opacity-[0.10]" style={{ background: NAVY_DARK }} />
+
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: GOLD_DARK }}>
+                  <GraduationCap className="h-4.5 w-4.5 text-white" />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD_DARK }}>
+                  MBA · BBA · PGDM · B.Com
+                </span>
+              </div>
+              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl" style={{ fontFamily: "'Sora',sans-serif" }}>
+                MBA / BBA Management Studies — semester-wise resources
+              </h2>
+              <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+                Principles of Management, Organisational Behaviour, Business Communication, HRM, Strategic
+                Management, OD &amp; Change Management, and International HRM — notes, MCQ practice and video
+                lectures for every semester, with a guide to which subject falls where.
+              </p>
+              <Link
+                to="/mba-bba"
+                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
+                style={{ background: GOLD_DARK, fontFamily: "'Sora',sans-serif" }}
+              >
+                <GraduationCap className="h-4 w-4" /> Explore the MBA/BBA Hub <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${GOLD_DARK}30` }}>
+              {stats.map(s => (
+                <div key={s.label} className="text-center">
+                  <p className="text-2xl font-extrabold" style={{ color: GOLD_DARK, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
+                  <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ─────────────── Section: Meet the Founder ───────────────────────────────────
 // Set this to the founder's exact LinkedIn profile URL when available; the
 // default is a safe public search for her name, so the button always works.
@@ -919,6 +996,7 @@ const Index = () => (
       <CompactHowItWorks />
       <Subjects />
       <LabourWelfareBanner />
+      <MBABBABanner />
       <FeaturedNotes />
       <VideoLectures />
       <BooksSection />
