@@ -244,14 +244,14 @@ const MBABBAPage = () => {
                     onClick={() => openPpt(note)}
                     className="group flex flex-col gap-1.5 rounded-lg border border-border bg-white p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <span className="mb-1 flex h-8 w-8 items-center justify-center rounded-lg bg-[#F7F1E3]">
-                      <Presentation className="h-4 w-4 text-[#A9823F]" />
+                    <span className="mb-1 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-cream">
+                      <Presentation className="h-4 w-4 text-brand-gold-deep" />
                     </span>
                     <h3 className="text-sm font-bold leading-snug text-foreground line-clamp-2">{note.title}</h3>
                     <p className="text-[11px] text-muted-foreground">
                       {getDiscipline(note.subject)?.short ?? note.subject?.toUpperCase() ?? ""}
                     </p>
-                    <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-[#A9823F]">
+                    <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-brand-gold-deep">
                       Open PPT <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                     </span>
                   </button>

@@ -18,16 +18,18 @@ import {
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
-const NAVY  = "#1F4E79";
-const NAVY_DARK = "#0D2A45";
-const STEEL = "#5B8AB8";
-const STEEL_DARK = "#3D6C98";
-const GOLD  = "#C7994A";
-const GOLD_DARK = "#A9823F";
-// Gold for TEXT on light grounds — the display golds above sit under 3.5:1
-// on white and fail WCAG AA for link/label-sized text; this cut passes.
-const GOLD_TEXT = "#8A6A28";
-const LIGHT = "#EEF0F8";
+// Sourced from the single palette in src/lib/brand.ts (the same values
+// Tailwind's brand-* classes resolve to) — these local aliases only keep
+// this page's many inline styles terse.
+import { BRAND } from "@/lib/brand";
+const NAVY = BRAND.navy;
+const NAVY_DARK = BRAND.navyDeep;
+const STEEL = BRAND.steel;
+const STEEL_DARK = BRAND.steelDeep;
+const GOLD = BRAND.gold;
+const GOLD_DARK = BRAND.goldDeep;
+const GOLD_TEXT = BRAND.goldText;
+const LIGHT = BRAND.light;
 
 // ─────────────── Data ────────────────────────────────────────────────────────
 // Hex colors for this page's custom (non-Tailwind-class) styling, keyed by
@@ -494,9 +496,9 @@ const FeaturedNotes = () => {
                 <div className="flex flex-col flex-1 p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
-                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-[#DCE6F1] text-[#1F4E79]">New</span>}
+                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-brand-mist text-brand-navy">New</span>}
                   </div>
-                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-[#1F4E79] transition-colors">
+                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-brand-navy transition-colors">
                     {note.title}
                   </h3>
                   <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
@@ -596,7 +598,7 @@ const VideoLectures = () => {
                 </span>
               </div>
               <div className="p-5">
-                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-[#1F4E79] transition-colors">
+                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-brand-navy transition-colors">
                   {lec.title}
                 </h3>
                 {lec.description && <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lec.description}</p>}
@@ -717,7 +719,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-[#C7994A] hover:text-[#8A6A28] hover:bg-[#F7F1E3]" style={{ borderColor: "#DCE6F1" }}>
+            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#DCE6F1" }}>
               {t.label}
             </Link>
           ))}
@@ -975,7 +977,7 @@ const Newsletter = () => {
               placeholder="your@email.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C7994A]/50"
+              className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
               style={{ background: "#FFFFFF", border: "1px solid #C9D8E8" }}
             />
             <button type="submit" disabled={loading} className="font-display rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY }}>
@@ -993,7 +995,7 @@ const Newsletter = () => {
         </div>
         <p className="mt-4 text-xs" style={{ color: "#7A8FA6" }}>
           By subscribing, you agree to our{" "}
-          <Link to="/privacy-policy" className="underline hover:text-[#1F4E79]">Privacy Policy</Link>.
+          <Link to="/privacy-policy" className="underline hover:text-brand-navy">Privacy Policy</Link>.
         </p>
       </div>
     </section>

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { BRAND } from "./src/lib/brand";
 
 export default {
   darkMode: ["class"],
@@ -19,6 +20,20 @@ export default {
         display: ["Sora", "sans-serif"],
       },
       colors: {
+        // Marketing palette — single-sourced from src/lib/brand.ts so
+        // classes and inline-style code can never drift apart.
+        brand: {
+          navy: BRAND.navy,
+          "navy-deep": BRAND.navyDeep,
+          steel: BRAND.steel,
+          "steel-deep": BRAND.steelDeep,
+          gold: BRAND.gold,
+          "gold-deep": BRAND.goldDeep,
+          "gold-text": BRAND.goldText,
+          light: BRAND.light,
+          mist: BRAND.mist,
+          cream: BRAND.cream,
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

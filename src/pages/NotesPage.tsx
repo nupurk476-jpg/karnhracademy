@@ -143,7 +143,7 @@ const NotesPage = () => {
         </span>
       )}
       {note.video_url && (
-        <span className="inline-flex items-center gap-0.5 rounded-full bg-[#EEF0F8] px-2 py-0.5 text-[11px] font-semibold text-[#3D6C98]">
+        <span className="inline-flex items-center gap-0.5 rounded-full bg-brand-light px-2 py-0.5 text-[11px] font-semibold text-brand-steel-deep">
           <PlayCircle className="h-3 w-3" /> Video
         </span>
       )}
