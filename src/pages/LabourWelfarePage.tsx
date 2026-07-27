@@ -147,7 +147,7 @@ const LabourWelfarePage = () => {
             <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET/JRF Labour Welfare" }]} />
 
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">UGC NET/JRF Paper II · Subject Code 55</p>
-            <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
               UGC NET/JRF Labour Welfare — Unit-wise Study Hub
             </h1>
             <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">

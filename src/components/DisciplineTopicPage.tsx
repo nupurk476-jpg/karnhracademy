@@ -101,7 +101,7 @@ const DisciplineTopicPage = ({
             <topic.icon className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-3xl font-bold text-foreground">
               {topic.label}
             </h1>
             <p className="mt-1 text-muted-foreground">{topic.desc}</p>

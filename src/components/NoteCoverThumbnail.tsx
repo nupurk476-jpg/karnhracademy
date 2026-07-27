@@ -41,7 +41,7 @@ const GeneratedNoteCover = ({
         <span className="inline-flex w-fit items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
           <Icon className="h-3 w-3" /> {fileTypeLabel}
         </span>
-        <h3 className="text-sm font-bold leading-snug text-white line-clamp-3" style={{ fontFamily: "'Sora',sans-serif" }}>
+        <h3 className="text-sm font-bold leading-snug text-white line-clamp-3">
           {title}
         </h3>
       </div>

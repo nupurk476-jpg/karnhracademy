@@ -13,6 +13,11 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["'Source Sans 3'", "sans-serif"],
+        // The site's single display face (headings, logo, stat numerals).
+        display: ["Sora", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

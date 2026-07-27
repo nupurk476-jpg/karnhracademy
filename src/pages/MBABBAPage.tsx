@@ -124,7 +124,7 @@ const MBABBAPage = () => {
             <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "MBA / BBA Hub" }]} />
 
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">MBA · BBA · PGDM · B.Com</p>
-            <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
               MBA / BBA Management Studies Hub
             </h1>
             <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">

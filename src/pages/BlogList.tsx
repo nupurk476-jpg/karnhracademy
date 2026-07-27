@@ -336,7 +336,7 @@ const BlogList = () => {
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">
               Academic Insights
             </p>
-            <h1 className="mb-4 text-4xl font-bold leading-tight text-foreground" style={{ fontFamily: "'Sora', sans-serif" }}>
+            <h1 className="mb-4 text-4xl font-bold leading-tight text-foreground">
               HR & Management<br />Knowledge Hub
             </h1>
             <p className="mb-8 text-base leading-relaxed text-muted-foreground">

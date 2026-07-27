@@ -193,7 +193,7 @@ const ProfilePage = () => {
         {/* Profile Card */}
         <div className="mb-10 rounded-lg border border-border bg-card p-6 md:p-8">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-2xl font-bold text-foreground">
               My Profile
             </h1>
             {!editing && (
@@ -306,7 +306,7 @@ const ProfilePage = () => {
 
         {/* Quiz Activity */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8">
-          <h2 className="mb-6 text-xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="mb-6 text-xl font-bold text-foreground">
             <Trophy className="mr-2 inline h-5 w-5 text-accent-deep" />
             Quiz Activity
           </h2>

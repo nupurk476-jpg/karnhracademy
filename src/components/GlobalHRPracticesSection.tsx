@@ -21,7 +21,7 @@ const GlobalHRPracticesSection = () => {
           <span className="mb-2 inline-block rounded-full bg-accent/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-accent-deep">
             International HRM
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="mt-3 text-3xl font-bold text-foreground md:text-4xl">
             International HRM Practices
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">

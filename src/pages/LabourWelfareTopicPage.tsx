@@ -123,7 +123,7 @@ const LabourWelfareTopicPage = () => {
               <p className="text-xs font-semibold uppercase tracking-widest text-accent-deep">High-Scoring Topic · {FREQUENCY_LABEL[topic.frequency]}</p>
             </div>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-              <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl" style={{ fontFamily: "'Sora', sans-serif" }}>
+              <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl">
                 {topic.name}
               </h1>
               <button

@@ -131,7 +131,7 @@ const PYQPaperPage = () => {
           )}
         </div>
 
-        <h1 className="mb-3 text-2xl font-bold leading-tight text-foreground sm:text-3xl" style={{ fontFamily: "'Sora', sans-serif" }}>
+        <h1 className="mb-3 text-2xl font-bold leading-tight text-foreground sm:text-3xl">
           {paper.title}
         </h1>
 

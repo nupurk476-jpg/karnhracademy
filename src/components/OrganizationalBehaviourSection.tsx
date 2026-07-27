@@ -28,7 +28,6 @@ const OrganizationalBehaviourSection = () => {
           </span>
           <h2
             className="mt-3 text-3xl font-bold text-foreground md:text-4xl"
-            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Organisational Behaviour
           </h2>

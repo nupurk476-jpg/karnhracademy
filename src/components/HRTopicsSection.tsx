@@ -48,7 +48,6 @@ const HRTopicsSection = () => {
           </span>
           <h2
             className="mt-3 text-3xl font-bold text-foreground md:text-4xl"
-            style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Human Resource Management
           </h2>

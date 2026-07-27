@@ -66,7 +66,7 @@ const LiveLecturesPage = () => {
           <span className="inline-flex items-center gap-2 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-destructive">
             <Radio className="h-3 w-3" /> Live Sessions
           </span>
-          <h1 className="mt-3 text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="mt-3 text-4xl font-bold text-foreground">
             Live Lectures
           </h1>
           <p className="mt-2 text-muted-foreground">Join interactive live classes and Q&A sessions.</p>

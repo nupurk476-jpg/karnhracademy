@@ -95,7 +95,7 @@ const GoldLabel = ({ text }: { text: string }) => (
 
 const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: string; center?: boolean }) => (
   <div className={center ? "text-center" : ""}>
-    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight" style={{ fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
+    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight" style={{ letterSpacing: "-0.02em" }}>
       {title}
     </h2>
     {sub && <p className="mt-3 text-slate-500 max-w-xl leading-relaxed" style={center ? { margin: "0.75rem auto 0" } : {}}>{sub}</p>}
@@ -139,7 +139,7 @@ const Hero = () => {
             <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>100% Free Academic Resource Platform</span>
           </div>
 
-          <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
+          <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
             Notes, MCQs &amp; PYQs for{" "}
             <span style={{ color: GOLD_DARK }}>UGC NET/JRF Labour Welfare</span>,{" "}
             HRM &amp; Management Studies
@@ -153,10 +153,10 @@ const Hero = () => {
 
           {/* CTAs — one primary, one secondary */}
           <div className="flex flex-wrap gap-3 mb-8">
-            <Link to="/notes" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif", boxShadow: `0 6px 24px ${GOLD}40` }}>
+            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, boxShadow: `0 6px 24px ${GOLD}40` }}>
               Start Learning <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <Link to="/ugc-net-labour-welfare" className="inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}>
+            <Link to="/ugc-net-labour-welfare" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF" }}>
               <ScrollText className="h-4 w-4" /> UGC NET/JRF Labour Welfare
             </Link>
           </div>
@@ -188,9 +188,9 @@ const Hero = () => {
 
               {/* Card header — no star rating */}
               <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #EEF0F8" }}>
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>K</div>
+                <div className="font-display flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY }}>K</div>
                 <div>
-                  <p className="text-sm font-bold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>Karn HR Academy</p>
+                  <p className="font-display text-sm font-bold" style={{ color: NAVY }}>Karn HR Academy</p>
                   <p className="text-xs" style={{ color: "#7A8FA6" }}>Notes by subject — live from the library</p>
                 </div>
               </div>
@@ -225,7 +225,7 @@ const Hero = () => {
               {/* Total badge — inside the card at the bottom, no absolute overlap */}
               <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #DCE6F1" }}>
                 <p className="text-xs" style={{ color: "#64798F" }}>Study notes in library</p>
-                <p className="text-xl font-extrabold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>
+                <p className="font-display text-xl font-extrabold" style={{ color: NAVY }}>
                   {totalNotes !== null ? `${totalNotes}` : "…"}
                 </p>
               </div>
@@ -285,7 +285,7 @@ const QuickAccess = () => (
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: item.color }}>
                 <Icon className="h-5 w-5 text-white" />
               </div>
-              <p className="mb-1 text-sm font-bold leading-snug text-slate-800" style={{ fontFamily: "'Sora',sans-serif" }}>{item.label}</p>
+              <p className="font-display mb-1 text-sm font-bold leading-snug text-slate-800">{item.label}</p>
               <p className="flex-1 text-xs leading-relaxed text-slate-500">{item.desc}</p>
               <div className="mt-3 flex items-center gap-1 text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100" style={{ color: item.color }}>
                 Open <ChevronRight className="h-3.5 w-3.5" />
@@ -316,7 +316,7 @@ const CompactHowItWorks = () => (
                 <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full" style={{ background: GOLD, color: NAVY }}>
                   <Icon className="h-3.5 w-3.5" />
                 </span>
-                <span className="text-xs font-semibold" style={{ color: NAVY, fontFamily: "'Sora',sans-serif" }}>{r.title}</span>
+                <span className="font-display text-xs font-semibold" style={{ color: NAVY }}>{r.title}</span>
               </div>
               {i < ROADMAP.length - 1 && <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" style={{ color: GOLD_DARK }} />}
             </div>
@@ -413,7 +413,7 @@ const LabourWelfareBanner = () => {
                   UGC NET/JRF Paper II · Subject Code 55
                 </span>
               </div>
-              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl" style={{ fontFamily: "'Sora',sans-serif" }}>
+              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
                 UGC NET/JRF Labour Welfare — our only fully unit-wise study hub
               </h2>
               <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
@@ -424,8 +424,8 @@ const LabourWelfareBanner = () => {
               </p>
               <Link
                 to="/ugc-net-labour-welfare"
-                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
-                style={{ background: NAVY_DARK, fontFamily: "'Sora',sans-serif" }}
+                className="font-display inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
+                style={{ background: NAVY_DARK }}
               >
                 <ScrollText className="h-4 w-4" /> Explore the Unit-wise Hub <ArrowRight className="h-4 w-4" />
               </Link>
@@ -434,7 +434,7 @@ const LabourWelfareBanner = () => {
             <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${NAVY_DARK}25` }}>
               {stats.map(s => (
                 <div key={s.label} className="text-center">
-                  <p className="text-2xl font-extrabold" style={{ color: NAVY_DARK, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
+                  <p className="font-display text-2xl font-extrabold" style={{ color: NAVY_DARK }}>{s.value}</p>
                   <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
                 </div>
               ))}
@@ -496,7 +496,7 @@ const FeaturedNotes = () => {
                     <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
                     {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-[#DCE6F1] text-[#1F4E79]">New</span>}
                   </div>
-                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-[#1F4E79] transition-colors">
                     {note.title}
                   </h3>
                   <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
@@ -596,7 +596,7 @@ const VideoLectures = () => {
                 </span>
               </div>
               <div className="p-5">
-                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-[#1F4E79] transition-colors" style={{ fontFamily: "'Sora',sans-serif" }}>
+                <h3 className="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2 group-hover:text-[#1F4E79] transition-colors">
                   {lec.title}
                 </h3>
                 {lec.description && <p className="text-sm text-slate-500 line-clamp-2 mb-3">{lec.description}</p>}
@@ -693,7 +693,7 @@ const BooksSection = () => {
                 )}
               </div>
               <div className="flex flex-col flex-1 p-5">
-                <h3 className="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug" style={{ fontFamily: "'Sora',sans-serif" }}>{book.title}</h3>
+                <h3 className="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug">{book.title}</h3>
                 <p className="text-xs font-medium mb-3" style={{ color: bookColors[i % 4] }}>{book.author}</p>
                 <p className="text-xs leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-4">{book.description}</p>
                 <Link to="/books" className="inline-flex items-center gap-1 text-xs font-bold hover:underline" style={{ color: bookColors[i % 4] }}>
@@ -772,7 +772,7 @@ const MBABBABanner = () => {
                   MBA · BBA · PGDM · B.Com
                 </span>
               </div>
-              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl" style={{ fontFamily: "'Sora',sans-serif" }}>
+              <h2 className="mb-3 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl">
                 MBA / BBA Management Studies — semester-wise resources
               </h2>
               <p className="mb-6 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
@@ -782,8 +782,8 @@ const MBABBABanner = () => {
               </p>
               <Link
                 to="/mba-bba"
-                className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
-                style={{ background: GOLD_DARK, fontFamily: "'Sora',sans-serif" }}
+                className="font-display inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-all hover:opacity-90"
+                style={{ background: GOLD_DARK }}
               >
                 <GraduationCap className="h-4 w-4" /> Explore the MBA/BBA Hub <ArrowRight className="h-4 w-4" />
               </Link>
@@ -792,7 +792,7 @@ const MBABBABanner = () => {
             <div className="flex gap-4 lg:gap-6 lg:border-l lg:pl-8" style={{ borderColor: `${GOLD_DARK}30` }}>
               {stats.map(s => (
                 <div key={s.label} className="text-center">
-                  <p className="text-2xl font-extrabold" style={{ color: GOLD_DARK, fontFamily: "'Sora',sans-serif" }}>{s.value}</p>
+                  <p className="font-display text-2xl font-extrabold" style={{ color: GOLD_DARK }}>{s.value}</p>
                   <p className="text-[11px] font-semibold text-slate-500">{s.label}</p>
                 </div>
               ))}
@@ -852,7 +852,7 @@ const AboutAuthor = () => {
                 {photoUrl ? (
                   <img src={photoUrl} alt="Ms. Nupur Karn, founder of Karn HR Academy" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-3xl font-extrabold text-white" style={{ fontFamily: "'Sora',sans-serif" }}>NK</span>
+                  <span className="font-display text-3xl font-extrabold text-white">NK</span>
                 )}
               </div>
               <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow" style={{ background: GOLD }}>
@@ -861,7 +861,7 @@ const AboutAuthor = () => {
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1" style={{ color: GOLD_TEXT }}>Meet the Founder</p>
-              <h3 id="founder-heading" className="text-2xl font-extrabold text-slate-900" style={{ fontFamily: "'Sora',sans-serif" }}>Ms. Nupur Karn</h3>
+              <h3 id="founder-heading" className="text-2xl font-extrabold text-slate-900">Ms. Nupur Karn</h3>
               <p className="text-sm text-slate-500">Founder, Karn HR Academy</p>
             </div>
           </div>
@@ -884,22 +884,22 @@ const AboutAuthor = () => {
               href={FOUNDER_LINKEDIN}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
-              style={{ background: NAVY, fontFamily: "'Sora',sans-serif" }}
+              className="font-display inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: NAVY }}
             >
               <Linkedin aria-hidden="true" className="h-4 w-4" /> LinkedIn
             </a>
             <a
               href={`mailto:${FOUNDER_EMAIL}`}
-              className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}
+              className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF" }}
             >
               <Mail aria-hidden="true" className="h-4 w-4" /> Email
             </a>
             <Link
               to="/blogs"
-              className="inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF", fontFamily: "'Sora',sans-serif" }}
+              className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
+              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF" }}
             >
               <ScrollText aria-hidden="true" className="h-4 w-4" /> Publications
             </Link>
@@ -915,7 +915,7 @@ const AboutAuthor = () => {
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: item.color }}>
                   <Icon className="h-5 w-5 text-white" />
                 </div>
-                <p className="text-2xl font-extrabold leading-none mb-1" style={{ color: item.color, fontFamily: "'Sora',sans-serif" }}>{item.value}</p>
+                <p className="font-display text-2xl font-extrabold leading-none mb-1" style={{ color: item.color }}>{item.value}</p>
                 <p className="text-xs font-semibold text-slate-500">{item.label}</p>
               </div>
             );
@@ -956,7 +956,7 @@ const Newsletter = () => {
           <span className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: GOLD_TEXT }}>Stay Updated</span>
           <span className="h-px w-6 rounded-full" style={{ background: GOLD }} />
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: NAVY, fontFamily: "'Sora',sans-serif", letterSpacing: "-0.02em" }}>
+        <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: NAVY, letterSpacing: "-0.02em" }}>
           Join the HR Learning Community
         </h2>
         <p className="mb-8 leading-relaxed" style={{ color: "#4A6076" }}>
@@ -978,7 +978,7 @@ const Newsletter = () => {
               className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C7994A]/50"
               style={{ background: "#FFFFFF", border: "1px solid #C9D8E8" }}
             />
-            <button type="submit" disabled={loading} className="rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY, fontFamily: "'Sora',sans-serif" }}>
+            <button type="submit" disabled={loading} className="font-display rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY }}>
               {loading ? "Subscribing…" : "Subscribe Free"}
             </button>
           </form>

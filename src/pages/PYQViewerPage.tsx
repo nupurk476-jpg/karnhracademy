@@ -130,7 +130,7 @@ const PYQViewerPage = () => {
         <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-accent-deep">
           <ShieldCheck className="h-3.5 w-3.5" /> Secure Online Viewer
         </div>
-        <h1 className="mb-3 text-2xl font-bold leading-tight text-foreground sm:text-3xl" style={{ fontFamily: "'Sora', sans-serif" }}>
+        <h1 className="mb-3 text-2xl font-bold leading-tight text-foreground sm:text-3xl">
           {pyq.title}
         </h1>
         <div className="mb-6 flex flex-wrap items-center gap-1.5">

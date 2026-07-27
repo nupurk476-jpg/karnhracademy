@@ -80,7 +80,7 @@ const NewspaperPage = () => {
       <main id="main-content" className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-8">
           <p className="mb-1 text-sm font-semibold uppercase tracking-[0.15em] text-accent-deep">Stay Informed</p>
-          <h1 className="text-4xl font-bold text-foreground" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-4xl font-bold text-foreground">
             Newspaper Highlights
           </h1>
           <input

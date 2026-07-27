@@ -41,7 +41,7 @@ const AboutPage = () => {
                 {imageUrl ? (
                   <img src={imageUrl} alt="Educator" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-6xl font-bold text-primary/20" style={{ fontFamily: "'Playfair Display', serif" }}>HR</span>
+                  <span className="font-display text-6xl font-bold text-primary/20">HR</span>
                 )}
               </div>
               <div className="absolute -bottom-3 -right-3 rounded-lg bg-accent px-4 py-2">

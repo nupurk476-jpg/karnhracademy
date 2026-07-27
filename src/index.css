@@ -93,8 +93,12 @@
     @apply bg-background text-foreground;
     font-family: 'Source Sans 3', sans-serif;
   }
+  /* One display face sitewide. This base rule used to be Playfair Display,
+     which made every heading that DIDN'T inline Sora silently render serif —
+     the site read as two brands. Playfair survives only inside .blog-content
+     as the editorial voice. */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Sora', sans-serif;
   }
 }
 
