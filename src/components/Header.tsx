@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 // PYQs) lead; Blogs is deliberately not in this primary bar (still
 // reachable via the footer) since this is a study platform, not a
 // content-marketing site.
+// `wideOnly` items appear in the desktop bar only from xl up — at laptop
+// widths (lg–xl) the bar keeps the core product links and defers
+// About/Contact to the mobile menu and footer, instead of hiding the
+// entire nav behind a hamburger the way it used to below 1280px.
 const navItems = [
   { label: "Home", to: "/" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
@@ -16,9 +20,9 @@ const navItems = [
   { label: "Notes", to: "/notes" },
   { label: "MCQs", to: "/quizzes" },
   { label: "PYQs", to: "/pyqs" },
-  { label: "Video Lectures", to: "/lectures" },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
+  { label: "Lectures", to: "/lectures" },
+  { label: "About", to: "/about", wideOnly: true },
+  { label: "Contact", to: "/contact", wideOnly: true },
 ];
 
 const Header = () => {
@@ -122,13 +126,15 @@ const Header = () => {
           </div>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden xl:flex items-center gap-1 flex-1 justify-center">
+        {/* Desktop nav — visible from lg (1024px); tighter padding until xl */}
+        <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 justify-center">
           {navItems.map((item) => (
             <Link
               key={item.label}
               to={item.to}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`px-2 xl:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                item.wideOnly ? "hidden xl:block " : ""
+              }${
                 isActive(item.to)
                   ? "text-foreground bg-slate-100"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
@@ -209,7 +215,7 @@ const Header = () => {
 
           {/* Mobile hamburger */}
           <button
-            className="xl:hidden p-2 rounded-md text-foreground hover:bg-slate-50 transition-colors"
+            className="lg:hidden p-2 rounded-md text-foreground hover:bg-slate-50 transition-colors"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -221,7 +227,7 @@ const Header = () => {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="xl:hidden border-t border-border bg-white">
+        <div className="lg:hidden border-t border-border bg-white">
           {/* Mobile search */}
           <div className="px-4 pt-3 pb-2">
             <form onSubmit={submitSearch} className="relative">
