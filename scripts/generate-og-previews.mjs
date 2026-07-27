@@ -6,10 +6,13 @@
 // shared link shows the generic homepage preview.
 //
 // Fix: clone dist/index.html (the real, hashed post-build shell) once per
-// route with just the <head> meta swapped for that route's real values.
-// The <body> — an empty <div id="root"> plus the built script tag — is left
-// byte-identical, so a real visitor's React app boots exactly as it always
-// did; only a crawler that doesn't run JS benefits from the difference.
+// route with the <head> meta swapped for that route's real values, and —
+// for syllabus-structured routes whose content lives in static in-repo
+// data — real body text injected into <div id="root">. React's createRoot
+// (see src/main.tsx — client render, not hydrateRoot) replaces #root's
+// children wholesale on mount, so a JS-executing visitor still gets the
+// exact app they always did; crawlers that don't run JS now index real
+// content and internal links instead of an empty shell.
 // Static hosts (Vercel included) serve a real file at <route>/index.html in
 // preference to a SPA rewrite, so this needs no platform-specific config.
 //
@@ -45,7 +48,53 @@ const DEFAULT_TITLE = "Karn HR Academy — HRM, Labour Welfare &amp; Management 
 const DEFAULT_DESC = "Notes, MCQs, previous year questions, and video lectures for UGC NET/JRF Labour Welfare, HRM and Management Studies — organised by syllabus for aspirants, MBA/BBA students, and HR professionals. Free.";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
-function buildHtml({ title, description, path, image = DEFAULT_IMAGE, type = "website", jsonLd }) {
+// Pulls the official unit/topic structure straight out of the app's own
+// data module so the prerendered content can never drift from what the
+// live page renders. Regex-parsed (this plain Node script can't import TS);
+// fails soft to null — the affected routes then keep today's meta-only
+// shells rather than breaking the build.
+function parseLWUnits() {
+  try {
+    const src = readFileSync("src/lib/labourWelfareUnits.ts", "utf8");
+    const arrText = src.match(/export const LW_UNITS[^=]*=\s*\[([\s\S]*?)\n\];/)?.[1];
+    if (!arrText) return null;
+    const units = [];
+    const blockRe = /number:\s*(\d+),\s*title:\s*"([^"]+)",\s*topics:\s*\[([\s\S]*?)\]/g;
+    let m;
+    while ((m = blockRe.exec(arrText))) {
+      const topics = [];
+      const topicRe = /label:\s*"([^"]+)",\s*slug:\s*"([^"]+)"/g;
+      let t;
+      while ((t = topicRe.exec(m[3]))) topics.push({ label: t[1], slug: t[2] });
+      if (topics.length === 0) return null;
+      units.push({ number: Number(m[1]), title: m[2], topics });
+    }
+    return units.length === 10 ? units : null;
+  } catch {
+    return null;
+  }
+}
+const LW_UNITS_DATA = parseLWUnits();
+if (!LW_UNITS_DATA) console.warn("og-previews: LW_UNITS parse failed — unit/topic routes get meta-only shells");
+
+// Plain semantic HTML with light inline styling: visible for only the
+// moment before React mounts and replaces it, fully readable to any
+// crawler that never runs JS at all.
+const contentWrap = (inner) =>
+  `<div style="max-width:760px;margin:0 auto;padding:48px 24px;font-family:system-ui,-apple-system,sans-serif;color:#1e293b;line-height:1.65">${inner}</div>`;
+
+const breadcrumbLd = (items) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: items.map((it, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: it.name,
+    item: `${SITE_URL}${it.path}`,
+  })),
+});
+
+function buildHtml({ title, description, path, image = DEFAULT_IMAGE, type = "website", jsonLd, content }) {
   const url = `${SITE_URL}${path}`;
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
@@ -93,6 +142,9 @@ function buildHtml({ title, description, path, image = DEFAULT_IMAGE, type = "we
   if (jsonLd) {
     html = html.replace("</head>", `  <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>\n</head>`);
   }
+  if (content) {
+    html = html.replace(`<div id="root"></div>`, `<div id="root">${content}</div>`);
+  }
   return html;
 }
 
@@ -127,20 +179,50 @@ const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 const LW_UNIT_ROUTES = LW_UNIT_TITLES.map((title, i) => {
   const n = i + 1;
   const roman = ROMAN[i];
+  const path = `/ugc-net-labour-welfare/unit-${n}`;
+  const unitData = LW_UNITS_DATA?.find(u => u.number === n);
+
+  let content;
+  if (unitData) {
+    const topicItems = unitData.topics
+      .map(t => `<li>${escapeHtml(t.label)}</li>`)
+      .join("");
+    const prev = n > 1 ? `<a href="/ugc-net-labour-welfare/unit-${n - 1}">← Unit ${ROMAN[i - 1]}: ${escapeHtml(LW_UNIT_TITLES[i - 1])}</a>` : "";
+    const next = n < 10 ? `<a href="/ugc-net-labour-welfare/unit-${n + 1}">Unit ${ROMAN[i + 1]}: ${escapeHtml(LW_UNIT_TITLES[i + 1])} →</a>` : "";
+    content = contentWrap(`
+      <nav><a href="/">Home</a> › <a href="/ugc-net-labour-welfare">UGC NET/JRF Labour Welfare</a> › Unit ${roman}</nav>
+      <h1>Unit ${roman}: ${escapeHtml(title)} — UGC NET/JRF Labour Welfare</h1>
+      <p>Unit ${roman} of the official UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM syllabus (Subject Code 55). Free study notes, topic-wise MCQs, previous year question papers and video lectures for every topic in this unit.</p>
+      <h2>Topics covered in Unit ${roman}</h2>
+      <ul>${topicItems}</ul>
+      <h2>Study resources</h2>
+      <p>Explore <a href="/ugc-net-labour-welfare">the full unit-wise Labour Welfare study hub</a>, browse <a href="/notes">study notes</a>, practice <a href="/quizzes">MCQ sets</a>, or read <a href="/pyqs">previous year question papers</a> online.</p>
+      <p>${prev}${prev && next ? " · " : ""}${next}</p>
+    `);
+  }
+
   return {
-    path: `/ugc-net-labour-welfare/unit-${n}`,
+    path,
     title: `UGC NET/JRF Labour Welfare Unit ${roman}: ${title} — Notes, MCQs & PYQs`,
     description: `Unit ${roman} of the UGC NET/JRF Paper II Labour Welfare syllabus (Subject Code 55) — ${title}. Study notes, MCQs, previous year questions and video lectures.`,
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "LearningResource",
-      name: `UGC NET/JRF Labour Welfare — Unit ${roman}: ${title}`,
-      about: title,
-      isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
-      provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
-      isAccessibleForFree: true,
-      inLanguage: "en",
-    },
+    content,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        name: `UGC NET/JRF Labour Welfare — Unit ${roman}: ${title}`,
+        about: title,
+        isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
+        provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
+        isAccessibleForFree: true,
+        inLanguage: "en",
+      },
+      breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "UGC NET/JRF Labour Welfare", path: "/ugc-net-labour-welfare" },
+        { name: `Unit ${roman}: ${title}`, path },
+      ]),
+    ],
   };
 });
 
@@ -245,31 +327,94 @@ const HST_TOPICS = [
   { slug: "training-and-development", name: 'Training & Development', frequency: "medium", units: [2] },
 ];
 
+const FREQ_TEXT = { high: "very frequently asked", medium: "occasionally asked", low: "rarely asked" };
+
 const HST_ROUTES = HST_TOPICS.map((t) => {
   const unitsLabel = t.units.map((n) => `Unit ${ROMAN[n - 1]}`).join(", ");
+  const path = `/ugc-net-labour-welfare/topic/${t.slug}`;
+
+  const unitLinks = t.units
+    .map((n) => `<li><a href="/ugc-net-labour-welfare/unit-${n}">Unit ${ROMAN[n - 1]}: ${escapeHtml(LW_UNIT_TITLES[n - 1])}</a></li>`)
+    .join("");
+  const content = contentWrap(`
+    <nav><a href="/">Home</a> › <a href="/ugc-net-labour-welfare">UGC NET/JRF Labour Welfare</a> › ${escapeHtml(t.name)}</nav>
+    <h1>${escapeHtml(t.name)} — UGC NET/JRF Labour Welfare</h1>
+    <p>${escapeHtml(t.name)} is a high-scoring topic in the UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM syllabus (Subject Code 55). In recent exams this topic has been ${FREQ_TEXT[t.frequency]}, making it a ${t.frequency === "high" ? "must-prepare area" : t.frequency === "medium" ? "solid-return area" : "completeness area"} for serious aspirants.</p>
+    <h2>Where it sits in the official syllabus</h2>
+    <ul>${unitLinks}</ul>
+    <h2>How to prepare this topic</h2>
+    <p>Read the unit-wise <a href="/notes">study notes</a> for ${escapeHtml(t.name)}, practice the matching <a href="/quizzes">topic-wise MCQ sets</a>, and check how it has appeared in <a href="/pyqs">previous year question papers</a> — all free on Karn HR Academy.</p>
+    <p><a href="/ugc-net-labour-welfare">← Back to the full UGC NET/JRF Labour Welfare study hub</a></p>
+  `);
+
   return {
-    path: `/ugc-net-labour-welfare/topic/${t.slug}`,
+    path,
     title: `${t.name} — UGC NET/JRF Labour Welfare Notes, MCQs & PYQs`,
     description: `${t.name} — a ${t.frequency}-frequency UGC NET/JRF Paper II Labour Welfare (Subject Code 55) topic covering ${unitsLabel}. Study notes, MCQs, previous year questions and video lectures.`,
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "LearningResource",
-      name: `UGC NET/JRF Labour Welfare — ${t.name}`,
-      about: t.name,
-      isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
-      provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
-      isAccessibleForFree: true,
-      inLanguage: "en",
-    },
+    content,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        name: `UGC NET/JRF Labour Welfare — ${t.name}`,
+        about: t.name,
+        isPartOf: { "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", url: `${SITE_URL}/ugc-net-labour-welfare` },
+        provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL },
+        isAccessibleForFree: true,
+        inLanguage: "en",
+      },
+      breadcrumbLd([
+        { name: "Home", path: "/" },
+        { name: "UGC NET/JRF Labour Welfare", path: "/ugc-net-labour-welfare" },
+        { name: t.name, path },
+      ]),
+    ],
   };
 });
 
+// Full syllabus baked into the hub page's shell — every unit heading and
+// every official topic name, each unit linking to its subpage.
+const LW_HUB_CONTENT = LW_UNITS_DATA
+  ? contentWrap(`
+    <h1>UGC NET/JRF Labour Welfare — Unit-wise Study Hub (Subject Code 55)</h1>
+    <p>Free unit-wise preparation for UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour &amp; Social Welfare / Human Resource Management — study notes, topic-wise MCQs and previous year question papers organised strictly by the official syllabus, Units I through X.</p>
+    ${LW_UNITS_DATA.map(u => `
+      <h2><a href="/ugc-net-labour-welfare/unit-${u.number}">Unit ${ROMAN[u.number - 1]}: ${escapeHtml(u.title)}</a></h2>
+      <ul>${u.topics.map(t => `<li>${escapeHtml(t.label)}</li>`).join("")}</ul>
+    `).join("")}
+    <h2>Study resources</h2>
+    <p>Browse <a href="/notes">study notes</a>, practice <a href="/quizzes">MCQ sets</a>, read <a href="/pyqs">previous year question papers</a> online, or watch <a href="/lectures">video lectures</a>.</p>
+  `)
+  : undefined;
+
+// Hand-synced with src/pages/MBABBAPage.tsx (SEMESTER_GUIDE) and
+// src/lib/disciplines.ts (labels/descriptions) — same caveat as
+// LW_UNIT_TITLES above.
+const MBA_BBA_CONTENT = contentWrap(`
+  <h1>MBA / BBA Management Studies Hub</h1>
+  <p>Free semester-wise study resources for MBA, BBA, PGDM and B.Com students — seven core HR &amp; Management subjects with study notes, topic-wise MCQ practice and video lectures.</p>
+  <h2>Which subject in which semester?</h2>
+  <p><strong>BBA / B.Com:</strong> Sem 1–2 — Principles of Management, Business Communication · Sem 3–4 — Organisational Behaviour, Human Resource Management · Sem 5–6 — Strategic Management, OD &amp; Change Management (elective).</p>
+  <p><strong>MBA / PGDM:</strong> Sem 1 — Principles of Management, Organisational Behaviour, Business Communication · Sem 2 — Human Resource Management, Strategic Management · Sem 3–4 (HR specialisation) — OD &amp; Change Management, International HRM Practices.</p>
+  <h2>Subjects covered</h2>
+  <ul>
+    <li>Human Resource Management — recruitment, compensation, SHRM, HR analytics, labour law</li>
+    <li>Organisational Behaviour — individual behaviour, motivation, leadership, group dynamics</li>
+    <li>Strategic Management — SWOT, Porter's five forces, strategy formulation &amp; evaluation</li>
+    <li>Principles of Management — planning, organising, directing, controlling, Fayol &amp; Taylor</li>
+    <li>Business Communication — written, verbal, cross-cultural &amp; digital business communication</li>
+    <li>OD &amp; Change Management — OD interventions, change models, managing resistance</li>
+    <li>International HRM Practices — expatriate management, international staffing, MNCs &amp; diversity</li>
+  </ul>
+  <p>Browse <a href="/notes">study notes</a>, practice <a href="/quizzes">MCQ sets</a>, or watch <a href="/lectures">video lectures</a>. Preparing for UGC NET instead? Visit the <a href="/ugc-net-labour-welfare">UGC NET/JRF Labour Welfare hub</a>.</p>
+`);
+
 const STATIC_ROUTES = [
   { path: "/notes", title: "Study Notes", description: "Downloadable MBA study notes organised by discipline — HRM, Strategic Management, OB, POM, Business Communication and more." },
-  { path: "/ugc-net-labour-welfare", title: "UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs", description: "UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X.", jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", description: "Free unit-wise preparation covering all 10 official units of UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
+  { path: "/ugc-net-labour-welfare", title: "UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs", description: "UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X.", content: LW_HUB_CONTENT, jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "UGC NET/JRF Labour Welfare (Subject Code 55) — Unit-wise Study Hub", description: "Free unit-wise preparation covering all 10 official units of UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / HRM — study notes, MCQs, and previous year question papers.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
   ...LW_UNIT_ROUTES,
   ...HST_ROUTES,
-  { path: "/mba-bba", title: "MBA / BBA HR & Management Studies — Notes, MCQs & Video Lectures", description: "Free semester-wise study resources for MBA, BBA, PGDM and B.Com students — HRM, Organisational Behaviour, Principles of Management, Strategic Management, Business Communication, OD & Change Management and International HRM notes, MCQ practice sets and video lectures.", jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "MBA / BBA HR & Management Studies Hub", description: "Free notes, MCQ practice and video lectures across seven core HR & Management subjects for MBA, BBA, PGDM and B.Com students.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
+  { path: "/mba-bba", title: "MBA / BBA HR & Management Studies — Notes, MCQs & Video Lectures", description: "Free semester-wise study resources for MBA, BBA, PGDM and B.Com students — HRM, Organisational Behaviour, Principles of Management, Strategic Management, Business Communication, OD & Change Management and International HRM notes, MCQ practice sets and video lectures.", content: MBA_BBA_CONTENT, jsonLd: { "@context": "https://schema.org", "@type": "Course", name: "MBA / BBA HR & Management Studies Hub", description: "Free notes, MCQ practice and video lectures across seven core HR & Management subjects for MBA, BBA, PGDM and B.Com students.", provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: SITE_URL }, isAccessibleForFree: true, inLanguage: "en" } },
   { path: "/lectures", title: "Video Lectures", description: "Watch HR Management, Organisational Behaviour, Strategic Management and other video lectures for MBA, BBA, and UGC NET/JRF preparation." },
   { path: "/live-lectures", title: "Live Lectures", description: "Join interactive live classes and Q&A sessions on HR & Management topics with Karn HR Academy." },
   { path: "/quizzes", title: "MCQ Quizzes — HR & Management Assessment", description: "Topic-wise MCQ quizzes for MBA, BBA, and UGC NET/JRF HR exam preparation. Instant results, detailed explanations, and progress tracking." },
