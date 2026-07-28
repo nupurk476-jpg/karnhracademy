@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -6,8 +6,9 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { getDiscipline } from "@/lib/disciplines";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
-import { ArrowLeft, FileText, Download, HelpCircle, ChevronRight } from "lucide-react";
+import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
+import { useDownloadGate } from "@/hooks/use-download-gate";
+import { ArrowLeft, FileText, Download, Eye, HelpCircle, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface DisciplineTopic {
@@ -37,8 +38,26 @@ const DisciplineTopicPage = ({
   routePrefix,
 }: DisciplineTopicPageProps) => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const topic = topics.find((t) => t.slug === slug);
   const [notes, setNotes] = useState<any[]>([]);
+  const { request, openFree, GateDialog } = useDownloadGate();
+
+  // Same free-view / gated-download split as the main Notes page: PDFs open
+  // in the branded in-app reader (/notes/view/:id), everything else opens a
+  // signed URL directly. Viewing stays friction-free; downloads keep the
+  // one-time email gate.
+  const recordView = (note: any) => {
+    supabase.rpc("increment_note_views" as any, { _note_id: note.id }).then(({ error }) => {
+      if (error) console.error("view count failed", error);
+    });
+  };
+  const requestNote = (note: any, mode: "view" | "download") => {
+    if (!note.file_url) return;
+    if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
+    const open = mode === "download" ? request : openFree;
+    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordView(note));
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -127,17 +146,20 @@ const DisciplineTopicPage = ({
                 <h3 className="mb-1 text-sm font-semibold text-foreground">{note.title}</h3>
                 {note.description && <p className="mb-3 text-xs text-muted-foreground">{note.description}</p>}
                 {note.file_url && (
-                  <a
-                    href={note.file_url}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      const url = await getSignedFileUrl(note.file_url, "notes", true);
-                      if (url) window.open(url, "_blank", "noopener,noreferrer");
-                    }}
-                    className="inline-flex cursor-pointer items-center gap-2 self-start text-sm font-semibold text-accent-deep hover:underline"
-                  >
-                    <Download className="h-4 w-4" /> Download
-                  </a>
+                  <div className="mt-auto flex items-center gap-2 self-start">
+                    <button
+                      onClick={() => requestNote(note, "view")}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> View
+                    </button>
+                    <button
+                      onClick={() => requestNote(note, "download")}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110"
+                    >
+                      <Download className="h-3.5 w-3.5" /> Download
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -171,6 +193,7 @@ const DisciplineTopicPage = ({
           </div>
         </section>
       </main>
+      <GateDialog />
       <Footer />
     </div>
   );
