@@ -3,7 +3,7 @@ import { ChevronRight, Calendar, Clock, Eye, Download, BookOpenCheck, FileCheck2
 import { Badge } from "@/components/ui/badge";
 import { getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { getUnitByNumber, unitRoman } from "@/lib/labourWelfareUnits";
-import { formatDate } from "@/lib/format";
+import { formatDate, humanizeTitle } from "@/lib/format";
 
 // Small display bits shared by the Labour Welfare hub and its per-unit
 // subpages, so a note/quiz card looks and behaves identically wherever a
@@ -57,7 +57,7 @@ export const PYQCard = ({ pyq, showSubject = false, showViews = false }: { pyq: 
             vs. the reader) — the chevron signals the title itself goes
             somewhere, not just styled text. */}
         <Link to={`/pyqs/paper/${pyq.id}`} className="group/title inline-flex items-center gap-1 hover:text-accent-deep hover:underline">
-          {pyq.title}
+          {humanizeTitle(pyq.title)}
           <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/title:opacity-100" />
         </Link>
       </h3>
