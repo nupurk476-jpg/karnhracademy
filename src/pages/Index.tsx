@@ -132,6 +132,11 @@ const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color
 
 const Hero = () => {
   const { counts, totalNotes } = useSubjectNoteCounts();
+  // The card used to show only note counts, which read as "this is just a
+  // notes site" — this row makes the full range of formats (MCQs, PYQs,
+  // lectures) visible at a glance, not just the one format that happens to
+  // be listed per-subject below.
+  const { quizCount, pyqCount, lecturesCount } = useContentCounts();
   // Signed-in students with a paper mid-read get a "Resume reading" pill in
   // place of the generic sign-up pitch — the same reading-progress data the
   // PYQs page's "Continue where you left off" strip uses, surfaced at the
@@ -190,24 +195,31 @@ const Hero = () => {
           )}
 
           <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
-            Notes, MCQs &amp; PYQs for{" "}
-            <span style={{ color: GOLD_DARK }}>UGC NET/JRF Labour Welfare</span>,{" "}
-            HRM &amp; Management Studies
+            Study Resources for{" "}
+            <span style={{ color: GOLD_DARK }}>UGC NET/JRF, MBA/BBA &amp; HR Studies</span>
           </h1>
 
           <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#4A6076" }}>
-            A syllabus-based academic resource platform for UGC NET/JRF aspirants, MBA &amp; BBA students,
-            university learners, and HR professionals — organised unit-by-unit, updated regularly, and free
-            to use.
+            Notes, MCQs, previous year papers and video lectures for three kinds of learners — UGC NET/JRF
+            Paper II (Subject Code 55) aspirants, MBA &amp; BBA students, and research scholars &amp; HR
+            professionals — organised by syllabus, updated regularly, and free to use.
           </p>
 
-          {/* CTAs — one primary, one secondary */}
+          {/* CTAs — one primary (self-select a track below), one secondary
+              (browse everything). Neither CTA singles out Labour Welfare —
+              that used to read as if it were the whole site's focus; the
+              three pathway cards below the hero now carry that routing. */}
           <div className="flex flex-wrap gap-3 mb-8">
-            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg" style={{ background: GOLD, color: NAVY, boxShadow: `0 6px 24px ${GOLD}40` }}>
-              Start Learning <ArrowRight aria-hidden="true" className="h-4 w-4" />
-            </Link>
-            <Link to="/ugc-net-labour-welfare" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF" }}>
-              <ScrollText className="h-4 w-4" /> UGC NET/JRF Labour Welfare
+            <a
+              href="#pathways"
+              onClick={(e) => { e.preventDefault(); document.getElementById("pathways")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
+              style={{ background: GOLD, color: NAVY, boxShadow: `0 6px 24px ${GOLD}40` }}
+            >
+              Find Your Study Path <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </a>
+            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF" }}>
+              <FileText className="h-4 w-4" /> Browse All Resources
             </Link>
           </div>
 
@@ -241,15 +253,33 @@ const Hero = () => {
                 <div className="font-display flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY }}>K</div>
                 <div>
                   <p className="font-display text-sm font-bold" style={{ color: NAVY }}>Karn HR Academy</p>
-                  <p className="text-xs" style={{ color: "#7A8FA6" }}>Notes by subject — live from the library</p>
+                  <p className="text-xs" style={{ color: "#7A8FA6" }}>Live from the library</p>
                 </div>
+              </div>
+
+              {/* Format breakdown — makes clear this is more than a notes
+                  site before the subject-by-subject list below. */}
+              <div className="grid grid-cols-3 gap-2 px-6 pt-4">
+                {[
+                  { label: "MCQ Sets", value: quizCount },
+                  { label: "PYQ Papers", value: pyqCount },
+                  { label: "Lectures", value: lecturesCount },
+                ].map(f => (
+                  <div key={f.label} className="rounded-lg px-2 py-2 text-center" style={{ background: LIGHT }}>
+                    <p className="font-display text-sm font-extrabold" style={{ color: NAVY }}>{f.value !== null ? f.value : "…"}</p>
+                    <p className="text-[10px] font-semibold" style={{ color: "#7A8FA6" }}>{f.label}</p>
+                  </div>
+                ))}
               </div>
 
               {/* Subject rows — only subjects with real content, so this card
                   never reads as "mostly empty". Repeating a "Coming Soon"
                   badge across every not-yet-populated subject undermined
                   trust more than just not mentioning them here at all. */}
-              <div className="px-6 py-4 space-y-2.5">
+              <div className="px-6 pb-1 pt-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#7A8FA6" }}>Notes by subject</p>
+              </div>
+              <div className="px-6 pb-4 space-y-2.5">
                 {(() => {
                   const withContent = HERO_SUBJECTS.filter(s => (counts[s.value] || 0) > 0);
                   if (withContent.length === 0) {
@@ -360,15 +390,17 @@ function useContentCounts() {
   const [quizCount, setQuizCount] = useState<number | null>(null);
   const [lecturesCount, setLecturesCount] = useState<number | null>(null);
   const [booksCount, setBooksCount] = useState<number | null>(null);
+  const [pyqCount, setPyqCount] = useState<number | null>(null);
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).then(({ count }) => setNotesCount(count ?? 0));
     supabase.from("quizzes").select("id", { count: "exact", head: true }).then(({ count }) => setQuizCount(count ?? 0));
     supabase.from("lectures" as any).select("id", { count: "exact", head: true }).then(({ count }) => setLecturesCount(count ?? 0));
     supabase.from("book_recommendations").select("id", { count: "exact", head: true }).then(({ count }) => setBooksCount(count ?? 0));
+    (supabase.from("pyq_papers" as any) as any).select("id", { count: "exact", head: true }).then(({ count }: any) => setPyqCount(count ?? 0));
   }, []);
 
-  return { notesCount, quizCount, lecturesCount, booksCount };
+  return { notesCount, quizCount, lecturesCount, booksCount, pyqCount };
 }
 
 // ─────────────── Section: Quick Access ───────────────────────────────────────
@@ -508,6 +540,7 @@ const Subjects = () => {
 const AudienceSplit = () => {
   const [lw, setLw] = useState<{ notes: number | null; quizzes: number | null; pyqs: number | null }>({ notes: null, quizzes: null, pyqs: null });
   const [mba, setMba] = useState<{ notes: number | null; quizzes: number | null; lectures: number | null }>({ notes: null, quizzes: null, lectures: null });
+  const { booksCount } = useContentCounts();
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("subject", "lw")
@@ -566,13 +599,13 @@ const AudienceSplit = () => {
   );
 
   return (
-    <section className="py-16 md:py-20 bg-white">
+    <section id="pathways" className="py-16 md:py-20 bg-white" style={{ scrollMarginTop: "80px" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 flex flex-col items-center text-center">
           <GoldLabel text="Choose your path" />
-          <SectionHeading center title="Two kinds of learners. One platform." sub="Pick the track that matches your goal — everything on it is free." />
+          <SectionHeading center title="Three kinds of learners. One platform." sub="Pick the track that matches your goal — everything on it is free." />
         </div>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           <AudienceCard
             accent={NAVY_DARK}
             eyebrowColor={NAVY_DARK}
@@ -604,6 +637,20 @@ const AudienceSplit = () => {
             ]}
             to="/mba-bba"
             cta="Explore the MBA/BBA Hub"
+          />
+          <AudienceCard
+            accent={STEEL_DARK}
+            eyebrowColor={STEEL_DARK}
+            eyebrow="PhD · Faculty · HR Practitioners"
+            icon={BookMarked}
+            title="Doing research or working in HR?"
+            body="A curated reference library and research-based notes to support academic work and applied HR practice, alongside the founder's own publications."
+            stats={[
+              { label: "Books Curated", value: n(booksCount) },
+              { label: "Disciplines", value: "8" },
+            ]}
+            to="/notes"
+            cta="Explore Reference Resources"
           />
         </div>
       </div>
