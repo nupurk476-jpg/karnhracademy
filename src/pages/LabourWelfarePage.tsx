@@ -121,8 +121,8 @@ const LabourWelfarePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="UGC NET/JRF Labour Welfare — Unit-wise Notes, MCQs & PYQs"
-        description="UGC NET/JRF Paper II Labour Welfare / Personnel Management / Industrial Relations / Labour & Social Welfare / HRM (Subject Code 55) — unit-wise study notes, MCQs and previous year question papers, organised across Units I–X."
+        title="UGC NET Labour Welfare Notes, MCQs & PYQs"
+        description="Free UGC NET/JRF Labour Welfare (Code 55) study material — unit-wise notes, syllabus, MCQs and previous year question papers covering all 10 units."
         path="/ugc-net-labour-welfare"
         jsonLd={{
           "@context": "https://schema.org",
@@ -146,7 +146,7 @@ const LabourWelfarePage = () => {
         {/* ── Hero ──────────────────────────────────────────────────────── */}
         <section className="border-b border-border bg-white">
           <div className="mx-auto max-w-6xl px-6 py-10">
-            <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET/JRF Labour Welfare" }]} />
+            <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "UGC NET/JRF" }, { label: "Code 55 Labour Welfare" }]} />
 
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">UGC NET/JRF Paper II · Subject Code 55</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
@@ -163,6 +163,34 @@ const LabourWelfarePage = () => {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><HelpCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{quizzes.length}</strong>&nbsp;MCQ Sets</span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><ScrollText className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{pyqs.length}</strong>&nbsp;Previous Year Papers</span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5"><Layers className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">10</strong>&nbsp;Units</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Recommended Study Path ───────────────────────────────────── */}
+        <section className="border-b border-border bg-slate-50 py-4" aria-label="Recommended study path">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
+              {[
+                { icon: Layers, label: "Understand the Syllabus" },
+                { icon: FileText, label: "Study Unit-wise Notes" },
+                { icon: HelpCircle, label: "Practise MCQs" },
+                { icon: ScrollText, label: "Solve PYQs" },
+                { icon: BookOpen, label: "Revise High-Scoring Topics" },
+              ].map((step, i, steps) => {
+                const Icon = step.icon;
+                return (
+                  <div key={step.label} className="flex flex-shrink-0 items-center gap-2">
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+                        <Icon className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-xs font-semibold text-foreground">{step.label}</span>
+                    </div>
+                    {i < steps.length - 1 && <ChevronRight className="h-3.5 w-3.5 flex-shrink-0 text-accent-deep" />}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -202,7 +230,7 @@ const LabourWelfarePage = () => {
               <div className="relative flex-1 lg:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
-                  type="text" aria-label="Search this page" placeholder="Search notes, MCQs, papers…"
+                  type="text" aria-label="Search this page" placeholder="Search topics, notes, MCQs or PYQs…"
                   value={search} onChange={e => setSearch(e.target.value)}
                   className="w-full rounded-md border border-border bg-slate-50 py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
@@ -254,10 +282,10 @@ const LabourWelfarePage = () => {
         {loading ? (
           <div className="mx-auto max-w-6xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
         ) : (
-          <div className="mx-auto max-w-6xl px-6 py-10 space-y-14">
-
+          <>
             {/* ── Unit-wise Notes ──────────────────────────────────────── */}
-            <section id="notes">
+            <section id="notes" className="border-b border-border bg-slate-50 py-10">
+            <div className="mx-auto max-w-6xl px-6">
               <div className="mb-4 flex items-center gap-2">
                 <FileText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit-wise Notes</h2>
@@ -289,18 +317,17 @@ const LabourWelfarePage = () => {
                   );
                 })}
                 {unitFilter === "all" && unassignedNotes.length > 0 && (
-                  <details className="group rounded-lg border border-amber-300 bg-amber-50/40">
+                  <details className="group rounded-lg border border-border bg-white">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-                      <span className="text-sm font-semibold text-foreground">Not yet assigned to a unit</span>
+                      <span className="text-sm font-semibold text-foreground">General / Cross-Unit Resources</span>
                       <span className="flex items-center gap-2 text-xs text-muted-foreground">
                         {unassignedNotes.length} note{unassignedNotes.length !== 1 ? "s" : ""}
                         <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                       </span>
                     </summary>
-                    <div className="border-t border-amber-200 p-4 pt-3">
+                    <div className="border-t border-border p-4 pt-3">
                       <p className="mb-3 text-xs text-muted-foreground">
-                        These notes were uploaded without a unit topic. To file one under its unit, edit it in
-                        Admin → Notes and pick the matching topic under Labour Welfare.
+                        Reference material spanning multiple units or the syllabus as a whole.
                       </p>
                       <div className="space-y-2.5">
                         {unassignedNotes.map(note => (
@@ -311,10 +338,12 @@ const LabourWelfarePage = () => {
                   </details>
                 )}
               </div>
+            </div>
             </section>
 
             {/* ── Unit-wise MCQs ───────────────────────────────────────── */}
-            <section id="mcqs">
+            <section id="mcqs" className="border-b border-border bg-white py-10">
+            <div className="mx-auto max-w-6xl px-6">
               <div className="mb-4 flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Unit-wise MCQs</h2>
@@ -346,18 +375,17 @@ const LabourWelfarePage = () => {
                   );
                 })}
                 {unitFilter === "all" && unassignedQuizzes.length > 0 && (
-                  <details className="group rounded-lg border border-amber-300 bg-amber-50/40">
+                  <details className="group rounded-lg border border-border bg-white">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-                      <span className="text-sm font-semibold text-foreground">Not yet assigned to a unit</span>
+                      <span className="text-sm font-semibold text-foreground">General / Cross-Unit Resources</span>
                       <span className="flex items-center gap-2 text-xs text-muted-foreground">
                         {unassignedQuizzes.length} MCQ set{unassignedQuizzes.length !== 1 ? "s" : ""}
                         <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                       </span>
                     </summary>
-                    <div className="border-t border-amber-200 p-4 pt-3">
+                    <div className="border-t border-border p-4 pt-3">
                       <p className="mb-3 text-xs text-muted-foreground">
-                        These MCQ sets were created without a unit topic. To file one under its unit, edit it in
-                        Admin → Quizzes and pick the matching topic under Labour Welfare.
+                        Practice sets spanning multiple units or the syllabus as a whole.
                       </p>
                       <div className="grid gap-3 sm:grid-cols-2">
                         {unassignedQuizzes.map(q => (
@@ -368,10 +396,12 @@ const LabourWelfarePage = () => {
                   </details>
                 )}
               </div>
+            </div>
             </section>
 
             {/* ── Previous Year Questions ──────────────────────────────── */}
-            <section id="pyq">
+            <section id="pyq" className="border-b border-border bg-brand-cream py-10">
+            <div className="mx-auto max-w-6xl px-6">
               <div className="mb-4 flex items-center gap-2">
                 <ScrollText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Previous Year Questions</h2>
@@ -392,11 +422,13 @@ const LabourWelfarePage = () => {
                   ))}
                 </div>
               )}
+            </div>
             </section>
 
             {/* ── Latest uploads ───────────────────────────────────────── */}
             {latest.length > 0 && (
-              <section>
+              <section className="bg-white py-10">
+              <div className="mx-auto max-w-6xl px-6">
                 <div className="mb-4 flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Latest Uploads</h2>
@@ -412,9 +444,10 @@ const LabourWelfarePage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
               </section>
             )}
-          </div>
+          </>
         )}
       </main>
 
