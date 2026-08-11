@@ -404,22 +404,24 @@ function useContentCounts() {
 }
 
 // ─────────────── Section: Quick Access ───────────────────────────────────────
-// The five student-facing formats the platform is actually organised
-// around — placed right after the hero so a first-time visitor can jump
-// straight to what they came for instead of scrolling through marketing
-// copy first.
+// Pure resource-format directory — Labour Welfare and MBA/BBA routing now
+// live one section up in the Learning Paths pathway cards, so this row
+// doesn't repeat that choice; it's purely "which format do I want."
 const QUICK_ACCESS = [
-  { icon: HandHeart,  label: "UGC NET/JRF Labour Welfare", desc: "Unit-wise notes, MCQs & PYQs for Subject Code 55", to: "/ugc-net-labour-welfare", color: NAVY_DARK, bg: "#E3EAF2" },
-  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",        to: "/notes",                 color: NAVY,      bg: "#DCE6F1" },
-  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",          to: "/quizzes",               color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",              to: "/pyqs",                  color: GOLD_TEXT, bg: "#F7F1E3" },
-  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators",       to: "/lectures",              color: STEEL,     bg: "#EEF0F8" },
+  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#DCE6F1" },
+  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#EEF0F8" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F1E3" },
+  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#EEF0F8" },
 ];
 
 const QuickAccess = () => (
   <section className="py-14 md:py-16 bg-white border-b border-slate-100" aria-label="Quick access">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <GoldLabel text="Resource Types" />
+        <SectionHeading center title="Notes, MCQs, PYQs & Lectures" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {QUICK_ACCESS.map(item => {
           const Icon = item.icon;
           return (
@@ -488,7 +490,7 @@ const Subjects = () => {
   const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"][disciplineCount] || String(disciplineCount);
 
   return (
-    <section id="subjects" className="py-20 md:py-24" style={{ background: LIGHT }}>
+    <section id="subjects" className="py-16 md:py-20" style={{ background: LIGHT }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
@@ -523,6 +525,11 @@ const Subjects = () => {
                     {isComingSoon ? "Coming soon" : `${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
                   </span>
                 </div>
+                {!isComingSoon && (
+                  <div className="mt-2 flex items-center gap-1 text-xs font-semibold transition-transform group-hover:translate-x-0.5" style={{ color: s.color }}>
+                    Explore <ChevronRight className="h-3.5 w-3.5" />
+                  </div>
+                )}
               </Wrapper>
             );
           })}
@@ -602,8 +609,8 @@ const AudienceSplit = () => {
     <section id="pathways" className="py-16 md:py-20 bg-white" style={{ scrollMarginTop: "80px" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 flex flex-col items-center text-center">
-          <GoldLabel text="Choose your path" />
-          <SectionHeading center title="Three kinds of learners. One platform." sub="Pick the track that matches your goal — everything on it is free." />
+          <GoldLabel text="Learning Paths" />
+          <SectionHeading center title="What are you studying for?" sub="Pick the track that matches your goal — everything on it is free." />
         </div>
         <div className="grid gap-6 lg:grid-cols-3">
           <AudienceCard
@@ -1189,10 +1196,10 @@ const Index = () => (
     <main id="main-content">
       <Hero />
       <FounderStrip />
+      <AudienceSplit />
       <QuickAccess />
       <CompactHowItWorks />
       <Subjects />
-      <AudienceSplit />
       <Testimonials />
       <FeaturedNotes />
       <VideoLectures />
