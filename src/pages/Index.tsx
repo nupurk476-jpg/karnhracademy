@@ -445,9 +445,15 @@ const CompactHowItWorks = () => (
 // ─────────────── Section: Subjects ───────────────────────────────────────────
 const MIN_NOTES_TO_LINK = 3;
 
+const SUBJECT_LINK: Record<string, string> = { lw: "/ugc-net-labour-welfare" };
+
 const Subjects = () => {
   const { counts, totalNotes } = useSubjectNoteCounts();
-  const disciplineCount = SUBJECTS.filter(s => s.value !== "lw").length;
+  // Derived from the same per-subject counts query as the hero sidebar
+  // widget — a subject only counts as "live" once it has a published note —
+  // so this number can never drift out of sync with what's actually shown.
+  const disciplineCount = SUBJECTS.filter(s => (counts[s.value] ?? 0) > 0).length;
+  const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"][disciplineCount] || String(disciplineCount);
 
   return (
     <section id="subjects" className="py-20 md:py-24" style={{ background: LIGHT }}>
@@ -455,42 +461,33 @@ const Subjects = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
             <GoldLabel text="Browse by Discipline" />
-            <SectionHeading title="HR & Management. One Platform." sub={`${disciplineCount === 8 ? "Eight" : disciplineCount} disciplines, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly.`} />
+            <SectionHeading title="HR & Management. One Platform." sub={`${disciplineWord} disciplines, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly.`} />
           </div>
           <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             View all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        {/* Labour Welfare is deliberately left out of this grid — the
-            AudienceSplit section immediately below already gives it a
-            full, dedicated promotion, so a plain tile here just repeated the
-            same "go to the Labour Welfare hub" link a second time in a row. */}
-        <div className="flex flex-wrap justify-center gap-4">
-          {SUBJECTS.filter(s => s.value !== "lw").map(s => {
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {SUBJECTS.map(s => {
             const Icon = s.icon;
             const noteCount = counts[s.value] ?? 0;
             const isComingSoon = noteCount < MIN_NOTES_TO_LINK;
             const Wrapper = isComingSoon ? "div" : Link;
-            const wrapperProps = isComingSoon ? { "aria-disabled": true } : { to: "/notes" };
+            const wrapperProps = isComingSoon ? { "aria-disabled": true } : { to: SUBJECT_LINK[s.value] ?? "/notes" };
             return (
               <Wrapper
                 key={s.label}
                 {...(wrapperProps as any)}
-                className={`group relative flex w-[calc(50%-8px)] flex-col rounded-2xl border p-5 transition-all duration-200 sm:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)] ${isComingSoon ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:shadow-md"}`}
+                className={`group flex h-full flex-col rounded-2xl border p-5 transition-all duration-200 ${isComingSoon ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:shadow-md"}`}
                 style={{ background: s.bg, borderColor: `${s.color}20` }}
               >
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
                   <Icon className="h-5 w-5 text-white" />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: s.color }}>{s.short}</p>
                 <p className="text-sm font-bold leading-snug text-slate-800 flex-1">{s.label}</p>
-                <div className="mt-3 flex items-center justify-between gap-1">
-                  {!isComingSoon && (
-                    <span className="text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100 inline-flex items-center gap-1" style={{ color: s.color }}>
-                      Explore <ChevronRight className="h-3.5 w-3.5" />
-                    </span>
-                  )}
-                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums" style={{ background: "#FFFFFF", color: s.color, border: `1px solid ${s.color}30` }}>
+                <div className="mt-3 flex items-center justify-between gap-1 pt-3" style={{ borderTop: `1px solid ${s.color}20` }}>
+                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: s.color }}>{s.short}</span>
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums" style={{ background: "#FFFFFF", color: s.color, border: `1px solid ${s.color}30` }}>
                     {isComingSoon ? "Coming soon" : `${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
                   </span>
                 </div>
