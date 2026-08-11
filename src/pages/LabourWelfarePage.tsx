@@ -152,10 +152,13 @@ const LabourWelfarePage = () => {
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
               UGC NET/JRF Labour Welfare — Unit-wise Study Hub
             </h1>
-            <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Labour Welfare / Personnel Management / Industrial Relations / Labour &amp; Social Welfare / Human Resource
-              Management — structured strictly by the official syllabus, Units I through X. Notes, MCQs and previous
-              year question papers are all organised unit-by-unit for focused exam preparation.
+            <p className="mb-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Complete UGC NET/JRF Code 55 study resources organised unit-wise according to the official
+              syllabus — including notes, MCQs and previous year questions for focused exam preparation.
+            </p>
+            <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Covers Labour Welfare, HRM, Industrial Relations, Labour Legislation, Wages, Social Security and
+              related areas.
             </p>
 
             <div className="flex flex-wrap gap-4 text-sm">
