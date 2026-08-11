@@ -612,6 +612,46 @@ const AudienceSplit = () => {
 };
 
 
+// ─────────────── Section: Testimonials ───────────────────────────────────────
+// Renders nothing at all when there are no published rows — a half-empty
+// "what students say" section reads worse than not having one.
+type Testimonial = { id: string; quote: string; name: string; context: string };
+
+const Testimonials = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[] | null>(null);
+
+  useEffect(() => {
+    (supabase.from("testimonials" as any) as any)
+      .select("id, quote, name, context")
+      .eq("is_published", true)
+      .order("display_order", { ascending: true })
+      .limit(3)
+      .then(({ data }: any) => setTestimonials(data ?? []));
+  }, []);
+
+  if (!testimonials || testimonials.length === 0) return null;
+
+  return (
+    <section className="py-16 md:py-20 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 flex flex-col items-center text-center">
+          <GoldLabel text="Student Voices" />
+          <SectionHeading center title="What aspirants say" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {testimonials.map(t => (
+            <div key={t.id} className="flex flex-col rounded-2xl border p-6" style={{ borderColor: "#DCE6F1", background: LIGHT }}>
+              <p className="flex-1 text-sm leading-relaxed text-slate-700 line-clamp-3">"{t.quote}"</p>
+              <p className="mt-4 font-display text-sm font-bold text-slate-900">{t.name}</p>
+              <p className="text-xs text-slate-500">{t.context}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ─────────────── Section: Featured Notes (live from DB) ──────────────────────
 const FeaturedNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
@@ -1106,6 +1146,7 @@ const Index = () => (
       <CompactHowItWorks />
       <Subjects />
       <AudienceSplit />
+      <Testimonials />
       <FeaturedNotes />
       <VideoLectures />
       <BooksSection />
