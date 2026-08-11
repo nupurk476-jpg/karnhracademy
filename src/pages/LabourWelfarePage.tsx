@@ -17,7 +17,6 @@ import { LW_UNITS, getUnitForTopicSlug, getUnitByNumber, unitRoman } from "@/lib
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
 import { formatDate } from "@/lib/format";
-import HighScoringTopicsSection from "@/components/HighScoringTopicsSection";
 import ExamInfoSection from "@/components/ExamInfoSection";
 
 
@@ -195,9 +194,6 @@ const LabourWelfarePage = () => {
             </div>
           </div>
         </section>
-
-        {/* ── High-Scoring Topics ──────────────────────────────────────── */}
-        <HighScoringTopicsSection notes={notes} quizzes={quizzes} pyqs={pyqs} />
 
         {/* ── Search + filters (browse across every unit on one page) ────── */}
         <section className="border-b border-border bg-white py-6">
