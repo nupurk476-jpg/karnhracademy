@@ -104,17 +104,12 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
   </div>
 );
 
-// ─────────────── Section: Hero ────────────────────────────────────────────────
-const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
-
-const Hero = () => {
+// Note counts per subject, keyed by discipline value — the single query the
+// hero sidebar widget and the discipline grid's badges both read from, so
+// the two can never show different numbers for the same subject.
+function useSubjectNoteCounts() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [totalNotes, setTotalNotes] = useState<number | null>(null);
-  // Signed-in students with a paper mid-read get a "Resume reading" pill in
-  // place of the generic sign-up pitch — the same reading-progress data the
-  // PYQs page's "Continue where you left off" strip uses, surfaced at the
-  // very first thing a returning visitor sees instead of only on /pyqs.
-  const [resume, setResume] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     supabase.from("notes").select("subject").then(({ data }) => {
@@ -127,7 +122,23 @@ const Hero = () => {
       });
       setCounts(map);
     });
+  }, []);
 
+  return { counts, totalNotes };
+}
+
+// ─────────────── Section: Hero ────────────────────────────────────────────────
+const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
+
+const Hero = () => {
+  const { counts, totalNotes } = useSubjectNoteCounts();
+  // Signed-in students with a paper mid-read get a "Resume reading" pill in
+  // place of the generic sign-up pitch — the same reading-progress data the
+  // PYQs page's "Continue where you left off" strip uses, surfaced at the
+  // very first thing a returning visitor sees instead of only on /pyqs.
+  const [resume, setResume] = useState<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
     let cancelled = false;
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session?.user || cancelled) return;
@@ -367,42 +378,65 @@ const CompactHowItWorks = () => (
 );
 
 // ─────────────── Section: Subjects ───────────────────────────────────────────
-const Subjects = () => (
-  <section id="subjects" className="py-20 md:py-24" style={{ background: LIGHT }}>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
-        <div>
-          <GoldLabel text="Browse by Discipline" />
-          <SectionHeading title="HR & Management. One Platform." sub="Deep resources for HRM and OB now live — more disciplines actively being added. Check the Notes page for availability." />
+const MIN_NOTES_TO_LINK = 3;
+
+const Subjects = () => {
+  const { counts, totalNotes } = useSubjectNoteCounts();
+  const disciplineCount = SUBJECTS.filter(s => s.value !== "lw").length;
+
+  return (
+    <section id="subjects" className="py-20 md:py-24" style={{ background: LIGHT }}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div>
+            <GoldLabel text="Browse by Discipline" />
+            <SectionHeading title="HR & Management. One Platform." sub={`${disciplineCount === 8 ? "Eight" : disciplineCount} disciplines, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly.`} />
+          </div>
+          <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
+            View all notes <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
-        <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
-          View all notes <ArrowRight className="h-4 w-4" />
-        </Link>
+        {/* Labour Welfare is deliberately left out of this grid — the
+            AudienceSplit section immediately below already gives it a
+            full, dedicated promotion, so a plain tile here just repeated the
+            same "go to the Labour Welfare hub" link a second time in a row. */}
+        <div className="flex flex-wrap justify-center gap-4">
+          {SUBJECTS.filter(s => s.value !== "lw").map(s => {
+            const Icon = s.icon;
+            const noteCount = counts[s.value] ?? 0;
+            const isComingSoon = noteCount < MIN_NOTES_TO_LINK;
+            const Wrapper = isComingSoon ? "div" : Link;
+            const wrapperProps = isComingSoon ? { "aria-disabled": true } : { to: "/notes" };
+            return (
+              <Wrapper
+                key={s.label}
+                {...(wrapperProps as any)}
+                className={`group relative flex w-[calc(50%-8px)] flex-col rounded-2xl border p-5 transition-all duration-200 sm:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)] ${isComingSoon ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:shadow-md"}`}
+                style={{ background: s.bg, borderColor: `${s.color}20` }}
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: s.color }}>{s.short}</p>
+                <p className="text-sm font-bold leading-snug text-slate-800 flex-1">{s.label}</p>
+                <div className="mt-3 flex items-center justify-between gap-1">
+                  {!isComingSoon && (
+                    <span className="text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100 inline-flex items-center gap-1" style={{ color: s.color }}>
+                      Explore <ChevronRight className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                  <span className="ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums" style={{ background: "#FFFFFF", color: s.color, border: `1px solid ${s.color}30` }}>
+                    {isComingSoon ? "Coming soon" : `${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
+                  </span>
+                </div>
+              </Wrapper>
+            );
+          })}
+        </div>
       </div>
-      {/* Labour Welfare is deliberately left out of this grid — the
-          AudienceSplit section immediately below already gives it a
-          full, dedicated promotion, so a plain tile here just repeated the
-          same "go to the Labour Welfare hub" link a second time in a row. */}
-      <div className="flex flex-wrap justify-center gap-4">
-        {SUBJECTS.filter(s => s.value !== "lw").map(s => {
-          const Icon = s.icon;
-          return (
-            <Link key={s.label} to="/notes" className="group flex w-[calc(50%-8px)] flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md sm:w-[calc(33.333%-11px)] lg:w-[calc(20%-13px)]" style={{ background: s.bg, borderColor: `${s.color}20` }}>
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
-                <Icon className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: s.color }}>{s.short}</p>
-              <p className="text-sm font-bold leading-snug text-slate-800 flex-1">{s.label}</p>
-              <div className="mt-3 flex items-center gap-1 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: s.color }}>
-                Explore <ChevronRight className="h-3.5 w-3.5" />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 // ─────────────── Section: audience split ────────────────────────────────────
 // One "who are you?" section replaces the two stacked full-width promo
