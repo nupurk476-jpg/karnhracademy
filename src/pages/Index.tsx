@@ -288,6 +288,71 @@ const Hero = () => {
   );
 };
 
+// ─────────────── Section: Founder Strip ──────────────────────────────────────
+// A compact credibility band right after the hero, so a first-time visitor
+// sees who's behind the platform before scrolling — the full detailed
+// founder card (id="founder", further down the page) is where "Read full
+// profile" lands via a smooth scroll.
+const FOUNDER_CREDENTIALS = [
+  "UGC NET Qualified (Code 55)",
+  "PhD Scholar (Management)",
+  "Assistant Professor",
+  "10+ Years Teaching",
+];
+
+const FounderStrip = () => {
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const { data } = supabase.storage.from("educator").getPublicUrl("profile.jpg");
+    fetch(data.publicUrl, { method: "HEAD" }).then(res => {
+      if (res.ok) setPhotoUrl(data.publicUrl);
+    }).catch(() => {});
+  }, []);
+
+  const scrollToFounder = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById("founder")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <section className="border-b border-slate-100" style={{ background: LIGHT }} aria-label="Founder credibility">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:max-h-[110px]">
+        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:gap-4 sm:text-left">
+          {/* Avatar */}
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-md" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
+            {photoUrl ? (
+              <img src={photoUrl} alt="Ms. Nupur Karn, founder of Karn HR Academy" className="h-full w-full object-cover" />
+            ) : (
+              <span className="font-display text-lg font-extrabold text-white">NK</span>
+            )}
+          </div>
+
+          {/* Name + credentials */}
+          <div className="flex-1 min-w-0">
+            <p className="text-base font-medium text-slate-900">Ms. Nupur Karn — Founder, Karn HR Academy</p>
+            <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[13px] text-slate-500 sm:flex sm:flex-wrap sm:justify-start sm:gap-x-0">
+              {FOUNDER_CREDENTIALS.map(c => (
+                <li key={c} className="sm:before:content-['·'] sm:before:mx-1.5 sm:before:text-slate-400 sm:first:before:content-none">{c}</li>
+              ))}
+            </ul>
+          </div>
+
+          {/* CTA */}
+          <a
+            href="#founder"
+            onClick={scrollToFounder}
+            className="flex-shrink-0 text-sm font-semibold hover:underline"
+            style={{ color: GOLD_TEXT }}
+          >
+            Read full profile →
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // Real content counts, shared by StatsBar and AboutAuthor — replaces the
 // fabricated static numbers both sections used to show independently.
 function useContentCounts() {
@@ -869,7 +934,7 @@ const AboutAuthor = () => {
     { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F1E3" },
   ];
   return (
-  <section className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading">
+  <section id="founder" className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading" style={{ scrollMarginTop: "80px" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         {/* Left: Founder card */}
@@ -1039,6 +1104,7 @@ const Index = () => (
     <Header />
     <main id="main-content">
       <Hero />
+      <FounderStrip />
       <QuickAccess />
       <CompactHowItWorks />
       <Subjects />
