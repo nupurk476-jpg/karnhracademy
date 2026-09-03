@@ -36,14 +36,14 @@ const LIGHT = BRAND.light;
 // discipline value. Everything else (label, short, value, icon, topics) is
 // sourced from disciplines.ts so it can never drift out of sync.
 const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
-  hrm:     { color: NAVY,       bg: "#DCE6F1" },
-  ob:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  sm:      { color: GOLD_TEXT,  bg: "#F7F1E3" },
-  pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
-  bc:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  odcm:    { color: GOLD_TEXT,  bg: "#F7F1E3" },
-  ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
-  lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
+  hrm:     { color: NAVY,       bg: "#E8E6E2" },
+  ob:      { color: STEEL_DARK, bg: "#F2F1EF" },
+  sm:      { color: GOLD_TEXT,  bg: "#F7F4EF" },
+  pom:     { color: NAVY_DARK,  bg: "#EBE9E4" },
+  bc:      { color: STEEL_DARK, bg: "#F2F1EF" },
+  odcm:    { color: GOLD_TEXT,  bg: "#F7F4EF" },
+  ghr:     { color: NAVY_DARK,  bg: "#E8E6E2" },
+  lw:      { color: NAVY_DARK,  bg: "#EFEDE9" },
 };
 
 const SUBJECTS = DISCIPLINES.map(d => ({
@@ -199,7 +199,7 @@ const Hero = () => {
             <span style={{ color: GOLD_DARK }}>UGC NET/JRF, MBA/BBA &amp; HR Studies</span>
           </h1>
 
-          <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#4A6076" }}>
+          <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#55514C" }}>
             Notes, MCQs, previous year papers and video lectures for three kinds of learners — UGC NET/JRF
             Paper II (Subject Code 55) aspirants, MBA &amp; BBA students, and research scholars &amp; HR
             professionals — organised by syllabus, updated regularly, and free to use.
@@ -218,7 +218,7 @@ const Hero = () => {
             >
               Find Your Study Path <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </a>
-            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #C9D8E8`, color: NAVY, background: "#FFFFFF" }}>
+            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #DCD9D3`, color: NAVY, background: "#FFFFFF" }}>
               <FileText className="h-4 w-4" /> Browse All Resources
             </Link>
           </div>
@@ -235,7 +235,7 @@ const Hero = () => {
               { icon: FileText,      label: "Case Studies & Research Support" },
               { icon: Award,         label: "Designed by Academic Experts" },
             ].map(({ icon: Icon, label }) => (
-              <li key={label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #C9D8E8" }}>
+              <li key={label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #DCD9D3" }}>
                 <Icon aria-hidden="true" className="h-3 w-3 flex-shrink-0" style={{ color: GOLD_TEXT }} />{label}
               </li>
             ))}
@@ -246,14 +246,14 @@ const Hero = () => {
         <div className="hidden lg:flex items-center justify-center">
           <div className="w-full max-w-md">
             {/* Card: no overflow:hidden so badge won't clip */}
-            <div className="rounded-2xl shadow-xl" style={{ background: "#FFFFFF", border: "1px solid #DCE6F1" }}>
+            <div className="rounded-2xl shadow-xl" style={{ background: "#FFFFFF", border: "1px solid #E8E6E2" }}>
 
               {/* Card header — no star rating */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #EEF0F8" }}>
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #F2F1EF" }}>
                 <div className="font-display flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY }}>K</div>
                 <div>
                   <p className="font-display text-sm font-bold" style={{ color: NAVY }}>Karn HR Academy</p>
-                  <p className="text-xs" style={{ color: "#7A8FA6" }}>Live from the library</p>
+                  <p className="text-xs" style={{ color: "#8A8580" }}>Live from the library</p>
                 </div>
               </div>
 
@@ -267,7 +267,7 @@ const Hero = () => {
                 ].map(f => (
                   <div key={f.label} className="rounded-lg px-2 py-2 text-center" style={{ background: LIGHT }}>
                     <p className="font-display text-sm font-extrabold" style={{ color: NAVY }}>{f.value !== null ? f.value : "…"}</p>
-                    <p className="text-[10px] font-semibold" style={{ color: "#7A8FA6" }}>{f.label}</p>
+                    <p className="text-[10px] font-semibold" style={{ color: "#8A8580" }}>{f.label}</p>
                   </div>
                 ))}
               </div>
@@ -277,14 +277,14 @@ const Hero = () => {
                   badge across every not-yet-populated subject undermined
                   trust more than just not mentioning them here at all. */}
               <div className="px-6 pb-1 pt-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#7A8FA6" }}>Notes by subject</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8A8580" }}>Notes by subject</p>
               </div>
               <div className="px-6 pb-4 space-y-2.5">
                 {(() => {
                   const withContent = HERO_SUBJECTS.filter(s => (counts[s.value] || 0) > 0);
                   if (withContent.length === 0) {
                     return (
-                      <p className="text-xs" style={{ color: "#8296AC" }}>
+                      <p className="text-xs" style={{ color: "#918C86" }}>
                         New content added every week — check back soon.
                       </p>
                     );
@@ -293,7 +293,7 @@ const Hero = () => {
                     <div key={s.value} className="flex items-center justify-between gap-3">
                       {/* Color dot */}
                       <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: s.color }} />
-                      <span className="flex-1 text-xs font-medium" style={{ color: "#33475C" }}>{s.label}</span>
+                      <span className="flex-1 text-xs font-medium" style={{ color: "#3A3835" }}>{s.label}</span>
                       <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
                         {counts[s.value]} {counts[s.value] === 1 ? "note" : "notes"}
                       </span>
@@ -303,8 +303,8 @@ const Hero = () => {
               </div>
 
               {/* Total badge — inside the card at the bottom, no absolute overlap */}
-              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #DCE6F1" }}>
-                <p className="text-xs" style={{ color: "#64798F" }}>Study notes in library</p>
+              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #E8E6E2" }}>
+                <p className="text-xs" style={{ color: "#6E6963" }}>Study notes in library</p>
                 <p className="font-display text-xl font-extrabold" style={{ color: NAVY }}>
                   {totalNotes !== null ? `${totalNotes}` : "…"}
                 </p>
@@ -408,10 +408,10 @@ function useContentCounts() {
 // live one section up in the Learning Paths pathway cards, so this row
 // doesn't repeat that choice; it's purely "which format do I want."
 const QUICK_ACCESS = [
-  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#DCE6F1" },
-  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F1E3" },
-  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#EEF0F8" },
+  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#E8E6E2" },
+  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#F2F1EF" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F4EF" },
+  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#F2F1EF" },
 ];
 
 const QuickAccess = () => (
@@ -454,7 +454,7 @@ const QuickAccess = () => (
 // only "how it works" section on the page — the full illustrated version
 // used to duplicate it further down and was removed as dead weight.
 const CompactHowItWorks = () => (
-  <section style={{ background: "#F7F1E3", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
+  <section style={{ background: "#F7F4EF", borderTop: "1px solid #F0C8C1", borderBottom: "1px solid #F0C8C1" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
         {ROADMAP.map((r, i) => {
@@ -694,7 +694,7 @@ const Testimonials = () => {
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map(t => (
-            <div key={t.id} className="flex flex-col rounded-2xl border p-6" style={{ borderColor: "#DCE6F1", background: LIGHT }}>
+            <div key={t.id} className="flex flex-col rounded-2xl border p-6" style={{ borderColor: "#E8E6E2", background: LIGHT }}>
               <p className="flex-1 text-sm leading-relaxed text-slate-700 line-clamp-3">"{t.quote}"</p>
               <p className="mt-4 font-display text-sm font-bold text-slate-900">{t.name}</p>
               <p className="text-xs text-slate-500">{t.context}</p>
@@ -977,7 +977,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#DCE6F1" }}>
+            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#E8E6E2" }}>
               {t.label}
             </Link>
           ))}
@@ -1017,19 +1017,19 @@ const AboutAuthor = () => {
   }, []);
 
   const achievements = [
-    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#DCE6F1" },
-    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#EEF0F8" },
-    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#E3EAF2" },
-    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F1E3" },
-    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#EEF0F8" },
-    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F1E3" },
+    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#E8E6E2" },
+    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#F2F1EF" },
+    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#EBE9E4" },
+    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F4EF" },
+    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#F2F1EF" },
+    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F4EF" },
   ];
   return (
   <section id="founder" className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading" style={{ scrollMarginTop: "80px" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         {/* Left: Founder card */}
-        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#DCE6F1", background: "#fafafa" }}>
+        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#E8E6E2", background: "#fafafa" }}>
           <div className="mb-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <div className="relative flex-shrink-0">
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
@@ -1076,14 +1076,14 @@ const AboutAuthor = () => {
             <a
               href={`mailto:${FOUNDER_EMAIL}`}
               className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF" }}
+              style={{ borderColor: "#DCD9D3", color: NAVY, background: "#FFFFFF" }}
             >
               <Mail aria-hidden="true" className="h-4 w-4" /> Email
             </a>
             <Link
               to="/blogs"
               className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
-              style={{ borderColor: "#C9D8E8", color: NAVY, background: "#FFFFFF" }}
+              style={{ borderColor: "#DCD9D3", color: NAVY, background: "#FFFFFF" }}
             >
               <ScrollText aria-hidden="true" className="h-4 w-4" /> Publications
             </Link>
@@ -1130,7 +1130,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: "#DCE6F1" }}>
+    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: "#E8E6E2" }}>
       <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: `radial-gradient(circle,${NAVY} 1px,transparent 1px)`, backgroundSize: "24px 24px" }} />
       <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none opacity-15 rounded-full" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)`, transform: "translate(40%,-40%)" }} />
       <div className="relative mx-auto max-w-2xl px-4 sm:px-6 text-center">
@@ -1143,7 +1143,7 @@ const Newsletter = () => {
         <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: NAVY, letterSpacing: "-0.02em" }}>
           Join the HR Learning Community
         </h2>
-        <p className="mb-8 leading-relaxed" style={{ color: "#4A6076" }}>
+        <p className="mb-8 leading-relaxed" style={{ color: "#55514C" }}>
           New notes, MCQs, video lectures, and articles every week — curated for MBA, BBA, and UGC NET/JRF preparation. Free forever.
         </p>
 
@@ -1160,7 +1160,7 @@ const Newsletter = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
-              style={{ background: "#FFFFFF", border: "1px solid #C9D8E8" }}
+              style={{ background: "#FFFFFF", border: "1px solid #DCD9D3" }}
             />
             <button type="submit" disabled={loading} className="font-display rounded-xl px-6 py-3 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60" style={{ background: GOLD, color: NAVY }}>
               {loading ? "Subscribing…" : "Subscribe Free"}
@@ -1168,14 +1168,14 @@ const Newsletter = () => {
           </form>
         )}
 
-        <div className="flex items-center justify-center gap-5 text-xs" style={{ color: "#64798F" }}>
+        <div className="flex items-center justify-center gap-5 text-xs" style={{ color: "#6E6963" }}>
           {["No spam, ever", "Free forever", "Unsubscribe anytime"].map(t => (
             <span key={t} className="flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5" style={{ color: GOLD_DARK }} /> {t}
             </span>
           ))}
         </div>
-        <p className="mt-4 text-xs" style={{ color: "#7A8FA6" }}>
+        <p className="mt-4 text-xs" style={{ color: "#8A8580" }}>
           By subscribing, you agree to our{" "}
           <Link to="/privacy-policy" className="underline hover:text-brand-navy">Privacy Policy</Link>.
         </p>

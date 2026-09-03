@@ -167,8 +167,11 @@ const ProfilePage = () => {
       .sort((a, b) => a.accuracy - b.accuracy);
   })();
 
+  // A red/amber/green scale, deliberately NOT the brand palette — this
+  // ranks a score, so the steps have to read worst-to-best regardless of
+  // what the marketing accent happens to be.
   const accuracyColor = (pct: number) =>
-    pct < 50 ? "#B4552D" : pct < 70 ? "#A9823F" : "#3D7A50";
+    pct < 50 ? "#B23223" : pct < 70 ? "#B7791F" : "#3D7A50";
 
   if (loading) {
     return (

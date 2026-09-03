@@ -10,17 +10,19 @@
 // intentionally match them where they overlap (gold ≙ --accent,
 // goldText ≙ --accent-deep).
 export const BRAND = {
-  navy: "#1F4E79",
-  navyDeep: "#0D2A45",
-  steel: "#5B8AB8",
-  steelDeep: "#3D6C98",
-  gold: "#C7994A",
-  goldDeep: "#A9823F",
-  // Gold for TEXT on light grounds — ~5:1 on white (WCAG AA); the display
-  // golds above fail AA at link/label sizes.
-  goldText: "#8A6A28",
+  // "Ink Vermillion": near-black ink as the primary ground, vermillion as
+  // the single accent — replaces the earlier navy/gold identity.
+  navy: "#17181C",
+  navyDeep: "#0B0C0E",
+  steel: "#6B6B70",
+  steelDeep: "#4A4A4F",
+  gold: "#E34234",
+  goldDeep: "#B23223",
+  // Vermillion for TEXT on light grounds — ~7:1 on white (WCAG AA); the
+  // display vermillions above are for fills/borders/large display type.
+  goldText: "#8C2A1E",
   // Tinted light grounds
-  light: "#EEF0F8",
-  mist: "#DCE6F1",
-  cream: "#F7F1E3",
+  light: "#F2F1EF",
+  mist: "#E8E6E2",
+  cream: "#F7F4EF",
 } as const;

@@ -32,12 +32,12 @@ const pickIcon = (title: string) => {
   return Info;
 };
 
-// Rotating accent tints from the site palette (navy / gold / steel) — the
-// same trio the homepage Quick Access cards cycle through.
+// Rotating accent tints from the site palette (ink / vermillion / steel) —
+// the same trio the homepage Quick Access cards cycle through.
 const TINTS = [
-  { color: "#1F4E79", bg: "#EEF0F8" },
-  { color: "#A9823F", bg: "#F7F1E3" },
-  { color: "#3D6C98", bg: "#DCE6F1" },
+  { color: "#17181C", bg: "#F2F1EF" },
+  { color: "#B23223", bg: "#F7F4EF" },
+  { color: "#4A4A4F", bg: "#E8E6E2" },
 ];
 
 // Compact "Exam Essentials" strip for the Labour Welfare hub — syllabus,

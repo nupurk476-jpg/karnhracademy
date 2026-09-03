@@ -17,6 +17,7 @@ const navItems = [
   { label: "Home", to: "/" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
   { label: "MBA/BBA", to: "/mba-bba" },
+  { label: "Programmes", to: "/programmes" },
   { label: "Notes", to: "/notes" },
   { label: "MCQs", to: "/quizzes" },
   { label: "PYQs", to: "/pyqs" },
@@ -81,7 +82,7 @@ const Header = () => {
             style={{
               width: 5,
               height: 42,
-              background: "#C7994A",
+              background: "#E34234",
               borderRadius: 3,
               flexShrink: 0,
             }}
@@ -90,7 +91,7 @@ const Header = () => {
             <div style={{ lineHeight: 1 }}>
               <span
                 style={{
-                  fontFamily: "'Sora', sans-serif",
+                  fontFamily: "'Playfair Display', serif",
                   fontWeight: 300,
                   fontSize: 26,
                   letterSpacing: -1,
@@ -101,7 +102,7 @@ const Header = () => {
               </span>
               <span
                 style={{
-                  fontFamily: "'Sora', sans-serif",
+                  fontFamily: "'Playfair Display', serif",
                   fontWeight: 800,
                   fontSize: 26,
                   letterSpacing: -1,
@@ -113,7 +114,7 @@ const Header = () => {
             </div>
             <div
               style={{
-                fontFamily: "'Sora', sans-serif",
+                fontFamily: "'Playfair Display', serif",
                 fontWeight: 500,
                 fontSize: 9,
                 letterSpacing: 4,

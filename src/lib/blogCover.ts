@@ -15,9 +15,9 @@
 const COVER_WIDTH = 1200;
 const COVER_HEIGHT = 630; // standard OG/social image size — also used as og:image
 
-const NAVY = "#1F4E79";
-const NAVY_DARK = "#0D2A45";
-const GOLD = "#C7994A";
+const NAVY = "#17181C";
+const NAVY_DARK = "#0B0C0E";
+const GOLD = "#E34234";
 
 function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -132,12 +132,12 @@ async function drawFallbackCover(title: string, category: string): Promise<Blob>
   ctx.restore();
 
   ctx.fillStyle = GOLD;
-  ctx.font = "700 22px 'Sora', sans-serif";
+  ctx.font = "700 22px 'Playfair Display', serif";
   ctx.textBaseline = "alphabetic";
   ctx.fillText(category.toUpperCase(), 80, 140);
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "800 56px 'Sora', sans-serif";
+  ctx.font = "800 56px 'Playfair Display', serif";
   const lines = wrapText(ctx, title, COVER_WIDTH - 160).slice(0, 3);
   let y = 240;
   for (const line of lines) {
@@ -146,7 +146,7 @@ async function drawFallbackCover(title: string, category: string): Promise<Blob>
   }
 
   ctx.fillStyle = "rgba(255,255,255,0.6)";
-  ctx.font = "600 20px 'Sora', sans-serif";
+  ctx.font = "600 20px 'Playfair Display', serif";
   ctx.fillText("Karn HR Academy", 80, COVER_HEIGHT - 60);
 
   return canvasToPngBlob(canvas);

@@ -13,9 +13,12 @@ import {
 import { resolveLWTopicSlug } from "@/lib/labourWelfareUnits";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 
+// A three-step emphasis ramp, not three brand hues: vermillion carries the
+// "appears most often" badge, and the lower two step down through warm
+// neutral to grey so the eye lands on "high" first.
 const FREQUENCY_STYLE: Record<HSTFrequency, string> = {
-  high: "bg-[#FDEEEA] text-[#B3421D] border-[#F3C7B4]",
-  medium: "bg-[#FBF3E2] text-[#8F6D33] border-[#E8DCC0]",
+  high: "bg-[#FDEEEA] text-[#8C2A1E] border-[#F3C7B4]",
+  medium: "bg-[#F2F1EF] text-[#6E6963] border-[#DCD9D3]",
   low: "bg-slate-100 text-slate-500 border-slate-200",
 };
 

@@ -2,18 +2,18 @@
 // PPT note thumbnails — so they all read as one designed poster system
 // instead of drifting into per-page one-offs.
 
-export const NAVY_HEX = "#1F4E79";
-export const GOLD_HEX = "#C7994A";
+export const NAVY_HEX = "#17181C";
+export const GOLD_HEX = "#E34234";
 
 // Per-subject cover gradient, built from the site's navy/steel/gold palette.
 export const SUBJECT_GRADIENT: Record<string, [string, string]> = {
-  hrm:     ["#1F4E79", "#0D2A45"],
-  ob:      ["#3D6C98", "#1F4E79"],
-  sm:      ["#A9823F", "#0D2A45"],
-  pom:     ["#0D2A45", "#1F4E79"],
-  bc:      ["#5B8AB8", "#1F4E79"],
-  odcm:    ["#C7994A", "#A9823F"],
-  ghr:     ["#0D2A45", "#3D6C98"],
+  hrm:     ["#17181C", "#0B0C0E"],
+  ob:      ["#4A4A4F", "#17181C"],
+  sm:      ["#B23223", "#0B0C0E"],
+  pom:     ["#0B0C0E", "#17181C"],
+  bc:      ["#6B6B70", "#17181C"],
+  odcm:    ["#E34234", "#B23223"],
+  ghr:     ["#0B0C0E", "#4A4A4F"],
 };
 
 export function subjectGradient(subjectValue?: string | null): [string, string] {
