@@ -220,7 +220,7 @@ const QuizTake = () => {
             </p>
             {totalRatings > 0 && (
               <p className="mb-6 flex items-center justify-center gap-1 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 fill-[#C6A15B] text-[#C6A15B]" />
+                <Star className="h-4 w-4 fill-[#E34234] text-[#E34234]" />
                 {avgRating.toFixed(1)}/5 ({totalRatings} {totalRatings === 1 ? "rating" : "ratings"})
               </p>
             )}
@@ -431,7 +431,7 @@ const QuizTake = () => {
               <div className="mb-3 flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button key={star} onClick={() => submitRating(star)} onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)} className="transition-transform hover:scale-110">
-                    <Star className={`h-8 w-8 ${(hoverRating || userRating) >= star ? "fill-[#C6A15B] text-[#C6A15B]" : "text-muted-foreground"}`} />
+                    <Star className={`h-8 w-8 ${(hoverRating || userRating) >= star ? "fill-[#E34234] text-[#E34234]" : "text-muted-foreground"}`} />
                   </button>
                 ))}
                 {userRating > 0 && <span className="ml-2 text-sm text-muted-foreground">{ratingSaved ? "Your rating saved!" : ""}</span>}

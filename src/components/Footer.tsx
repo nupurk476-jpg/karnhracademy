@@ -13,7 +13,7 @@ const Footer = () => {
                 style={{
                   width: 5,
                   height: 42,
-                  background: "#C6A15B",
+                  background: "#E34234",
                   borderRadius: 3,
                   flexShrink: 0,
                 }}

@@ -36,13 +36,13 @@ const LIGHT = BRAND.light;
 // discipline value. Everything else (label, short, value, icon, topics) is
 // sourced from disciplines.ts so it can never drift out of sync.
 const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
-  hrm:     { color: NAVY,       bg: "#DCE6F1" },
-  ob:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  sm:      { color: GOLD_TEXT,  bg: "#F6F3EC" },
+  hrm:     { color: NAVY,       bg: "#E8E6E2" },
+  ob:      { color: STEEL_DARK, bg: "#F2F1EF" },
+  sm:      { color: GOLD_TEXT,  bg: "#F7F4EF" },
   pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
-  bc:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  odcm:    { color: GOLD_TEXT,  bg: "#F6F3EC" },
-  ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
+  bc:      { color: STEEL_DARK, bg: "#F2F1EF" },
+  odcm:    { color: GOLD_TEXT,  bg: "#F7F4EF" },
+  ghr:     { color: NAVY_DARK,  bg: "#E8E6E2" },
   lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
 };
 
@@ -246,10 +246,10 @@ const Hero = () => {
         <div className="hidden lg:flex items-center justify-center">
           <div className="w-full max-w-md">
             {/* Card: no overflow:hidden so badge won't clip */}
-            <div className="rounded-2xl shadow-xl" style={{ background: "#FFFFFF", border: "1px solid #DCE6F1" }}>
+            <div className="rounded-2xl shadow-xl" style={{ background: "#FFFFFF", border: "1px solid #E8E6E2" }}>
 
               {/* Card header — no star rating */}
-              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #EEF0F8" }}>
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4" style={{ borderBottom: "1px solid #F2F1EF" }}>
                 <div className="font-display flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl font-extrabold text-sm" style={{ background: GOLD, color: NAVY }}>K</div>
                 <div>
                   <p className="font-display text-sm font-bold" style={{ color: NAVY }}>Karn HR Academy</p>
@@ -303,7 +303,7 @@ const Hero = () => {
               </div>
 
               {/* Total badge — inside the card at the bottom, no absolute overlap */}
-              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #DCE6F1" }}>
+              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #E8E6E2" }}>
                 <p className="text-xs" style={{ color: "#64798F" }}>Study notes in library</p>
                 <p className="font-display text-xl font-extrabold" style={{ color: NAVY }}>
                   {totalNotes !== null ? `${totalNotes}` : "…"}
@@ -408,10 +408,10 @@ function useContentCounts() {
 // live one section up in the Learning Paths pathway cards, so this row
 // doesn't repeat that choice; it's purely "which format do I want."
 const QUICK_ACCESS = [
-  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#DCE6F1" },
-  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F6F3EC" },
-  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#EEF0F8" },
+  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#E8E6E2" },
+  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#F2F1EF" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F4EF" },
+  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#F2F1EF" },
 ];
 
 const QuickAccess = () => (
@@ -454,7 +454,7 @@ const QuickAccess = () => (
 // only "how it works" section on the page — the full illustrated version
 // used to duplicate it further down and was removed as dead weight.
 const CompactHowItWorks = () => (
-  <section style={{ background: "#F6F3EC", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
+  <section style={{ background: "#F7F4EF", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
         {ROADMAP.map((r, i) => {
@@ -694,7 +694,7 @@ const Testimonials = () => {
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map(t => (
-            <div key={t.id} className="flex flex-col rounded-2xl border p-6" style={{ borderColor: "#DCE6F1", background: LIGHT }}>
+            <div key={t.id} className="flex flex-col rounded-2xl border p-6" style={{ borderColor: "#E8E6E2", background: LIGHT }}>
               <p className="flex-1 text-sm leading-relaxed text-slate-700 line-clamp-3">"{t.quote}"</p>
               <p className="mt-4 font-display text-sm font-bold text-slate-900">{t.name}</p>
               <p className="text-xs text-slate-500">{t.context}</p>
@@ -977,7 +977,7 @@ const PopularTopics = () => (
         <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
         <div className="flex flex-wrap gap-2">
           {TOPICS.map(t => (
-            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#DCE6F1" }}>
+            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#E8E6E2" }}>
               {t.label}
             </Link>
           ))}
@@ -1017,19 +1017,19 @@ const AboutAuthor = () => {
   }, []);
 
   const achievements = [
-    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#DCE6F1" },
-    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#EEF0F8" },
+    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#E8E6E2" },
+    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#F2F1EF" },
     { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#E3EAF2" },
-    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F6F3EC" },
-    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#EEF0F8" },
-    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F6F3EC" },
+    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F4EF" },
+    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#F2F1EF" },
+    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F4EF" },
   ];
   return (
   <section id="founder" className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading" style={{ scrollMarginTop: "80px" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         {/* Left: Founder card */}
-        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#DCE6F1", background: "#fafafa" }}>
+        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#E8E6E2", background: "#fafafa" }}>
           <div className="mb-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <div className="relative flex-shrink-0">
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
@@ -1130,7 +1130,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: "#DCE6F1" }}>
+    <section className="py-20 md:py-24 relative overflow-hidden" style={{ background: "#E8E6E2" }}>
       <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: `radial-gradient(circle,${NAVY} 1px,transparent 1px)`, backgroundSize: "24px 24px" }} />
       <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none opacity-15 rounded-full" style={{ background: `radial-gradient(circle,${GOLD},transparent 70%)`, transform: "translate(40%,-40%)" }} />
       <div className="relative mx-auto max-w-2xl px-4 sm:px-6 text-center">

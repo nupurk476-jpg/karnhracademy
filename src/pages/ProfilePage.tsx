@@ -168,7 +168,7 @@ const ProfilePage = () => {
   })();
 
   const accuracyColor = (pct: number) =>
-    pct < 50 ? "#B4552D" : pct < 70 ? "#9C7C3B" : "#3D7A50";
+    pct < 50 ? "#B4552D" : pct < 70 ? "#B23223" : "#3D7A50";
 
   if (loading) {
     return (

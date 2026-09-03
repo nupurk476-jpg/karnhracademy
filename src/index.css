@@ -3,85 +3,85 @@
 @tailwind utilities;
 
 @layer base {
-  /* Palette from the Karn HR Academy study-notes design:
-     navy #16274A · dark navy #0E1B33 · steel blue #5B8AB8
-     light blue #DCE6F1 / #EEF0F8 · gold #C6A15B · cream #F6F3EC */
+  /* "Ink Vermillion" palette:
+     ink #17181C · deep ink #0B0C0E · neutral steel #6B6B70
+     tinted grounds #E8E6E2 / #F2F1EF · vermillion #E34234 · ivory #F7F4EF */
   :root {
-    --background: 42 36% 96%;
-    --foreground: 220 40% 15%;
+    --background: 38 33% 95%;
+    --foreground: 228 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 15%;
+    --card-foreground: 228 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 15%;
+    --popover-foreground: 228 10% 10%;
 
-    --primary: 220 54% 19%;
-    --primary-foreground: 42 36% 97%;
+    --primary: 228 10% 10%;
+    --primary-foreground: 38 33% 97%;
 
-    --secondary: 211 43% 90%;
-    --secondary-foreground: 220 54% 22%;
+    --secondary: 30 12% 90%;
+    --secondary-foreground: 228 10% 15%;
 
-    --muted: 220 30% 95%;
-    --muted-foreground: 210 20% 40%;
+    --muted: 30 8% 95%;
+    --muted-foreground: 30 6% 40%;
 
-    --accent: 39 48% 57%;
-    --accent-foreground: 220 54% 15%;
-    /* Gold used AS TEXT on light grounds. The brand gold above sits at
-       ~2.5:1 on white — fine for fills/borders/large display type, but a
-       WCAG AA failure for link- and label-sized text (needs 4.5:1). This
-       darker cut measures ~5:1 on white. */
-    --accent-deep: 40 44% 33%;
+    --accent: 5 76% 55%;
+    --accent-foreground: 0 0% 100%;
+    /* Vermillion used AS TEXT on light grounds. The brand vermillion above
+       sits at ~3.5:1 on white — fine for fills/borders/large display type,
+       but a WCAG AA failure for link- and label-sized text (needs 4.5:1).
+       This darker cut measures ~7:1 on white. */
+    --accent-deep: 7 65% 33%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 211 35% 87%;
-    --input: 211 35% 87%;
-    --ring: 220 54% 19%;
+    --border: 30 10% 87%;
+    --input: 30 10% 87%;
+    --ring: 228 10% 10%;
 
     --radius: 0.25rem;
 
-    --sidebar-background: 42 36% 96%;
-    --sidebar-foreground: 220 30% 26%;
-    --sidebar-primary: 220 54% 19%;
+    --sidebar-background: 38 33% 95%;
+    --sidebar-foreground: 228 8% 26%;
+    --sidebar-primary: 228 10% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 211 43% 92%;
-    --sidebar-accent-foreground: 220 54% 22%;
-    --sidebar-border: 211 35% 88%;
-    --sidebar-ring: 210 40% 54%;
+    --sidebar-accent: 30 12% 92%;
+    --sidebar-accent-foreground: 228 10% 15%;
+    --sidebar-border: 30 10% 88%;
+    --sidebar-ring: 5 76% 55%;
   }
 
   .dark {
-    --background: 209 55% 10%;
-    --foreground: 211 30% 92%;
-    --card: 209 50% 13%;
-    --card-foreground: 211 30% 92%;
-    --popover: 209 50% 13%;
-    --popover-foreground: 211 30% 92%;
-    --primary: 210 40% 64%;
-    --primary-foreground: 209 68% 12%;
-    --secondary: 209 40% 20%;
-    --secondary-foreground: 211 30% 92%;
-    --muted: 209 40% 18%;
-    --muted-foreground: 211 25% 65%;
-    --accent: 38 53% 54%;
-    --accent-foreground: 209 68% 12%;
-    /* On dark grounds the readable gold goes lighter, not darker. */
-    --accent-deep: 38 55% 66%;
+    --background: 228 12% 9%;
+    --foreground: 30 15% 92%;
+    --card: 228 10% 13%;
+    --card-foreground: 30 15% 92%;
+    --popover: 228 10% 13%;
+    --popover-foreground: 30 15% 92%;
+    --primary: 30 15% 90%;
+    --primary-foreground: 228 12% 10%;
+    --secondary: 228 8% 20%;
+    --secondary-foreground: 30 15% 92%;
+    --muted: 228 8% 18%;
+    --muted-foreground: 30 10% 65%;
+    --accent: 5 76% 58%;
+    --accent-foreground: 0 0% 100%;
+    /* On dark grounds the readable vermillion goes lighter, not darker. */
+    --accent-deep: 6 80% 70%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 209 35% 24%;
-    --input: 209 35% 24%;
-    --ring: 210 40% 64%;
-    --sidebar-background: 209 55% 8%;
-    --sidebar-foreground: 211 25% 90%;
-    --sidebar-primary: 210 40% 60%;
-    --sidebar-primary-foreground: 209 68% 10%;
-    --sidebar-accent: 209 40% 16%;
-    --sidebar-accent-foreground: 211 25% 90%;
-    --sidebar-border: 209 40% 16%;
-    --sidebar-ring: 210 40% 60%;
+    --border: 228 8% 24%;
+    --input: 228 8% 24%;
+    --ring: 5 76% 58%;
+    --sidebar-background: 228 12% 7%;
+    --sidebar-foreground: 30 12% 90%;
+    --sidebar-primary: 30 15% 85%;
+    --sidebar-primary-foreground: 228 12% 8%;
+    --sidebar-accent: 228 8% 16%;
+    --sidebar-accent-foreground: 30 12% 90%;
+    --sidebar-border: 228 8% 16%;
+    --sidebar-ring: 5 76% 58%;
   }
 }
 

@@ -15,9 +15,9 @@
 const COVER_WIDTH = 1200;
 const COVER_HEIGHT = 630; // standard OG/social image size — also used as og:image
 
-const NAVY = "#16274A";
-const NAVY_DARK = "#0E1B33";
-const GOLD = "#C6A15B";
+const NAVY = "#17181C";
+const NAVY_DARK = "#0B0C0E";
+const GOLD = "#E34234";
 
 function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {

@@ -35,9 +35,9 @@ const pickIcon = (title: string) => {
 // Rotating accent tints from the site palette (navy / gold / steel) — the
 // same trio the homepage Quick Access cards cycle through.
 const TINTS = [
-  { color: "#16274A", bg: "#EEF0F8" },
-  { color: "#9C7C3B", bg: "#F6F3EC" },
-  { color: "#3D6C98", bg: "#DCE6F1" },
+  { color: "#17181C", bg: "#F2F1EF" },
+  { color: "#B23223", bg: "#F7F4EF" },
+  { color: "#3D6C98", bg: "#E8E6E2" },
 ];
 
 // Compact "Exam Essentials" strip for the Labour Welfare hub — syllabus,
