@@ -1,0 +1,22 @@
+{
+  "_comment": "PLACEHOLDER TESTIMONIALS — replace every entry with a real, verifiable quote from someone who consented to being named, or delete the entries and this block will not render. Inventing student testimonials is a misleading-advertising problem, not a copywriting shortcut. `slug` matches a programme slug; `default` is used when a programme has no entry of its own.",
+  "default": [
+    {
+      "quote": "PLACEHOLDER — replace with a real quote from a student who completed this programme.",
+      "name": "Name",
+      "context": "Programme completed, year"
+    },
+    {
+      "quote": "PLACEHOLDER — replace with a second real quote, ideally naming a concrete outcome.",
+      "name": "Name",
+      "context": "Current role or institution"
+    }
+  ],
+  "gd-pi-preparation": [
+    {
+      "quote": "PLACEHOLDER — a GD/PI participant on how the mock interviews changed their preparation.",
+      "name": "Name",
+      "context": "MBA admission, year"
+    }
+  ]
+}

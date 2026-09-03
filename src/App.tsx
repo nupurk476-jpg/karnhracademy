@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import { CartProvider } from "./context/CartContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Route-level code splitting: everything except the homepage loads on demand,
@@ -41,6 +42,7 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PricingPage = lazy(() => import("./pages/PricingPage"));
 const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
 const ProgrammesPage = lazy(() => import("./pages/ProgrammesPage"));
 const ProgrammeDetailPage = lazy(() => import("./pages/ProgrammeDetailPage"));
@@ -81,6 +83,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        {/* Inside the router: the cart is read by the header on every page. */}
+        <CartProvider>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -113,6 +117,7 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/programmes" element={<ProgrammesPage />} />
             <Route path="/programmes/:slug" element={<ProgrammeDetailPage />} />
             <Route path="/hr/:slug" element={<HRTopicPage />} />
@@ -144,6 +149,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        </CartProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
