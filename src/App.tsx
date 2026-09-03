@@ -41,6 +41,9 @@ const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
+const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
+const ProgrammesPage = lazy(() => import("./pages/ProgrammesPage"));
+const ProgrammeDetailPage = lazy(() => import("./pages/ProgrammeDetailPage"));
 const NewspaperPage = lazy(() => import("./pages/NewspaperPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -56,6 +59,9 @@ const AdminBooks = lazy(() => import("./pages/admin/AdminBooks"));
 const AdminComments = lazy(() => import("./pages/admin/AdminComments"));
 const AdminSubscribers = lazy(() => import("./pages/admin/AdminSubscribers"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
+const AdminProgrammes = lazy(() => import("./pages/admin/AdminProgrammes"));
+const AdminRegistrations = lazy(() => import("./pages/admin/AdminRegistrations"));
+const AdminPaymentSettings = lazy(() => import("./pages/admin/AdminPaymentSettings"));
 const AdminNewspaperHighlights = lazy(() => import("./pages/admin/AdminNewspaperHighlights"));
 const AdminLectures = lazy(() => import("./pages/admin/AdminLectures"));
 const AdminLiveLectures = lazy(() => import("./pages/admin/AdminLiveLectures"));
@@ -106,6 +112,9 @@ const App = () => (
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/programmes" element={<ProgrammesPage />} />
+            <Route path="/programmes/:slug" element={<ProgrammeDetailPage />} />
             <Route path="/hr/:slug" element={<HRTopicPage />} />
             <Route path="/pom/:slug" element={<POMTopicPage />} />
             <Route path="/ob/:slug" element={<OBTopicPage />} />
@@ -124,6 +133,9 @@ const App = () => (
               <Route path="comments" element={<AdminComments />} />
               <Route path="subscribers" element={<AdminSubscribers />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
+              <Route path="programmes" element={<AdminProgrammes />} />
+              <Route path="registrations" element={<AdminRegistrations />} />
+              <Route path="payment-settings" element={<AdminPaymentSettings />} />
               <Route path="newspaper" element={<AdminNewspaperHighlights />} />
               <Route path="lectures" element={<AdminLectures />} />
               <Route path="live-lectures" element={<AdminLiveLectures />} />

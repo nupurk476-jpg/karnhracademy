@@ -147,6 +147,9 @@ const Footer = () => {
             <Link to="/terms" className="text-xs text-primary-foreground/50 hover:text-accent transition-colors">
               Terms of Use
             </Link>
+            <Link to="/refund-policy" className="text-xs text-primary-foreground/50 hover:text-accent transition-colors">
+              Refunds
+            </Link>
             <p className="text-xs text-primary-foreground/40">Academic Resource Hub</p>
           </div>
         </div>
