@@ -38,10 +38,10 @@ const LIGHT = BRAND.light;
 const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   hrm:     { color: NAVY,       bg: "#DCE6F1" },
   ob:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  sm:      { color: GOLD_TEXT,  bg: "#F7F1E3" },
+  sm:      { color: GOLD_TEXT,  bg: "#F6F3EC" },
   pom:     { color: NAVY_DARK,  bg: "#E3EAF2" },
   bc:      { color: STEEL_DARK, bg: "#EEF0F8" },
-  odcm:    { color: GOLD_TEXT,  bg: "#F7F1E3" },
+  odcm:    { color: GOLD_TEXT,  bg: "#F6F3EC" },
   ghr:     { color: NAVY_DARK,  bg: "#DCE6F1" },
   lw:      { color: NAVY_DARK,  bg: "#E9EEF5" },
 };
@@ -410,7 +410,7 @@ function useContentCounts() {
 const QUICK_ACCESS = [
   { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#DCE6F1" },
   { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#EEF0F8" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F1E3" },
+  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F6F3EC" },
   { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#EEF0F8" },
 ];
 
@@ -454,7 +454,7 @@ const QuickAccess = () => (
 // only "how it works" section on the page — the full illustrated version
 // used to duplicate it further down and was removed as dead weight.
 const CompactHowItWorks = () => (
-  <section style={{ background: "#F7F1E3", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
+  <section style={{ background: "#F6F3EC", borderTop: "1px solid #E8DCC0", borderBottom: "1px solid #E8DCC0" }}>
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
       <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
         {ROADMAP.map((r, i) => {
@@ -1020,9 +1020,9 @@ const AboutAuthor = () => {
     { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#DCE6F1" },
     { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#EEF0F8" },
     { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#E3EAF2" },
-    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F1E3" },
+    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F6F3EC" },
     { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#EEF0F8" },
-    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F1E3" },
+    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F6F3EC" },
   ];
   return (
   <section id="founder" className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading" style={{ scrollMarginTop: "80px" }}>

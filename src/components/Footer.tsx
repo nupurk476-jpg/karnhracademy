@@ -13,7 +13,7 @@ const Footer = () => {
                 style={{
                   width: 5,
                   height: 42,
-                  background: "#C7994A",
+                  background: "#C6A15B",
                   borderRadius: 3,
                   flexShrink: 0,
                 }}
@@ -22,7 +22,7 @@ const Footer = () => {
                 <div style={{ lineHeight: 1 }}>
                   <span
                     style={{
-                      fontFamily: "'Sora', sans-serif",
+                      fontFamily: "'Playfair Display', serif",
                       fontWeight: 300,
                       fontSize: 22,
                       letterSpacing: -1,
@@ -33,7 +33,7 @@ const Footer = () => {
                   </span>
                   <span
                     style={{
-                      fontFamily: "'Sora', sans-serif",
+                      fontFamily: "'Playfair Display', serif",
                       fontWeight: 800,
                       fontSize: 22,
                       letterSpacing: -1,
@@ -45,7 +45,7 @@ const Footer = () => {
                 </div>
                 <div
                   style={{
-                    fontFamily: "'Sora', sans-serif",
+                    fontFamily: "'Playfair Display', serif",
                     fontWeight: 500,
                     fontSize: 8,
                     letterSpacing: 4,

@@ -10,17 +10,17 @@
 // intentionally match them where they overlap (gold ≙ --accent,
 // goldText ≙ --accent-deep).
 export const BRAND = {
-  navy: "#1F4E79",
-  navyDeep: "#0D2A45",
+  navy: "#16274A",
+  navyDeep: "#0E1B33",
   steel: "#5B8AB8",
   steelDeep: "#3D6C98",
-  gold: "#C7994A",
-  goldDeep: "#A9823F",
+  gold: "#C6A15B",
+  goldDeep: "#9C7C3B",
   // Gold for TEXT on light grounds — ~5:1 on white (WCAG AA); the display
   // golds above fail AA at link/label sizes.
-  goldText: "#8A6A28",
+  goldText: "#7A6130",
   // Tinted light grounds
   light: "#EEF0F8",
   mist: "#DCE6F1",
-  cream: "#F7F1E3",
+  cream: "#F6F3EC",
 } as const;

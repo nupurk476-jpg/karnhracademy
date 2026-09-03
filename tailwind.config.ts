@@ -17,7 +17,7 @@ export default {
       fontFamily: {
         sans: ["'Source Sans 3'", "sans-serif"],
         // The site's single display face (headings, logo, stat numerals).
-        display: ["Sora", "sans-serif"],
+        display: ["'Playfair Display'", "serif"],
       },
       colors: {
         // Marketing palette — single-sourced from src/lib/brand.ts so
