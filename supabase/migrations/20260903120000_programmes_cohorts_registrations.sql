@@ -221,6 +221,33 @@ CREATE POLICY "Admin update payment settings" ON public.payment_settings
   FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin'::app_role))
   WITH CHECK (public.has_role(auth.uid(), 'admin'::app_role));
 
+-- ── Table privileges ─────────────────────────────────────────────────────
+-- RLS decides which ROWS a caller may touch; these decide whether the role
+-- may touch the table at all. Supabase's default privileges usually grant
+-- these automatically, but stating them is free and makes the migration
+-- correct on a project where those defaults were never set — matching what
+-- the lectures and live_lectures migrations already do here.
+--
+-- Note what anon does NOT get on registrations: SELECT. A visitor may file
+-- one and never read one. This works because the client inserts without
+-- asking for the row back (supabase-js sends Prefer: return=minimal unless
+-- .select() is chained), so nothing needs to read it.
+GRANT SELECT ON public.programmes TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.programmes TO authenticated;
+GRANT ALL ON public.programmes TO service_role;
+
+GRANT SELECT ON public.programme_cohorts TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.programme_cohorts TO authenticated;
+GRANT ALL ON public.programme_cohorts TO service_role;
+
+GRANT INSERT ON public.programme_registrations TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.programme_registrations TO authenticated;
+GRANT ALL ON public.programme_registrations TO service_role;
+
+GRANT SELECT ON public.payment_settings TO anon;
+GRANT SELECT, UPDATE ON public.payment_settings TO authenticated;
+GRANT ALL ON public.payment_settings TO service_role;
+
 -- ── Seed: the GD/PI programme, unpublished and unpriced ──────────────────
 -- Deliberately is_published = false with price 0 and no cohort: set the
 -- real price and batch dates in Admin, then publish. Nothing is guessed
