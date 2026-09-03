@@ -313,7 +313,7 @@ const AdminNotes = () => {
               {note.subject === "lw" && (() => {
                 const unit = getUnitForTopicSlug(note.topic_slug);
                 return unit ? (
-                  <span className="ml-2 rounded-full bg-[#E9EEF5] px-2 py-0.5 text-xs font-semibold text-[#0B0C0E]">
+                  <span className="ml-2 rounded-full bg-[#EFEDE9] px-2 py-0.5 text-xs font-semibold text-[#0B0C0E]">
                     Unit {unitRoman(unit.number)}
                   </span>
                 ) : (

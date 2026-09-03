@@ -8,12 +8,12 @@ export const GOLD_HEX = "#E34234";
 // Per-subject cover gradient, built from the site's navy/steel/gold palette.
 export const SUBJECT_GRADIENT: Record<string, [string, string]> = {
   hrm:     ["#17181C", "#0B0C0E"],
-  ob:      ["#3D6C98", "#17181C"],
+  ob:      ["#4A4A4F", "#17181C"],
   sm:      ["#B23223", "#0B0C0E"],
   pom:     ["#0B0C0E", "#17181C"],
   bc:      ["#6B6B70", "#17181C"],
   odcm:    ["#E34234", "#B23223"],
-  ghr:     ["#0B0C0E", "#3D6C98"],
+  ghr:     ["#0B0C0E", "#4A4A4F"],
 };
 
 export function subjectGradient(subjectValue?: string | null): [string, string] {
