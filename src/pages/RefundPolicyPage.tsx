@@ -92,8 +92,8 @@ const RefundPolicyPage = () => (
           <h2 className="mb-2 text-lg font-bold text-foreground">How to request a refund</h2>
           <p>
             Email{" "}
-            <a href="mailto:contact@karnhracademy.com" className="font-semibold text-accent-deep hover:underline">
-              contact@karnhracademy.com
+            <a href="mailto:nupur@karnhracademy.com" className="font-semibold text-accent-deep hover:underline">
+              nupur@karnhracademy.com
             </a>{" "}
             with your name, the programme and batch, and your UPI reference number. We aim to
             respond within 2 working days. You can also reach us through the{" "}

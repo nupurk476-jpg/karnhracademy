@@ -127,11 +127,11 @@ const Footer = () => {
               Have a question or suggestion? We'd love to hear from you.
             </p>
             <a
-              href="mailto:contact@karnhracademy.com"
+              href="mailto:nupur@karnhracademy.com"
               className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
             >
               <Mail className="h-4 w-4 shrink-0" style={{ color: "hsl(var(--accent))" }} />
-              contact@karnhracademy.com
+              nupur@karnhracademy.com
             </a>
           </div>
         </div>
