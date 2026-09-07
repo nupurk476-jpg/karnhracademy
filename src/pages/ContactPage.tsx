@@ -55,8 +55,8 @@ const ContactPage = () => {
 
         <div className="mb-8 flex items-center gap-3">
           <Mail className="h-5 w-5 text-accent-deep" />
-          <a href="mailto:contact@karnhracademy.com" className="text-foreground hover:text-accent-deep transition-colors">
-            contact@karnhracademy.com
+          <a href="mailto:nupur@karnhracademy.com" className="text-foreground hover:text-accent-deep transition-colors">
+            nupur@karnhracademy.com
           </a>
         </div>
 

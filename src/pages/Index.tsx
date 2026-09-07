@@ -992,7 +992,7 @@ const PopularTopics = () => (
 // Set this to the founder's exact LinkedIn profile URL when available; the
 // default is a safe public search for her name, so the button always works.
 const FOUNDER_LINKEDIN = "https://www.linkedin.com/search/results/people/?keywords=Nupur%20Karn";
-const FOUNDER_EMAIL = "contact@karnhracademy.com";
+const FOUNDER_EMAIL = "nupur@karnhracademy.com";
 
 const FOUNDER_QUALIFICATIONS = [
   "UGC NET Qualified (Code 55)",
