@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { track, EVENTS } from "@/lib/analytics";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -17,9 +18,10 @@ export function useDownloadGate() {
   const [gateOpen, setGateOpen] = useState(false);
   const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
 
-  // Ungated open — used for in-browser *viewing*, which stays friction-free
-  // for first-time visitors; the email ask is reserved for downloads.
-  const openFree = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
+  // The actual open, with no tracking of its own. Both entry points below
+  // funnel through here, so a download that skips the gate cannot also be
+  // counted as a view.
+  const doOpen = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
     const win = window.open("", "_blank"); // synchronous within the click — popup-safe
     resolveUrl().then((url) => {
       if (!url) { win?.close(); return; }
@@ -28,13 +30,30 @@ export function useDownloadGate() {
     });
   };
 
+  /**
+   * Ungated open — used for in-browser *viewing*, which stays friction-free
+   * for first-time visitors; the email ask is reserved for downloads.
+   *
+   * Instrumented here rather than at the six call sites that share this
+   * hook: one place means uniform coverage, with no chance of a page being
+   * silently left out and understating the totals. The `path` column every
+   * event already carries supplies the section context, so no caller has
+   * to change.
+   */
+  const openFree = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
+    track(EVENTS.CONTENT_OPEN, { mode: "view" });
+    doOpen(resolveUrl, onOpened);
+  };
+
   const request = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
     const saved = localStorage.getItem(EMAIL_KEY);
     if (saved) {
-      openFree(resolveUrl, onOpened);
+      track(EVENTS.CONTENT_OPEN, { mode: "download" });
+      doOpen(resolveUrl, onOpened);
       return;
     }
     pending.current = { resolveUrl, onOpened };
+    track(EVENTS.GATE_SHOWN);
     setGateOpen(true);
   };
 
@@ -47,15 +66,32 @@ export function useDownloadGate() {
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
     setSubmitting(false);
     localStorage.setItem(EMAIL_KEY, email.trim());
+    // The address goes to email_subscribers and nowhere else; this records
+    // only that the gate converted. Clearing `pending` first is what stops
+    // dismissGate from also counting this as an abandon.
+    pending.current = null;
+    track(EVENTS.GATE_SUBMITTED);
     setGateOpen(false);
     setEmail("");
-    pending.current = null;
+    track(EVENTS.CONTENT_OPEN, { mode: "download" });
     const url = win ? await resolveUrl() : null;
     if (url && win) { onOpened(); win.location.href = url; } else win?.close();
   };
 
+  /**
+   * One exit path for every way out of the dialog (Cancel, the X, Esc,
+   * clicking away). Guarded on `pending`, which a successful submit has
+   * already cleared, so an abandon is only ever counted when the visitor
+   * really did leave without giving an address -- and only once.
+   */
+  const dismissGate = () => {
+    if (pending.current) track(EVENTS.GATE_DISMISSED);
+    setGateOpen(false);
+    pending.current = null;
+  };
+
   const GateDialog = () => (
-    <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) { setGateOpen(false); pending.current = null; } }}>
+    <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) dismissGate(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Enter your email to continue</DialogTitle>
@@ -71,7 +107,7 @@ export function useDownloadGate() {
             <button type="submit" disabled={submitting} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
               {submitting ? "..." : "Continue"}
             </button>
-            <button type="button" onClick={() => { setGateOpen(false); pending.current = null; }} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
+            <button type="button" onClick={dismissGate} className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted">
               Cancel
             </button>
           </div>

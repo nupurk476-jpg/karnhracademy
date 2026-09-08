@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,6 +6,7 @@ import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useToast } from "@/hooks/use-toast";
+import { track, EVENTS } from "@/lib/analytics";
 import {
   formatDateRange, formatDate, formatRupees, isCohortOpen, seatsLeft,
   type Cohort, type Programme,
@@ -105,8 +106,19 @@ const ProgrammeDetailPage = () => {
     return `upi://pay?${params.toString()}`;
   }, [payment, prog, amountRupees, selected]);
 
+  /**
+   * Deliberately means "tried to pay", not "saw the payment screen" —
+   * copying the handle or opening a UPI app is the last observable act
+   * before the student leaves the site. The gap between this and
+   * reg_submitted is the money question: paid, but never came back to
+   * enter the reference.
+   */
+  const trackPaymentAttempt = (method: "copy_upi" | "upi_app") =>
+    track(EVENTS.REG_PAYMENT, { slug: prog?.slug, batch: selected?.batch_name, method, price: amountRupees });
+
   const copyUpiId = async () => {
     if (!payment?.upi_id) return;
+    trackPaymentAttempt("copy_upi");
     try {
       await navigator.clipboard.writeText(payment.upi_id);
       toast({ title: "UPI ID copied" });
@@ -118,6 +130,7 @@ const ProgrammeDetailPage = () => {
   const goToPayment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selected) return;
+    track(EVENTS.REG_DETAILS, { slug: prog?.slug, batch: selected.batch_name, price: amountRupees });
     setStep("payment");
   };
 
@@ -153,8 +166,21 @@ const ProgrammeDetailPage = () => {
       });
       return;
     }
+    track(EVENTS.REG_SUBMITTED, { slug: prog?.slug, batch: selected.batch_name, price: amountRupees });
     setStep("done");
   };
+
+  /**
+   * Top of the revenue funnel. Fires once the programme resolves to a real
+   * published one, so a 404 or a still-loading page never counts as a view
+   * and deflates every rate measured against it.
+   */
+  const viewed = useRef<string | null>(null);
+  useEffect(() => {
+    if (!prog || viewed.current === prog.slug) return;
+    viewed.current = prog.slug;
+    track(EVENTS.PROGRAMME_VIEW, { slug: prog.slug, price: prog.price_paise });
+  }, [prog]);
 
   if (programme === null) {
     return (
@@ -401,6 +427,7 @@ const ProgrammeDetailPage = () => {
                             {upiDeepLink && (
                               <a
                                 href={upiDeepLink}
+                                onClick={() => trackPaymentAttempt("upi_app")}
                                 className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-md border border-accent px-4 py-2 text-sm font-semibold text-accent-deep hover:bg-accent/10 sm:hidden"
                               >
                                 <Smartphone aria-hidden="true" className="h-4 w-4" />

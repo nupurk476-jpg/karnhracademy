@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { track, EVENTS } from "@/lib/analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -73,6 +74,11 @@ const AuthPage = () => {
           setIsLogin(true);
           return;
         }
+        // Only past the already-registered check, so a re-signup attempt is
+        // never counted as a new account. `from` records what drove it --
+        // the quiz sign-in wall and the PYQ viewer are the two gates that
+        // push people here, and this is what shows whether they convert.
+        track(EVENTS.AUTH_SIGNUP, { from: redirectTo });
         if (data.session) {
           // Email confirmation is disabled — the user is signed in already.
           toast({ title: "Account created — welcome!" });

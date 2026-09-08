@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { track, EVENTS } from "@/lib/analytics";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
 import {
   ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star,
@@ -109,8 +110,11 @@ const QuizTake = () => {
     setTimeTakenFinal(timeTaken);
     const finalScore = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
     saveAttempt(finalScore, questions.length, timeTaken);
+    track(EVENTS.QUIZ_COMPLETE, {
+      quiz: id, score: finalScore, total: questions.length, seconds: timeTaken,
+    });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [questions, answers, saveAttempt]);
+  }, [questions, answers, saveAttempt, id]);
 
   useEffect(() => {
     if (!started || submitted || questions.length === 0) return;
@@ -139,7 +143,16 @@ const QuizTake = () => {
   };
 
   const handleStart = () => {
-    if (!user) { navigate("/auth", { state: { from: `/quizzes/${id}` } }); return; }
+    // Splitting the two outcomes is the whole point: quizzes demand a
+    // sign-in before the first question, and the size of that wall's cost
+    // has never been measured. A high signin_required-to-start ratio means
+    // the gate is turning away engagement, not capturing leads.
+    if (!user) {
+      track(EVENTS.QUIZ_SIGNIN_REQUIRED, { quiz: id });
+      navigate("/auth", { state: { from: `/quizzes/${id}` } });
+      return;
+    }
+    track(EVENTS.QUIZ_START, { quiz: id });
     setStarted(true);
     startTimeRef.current = Date.now();
   };
