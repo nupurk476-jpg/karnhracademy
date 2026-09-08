@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { track, EVENTS } from "@/lib/analytics";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -300,6 +301,7 @@ const BlogList = () => {
   const handleSubscribe = async (email: string) => {
     if (!email.trim()) return;
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
+    track(EVENTS.NEWSLETTER_SUBSCRIBE, { where: "blog" });
   };
 
   const filtered = posts

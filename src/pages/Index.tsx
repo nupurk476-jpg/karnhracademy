@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { track, EVENTS } from "@/lib/analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -1124,6 +1125,7 @@ const Newsletter = () => {
     if (isBot()) { setDone(true); setEmail(""); return; }
     setLoading(true);
     await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
+    track(EVENTS.NEWSLETTER_SUBSCRIBE, { where: "home" });
     setLoading(false);
     setDone(true);
     setEmail("");
