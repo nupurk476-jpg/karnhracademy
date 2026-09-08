@@ -1124,7 +1124,7 @@ const Newsletter = () => {
     if (!email.trim()) return;
     if (isBot()) { setDone(true); setEmail(""); return; }
     setLoading(true);
-    await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
     track(EVENTS.NEWSLETTER_SUBSCRIBE, { where: "home" });
     setLoading(false);
     setDone(true);

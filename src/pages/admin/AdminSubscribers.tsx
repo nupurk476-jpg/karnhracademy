@@ -3,16 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useConfirm } from "@/hooks/use-confirm";
 import { toCsv, downloadCsv } from "@/lib/csv";
+import { activeSubscribers, type Subscriber } from "@/lib/subscribers";
 import { Trash2, Download } from "lucide-react";
 
 /** PostgREST caps a single response; paging is the only way past it. */
 const PAGE_SIZE = 1000;
-
-type Subscriber = {
-  id: string;
-  email: string;
-  created_at: string;
-};
 
 /** Supabase errors and thrown values are unknown until narrowed. */
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -69,6 +64,8 @@ const AdminSubscribers = () => {
 
   const term = search.trim().toLowerCase();
   const filteredSubscribers = subscribers.filter(s => !term || s.email?.toLowerCase().includes(term));
+  const activeCount = subscribers.filter(s => !s.unsubscribed_at).length;
+  const optedOutCount = subscribers.length - activeCount;
 
   /**
    * Export what is on screen, filter included — exporting something other
@@ -82,9 +79,12 @@ const AdminSubscribers = () => {
     setExporting(true);
     try {
       const rows = await loadAll();
-      const scoped = rows.filter(s => !term || s.email?.toLowerCase().includes(term));
+      // Opted-out addresses never leave this screen. The export exists to
+      // be pasted into a sending tool, so including someone who asked to
+      // leave would mail them again -- the exact harm unsubscribe prevents.
+      const scoped = activeSubscribers(rows, term);
       if (scoped.length === 0) {
-        toast({ title: "Nothing to export", description: "No subscribers match the current search." });
+        toast({ title: "Nothing to export", description: "No active subscribers match the current search." });
         return;
       }
       const csv = toCsv(
@@ -93,7 +93,7 @@ const AdminSubscribers = () => {
       );
       const stamp = new Date().toISOString().slice(0, 10);
       downloadCsv(`karn-hr-subscribers-${stamp}.csv`, csv);
-      toast({ title: `Exported ${scoped.length} subscriber(s)` });
+      toast({ title: `Exported ${scoped.length} active subscriber(s)` });
     } catch (e: unknown) {
       toast({ title: "Export failed", description: message(e), variant: "destructive" });
     } finally {
@@ -112,12 +112,18 @@ const AdminSubscribers = () => {
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
-            {exporting ? "Exporting…" : term ? `Export ${filteredSubscribers.length} shown` : "Export CSV"}
+            {exporting
+              ? "Exporting…"
+              : term
+                ? `Export ${activeSubscribers(subscribers, term).length} shown`
+                : "Export CSV"}
           </button>
         )}
       </div>
       <p className="mb-4 text-sm text-muted-foreground">
-        {subscribers.length} subscriber(s) — collected from the newsletter forms and the download email gate.
+        {activeCount} active subscriber(s)
+        {optedOutCount > 0 && ` · ${optedOutCount} unsubscribed`} — collected from the newsletter
+        forms and the download email gate. Only active ones are exported.
       </p>
       {subscribers.length > 0 && (
         <input
@@ -137,8 +143,15 @@ const AdminSubscribers = () => {
           {filteredSubscribers.map((s) => (
             <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-card px-4 py-3">
               <div className="min-w-0">
-                <span className="text-sm font-medium text-foreground">{s.email}</span>
+                <span className={`text-sm font-medium ${s.unsubscribed_at ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                  {s.email}
+                </span>
                 <span className="ml-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
+                {s.unsubscribed_at && (
+                  <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Unsubscribed
+                  </span>
+                )}
               </div>
               <button onClick={() => remove(s.id, s.email)} aria-label={`Remove ${s.email}`} className="shrink-0 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
             </div>

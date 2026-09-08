@@ -63,7 +63,7 @@ export function useDownloadGate() {
     const { resolveUrl, onOpened } = pending.current;
     const win = window.open("", "_blank");
     setSubmitting(true);
-    await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
     setSubmitting(false);
     localStorage.setItem(EMAIL_KEY, email.trim());
     // The address goes to email_subscribers and nowhere else; this records
