@@ -1,20 +1,62 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useConfirm } from "@/hooks/use-confirm";
-import { Trash2 } from "lucide-react";
+import { toCsv, downloadCsv } from "@/lib/csv";
+import { Trash2, Download } from "lucide-react";
+
+/** PostgREST caps a single response; paging is the only way past it. */
+const PAGE_SIZE = 1000;
+
+type Subscriber = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
+/** Supabase errors and thrown values are unknown until narrowed. */
+const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 const AdminSubscribers = () => {
-  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
+  const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
-  const load = () => {
-    supabase.from("email_subscribers").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setSubscribers(data));
-  };
+  /**
+   * Read every subscriber, not the first thousand.
+   *
+   * A plain .select() silently stops at PostgREST's row cap, so once the
+   * list passed 1000 this screen would have quietly under-reported the
+   * count and any export taken from it would have been short — the kind
+   * of wrong that looks perfectly fine.
+   */
+  const loadAll = useCallback(async (): Promise<Subscriber[]> => {
+    const all: Subscriber[] = [];
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from("email_subscribers")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE_SIZE - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      all.push(...(data as Subscriber[]));
+      if (data.length < PAGE_SIZE) break;
+    }
+    return all;
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  const load = useCallback(() => {
+    loadAll()
+      .then(setSubscribers)
+      .catch((e: unknown) =>
+        toast({ title: "Couldn't load subscribers", description: message(e), variant: "destructive" }),
+      );
+  }, [loadAll, toast]);
+
+  useEffect(() => { load(); }, [load]);
 
   const remove = async (id: string, email: string) => {
     const ok = await confirm({ title: `Remove ${email}?`, description: "This cannot be undone." });
@@ -28,10 +70,55 @@ const AdminSubscribers = () => {
   const term = search.trim().toLowerCase();
   const filteredSubscribers = subscribers.filter(s => !term || s.email?.toLowerCase().includes(term));
 
+  /**
+   * Export what is on screen, filter included — exporting something other
+   * than what the admin is looking at is a surprise, and a search box
+   * doubles as the segment picker for a targeted send.
+   *
+   * Re-reads rather than dumping state, so a list that grew since page
+   * load still exports completely.
+   */
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const rows = await loadAll();
+      const scoped = rows.filter(s => !term || s.email?.toLowerCase().includes(term));
+      if (scoped.length === 0) {
+        toast({ title: "Nothing to export", description: "No subscribers match the current search." });
+        return;
+      }
+      const csv = toCsv(
+        ["email", "subscribed_on"],
+        scoped.map(s => [s.email, new Date(s.created_at).toISOString().slice(0, 10)]),
+      );
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadCsv(`karn-hr-subscribers-${stamp}.csv`, csv);
+      toast({ title: `Exported ${scoped.length} subscriber(s)` });
+    } catch (e: unknown) {
+      toast({ title: "Export failed", description: message(e), variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold text-foreground">Email Subscribers</h1>
-      <p className="mb-4 text-sm text-muted-foreground">{subscribers.length} subscriber(s)</p>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold text-foreground">Email Subscribers</h1>
+        {subscribers.length > 0 && (
+          <button
+            onClick={exportCsv}
+            disabled={exporting}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {exporting ? "Exporting…" : term ? `Export ${filteredSubscribers.length} shown` : "Export CSV"}
+          </button>
+        )}
+      </div>
+      <p className="mb-4 text-sm text-muted-foreground">
+        {subscribers.length} subscriber(s) — collected from the newsletter forms and the download email gate.
+      </p>
       {subscribers.length > 0 && (
         <input
           type="text"
