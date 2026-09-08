@@ -25,7 +25,10 @@ const AdminDashboard = () => {
       supabase.from("quizzes").select("id", { count: "exact", head: true }),
       supabase.from("book_recommendations").select("id", { count: "exact", head: true }),
       supabase.from("blog_comments").select("id", { count: "exact", head: true }),
-      supabase.from("email_subscribers").select("id", { count: "exact", head: true }),
+      // Active only. A headline "subscribers" figure that counts people
+      // who opted out overstates the reachable audience, which is the one
+      // thing this number is for.
+      supabase.from("email_subscribers").select("id", { count: "exact", head: true }).is("unsubscribed_at", null),
     ]).then(([b, n, q, bk, c, s]) => {
       setCounts({
         blogs: b.count || 0, notes: n.count || 0, quizzes: q.count || 0,

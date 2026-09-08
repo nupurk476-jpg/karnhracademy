@@ -300,7 +300,7 @@ const BlogList = () => {
 
   const handleSubscribe = async (email: string) => {
     if (!email.trim()) return;
-    await supabase.from("email_subscribers").upsert({ email: email.trim() }, { onConflict: "email" });
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
     track(EVENTS.NEWSLETTER_SUBSCRIBE, { where: "blog" });
   };
 

@@ -50,6 +50,7 @@ const ProgrammesPage = lazy(() => import("./pages/ProgrammesPage"));
 const ProgrammeDetailPage = lazy(() => import("./pages/ProgrammeDetailPage"));
 const NewspaperPage = lazy(() => import("./pages/NewspaperPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -113,6 +114,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/newspaper" element={<NewspaperPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
