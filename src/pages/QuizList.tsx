@@ -10,6 +10,7 @@ import { DISCIPLINES, getTopicLabel, getDiscipline } from "@/lib/disciplines";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import UpsellBanner from "@/components/UpsellBanner";
 
 const PAGE_SIZE = 30;
 
@@ -331,6 +332,7 @@ const QuizList = () => {
             )}
           </section>
         )}
+      <UpsellBanner />
       </main>
 
       <Footer />

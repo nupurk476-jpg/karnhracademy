@@ -1,8 +1,9 @@
-import { Menu, X, Search, LogIn, UserPlus, LogOut, User } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Menu, X, Search, LogIn, UserPlus, LogOut, User, ShoppingCart, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/context/CartContext";
 
 // Ordered by student intent, not by content type — Labour Welfare (the
 // flagship syllabus hub) and the three exam-prep formats (Notes, MCQs,
@@ -13,15 +14,27 @@ import { Button } from "@/components/ui/button";
 // widths (lg–xl) the bar keeps the core product links and defers
 // About/Contact to the mobile menu and footer, instead of hiding the
 // entire nav behind a hamburger the way it used to below 1280px.
-const navItems = [
-  { label: "Home", to: "/" },
-  { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
-  { label: "MBA/BBA", to: "/mba-bba" },
-  { label: "Programmes", to: "/programmes" },
+// The four free formats collapse into one "Free Resources" menu so the paid
+// side has room in the bar — but their routes are untouched and all four stay
+// one click away. PYQs in particular is indexed and stays listed; dropping it
+// from navigation would bury pages Google already sends traffic to.
+//
+// Labour Welfare and MBA/BBA remain top level: they are the syllabus hubs
+// students arrive looking for, not a content type.
+const FREE_RESOURCES = [
   { label: "Notes", to: "/notes" },
   { label: "MCQs", to: "/quizzes" },
   { label: "PYQs", to: "/pyqs" },
   { label: "Lectures", to: "/lectures" },
+];
+
+const navItems = [
+  { label: "Home", to: "/" },
+  { label: "Free Resources", children: FREE_RESOURCES },
+  { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
+  { label: "MBA/BBA", to: "/mba-bba" },
+  { label: "Programmes", to: "/programmes" },
+  { label: "Pricing", to: "/pricing" },
   { label: "About", to: "/about", wideOnly: true },
   { label: "Contact", to: "/contact", wideOnly: true },
 ];
@@ -31,8 +44,31 @@ const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [freeOpen, setFreeOpen] = useState(false);
+  const freeRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { count } = useCart();
+
+  // A dropdown that survives a click elsewhere or an Escape is the minimum
+  // for one that opens on click rather than hover — hover-only menus are
+  // unusable by keyboard and unreliable on touch.
+  useEffect(() => {
+    if (!freeOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (freeRef.current && !freeRef.current.contains(e.target as Node)) setFreeOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFreeOpen(false); };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [freeOpen]);
+
+  // Navigating away should never leave the menu hanging open behind the page.
+  useEffect(() => { setFreeOpen(false); }, [location.pathname]);
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,21 +165,61 @@ const Header = () => {
 
         {/* Desktop nav — visible from lg (1024px); tighter padding until xl */}
         <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 justify-center">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to}
-              className={`px-2 xl:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                item.wideOnly ? "hidden xl:block " : ""
-              }${
-                isActive(item.to)
-                  ? "text-foreground bg-slate-100"
-                  : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            if (item.children) {
+              const childActive = item.children.some(c => isActive(c.to));
+              return (
+                <div key={item.label} className="relative" ref={freeRef}>
+                  <button
+                    onClick={() => setFreeOpen(o => !o)}
+                    aria-expanded={freeOpen}
+                    aria-haspopup="true"
+                    className={`flex items-center gap-1 px-2 xl:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      childActive || freeOpen
+                        ? "text-foreground bg-slate-100"
+                        : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
+                    }`}
+                  >
+                    {item.label}
+                    <ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 transition-transform ${freeOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {freeOpen && (
+                    <div className="absolute left-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-md border border-border bg-white py-1 shadow-lg">
+                      {item.children.map(child => (
+                        <Link
+                          key={child.label}
+                          to={child.to}
+                          onClick={() => setFreeOpen(false)}
+                          className={`block px-4 py-2 text-sm transition-colors ${
+                            isActive(child.to)
+                              ? "text-foreground bg-slate-100"
+                              : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
+                          }`}
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            return (
+              <Link
+                key={item.label}
+                to={item.to!}
+                className={`px-2 xl:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  item.wideOnly ? "hidden xl:block " : ""
+                }${
+                  isActive(item.to!)
+                    ? "text-foreground bg-slate-100"
+                    : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right controls */}
@@ -214,6 +290,26 @@ const Header = () => {
             )}
           </div>
 
+          {/* Cart — shown at every width, since it is the paid path's only
+              persistent entry point. Phase 1 has no checkout, so it links to
+              the catalogue rather than a drawer that cannot do anything yet. */}
+          <Link
+            to="/programmes"
+            className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-slate-50 transition-colors"
+            aria-label={count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart, empty"}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {count > 0 && (
+              <span
+                aria-hidden="true"
+                className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums"
+                style={{ background: "hsl(var(--accent))", color: "hsl(var(--accent-foreground))" }}
+              >
+                {count}
+              </span>
+            )}
+          </Link>
+
           {/* Mobile hamburger */}
           <button
             className="lg:hidden p-2 rounded-md text-foreground hover:bg-slate-50 transition-colors"
@@ -245,20 +341,44 @@ const Header = () => {
 
           {/* Nav links */}
           <nav className="px-4 pb-3 space-y-0.5">
-            {navItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                className={`block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.to)
-                    ? "text-foreground bg-slate-100"
-                    : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
-                }`}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              item.children ? (
+                // Flattened rather than nested: a menu inside a menu on a phone
+                // is two taps to reach a page that was one tap before.
+                <div key={item.label} className="pt-2">
+                  <p className="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {item.label}
+                  </p>
+                  {item.children.map(child => (
+                    <Link
+                      key={child.label}
+                      to={child.to}
+                      className={`block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                        isActive(child.to)
+                          ? "text-foreground bg-slate-100"
+                          : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
+                      }`}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {child.label}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <Link
+                  key={item.label}
+                  to={item.to!}
+                  className={`block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                    isActive(item.to!)
+                      ? "text-foreground bg-slate-100"
+                      : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
+                  }`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
           </nav>
 
           {/* Mobile auth */}

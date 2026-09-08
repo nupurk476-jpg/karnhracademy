@@ -10,8 +10,9 @@ const FIELD =
 const LABEL = "mb-1 block text-xs font-semibold text-foreground";
 
 const emptyProgramme = () => ({
-  slug: "", title: "", subtitle: "", description: "", highlightsText: "",
-  priceRupees: "", duration_note: "", is_published: false, display_order: 0,
+  slug: "", title: "", short_description: "", long_description: "", includesText: "",
+  priceRupees: "", mrpRupees: "", category: "", duration_note: "",
+  is_active: false, sort_order: 0,
 });
 
 const emptyCohort = () => ({
@@ -45,7 +46,7 @@ const AdminProgrammes = () => {
 
   const load = async () => {
     const [{ data: progs }, { data: batches }] = await Promise.all([
-      (supabase.from("programmes" as any) as any).select("*").order("display_order", { ascending: true }),
+      (supabase.from("programmes" as any) as any).select("*").order("sort_order", { ascending: true }),
       (supabase.from("programme_cohorts" as any) as any).select("*").order("starts_on", { ascending: true }),
     ]);
     setProgrammes(progs ?? []);
@@ -57,11 +58,13 @@ const AdminProgrammes = () => {
   const startEdit = (p: Programme) => {
     setEditing(p.id);
     setForm({
-      slug: p.slug, title: p.title, subtitle: p.subtitle ?? "",
-      description: p.description ?? "", highlightsText: (p.highlights ?? []).join("\n"),
+      slug: p.slug, title: p.title, short_description: p.short_description ?? "",
+      long_description: p.long_description ?? "", includesText: (p.includes ?? []).join("\n"),
       priceRupees: p.price_paise ? String(p.price_paise / 100) : "",
-      duration_note: p.duration_note ?? "", is_published: p.is_published,
-      display_order: p.display_order,
+      mrpRupees: p.mrp_paise ? String(p.mrp_paise / 100) : "",
+      category: p.category ?? "",
+      duration_note: p.duration_note ?? "", is_active: p.is_active,
+      sort_order: p.sort_order,
     });
   };
 
@@ -72,18 +75,32 @@ const AdminProgrammes = () => {
       toast({ title: "Check the price", description: "Enter rupees as a number, e.g. 1500 or 1500.50.", variant: "destructive" });
       return;
     }
+    const mrpRaw = form.mrpRupees.trim();
+    const mrp_paise = mrpRaw === "" ? null : rupeesToPaise(mrpRaw);
+    if (mrp_paise === null && mrpRaw !== "") {
+      toast({ title: "Check the MRP", description: "Enter rupees as a number, or leave it blank.", variant: "destructive" });
+      return;
+    }
+    // A struck-through price below what you actually charge is not a discount.
+    // The database rejects it too; catching it here gives a usable message.
+    if (mrp_paise !== null && mrp_paise < price_paise) {
+      toast({ title: "MRP is below the price", description: "The struck-through price must be higher than the price you charge, or left blank.", variant: "destructive" });
+      return;
+    }
     const payload = {
       slug: form.slug.trim(),
       title: form.title.trim(),
-      subtitle: form.subtitle.trim() || null,
-      description: form.description.trim() || null,
-      highlights: form.highlightsText.split("\n").map(s => s.trim()).filter(Boolean),
+      short_description: form.short_description.trim() || null,
+      long_description: form.long_description.trim() || null,
+      includes: form.includesText.split("\n").map(s => s.trim()).filter(Boolean),
       price_paise,
+      mrp_paise,
+      category: form.category.trim() || null,
       duration_note: form.duration_note.trim() || null,
-      is_published: form.is_published,
-      display_order: Number(form.display_order) || 0,
+      is_active: form.is_active,
+      sort_order: Number(form.sort_order) || 0,
     };
-    if (form.is_published && price_paise <= 0) {
+    if (form.is_active && price_paise <= 0) {
       toast({ title: "Set a price before publishing", description: "A published programme with no price can't take registrations.", variant: "destructive" });
       return;
     }
@@ -197,21 +214,29 @@ const AdminProgrammes = () => {
             </div>
           </div>
           <div>
-            <label className={LABEL} htmlFor="p-subtitle">Subtitle</label>
-            <input id="p-subtitle" className={FIELD} value={form.subtitle} onChange={e => setForm({ ...form, subtitle: e.target.value })} />
+            <label className={LABEL} htmlFor="p-subtitle">Short description</label>
+            <input id="p-subtitle" className={FIELD} value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} />
           </div>
           <div>
-            <label className={LABEL} htmlFor="p-desc">Description</label>
-            <textarea id="p-desc" rows={3} className={FIELD} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+            <label className={LABEL} htmlFor="p-desc">Long description</label>
+            <textarea id="p-desc" rows={3} className={FIELD} value={form.long_description} onChange={e => setForm({ ...form, long_description: e.target.value })} />
           </div>
           <div>
             <label className={LABEL} htmlFor="p-highlights">What's included — one per line</label>
-            <textarea id="p-highlights" rows={5} className={FIELD} value={form.highlightsText} onChange={e => setForm({ ...form, highlightsText: e.target.value })} />
+            <textarea id="p-highlights" rows={5} className={FIELD} value={form.includesText} onChange={e => setForm({ ...form, includesText: e.target.value })} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <div>
               <label className={LABEL} htmlFor="p-price">Price in rupees</label>
               <input id="p-price" className={FIELD} value={form.priceRupees} onChange={e => setForm({ ...form, priceRupees: e.target.value })} placeholder="1500" inputMode="decimal" />
+            </div>
+            <div>
+              <label className={LABEL} htmlFor="p-mrp">MRP in rupees <span className="font-normal text-muted-foreground">(optional)</span></label>
+              <input id="p-mrp" className={FIELD} value={form.mrpRupees} onChange={e => setForm({ ...form, mrpRupees: e.target.value })} placeholder="2000" inputMode="decimal" />
+            </div>
+            <div>
+              <label className={LABEL} htmlFor="p-category">Category</label>
+              <input id="p-category" className={FIELD} value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Admissions" />
             </div>
             <div>
               <label className={LABEL} htmlFor="p-duration">Duration note</label>
@@ -219,12 +244,12 @@ const AdminProgrammes = () => {
             </div>
             <div>
               <label className={LABEL} htmlFor="p-order">Display order</label>
-              <input id="p-order" type="number" className={FIELD} value={form.display_order} onChange={e => setForm({ ...form, display_order: Number(e.target.value) })} />
+              <input id="p-order" type="number" className={FIELD} value={form.sort_order} onChange={e => setForm({ ...form, sort_order: Number(e.target.value) })} />
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-foreground">
-            <input type="checkbox" checked={form.is_published} onChange={e => setForm({ ...form, is_published: e.target.checked })} />
-            Published — visible on the public site
+            <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} />
+            Active — visible on the public site
           </label>
           <div className="flex gap-2 pt-1">
             <button type="submit" className="rounded-md bg-accent px-5 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">Save</button>
@@ -253,8 +278,8 @@ const AdminProgrammes = () => {
                   </span>
                 </button>
                 <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${p.is_published ? "bg-emerald-100 text-emerald-800" : "bg-muted text-muted-foreground"}`}>
-                    {p.is_published ? "Published" : "Draft"}
+                  <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${p.is_active ? "bg-emerald-100 text-emerald-800" : "bg-muted text-muted-foreground"}`}>
+                    {p.is_active ? "Published" : "Draft"}
                   </span>
                   <button onClick={() => startEdit(p)} className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">Edit</button>
                   <button onClick={() => removeProgramme(p)} className="rounded-md px-2 py-1.5 text-red-600 hover:bg-red-50">

@@ -13,13 +13,28 @@ export interface Programme {
   id: string;
   slug: string;
   title: string;
-  subtitle: string | null;
-  description: string | null;
-  highlights: string[];
+  short_description: string | null;
+  long_description: string | null;
+  /** jsonb array of "what's included" lines. */
+  includes: string[];
   price_paise: number;
+  /** Optional "was" price, shown struck through. Always >= price_paise. */
+  mrp_paise: number | null;
   duration_note: string | null;
-  is_published: boolean;
-  display_order: number;
+  category: string | null;
+  is_active: boolean;
+  sort_order: number;
+}
+
+/**
+ * Percentage off, for the discount badge — null unless there is a real MRP
+ * above the asking price, so a badge can never claim a saving of 0%.
+ */
+export function discountPercent(programme: Programme): number | null {
+  if (!programme.mrp_paise || programme.mrp_paise <= programme.price_paise) return null;
+  const off = 1 - programme.price_paise / programme.mrp_paise;
+  const pct = Math.round(off * 100);
+  return pct > 0 ? pct : null;
 }
 
 export interface Cohort {

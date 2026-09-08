@@ -14,6 +14,7 @@ import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { useDownloadGate } from "@/hooks/use-download-gate";
+import UpsellBanner from "@/components/UpsellBanner";
 
 const PAGE_SIZE = 30;
 
@@ -373,6 +374,7 @@ const NotesPage = () => {
             )}
           </section>
         )}
+      <UpsellBanner />
       </main>
 
       <GateDialog />

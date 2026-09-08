@@ -188,38 +188,44 @@ const Hero = () => {
               <ArrowRight aria-hidden="true" className="h-3 w-3 flex-shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: GOLD_TEXT }} />
             </Link>
           ) : (
+            // The badge used to claim "100% Free Academic Resource Platform".
+            // With programmes now sold alongside, that claim would be false —
+            // so it states what is actually still free instead of a headline
+            // number the site no longer lives up to.
             <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 w-fit" style={{ background: "rgba(199,153,74,0.12)", border: `1px solid ${GOLD}55` }}>
               <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: GOLD }} />
-              <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>100% Free Academic Resource Platform</span>
+              <span className="text-xs font-semibold" style={{ color: GOLD_TEXT }}>Notes, MCQs, PYQs &amp; lectures — free, always</span>
             </div>
           )}
 
           <h1 className="font-extrabold leading-[1.08] mb-5" style={{ color: NAVY, fontSize: "clamp(1.9rem,3.9vw,3rem)", letterSpacing: "-0.02em" }}>
-            Study Resources for{" "}
-            <span style={{ color: GOLD_DARK }}>UGC NET/JRF, MBA/BBA &amp; HR Studies</span>
+            Exam &amp; Career Preparation for{" "}
+            <span style={{ color: GOLD_DARK }}>HR and Management</span>
           </h1>
 
           <p className="text-sm md:text-base leading-relaxed mb-8 max-w-xl" style={{ color: "#55514C" }}>
-            Notes, MCQs, previous year papers and video lectures for three kinds of learners — UGC NET/JRF
-            Paper II (Subject Code 55) aspirants, MBA &amp; BBA students, and research scholars &amp; HR
-            professionals — organised by syllabus, updated regularly, and free to use.
+            For UGC NET/JRF Paper II (Subject Code 55) aspirants, MBA and BBA students, and HR
+            professionals. Notes, MCQs, previous year papers and lectures stay free — programmes
+            add live sessions, test series and individual feedback.
           </p>
 
           {/* CTAs — one primary (self-select a track below), one secondary
               (browse everything). Neither CTA singles out Labour Welfare —
               that used to read as if it were the whole site's focus; the
               three pathway cards below the hero now carry that routing. */}
+          {/* Free first, deliberately. The free library is what earns the
+              audience that programmes are later sold to — leading with the
+              paid CTA on a site built on free material inverts that. */}
           <div className="flex flex-wrap gap-3 mb-8">
-            <a
-              href="#pathways"
-              onClick={(e) => { e.preventDefault(); document.getElementById("pathways")?.scrollIntoView({ behavior: "smooth" }); }}
+            <Link
+              to="/notes"
               className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
               style={{ background: GOLD, color: NAVY, boxShadow: `0 6px 24px ${GOLD}40` }}
             >
-              Find Your Study Path <ArrowRight aria-hidden="true" className="h-4 w-4" />
-            </a>
-            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #DCD9D3`, color: NAVY, background: "#FFFFFF" }}>
-              <FileText className="h-4 w-4" /> Browse All Resources
+              <FileText className="h-4 w-4" /> Browse Free Resources
+            </Link>
+            <Link to="/programmes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #DCD9D3`, color: NAVY, background: "#FFFFFF" }}>
+              View Programmes <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
           </div>
 
