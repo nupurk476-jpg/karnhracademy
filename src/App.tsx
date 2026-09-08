@@ -4,6 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+// Cookieless pageview counting, handled off-database so the
+// analytics_events table stays a funnel log rather than a traffic log.
+// SPA route changes are picked up automatically via the History API.
+import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -80,6 +84,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <Analytics />
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>

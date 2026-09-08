@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { DISCIPLINES, getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { HIGH_SCORING_TOPICS, getUnitsForTopic } from "@/lib/highScoringTopics";
+import { track, EVENTS } from "@/lib/analytics";
 import { Search, FileText, HelpCircle, Newspaper, BookOpen, ChevronRight, GraduationCap, ScrollText, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -178,6 +179,25 @@ const SearchPage = () => {
     for (const r of results) (g[r.kind] ??= []).push(r);
     return g;
   }, [results]);
+
+  /**
+   * Log each distinct search once it can be answered honestly.
+   *
+   * Two conditions matter. It waits for `loading` to finish, because a
+   * query measured against a half-built index reports zero results when
+   * the real answer is unknown — and "searches that found nothing" is the
+   * content backlog, so a false zero is worse than no row at all. And it
+   * dedupes on the query itself, so re-renders (or the index arriving)
+   * can't log the same search twice and inflate demand for a term.
+   */
+  const loggedQuery = useRef<string | null>(null);
+  useEffect(() => {
+    const term = q.trim();
+    if (!term || loading) return;
+    if (loggedQuery.current === term) return;
+    loggedQuery.current = term;
+    track(EVENTS.SEARCH, { q: term, results: results.length });
+  }, [q, loading, results.length]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
