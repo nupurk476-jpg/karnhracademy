@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useConfirm } from "@/hooks/use-confirm";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { activeSubscribers, type Subscriber } from "@/lib/subscribers";
-import { Trash2, Download } from "lucide-react";
+import { Trash2, Download, Link2 } from "lucide-react";
 
 /** PostgREST caps a single response; paging is the only way past it. */
 const PAGE_SIZE = 1000;
@@ -16,6 +16,7 @@ const AdminSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [search, setSearch] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [exportingLinks, setExportingLinks] = useState(false);
   const { toast } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -101,29 +102,85 @@ const AdminSubscribers = () => {
     }
   };
 
+  /**
+   * A second, separate export that adds a ready-made unsubscribe URL per
+   * row -- for pasting into the sending tool as a personalisation column
+   * (e.g. Brevo's {{contact.UNSUB_URL}}), not for general handling.
+   *
+   * Kept apart from exportCsv rather than as an option on it, because the
+   * file it produces is meaningfully more sensitive: each URL is a live
+   * credential that unsubscribes that one address, unauthenticated, to
+   * anyone who has it. The plain export is safe to glance at or misplace;
+   * this one is not, and the button says so before it downloads.
+   *
+   * The link must be this app's own /unsubscribe -- not the sending
+   * tool's built-in one. A campaign tool's native unsubscribe updates only
+   * its own suppression list; email_subscribers.unsubscribed_at would
+   * never learn about it, and the two lists would silently diverge.
+   */
+  const exportCsvWithLinks = async () => {
+    setExportingLinks(true);
+    try {
+      const rows = await loadAll();
+      const scoped = activeSubscribers(rows, term);
+      if (scoped.length === 0) {
+        toast({ title: "Nothing to export", description: "No active subscribers match the current search." });
+        return;
+      }
+      const csv = toCsv(
+        ["email", "subscribed_on", "unsubscribe_url"],
+        scoped.map(s => [
+          s.email,
+          new Date(s.created_at).toISOString().slice(0, 10),
+          `${window.location.origin}/unsubscribe?token=${s.unsubscribe_token}`,
+        ]),
+      );
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadCsv(`karn-hr-subscribers-with-links-${stamp}.csv`, csv);
+      toast({ title: `Exported ${scoped.length} subscriber(s) with unsubscribe links`, description: "Keep this file private -- each link unsubscribes that address on its own." });
+    } catch (e: unknown) {
+      toast({ title: "Export failed", description: message(e), variant: "destructive" });
+    } finally {
+      setExportingLinks(false);
+    }
+  };
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-foreground">Email Subscribers</h1>
         {subscribers.length > 0 && (
-          <button
-            onClick={exportCsv}
-            disabled={exporting}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {exporting
-              ? "Exporting…"
-              : term
-                ? `Export ${activeSubscribers(subscribers, term).length} shown`
-                : "Export CSV"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={exportCsv}
+              disabled={exporting}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              {exporting
+                ? "Exporting…"
+                : term
+                  ? `Export ${activeSubscribers(subscribers, term).length} shown`
+                  : "Export CSV"}
+            </button>
+            <button
+              onClick={exportCsvWithLinks}
+              disabled={exportingLinks}
+              title="Adds a personal unsubscribe link per row, for a sending tool like Brevo. Keep this file private."
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
+            >
+              <Link2 className="h-3.5 w-3.5" />
+              {exportingLinks ? "Exporting…" : "Export with unsubscribe links"}
+            </button>
+          </div>
         )}
       </div>
       <p className="mb-4 text-sm text-muted-foreground">
         {activeCount} active subscriber(s)
         {optedOutCount > 0 && ` · ${optedOutCount} unsubscribed`} — collected from the newsletter
-        forms and the download email gate. Only active ones are exported.
+        forms and the download email gate. Only active ones are exported. Use "Export with
+        unsubscribe links" for a sending tool (e.g. Brevo) and use those links, not the tool's
+        own unsubscribe — otherwise Brevo's suppression list and this table will drift apart.
       </p>
       {subscribers.length > 0 && (
         <input
