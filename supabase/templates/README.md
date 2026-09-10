@@ -35,9 +35,10 @@ practice this template is read by email/password signups.
 
 ## Before it goes to real people
 
-**Replace `[YOUR POSTAL ADDRESS]` in the footer.** A real postal address is
-required on commercial email in most jurisdictions, and its absence is a
-strong spam signal regardless of the law.
+**A postal address is deliberately absent.** This is a transactional
+confirmation, which is exempt from the physical-address rule that applies to
+marketing mail. If you later send a newsletter, an offer, or anything
+promotional, that send is not exempt and will need one.
 
 **Set up custom SMTP.** Supabase's built-in email sender is rate-limited to a
 handful of messages per hour and is explicitly not for production — signups
