@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Tells Gmail/Apple Mail this design is light-only, so they stop trying to
+     invent a dark version of it and inverting the ink header into mud. -->
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Welcome to Karn HR Academy</title>
+<style>
+  /* Media queries reach most clients. Outlook desktop ignores them, which is
+     why nothing here is load-bearing — every critical style is inline. */
+  @media only screen and (max-width:620px) {
+    .sm-full   { width:100% !important; }
+    .sm-pad    { padding-left:24px !important; padding-right:24px !important; }
+    .sm-h1     { font-size:26px !important; line-height:32px !important; }
+    .sm-stack  { display:block !important; width:100% !important; }
+  }
+</style>
+</head>
+<!-- Ivory ground, matching the site. -->
+<body style="margin:0; padding:0; background-color:#F7F4EF; -webkit-font-smoothing:antialiased;">
+
+  <!-- Preheader: the grey line of text the inbox shows beside the subject.
+       Without one, clients scrape the first visible words instead — usually
+       "View this email in your browser" or the wordmark. -->
+  <div style="display:none; font-size:1px; color:#F7F4EF; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
+    Confirm your email to finish setting up your account — then the notes, MCQs, previous year papers and lectures are all yours.
+    &#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F7F4EF;">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sm-full"
+               style="width:600px; max-width:600px; background-color:#FFFFFF; border:1px solid #DCD9D3; border-radius:4px; overflow:hidden;">
+
+          <!-- ── Masthead: ink ground, vermillion rule, serif wordmark ── -->
+          <tr>
+            <td style="background-color:#17181C; padding:0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <!-- The vermillion bar is the site's logo rule, redrawn as a
+                       table cell because a border-left is unreliable in Outlook. -->
+                  <td width="4" style="width:4px; background-color:#E34234; font-size:0; line-height:0;">&nbsp;</td>
+                  <td class="sm-pad" style="padding:26px 32px;">
+                    <div style="font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:22px; font-weight:700; color:#FFFFFF; letter-spacing:0.5px;">
+                      KARN<span style="color:#E34234;">HR</span>
+                    </div>
+                    <div style="font-family:Arial, Helvetica, sans-serif; font-size:10px; letter-spacing:4px; color:#8A8580; padding-top:5px;">
+                      ACADEMY
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── Body ────────────────────────────────────────────────── -->
+          <tr>
+            <td class="sm-pad" style="padding:40px 40px 8px 40px;">
+              <h1 class="sm-h1" style="margin:0 0 16px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:30px; line-height:38px; font-weight:700; color:#17181C;">
+                Welcome to Karn&nbsp;HR&nbsp;Academy
+              </h1>
+              <p style="margin:0 0 16px 0; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#55514C;">
+                Thank you for signing up. One click confirms your email address and your
+                account is ready.
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── The one action this email exists for ─────────────────── -->
+          <tr>
+            <td class="sm-pad" style="padding:16px 40px 8px 40px;">
+              <!-- Bulletproof button: a table, not an <a> with padding, so it
+                   keeps its shape in Outlook. -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="#E34234" style="border-radius:4px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="display:inline-block; padding:14px 34px; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:bold; color:#FFFFFF; text-decoration:none; border-radius:4px;">
+                      Confirm my email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:14px 0 0 0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:19px; color:#8A8580;">
+                Button not working? Paste this into your browser:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#8C2A1E; word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── What they already have. Free first, always. ──────────── -->
+          <tr>
+            <td class="sm-pad" style="padding:28px 40px 8px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                     style="background-color:#F2F1EF; border:1px solid #DCD9D3; border-radius:4px;">
+                <tr>
+                  <td style="padding:22px 24px;">
+                    <p style="margin:0 0 14px 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; font-weight:bold; letter-spacing:1.5px; text-transform:uppercase; color:#8C2A1E;">
+                      Free, and staying free
+                    </p>
+                    <!-- Bulleted with a table rather than <ul>: list indentation
+                         is one of the things Outlook is worst at. -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td width="16" valign="top" style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#E34234;">&bull;</td>
+                        <td style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#3A3835; padding-bottom:6px;">Unit-wise study notes across every discipline</td>
+                      </tr>
+                      <tr>
+                        <td width="16" valign="top" style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#E34234;">&bull;</td>
+                        <td style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#3A3835; padding-bottom:6px;">Topic-wise MCQ practice with instant feedback</td>
+                      </tr>
+                      <tr>
+                        <td width="16" valign="top" style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#E34234;">&bull;</td>
+                        <td style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#3A3835; padding-bottom:6px;">Previous year papers by subject and year</td>
+                      </tr>
+                      <tr>
+                        <td width="16" valign="top" style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#E34234;">&bull;</td>
+                        <td style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:24px; color:#3A3835;">Video lectures from HR educators</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── A quiet nudge, not a pitch. This is a transactional email;
+                 leading with a sell is how welcome mail trains people to
+                 ignore you. ──────────────────────────────────────────── -->
+          <tr>
+            <td class="sm-pad" style="padding:24px 40px 36px 40px;">
+              <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:23px; color:#55514C;">
+                When you want live sessions, marked practice and individual feedback, our
+                <a href="https://karnhracademy.com/programmes" style="color:#8C2A1E; font-weight:bold; text-decoration:none;">programmes</a>
+                pick up where the free material stops. No rush &mdash; the library is not going anywhere.
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── Footer ──────────────────────────────────────────────── -->
+          <tr>
+            <td class="sm-pad" style="background-color:#17181C; padding:28px 40px;">
+              <p style="margin:0 0 10px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:15px; color:#FFFFFF;">
+                Karn HR Academy
+              </p>
+              <p style="margin:0 0 14px 0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:20px; color:#8A8580;">
+                HR &amp; management preparation for MBA, BBA and UGC NET Code 55.
+              </p>
+              <p style="margin:0 0 14px 0; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:20px; color:#8A8580;">
+                <a href="https://karnhracademy.com/notes" style="color:#DCD9D3; text-decoration:none;">Notes</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://karnhracademy.com/quizzes" style="color:#DCD9D3; text-decoration:none;">MCQs</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://karnhracademy.com/pyqs" style="color:#DCD9D3; text-decoration:none;">PYQs</a>
+                &nbsp;&middot;&nbsp;
+                <a href="https://karnhracademy.com/lectures" style="color:#DCD9D3; text-decoration:none;">Lectures</a>
+              </p>
+              <!-- REPLACE THE ADDRESS. A real postal address is required on
+                   commercial email in most jurisdictions, and its absence is a
+                   strong spam signal regardless of the law. -->
+              <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:18px; color:#6E6963;">
+                [YOUR POSTAL ADDRESS] &nbsp;&middot;&nbsp;
+                <a href="mailto:contact@karnhracademy.com" style="color:#6E6963;">contact@karnhracademy.com</a><br>
+                You received this because someone signed up with this address at karnhracademy.com.
+                If that wasn't you, ignore this email and no account will be created.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
