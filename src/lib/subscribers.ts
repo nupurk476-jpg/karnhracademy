@@ -6,6 +6,12 @@ export type Subscriber = {
   created_at: string;
   /** NULL means still subscribed. */
   unsubscribed_at: string | null;
+  /**
+   * The credential behind /unsubscribe?token=... . Real data, not a
+   * display field: never render it, log it, or put it anywhere but a
+   * file built to leave this screen for a sending tool.
+   */
+  unsubscribe_token: string;
 };
 
 /**

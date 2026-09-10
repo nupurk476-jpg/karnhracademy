@@ -3,6 +3,7 @@ import { activeSubscribers, type Subscriber } from "./subscribers";
 
 const sub = (email: string, unsubscribed_at: string | null = null): Subscriber => ({
   id: email, email, created_at: "2026-01-01T00:00:00Z", unsubscribed_at,
+  unsubscribe_token: `token-${email}`,
 });
 
 describe("activeSubscribers", () => {
