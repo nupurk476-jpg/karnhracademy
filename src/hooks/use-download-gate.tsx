@@ -14,6 +14,7 @@ const EMAIL_KEY = "khr_subscriber_email";
 // — see src/lib/signedFileUrl.ts, which both callers use.
 export function useDownloadGate() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
@@ -63,7 +64,10 @@ export function useDownloadGate() {
     const { resolveUrl, onOpened } = pending.current;
     const win = window.open("", "_blank");
     setSubmitting(true);
-    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
+    // Name is optional: the gate already asks for something in exchange
+    // for a download, and making it two required fields costs conversions
+    // on the most-used capture point on the site.
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim(), _name: name.trim() || null });
     setSubmitting(false);
     localStorage.setItem(EMAIL_KEY, email.trim());
     // The address goes to email_subscribers and nowhere else; this records
@@ -73,6 +77,7 @@ export function useDownloadGate() {
     track(EVENTS.GATE_SUBMITTED);
     setGateOpen(false);
     setEmail("");
+    setName("");
     track(EVENTS.CONTENT_OPEN, { mode: "download" });
     const url = win ? await resolveUrl() : null;
     if (url && win) { onOpened(); win.location.href = url; } else win?.close();
@@ -94,13 +99,20 @@ export function useDownloadGate() {
     <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) dismissGate(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Enter your email to continue</DialogTitle>
+          <DialogTitle>Almost there</DialogTitle>
           <DialogDescription>One-time step — we'll remember you on this device and send occasional updates about new study materials.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
           <input
-            type="email" required autoFocus placeholder="your@email.com"
+            type="text" autoFocus placeholder="First name (optional)"
+            value={name} onChange={e => setName(e.target.value)}
+            maxLength={80} aria-label="First name (optional)"
+            className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="email" required placeholder="your@email.com"
             value={email} onChange={e => setEmail(e.target.value)}
+            aria-label="Email address"
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <div className="flex gap-3">

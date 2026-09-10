@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,289 +7,113 @@
   <meta name="x-apple-disable-message-reformatting" />
   <meta name="color-scheme" content="light" />
   <meta name="supported-color-schemes" content="light" />
-  <title>Welcome to Karn HR Academy</title>
+  <title>Thanks for signing up</title>
   <!--[if mso]>
-  <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+  <noscript><xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office"><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
   <![endif]-->
   <style>
-    /* Only media queries and pseudo-states live here. Every visual style
-       that matters is inlined below, because Gmail strips <style> on
-       forwarded mail and Outlook ignores much of it. */
     @media only screen and (max-width: 620px) {
       .sm-full { width: 100% !important; max-width: 100% !important; }
-      .sm-px { padding-left: 22px !important; padding-right: 22px !important; }
-      /* Zero the gutter padding too, or the second stacked cell keeps
-         its left padding and sits indented against the first. */
-      .sm-stack { display: block !important; width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }
-      .sm-stack-pad { padding: 0 0 22px 0 !important; }
-      .sm-h1 { font-size: 26px !important; line-height: 34px !important; }
+      .sm-px { padding-left: 24px !important; padding-right: 24px !important; }
     }
-    a { text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a { color: #8C2A1E; }
   </style>
 </head>
-<body style="margin:0; padding:0; width:100%; background-color:#F2F1EF; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
+<!-- Deliberately plain. This should read as an email a person typed, not
+     a campaign a tool generated: no masthead banner, no feature grid, no
+     bordered cards, no button. A styled template signals "marketing" and
+     gets skimmed; a plain one gets read and replied to. -->
+<body style="margin:0; padding:0; width:100%; background-color:#FFFFFF; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;">
 
-  <!-- Preheader: the grey line Gmail/Apple Mail show next to the subject.
-       Without one, clients scrape the first visible words instead, which
-       here would be the navigation. -->
-  <div style="display:none; font-size:1px; color:#F2F1EF; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
-    Your notes, previous year papers, MCQs and video lectures are ready — all free, organised by syllabus.
-    &#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;
+  <div style="display:none; font-size:1px; color:#FFFFFF; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
+    A few places worth starting, and my number if you get stuck.
+    &#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;&#8199;&#847;
   </div>
 
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F2F1EF;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#FFFFFF;">
     <tr>
-      <td align="center" style="padding:32px 12px;">
+      <td align="center" style="padding:36px 12px 20px 12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" class="sm-full" style="width:560px; max-width:560px;">
 
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="sm-full" style="width:600px; max-width:600px; background-color:#FFFFFF; border-radius:6px; overflow:hidden;">
-
-          <!-- ── Masthead ─────────────────────────────────────────────── -->
           <tr>
-            <td style="background-color:#17181C; padding:30px 40px 26px 40px;" class="sm-px">
+            <td class="sm-px" style="padding:0 8px; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:27px; color:#1F1F23;">
+
+              <!-- Brevo shows the raw braces if the attribute is empty, so the
+                   default filter is not optional. Verify the exact syntax in
+                   Brevo's editor preview before sending. -->
+              <p style="margin:0 0 20px 0;">Hi {{ contact.FIRSTNAME | default : "there" }},</p>
+
+              <p style="margin:0 0 20px 0;">
+                Nupur here &mdash; I run Karn HR Academy. Thanks for signing up.
+              </p>
+
+              <p style="margin:0 0 12px 0;">
+                Rather than send you a tour, here are the three things people actually
+                start with:
+              </p>
+
+              <p style="margin:0 0 8px 0;">
+                &bull;&nbsp; <a href="https://karnhracademy.com/ugc-net-labour-welfare" style="color:#8C2A1E;">The Labour Welfare syllabus, unit by unit</a>
+                &mdash; if you're preparing for UGC NET Paper II, Code 55, start here.
+              </p>
+              <p style="margin:0 0 8px 0;">
+                &bull;&nbsp; <a href="https://karnhracademy.com/pyqs" style="color:#8C2A1E;">Previous year papers with answer keys</a>
+                &mdash; the fastest way to see what actually gets asked.
+              </p>
+              <p style="margin:0 0 20px 0;">
+                &bull;&nbsp; <a href="https://karnhracademy.com/quizzes" style="color:#8C2A1E;">Topic-wise MCQs</a>
+                &mdash; useful once you've read a unit and want to know if it stuck.
+              </p>
+
+              <p style="margin:0 0 20px 0;">
+                All of it is free. There's no paid tier and no trial running out &mdash;
+                I built this because the material I needed while preparing didn't exist
+                in one place.
+              </p>
+
+              <p style="margin:0 0 20px 0;">
+                If you get stuck on a topic, or you're looking for something we haven't
+                put up yet, just reply to this email. I read them. Neha handles academic
+                queries too, and she's usually quicker than me.
+              </p>
+
+              <p style="margin:0 0 26px 0;">
+                Good luck with your preparation.
+              </p>
+
+              <p style="margin:0 0 4px 0;">Nupur</p>
+              <p style="margin:0 0 26px 0; font-size:14px; line-height:22px; color:#6B6B70;">
+                Nupur Karn &middot; Founder, Karn HR Academy<br />
+                <a href="mailto:nupur@karnhracademy.com" style="color:#6B6B70;">nupur@karnhracademy.com</a> &middot; <a href="tel:+919082753396" style="color:#6B6B70;">90827 53396</a><br />
+                Neha Manjari &middot; <a href="mailto:neha@karnhracademy.com" style="color:#6B6B70;">neha@karnhracademy.com</a> &middot; <a href="tel:+917258896998" style="color:#6B6B70;">72588 96998</a>
+              </p>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sm-px" style="padding:0 8px;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td>
-                    <p style="margin:0 0 6px 0; font-family:Georgia,'Times New Roman',serif; font-size:22px; line-height:28px; font-weight:bold; color:#FFFFFF; letter-spacing:0.2px;">
-                      Karn HR Academy
-                    </p>
-                    <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; font-weight:bold; color:#E34234; text-transform:uppercase; letter-spacing:1.6px;">
-                      HRM &nbsp;&middot;&nbsp; Labour Welfare &nbsp;&middot;&nbsp; Management Studies
-                    </p>
-                  </td>
-                </tr>
+                <tr><td style="height:1px; background-color:#E8E6E2; font-size:0; line-height:0;">&nbsp;</td></tr>
               </table>
             </td>
           </tr>
 
-          <!-- A thin accent rule reads as considered; a thick coloured band
-               reads as a mass mailout. -->
-          <tr><td style="height:3px; background-color:#E34234; font-size:0; line-height:0;">&nbsp;</td></tr>
-
-          <!-- ── Welcome ──────────────────────────────────────────────── -->
           <tr>
-            <td style="padding:40px 40px 8px 40px;" class="sm-px">
-              <h1 class="sm-h1" style="margin:0 0 18px 0; font-family:Georgia,'Times New Roman',serif; font-size:30px; line-height:38px; font-weight:normal; color:#17181C;">
-                Welcome — you&rsquo;re in.
-              </h1>
-              <p style="margin:0 0 16px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:26px; color:#4A4A4F;">
-                Thank you for joining Karn HR Academy. You now have access to everything we
-                publish for <strong style="color:#17181C;">UGC NET/JRF</strong> aspirants,
-                <strong style="color:#17181C;">MBA &amp; BBA</strong> students, and HR professionals.
-              </p>
-              <p style="margin:0 0 8px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:26px; color:#4A4A4F;">
-                No paywall, no trial period. Every note, paper, lecture and quiz on the site is
-                free to read and download — and stays that way.
-              </p>
-            </td>
-          </tr>
-
-          <!-- ── Primary CTA ──────────────────────────────────────────── -->
-          <tr>
-            <td style="padding:22px 40px 34px 40px;" class="sm-px">
-              <!--[if mso]>
-              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
-                href="https://karnhracademy.com/ugc-net-labour-welfare" style="height:46px;v-text-anchor:middle;width:250px;" arcsize="9%" strokecolor="#E34234" fillcolor="#E34234">
-                <w:anchorlock/>
-                <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Start with the syllabus hub</center>
-              </v:roundrect>
-              <![endif]-->
-              <!--[if !mso]><!-- -->
-              <a href="https://karnhracademy.com/ugc-net-labour-welfare"
-                 style="display:inline-block; background-color:#E34234; color:#FFFFFF; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:20px; font-weight:bold; padding:13px 28px; border-radius:4px; text-decoration:none;">
-                Start with the syllabus hub &nbsp;&rarr;
-              </a>
-              <!--<![endif]-->
-            </td>
-          </tr>
-
-          <tr><td style="padding:0 40px;" class="sm-px"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td style="height:1px; background-color:#E8E6E2; font-size:0; line-height:0;">&nbsp;</td></tr></table></td></tr>
-
-          <!-- ── What's inside ────────────────────────────────────────── -->
-          <tr>
-            <td style="padding:34px 40px 6px 40px;" class="sm-px">
-              <p style="margin:0 0 4px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; font-weight:bold; color:#8C2A1E; text-transform:uppercase; letter-spacing:1.6px;">
-                What&rsquo;s inside
-              </p>
-              <h2 style="margin:0 0 24px 0; font-family:Georgia,'Times New Roman',serif; font-size:22px; line-height:30px; font-weight:normal; color:#17181C;">
-                Six places worth starting
-              </h2>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:0 40px 10px 40px;" class="sm-px">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-
-                <tr>
-                  <td style="padding:0 0 22px 0;">
-                    <a href="https://karnhracademy.com/ugc-net-labour-welfare" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">UGC NET Labour Welfare &mdash; Code 55 &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      The full Paper II syllabus, unit by unit, with every topic mapped and high-scoring areas flagged.
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0 0 22px 0;">
-                    <a href="https://karnhracademy.com/notes" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">Study notes &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      Exam-ready notes across HRM, Organisational Behaviour, Strategic Management and more &mdash; read online or download.
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0 0 22px 0;">
-                    <a href="https://karnhracademy.com/pyqs" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">Previous year question papers &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      Past UGC NET papers with answer keys &mdash; the fastest way to learn what actually gets asked.
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0 0 22px 0;">
-                    <a href="https://karnhracademy.com/quizzes" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">MCQ practice &amp; mock tests &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      Timed quizzes by topic, with instant scoring and a leaderboard to measure yourself against.
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0 0 22px 0;">
-                    <a href="https://karnhracademy.com/lectures" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">Video lectures &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      Concept-by-concept explanations for the topics students most often get stuck on.
-                    </p>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:0 0 6px 0;">
-                    <a href="https://karnhracademy.com/mba-bba" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:24px; font-weight:bold; color:#17181C; text-decoration:none;">MBA &amp; BBA resources &rsaquo;</a>
-                    <p style="margin:4px 0 0 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#6B6B70;">
-                      University-aligned material for coursework and semester exams, plus curated book recommendations.
-                    </p>
-                  </td>
-                </tr>
-
-              </table>
-            </td>
-          </tr>
-
-          <!-- ── Founder note ─────────────────────────────────────────── -->
-          <tr>
-            <td style="padding:14px 40px 34px 40px;" class="sm-px">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F2F1EF; border-radius:6px;">
-                <tr>
-                  <td style="padding:26px 28px;">
-                    <p style="margin:0 0 14px 0; font-family:Georgia,'Times New Roman',serif; font-size:16px; line-height:27px; font-style:italic; color:#4A4A4F;">
-                      &ldquo;Karn HR Academy was created to provide high-quality academic resources that
-                      bridge university learning and competitive examination preparation.&rdquo;
-                    </p>
-                    <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:20px; color:#17181C;">
-                      <strong>Ms. Nupur Karn</strong><br />
-                      <span style="color:#6B6B70;">Founder &middot; UGC NET Qualified (Code 55) &middot; Assistant Professor</span>
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ── Contact ──────────────────────────────────────────────── -->
-          <tr>
-            <td style="padding:0 40px 8px 40px;" class="sm-px">
-              <p style="margin:0 0 4px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:11px; line-height:16px; font-weight:bold; color:#8C2A1E; text-transform:uppercase; letter-spacing:1.6px;">
-                Questions?
-              </p>
-              <h2 style="margin:0 0 8px 0; font-family:Georgia,'Times New Roman',serif; font-size:22px; line-height:30px; font-weight:normal; color:#17181C;">
-                Talk to a real person
-              </h2>
-              <p style="margin:0 0 22px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:24px; color:#4A4A4F;">
-                Stuck on a topic, looking for material we haven&rsquo;t published, or want to ask about a
-                programme? Reach either of us directly &mdash; we answer personally.
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding:0 40px 36px 40px;" class="sm-px">
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td class="sm-stack sm-stack-pad" width="50%" valign="top" style="padding:0 10px 0 0;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #E8E6E2; border-radius:6px;">
-                      <tr>
-                        <td style="padding:20px;">
-                          <p style="margin:0 0 3px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:22px; font-weight:bold; color:#17181C;">Nupur Karn</p>
-                          <p style="margin:0 0 12px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:18px; color:#6B6B70;">Founder</p>
-                          <p style="margin:0 0 5px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:21px;">
-                            <a href="mailto:nupur@karnhracademy.com" style="color:#8C2A1E; text-decoration:none;">nupur@karnhracademy.com</a>
-                          </p>
-                          <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:21px;">
-                            <a href="tel:+919082753396" style="color:#4A4A4F; text-decoration:none;">+91 90827 53396</a>
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <td class="sm-stack" width="50%" valign="top" style="padding:0 0 0 10px;">
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #E8E6E2; border-radius:6px;">
-                      <tr>
-                        <td style="padding:20px;">
-                          <p style="margin:0 0 3px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:22px; font-weight:bold; color:#17181C;">Neha Manjari</p>
-                          <p style="margin:0 0 12px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:18px; color:#6B6B70;">Academic Support</p>
-                          <p style="margin:0 0 5px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:21px;">
-                            <a href="mailto:neha@karnhracademy.com" style="color:#8C2A1E; text-decoration:none;">neha@karnhracademy.com</a>
-                          </p>
-                          <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:21px;">
-                            <a href="tel:+917258896998" style="color:#4A4A4F; text-decoration:none;">+91 72588 96998</a>
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ── Footer ───────────────────────────────────────────────── -->
-          <tr>
-            <td style="background-color:#17181C; padding:30px 40px;" class="sm-px">
-              <p style="margin:0 0 14px 0; font-family:Georgia,'Times New Roman',serif; font-size:15px; line-height:22px; color:#FFFFFF;">
-                Karn HR Academy
-              </p>
-              <p style="margin:0 0 18px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; line-height:21px;">
-                <a href="https://karnhracademy.com/blogs" style="color:#B8B8BC; text-decoration:none;">Articles</a>
-                <span style="color:#4A4A4F;">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
-                <a href="https://karnhracademy.com/books" style="color:#B8B8BC; text-decoration:none;">Books</a>
-                <span style="color:#4A4A4F;">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
-                <a href="https://karnhracademy.com/about" style="color:#B8B8BC; text-decoration:none;">About</a>
-                <span style="color:#4A4A4F;">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
-                <a href="https://karnhracademy.com/contact" style="color:#B8B8BC; text-decoration:none;">Contact</a>
-              </p>
-              <p style="margin:0 0 12px 0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; color:#8A8A90;">
-                You&rsquo;re receiving this because you signed up for study material updates at
-                <a href="https://karnhracademy.com" style="color:#B8B8BC; text-decoration:underline;">karnhracademy.com</a>.
-              </p>
-              <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; color:#8A8A90;">
-                <!-- REPLACE with the Brevo attribute holding this app's own
-                     unsubscribe URL (from the "Export with unsubscribe links"
-                     CSV). Do NOT use Brevo's built-in {{ unsubscribe }} tag:
-                     that only updates Brevo's suppression list, leaving
-                     email_subscribers.unsubscribed_at out of date. -->
-                <a href="{{ contact.UNSUBSCRIBE_URL }}" style="color:#8A8A90; text-decoration:underline;">Unsubscribe</a>
-                <span style="color:#4A4A4F;">&nbsp;&middot;&nbsp;</span>
-                <a href="https://karnhracademy.com/privacy-policy" style="color:#8A8A90; text-decoration:underline;">Privacy Policy</a>
+            <td class="sm-px" style="padding:16px 8px 0 8px; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:12px; line-height:19px; color:#8A8A90;">
+              <p style="margin:0;">
+                You're getting this because you signed up at
+                <a href="https://karnhracademy.com" style="color:#8A8A90;">karnhracademy.com</a>.
+                <!-- The app's own /unsubscribe, mapped from the unsubscribe_url
+                     column in the admin export. Not Brevo's built-in
+                     {{ unsubscribe }} tag: that updates only Brevo's
+                     suppression list and leaves this database stale. -->
+                <a href="{{ contact.UNSUBSCRIBE_URL }}" style="color:#8A8A90;">Unsubscribe</a>.
               </p>
             </td>
           </tr>
 
         </table>
-
       </td>
     </tr>
   </table>
