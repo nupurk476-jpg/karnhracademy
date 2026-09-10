@@ -92,3 +92,73 @@ someone confirms — that needs a Postgres trigger or Auth Hook calling an Edge
 Function that sends through your provider. It is real work, and worth doing
 only once signups are steady enough to justify it. One good email beats two
 mediocre ones.
+
+---
+
+# Google sign-ins: `send-welcome-email`
+
+Google sign-in produces **no Supabase email at all** — Google has verified the
+address, so confirmation is skipped and the user lands in the app having heard
+nothing. Configuring Brevo as SMTP does not change this: SMTP only delivers
+mail Supabase decides to send, and for OAuth it decides to send none.
+
+So that welcome is sent by an Edge Function calling the Brevo API directly.
+
+| Signup route | What sends | Which template |
+| :--- | :--- | :--- |
+| Email + password | Supabase, automatically | `welcome-confirm-signup.html` (dashboard) |
+| Continue with Google | `send-welcome-email` function | `functions/send-welcome-email/email.ts` |
+
+The two are deliberately different. The Google one has **no confirm button** —
+there is nothing to confirm, and a prominent button that does nothing is the
+fastest way to make a first impression look broken.
+
+## Deploying it
+
+**1. Get a Brevo API key.** This is *not* the SMTP credential you gave
+Supabase. Brevo → SMTP & API → **API Keys** → create one.
+
+**2. Set the secrets.** These are server-side and must never carry a `VITE_`
+prefix, which would compile them into the public browser bundle:
+
+```bash
+supabase secrets set BREVO_API_KEY=xkeysib-...
+supabase secrets set BREVO_SENDER_EMAIL=noreply@karnhracademy.com
+supabase secrets set BREVO_SENDER_NAME="Karn HR Academy"
+```
+
+The sender address must be a verified sender in Brevo, or Brevo rejects
+the send.
+
+**3. Apply the migration** `20260910120000_welcome_emails.sql`.
+
+**4. Deploy:**
+
+```bash
+supabase functions deploy send-welcome-email
+```
+
+**5. Test** by signing in with a Google account that has never used the site.
+Check the inbox, then `select * from welcome_emails;` — one row.
+
+## How it decides to send
+
+The browser only ever *asks*. It never says who to email.
+
+- The function identifies the caller from their own access token and reads the
+  address from the verified user record. Nobody can point it at an address
+  that is not theirs.
+- The row in `welcome_emails` is **claimed before the send**, and its primary
+  key is the lock. Two tabs racing produce one email. Claiming first means a
+  crash mid-send costs one missed email rather than sending several.
+- If Brevo rejects the send, the claim is released so a later sign-in retries,
+  rather than marking someone welcomed by an email that never arrived.
+- Names from OAuth profiles are HTML-escaped. A display name containing markup
+  renders as text instead of becoming part of the email.
+
+## If it does not fire
+
+Check, in order: the function logs in the Supabase dashboard; that all three
+secrets are set (`supabase secrets list`); that the sender is verified in
+Brevo; and that `welcome_emails` has no stale row for that user — delete it to
+allow a resend.

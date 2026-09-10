@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import { CartProvider } from "./context/CartContext";
+import { useWelcomeEmail } from "./hooks/use-welcome-email";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Route-level code splitting: everything except the homepage loads on demand,
@@ -77,6 +78,12 @@ const RouteFallback = () => (
   </div>
 );
 
+/** Mounted inside the router so OAuth returns to "/" are heard. */
+const WelcomeEmailListener = () => {
+  useWelcomeEmail();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -85,6 +92,7 @@ const App = () => (
       <BrowserRouter>
         {/* Inside the router: the cart is read by the header on every page. */}
         <CartProvider>
+        <WelcomeEmailListener />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
