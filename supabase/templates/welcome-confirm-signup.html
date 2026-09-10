@@ -15,7 +15,10 @@
     .sm-full   { width:100% !important; }
     .sm-pad    { padding-left:24px !important; padding-right:24px !important; }
     .sm-h1     { font-size:26px !important; line-height:32px !important; }
-    .sm-stack  { display:block !important; width:100% !important; }
+    /* Side-by-side cards become full-width rows. The bottom padding is what
+       stops them touching once stacked — the horizontal gutter they use on
+       desktop does nothing in a vertical stack. */
+    .sm-stack  { display:block !important; width:100% !important; padding:0 0 12px 0 !important; }
   }
 </style>
 </head>
@@ -61,6 +64,15 @@
           <!-- ── Body ────────────────────────────────────────────────── -->
           <tr>
             <td class="sm-pad" style="padding:40px 40px 8px 40px;">
+              <!-- The greeting reads whatever name the account arrived with.
+                   Email/password signup stores display_name (AuthPage falls
+                   back to the part before the @). Google accounts carry
+                   full_name or name instead. The final {{ else }} means a
+                   missing name degrades to a plain "Hello," rather than
+                   printing "Hello ," or the word "nil" at someone. -->
+              <p style="margin:0 0 10px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:20px; line-height:28px; color:#17181C;">
+                {{ if .Data.display_name }}Hello {{ .Data.display_name }},{{ else if .Data.full_name }}Hello {{ .Data.full_name }},{{ else if .Data.name }}Hello {{ .Data.name }},{{ else }}Hello,{{ end }}
+              </p>
               <h1 class="sm-h1" style="margin:0 0 16px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:30px; line-height:38px; font-weight:700; color:#17181C;">
                 Welcome to Karn&nbsp;HR&nbsp;Academy
               </h1>
@@ -139,6 +151,85 @@
                 <a href="https://karnhracademy.com/programmes" style="color:#8C2A1E; font-weight:bold; text-decoration:none;">programmes</a>
                 pick up where the free material stops. No rush &mdash; the library is not going anywhere.
               </p>
+            </td>
+          </tr>
+
+          <!-- ── Talk to a person ─────────────────────────────────────
+                 Named people with working numbers, not a support address.
+                 For a student deciding whether to trust a small academy with
+                 a fee, a name and a phone number does more than any amount of
+                 reassuring copy. Two columns that stack on a phone. ─────── -->
+          <tr>
+            <td class="sm-pad" style="padding:0 40px 8px 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                     style="border-top:1px solid #DCD9D3;">
+                <tr>
+                  <td style="padding:26px 0 16px 0;">
+                    <p style="margin:0 0 4px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:19px; color:#17181C;">
+                      Questions? Just ask.
+                    </p>
+                    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#55514C;">
+                      Reply to this email, or reach either of us directly &mdash; we answer personally.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td class="sm-stack" width="50%" valign="top" style="padding:0 8px 0 0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                 style="background-color:#F2F1EF; border:1px solid #DCD9D3; border-radius:4px;">
+                            <tr>
+                              <td style="padding:18px 20px;">
+                                <p style="margin:0 0 8px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:16px; font-weight:700; color:#17181C;">
+                                  Nupur Karn
+                                </p>
+                                <p style="margin:0 0 5px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px;">
+                                  <a href="mailto:nupur@karnhracademy.com" style="color:#8C2A1E; text-decoration:none;">nupur@karnhracademy.com</a>
+                                </p>
+                                <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px;">
+                                  <a href="tel:+919082753396" style="color:#55514C; text-decoration:none;">90827&nbsp;53396</a>
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <!-- Spacer row so the two cards don't touch once they
+                             stack on a phone; Outlook ignores margin here. -->
+                        <td class="sm-stack" width="50%" valign="top" style="padding:0 0 0 8px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                 style="background-color:#F2F1EF; border:1px solid #DCD9D3; border-radius:4px;">
+                            <tr>
+                              <td style="padding:18px 20px;">
+                                <p style="margin:0 0 8px 0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:16px; font-weight:700; color:#17181C;">
+                                  Neha Manjari
+                                </p>
+                                <p style="margin:0 0 5px 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px;">
+                                  <a href="mailto:neha@karnhracademy.com" style="color:#8C2A1E; text-decoration:none;">neha@karnhracademy.com</a>
+                                </p>
+                                <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px;">
+                                  <a href="tel:+917258896998" style="color:#55514C; text-decoration:none;">72588&nbsp;96998</a>
+                                </p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:22px 0 30px 0;">
+                    <p style="margin:0 0 3px 0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:22px; color:#55514C;">
+                      Warm regards,
+                    </p>
+                    <p style="margin:0; font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:16px; color:#17181C;">
+                      Nupur &amp; Neha
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 

@@ -16,6 +16,23 @@ fires, which is why it is both the welcome and the confirmation.
 
 Test it by signing up with an address you own before pointing students at it.
 
+## The greeting
+
+The email opens `Hello {name},` read from user metadata:
+
+```
+{{ if .Data.display_name }}…{{ else if .Data.full_name }}…{{ else if .Data.name }}…{{ else }}Hello,{{ end }}
+```
+
+`AuthPage` already stores `display_name` on email/password signup, falling
+back to the part of the address before the `@`. Google accounts arrive with
+`full_name` or `name` instead. The final `{{ else }}` matters: without it a
+missing name renders `Hello ,` or prints `nil` at someone.
+
+Worth knowing: **Google sign-ins usually never receive this email at all** —
+Google has already verified the address, so Supabase skips confirmation. In
+practice this template is read by email/password signups.
+
 ## Before it goes to real people
 
 **Replace `[YOUR POSTAL ADDRESS]` in the footer.** A real postal address is
