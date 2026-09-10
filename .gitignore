@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .claude/
+
+# Supabase CLI local state (created by `supabase link`/`supabase functions`
+# commands) -- machine-specific, never something to share via git.
+supabase/.temp/
