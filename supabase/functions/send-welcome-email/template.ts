@@ -1,4 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+// GENERATED FILE -- do not edit.
+// Source: email-templates/welcome.html and welcome.txt
+// Regenerate: node scripts/sync-email-templates.mjs
+
+export const WELCOME_HTML = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="utf-8" />
@@ -249,3 +253,68 @@
   </table>
 </body>
 </html>
+`;
+
+export const WELCOME_TEXT = `KARN HR ACADEMY
+
+Hello {{FIRST_NAME}},
+
+WELCOME TO KARN HR ACADEMY
+
+Your account is ready - nothing to confirm, nothing to set up.
+Everything below is open to you right now.
+
+Start with the notes: https://karnhracademy.com/notes
+
+
+FREE, AND STAYING FREE
+
+  - Unit-wise study notes across every discipline
+    https://karnhracademy.com/notes
+
+  - Topic-wise MCQ practice with instant feedback
+    https://karnhracademy.com/quizzes
+
+  - Previous year papers by subject and year
+    https://karnhracademy.com/pyqs
+
+  - Video lectures from HR educators
+    https://karnhracademy.com/lectures
+
+
+When you want live sessions, marked practice and individual feedback, our
+programmes pick up where the free material stops. No rush - the library
+is not going anywhere.
+https://karnhracademy.com/programmes
+
+
+QUESTIONS? JUST ASK.
+
+Reply to this email, or reach either of us directly - we answer
+personally.
+
+  Nupur Karn
+  nupur@karnhracademy.com
+  90827 53396
+
+  Neha Manjari
+  neha@karnhracademy.com
+  72588 96998
+
+Warm regards,
+Nupur & Neha
+
+--
+Karn HR Academy
+HR & management preparation for MBA, BBA and UGC NET Code 55.
+
+Notes: https://karnhracademy.com/notes
+MCQs: https://karnhracademy.com/quizzes
+PYQs: https://karnhracademy.com/pyqs
+Lectures: https://karnhracademy.com/lectures
+
+nupur@karnhracademy.com
+
+You received this because an account was created with this address at
+karnhracademy.com
+`;

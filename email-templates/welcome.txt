@@ -1,38 +1,62 @@
-Hi {{ contact.FIRSTNAME | default : "there" }},
+KARN HR ACADEMY
 
-Nupur here - I run Karn HR Academy. Thanks for signing up.
+Hello {{FIRST_NAME}},
 
-Rather than send you a tour, here are the three things people actually
-start with:
+WELCOME TO KARN HR ACADEMY
 
-- The Labour Welfare syllabus, unit by unit - if you're preparing for
-  UGC NET Paper II, Code 55, start here.
-  https://karnhracademy.com/ugc-net-labour-welfare
+Your account is ready - nothing to confirm, nothing to set up.
+Everything below is open to you right now.
 
-- Previous year papers with answer keys - the fastest way to see what
-  actually gets asked.
-  https://karnhracademy.com/pyqs
+Start with the notes: https://karnhracademy.com/notes
 
-- Topic-wise MCQs - useful once you've read a unit and want to know if
-  it stuck.
-  https://karnhracademy.com/quizzes
 
-All of it is free. There's no paid tier and no trial running out - I
-built this because the material I needed while preparing didn't exist in
-one place.
+FREE, AND STAYING FREE
 
-If you get stuck on a topic, or you're looking for something we haven't
-put up yet, just reply to this email. I read them. Neha handles academic
-queries too, and she's usually quicker than me.
+  - Unit-wise study notes across every discipline
+    https://karnhracademy.com/notes
 
-Good luck with your preparation.
+  - Topic-wise MCQ practice with instant feedback
+    https://karnhracademy.com/quizzes
 
-Nupur
+  - Previous year papers by subject and year
+    https://karnhracademy.com/pyqs
+
+  - Video lectures from HR educators
+    https://karnhracademy.com/lectures
+
+
+When you want live sessions, marked practice and individual feedback, our
+programmes pick up where the free material stops. No rush - the library
+is not going anywhere.
+https://karnhracademy.com/programmes
+
+
+QUESTIONS? JUST ASK.
+
+Reply to this email, or reach either of us directly - we answer
+personally.
+
+  Nupur Karn
+  nupur@karnhracademy.com
+  90827 53396
+
+  Neha Manjari
+  neha@karnhracademy.com
+  72588 96998
+
+Warm regards,
+Nupur & Neha
 
 --
-Nupur Karn · Founder, Karn HR Academy
-nupur@karnhracademy.com · 90827 53396
-Neha Manjari · neha@karnhracademy.com · 72588 96998
+Karn HR Academy
+HR & management preparation for MBA, BBA and UGC NET Code 55.
 
-You're getting this because you signed up at karnhracademy.com
-Unsubscribe: {{ contact.UNSUBSCRIBE_URL }}
+Notes: https://karnhracademy.com/notes
+MCQs: https://karnhracademy.com/quizzes
+PYQs: https://karnhracademy.com/pyqs
+Lectures: https://karnhracademy.com/lectures
+
+nupur@karnhracademy.com
+
+You received this because an account was created with this address at
+karnhracademy.com
