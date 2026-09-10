@@ -1,8 +1,9 @@
 import {
   BookOpen, Briefcase, Users, Target,
-  MessageSquare, Repeat, Globe, HandHeart,
+  MessageSquare, Repeat, Globe, HandHeart, TrendingUp,
 } from "lucide-react";
 import { LW_TOPICS, resolveLWTopicSlug } from "./labourWelfareUnits";
+import { MBA_ECO_TOPICS, BBA_ECO_TOPICS } from "./economicsUnits";
 
 export const DISCIPLINES = [
   {
@@ -168,6 +169,30 @@ export const DISCIPLINES = [
       { label: "MNCs & HR Practices",              slug: "mncs-hr-practices" },
       { label: "Global Workforce Diversity",        slug: "global-workforce-diversity" },
     ],
+  },
+  {
+    value: "mba-eco",
+    label: "Managerial Economics",
+    short: "MBA Eco",
+    icon: TrendingUp,
+    color: "bg-[#F0FDF4] border-[#BBF7D0] text-[#166534]",
+    activeColor: "bg-[#166534] border-[#166534] text-white",
+    iconBg: "bg-[#DCFCE7]",
+    iconColor: "text-[#166534]",
+    description: "Demand analysis, production & cost, market structures, macroeconomics, Indian economy",
+    topics: MBA_ECO_TOPICS,
+  },
+  {
+    value: "bba-eco",
+    label: "Business Economics",
+    short: "BBA Eco",
+    icon: TrendingUp,
+    color: "bg-[#EEF2FF] border-[#C7D2FE] text-[#3730A3]",
+    activeColor: "bg-[#3730A3] border-[#3730A3] text-white",
+    iconBg: "bg-[#E0E7FF]",
+    iconColor: "text-[#3730A3]",
+    description: "Demand & supply, market equilibrium, production & cost, market structures, national income",
+    topics: BBA_ECO_TOPICS,
   },
   {
     value: "lw",

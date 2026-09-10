@@ -30,6 +30,10 @@ const LabourWelfarePage = lazy(() => import("./pages/LabourWelfarePage"));
 const MBABBAPage = lazy(() => import("./pages/MBABBAPage"));
 const LabourWelfareUnitPage = lazy(() => import("./pages/LabourWelfareUnitPage"));
 const LabourWelfareTopicPage = lazy(() => import("./pages/LabourWelfareTopicPage"));
+const MBAEconomicsPage = lazy(() => import("./pages/MBAEconomicsPage"));
+const MBAEconomicsUnitPage = lazy(() => import("./pages/MBAEconomicsUnitPage"));
+const BBAEconomicsPage = lazy(() => import("./pages/BBAEconomicsPage"));
+const BBAEconomicsUnitPage = lazy(() => import("./pages/BBAEconomicsUnitPage"));
 const PYQsPage = lazy(() => import("./pages/PYQsPage"));
 const PYQViewerPage = lazy(() => import("./pages/PYQViewerPage"));
 const PYQPaperPage = lazy(() => import("./pages/PYQPaperPage"));
@@ -102,6 +106,10 @@ const App = () => (
                 the "unit-" prefix out itself. URLs stay /unit-2 etc. */}
             <Route path="/ugc-net-labour-welfare/:unitSlug" element={<LabourWelfareUnitPage />} />
             <Route path="/ugc-net-labour-welfare/topic/:topicSlug" element={<LabourWelfareTopicPage />} />
+            <Route path="/mba-economics" element={<MBAEconomicsPage />} />
+            <Route path="/mba-economics/:unitSlug" element={<MBAEconomicsUnitPage />} />
+            <Route path="/bba-economics" element={<BBAEconomicsPage />} />
+            <Route path="/bba-economics/:unitSlug" element={<BBAEconomicsUnitPage />} />
             <Route path="/lectures" element={<LecturesPage />} />
             <Route path="/live-lectures" element={<LiveLecturesPage />} />
             <Route path="/quizzes" element={<QuizList />} />
