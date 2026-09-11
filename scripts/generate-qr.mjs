@@ -10,10 +10,13 @@ const pick = (name) => src.match(new RegExp(`export const ${name} = "([^"]*)"`))
 const WHATSAPP_NUMBER = pick("WHATSAPP_NUMBER");
 const SITE_URL = pick("SITE_URL");
 
+const PHONE_NUMBER = pick("PHONE_NUMBER");
+
 const targets = { site: SITE_URL, connect: `${SITE_URL}/connect` };
-for (const m of src.matchAll(/key: "(\w+)",[^\n]*?url: (?:"([^"]*)"|WHATSAPP_NUMBER \? `([^`]*)`)/g)) {
-  const [, key, literal, tpl] = m;
-  const url = literal ?? (WHATSAPP_NUMBER ? tpl.replace("${WHATSAPP_NUMBER}", WHATSAPP_NUMBER).split("?text=")[0] : "");
+for (const m of src.matchAll(/key: "(\w+)",[^\n]*?url: (?:"([^"]*)"|(WHATSAPP_NUMBER|PHONE_NUMBER) \? `([^`]*)`)/g)) {
+  const [, key, literal, guard, tpl] = m;
+  const num = guard === "WHATSAPP_NUMBER" ? WHATSAPP_NUMBER : PHONE_NUMBER;
+  const url = literal ?? (num ? tpl.replace(`\${${guard}}`, num).split("?text=")[0] : "");
   if (url) targets[key] = url;
 }
 

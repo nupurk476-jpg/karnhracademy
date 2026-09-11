@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Mail, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
+import { Mail, Phone, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CHANNEL_ICONS, CHANNEL_COLORS } from "@/components/SocialIcons";
-import { LIVE_CHANNELS, CONTACT_EMAIL } from "@/lib/socialLinks";
+import { LIVE_CHANNELS, CONTACT_EMAIL, PHONE_NUMBER, PHONE_DISPLAY } from "@/lib/socialLinks";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,11 +55,21 @@ const ContactPage = () => {
           Have questions, feedback, or want to collaborate? Send us a message and we'll get back to you.
         </p>
 
-        <div className="mb-8 flex items-center gap-3">
-          <Mail className="h-5 w-5 text-accent-deep" />
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground hover:text-accent-deep transition-colors">
-            {CONTACT_EMAIL}
-          </a>
+        <div className="mb-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+          <span className="flex items-center gap-3">
+            <Mail className="h-5 w-5 text-accent-deep" />
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground hover:text-accent-deep transition-colors">
+              {CONTACT_EMAIL}
+            </a>
+          </span>
+          {PHONE_NUMBER && (
+            <span className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-accent-deep" />
+              <a href={`tel:+${PHONE_NUMBER}`} className="text-foreground hover:text-accent-deep transition-colors">
+                {PHONE_DISPLAY}
+              </a>
+            </span>
+          )}
         </div>
 
         {/* ── Connect with us ─────────────────────────────────────────── */}

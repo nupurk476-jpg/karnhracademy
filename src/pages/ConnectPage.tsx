@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
 import { CHANNEL_ICONS, CHANNEL_COLORS } from "@/components/SocialIcons";
-import { LIVE_CHANNELS, CONTACT_EMAIL, SITE_URL } from "@/lib/socialLinks";
-import { ChevronRight, Globe, Mail } from "lucide-react";
+import { LIVE_CHANNELS, CONTACT_EMAIL, SITE_URL, PHONE_NUMBER, PHONE_DISPLAY } from "@/lib/socialLinks";
+import { ChevronRight, Globe, Mail, Phone } from "lucide-react";
 
 // Link-in-bio page: the one URL that goes in every social bio, the WhatsApp
 // "About", and the last page of every notes PDF. Deliberately no Header/Footer
@@ -11,6 +11,7 @@ const ConnectPage = () => {
   const rows = [
     { key: "website", label: "Website", sub: "Notes · MCQs · PYQs · Lectures", url: SITE_URL, internal: true },
     ...LIVE_CHANNELS.map(c => ({ key: c.key, label: c.label, sub: c.handle || c.cta, url: c.url, internal: false })),
+    ...(PHONE_NUMBER ? [{ key: "phone", label: "Call", sub: PHONE_DISPLAY, url: `tel:+${PHONE_NUMBER}`, internal: false }] : []),
     { key: "email", label: "Email", sub: CONTACT_EMAIL, url: `mailto:${CONTACT_EMAIL}`, internal: false },
   ];
 
@@ -43,7 +44,9 @@ const ConnectPage = () => {
             const inner = (
               <>
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style={{ background: color }}>
-                  {r.key === "email" ? <Mail className="h-5 w-5" strokeWidth={1.8} /> : <Icon width={20} height={20} />}
+                  {r.key === "email" ? <Mail className="h-5 w-5" strokeWidth={1.8} />
+                    : r.key === "phone" ? <Phone className="h-5 w-5" strokeWidth={1.8} />
+                    : <Icon width={20} height={20} />}
                 </span>
                 <span className="min-w-0 flex-1 text-left">
                   <span className="block text-sm font-bold text-[#16243F]">{r.label}</span>
