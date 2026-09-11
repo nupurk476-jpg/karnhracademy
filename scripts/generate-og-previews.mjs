@@ -453,7 +453,7 @@ const STATIC_ROUTES = [
   { path: "/pyqs", title: "Previous Year Question Papers", description: "Previous year question papers for UGC NET/JRF Labour Welfare, MBA/BBA HR, Organisational Behaviour, Strategic Management and other disciplines — organised by year." },
   { path: "/books", title: "Book Recommendations", description: "Curated book recommendations on Human Resource Management for students, scholars, and HR researchers." },
   { path: "/newspaper", title: "Newspaper Highlights", description: "Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants." },
-  { path: "/about", title: "About", description: "About the educator behind Karn HR Academy — PhD scholar specialising in Ethical HRM and Quiet Quitting." },
+  { path: "/about", title: "About Karn HR Academy", description: "A free, unit-wise study hub for HR & Management students — MBA, BBA, B.Com and UGC NET/JRF Labour Welfare — by Nupur Karn, UGC NET qualified educator and PhD scholar." },
   { path: "/contact", title: "Contact", description: "Have questions or want to collaborate? Reach out to the Karn HR Academy team." },
   { path: "/connect", title: "Connect with Karn HR Academy", description: "All Karn HR Academy channels in one place — YouTube, Facebook, LinkedIn, Instagram, Telegram, WhatsApp and email." },
   { path: "/privacy-policy", title: "Privacy Policy", description: "How Karn HR Academy collects, uses, and protects your personal information." },

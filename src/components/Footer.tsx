@@ -71,7 +71,7 @@ const Footer = () => {
             <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
               Follow Us
             </h4>
-            <SocialIconRow items={FOOTER_SOCIALS} onDark size={34} className="gap-2" />
+            <SocialIconRow items={FOOTER_SOCIALS} onDark size={31} className="gap-1.5" />
             <Link to="/connect" className="mt-3 inline-block text-xs text-primary-foreground/50 hover:text-accent transition-colors">
               All channels &amp; QR codes →
             </Link>
