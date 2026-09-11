@@ -109,7 +109,7 @@ const DisciplineTopicPage = ({
       <main id="main-content" className="mx-auto max-w-4xl px-6 py-16">
         <Breadcrumbs items={[
           { label: "Home", to: "/" },
-          { label: discipline?.short ?? "Notes", to: `/notes?subject=${subject}` },
+          { label: discipline?.short ?? "Notes", to: `/${routePrefix}` },
           { label: topic.label },
         ]} />
         <Link to={backLink} className="mb-6 inline-flex items-center gap-1 text-sm text-accent-deep hover:underline">

@@ -5,7 +5,7 @@ const SMTopicPage = () => (
   <DisciplineTopicPage
     subject="sm"
     topics={smTopics}
-    backLink="/notes?subject=sm"
+    backLink="/sm"
     backLabel="All Strategic Management Topics"
     routePrefix="sm"
   />

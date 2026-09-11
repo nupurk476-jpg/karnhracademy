@@ -5,7 +5,7 @@ const POMTopicPage = () => (
   <DisciplineTopicPage
     subject="pom"
     topics={pomTopics}
-    backLink="/notes?subject=pom"
+    backLink="/pom"
     backLabel="All Management Topics"
     routePrefix="pom"
   />

@@ -9,13 +9,13 @@
 export type SubjectMeta = { exams: string[]; hub: string; code: string; units?: number; image?: string };
 
 const META: Record<string, SubjectMeta> = {
-  hrm:       { exams: ["MBA", "BBA", "UGC NET"], hub: "/notes?subject=hrm",  code: "HRM" },
-  ob:        { exams: ["MBA", "BBA", "UGC NET"], hub: "/notes?subject=ob",   code: "OB" },
-  sm:        { exams: ["MBA", "BBA"],            hub: "/notes?subject=sm",   code: "SM" },
-  pom:       { exams: ["MBA", "BBA", "B.Com"],   hub: "/notes?subject=pom",  code: "POM" },
-  bc:        { exams: ["MBA", "BBA", "B.Com"],   hub: "/notes?subject=bc",   code: "BC" },
-  odcm:      { exams: ["MBA", "UGC NET"],        hub: "/notes?subject=odcm", code: "OD" },
-  ghr:       { exams: ["MBA", "UGC NET"],        hub: "/notes?subject=ghr",  code: "IHRM" },
+  hrm:       { exams: ["MBA", "BBA", "UGC NET"], hub: "/hr",   code: "HRM" },
+  ob:        { exams: ["MBA", "BBA", "UGC NET"], hub: "/ob",   code: "OB" },
+  sm:        { exams: ["MBA", "BBA"],            hub: "/sm",   code: "SM" },
+  pom:       { exams: ["MBA", "BBA", "B.Com"],   hub: "/pom",  code: "POM" },
+  bc:        { exams: ["MBA", "BBA", "B.Com"],   hub: "/bc",   code: "BC" },
+  odcm:      { exams: ["MBA", "UGC NET"],        hub: "/odcm", code: "OD" },
+  ghr:       { exams: ["MBA", "UGC NET"],        hub: "/ghr",  code: "IHRM" },
   "mba-eco": { exams: ["MBA", "PGDM"],           hub: "/mba-economics",      code: "ECO", units: 5 },
   "bba-eco": { exams: ["BBA", "B.Com"],          hub: "/bba-economics",      code: "ECO", units: 5 },
   lw:        { exams: ["UGC NET", "JRF"],        hub: "/ugc-net-labour-welfare", code: "LW", units: 10 },

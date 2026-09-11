@@ -114,12 +114,14 @@ const Footer = () => {
             </h4>
             <div className="space-y-2.5">
               {[
-                { label: "Human Resource Management", to: "/notes?subject=hrm" },
-                { label: "Organisational Behaviour", to: "/notes?subject=ob" },
-                { label: "Strategic Management", to: "/notes?subject=sm" },
-                { label: "International HRM", to: "/notes?subject=ghr" },
-                { label: "HR Analytics", to: "/hr/hr-analytics" },
-                { label: "Performance Management", to: "/hr/performance-management" },
+                { label: "Human Resource Management", to: "/hr" },
+                { label: "Organisational Behaviour", to: "/ob" },
+                { label: "Principles of Management", to: "/pom" },
+                { label: "Strategic Management", to: "/sm" },
+                { label: "Business Communication", to: "/bc" },
+                { label: "Economics (MBA / BBA)", to: "/mba-economics" },
+                { label: "International HRM", to: "/ghr" },
+                { label: "OD & Change Management", to: "/odcm" },
               ].map((link) => (
                 <Link
                   key={link.label}

@@ -5,7 +5,7 @@ const GHRTopicPage = () => (
   <DisciplineTopicPage
     subject="ghr"
     topics={ghrTopics}
-    backLink="/notes?subject=ghr"
+    backLink="/ghr"
     backLabel="All International HRM Topics"
     routePrefix="ghr"
   />
