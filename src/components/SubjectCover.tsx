@@ -83,13 +83,9 @@ export const SubjectCover = ({
         </defs>
         <rect width="360" height="202" fill={`url(#${uid}-bg)`} />
         <rect width="360" height="202" fill={`url(#${uid}-glow)`} />
-        {Art ? <Art /> : (
-          <>
-            <MotifLayer motif={motif} id={uid} />
-            {/* Big short-code watermark, bottom-right — the "picture" of the subject */}
-            <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill="rgba(23,24,28,0.08)" letterSpacing="-3">{code}</text>
-          </>
-        )}
+        {/* Big short-code watermark, bottom-right, under the art */}
+        <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill={Art ? "rgba(23,24,28,0.05)" : "rgba(23,24,28,0.08)"} letterSpacing="-3">{code}</text>
+        {Art ? <Art /> : <MotifLayer motif={motif} id={uid} />}
         {/* Vermillion bracket bar — the logo's mark */}
         <rect x="16" y="24" width="5" height="48" rx="2.5" fill={accent} />
       </svg>
