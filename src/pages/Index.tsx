@@ -9,6 +9,8 @@ import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
 import { DISCIPLINES } from "@/lib/disciplines";
 import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
+import { useSubjectCounts } from "@/hooks/use-subject-counts";
+import SubjectCard from "@/components/SubjectCard";
 import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
@@ -44,6 +46,8 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   bc:      { color: STEEL_DARK, bg: "#F2F1EF" },
   odcm:    { color: GOLD_TEXT,  bg: "#F7F4EF" },
   ghr:     { color: NAVY_DARK,  bg: "#E8E6E2" },
+  "mba-eco": { color: NAVY,     bg: "#E8E6E2" },
+  "bba-eco": { color: STEEL_DARK, bg: "#F2F1EF" },
   lw:      { color: NAVY_DARK,  bg: "#EFEDE9" },
 };
 
@@ -109,23 +113,8 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 // hero sidebar widget and the discipline grid's badges both read from, so
 // the two can never show different numbers for the same subject.
 function useSubjectNoteCounts() {
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [totalNotes, setTotalNotes] = useState<number | null>(null);
-
-  useEffect(() => {
-    supabase.from("notes").select("subject").then(({ data }) => {
-      if (!data) return;
-      setTotalNotes(data.length);
-      const map: Record<string, number> = {};
-      data.forEach((n: any) => {
-        const key = n.subject || "hrm";
-        map[key] = (map[key] || 0) + 1;
-      });
-      setCounts(map);
-    });
-  }, []);
-
-  return { counts, totalNotes };
+  const { counts } = useSubjectCounts();
+  return { counts: counts?.notes ?? {}, totalNotes: counts?.totalNotes ?? null };
 }
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
@@ -480,60 +469,38 @@ const CompactHowItWorks = () => (
 // ─────────────── Section: Subjects ───────────────────────────────────────────
 const MIN_NOTES_TO_LINK = 3;
 
-const SUBJECT_LINK: Record<string, string> = { lw: "/ugc-net-labour-welfare" };
-
 const Subjects = () => {
-  const { counts, totalNotes } = useSubjectNoteCounts();
-  // Derived from the same per-subject counts query as the hero sidebar
-  // widget — a subject only counts as "live" once it has a published note —
-  // so this number can never drift out of sync with what's actually shown.
-  const disciplineCount = SUBJECTS.filter(s => (counts[s.value] ?? 0) > 0).length;
-  const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"][disciplineCount] || String(disciplineCount);
+  const { counts } = useSubjectCounts();
+  const totalNotes = counts?.totalNotes ?? null;
+  // A subject only counts as "live" once it has enough published notes to
+  // link — the same threshold the cards use — so this number can never drift
+  // out of sync with what's actually shown.
+  const disciplineCount = counts ? DISCIPLINES.filter(d => (counts.notes[d.value] ?? 0) >= MIN_NOTES_TO_LINK).length : 0;
+  const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][disciplineCount] || String(disciplineCount);
 
   return (
     <section id="subjects" className="py-16 md:py-20" style={{ background: LIGHT }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
-            <GoldLabel text="Browse by Discipline" />
-            <SectionHeading title="HR & Management. One Platform." sub={`${disciplineWord} disciplines, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly.`} />
+            <GoldLabel text="Browse by Subject" />
+            <SectionHeading title="HR & Management. One Platform." sub={`${counts ? disciplineWord : "…"} subjects live, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly — all free.`} />
           </div>
           <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             View all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {SUBJECTS.map(s => {
-            const Icon = s.icon;
-            const noteCount = counts[s.value] ?? 0;
-            const isComingSoon = noteCount < MIN_NOTES_TO_LINK;
-            const Wrapper = isComingSoon ? "div" : Link;
-            const wrapperProps = isComingSoon ? { "aria-disabled": true } : { to: SUBJECT_LINK[s.value] ?? "/notes" };
-            return (
-              <Wrapper
-                key={s.label}
-                {...(wrapperProps as any)}
-                className={`group flex h-full flex-col rounded-2xl border p-5 transition-all duration-200 ${isComingSoon ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:shadow-md"}`}
-                style={{ background: s.bg, borderColor: `${s.color}20` }}
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
-                  <Icon className="h-5 w-5 text-white" />
-                </div>
-                <p className="text-sm font-bold leading-snug text-slate-800 flex-1">{s.label}</p>
-                <div className="mt-3 flex items-center justify-between gap-1 pt-3" style={{ borderTop: `1px solid ${s.color}20` }}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: s.color }}>{s.short}</span>
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums" style={{ background: "#FFFFFF", color: s.color, border: `1px solid ${s.color}30` }}>
-                    {isComingSoon ? "Coming soon" : `${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
-                  </span>
-                </div>
-                {!isComingSoon && (
-                  <div className="mt-2 flex items-center gap-1 text-xs font-semibold transition-transform group-hover:translate-x-0.5" style={{ color: s.color }}>
-                    Explore <ChevronRight className="h-3.5 w-3.5" />
-                  </div>
-                )}
-              </Wrapper>
-            );
-          })}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {DISCIPLINES.map(d => (
+            <SubjectCard
+              key={d.value}
+              discipline={d}
+              notes={counts ? (counts.notes[d.value] ?? 0) : null}
+              quizzes={counts ? (counts.quizzes[d.value] ?? 0) : null}
+              lectures={counts ? (counts.lectures[d.value] ?? 0) : null}
+              minNotes={MIN_NOTES_TO_LINK}
+            />
+          ))}
         </div>
       </div>
     </section>
