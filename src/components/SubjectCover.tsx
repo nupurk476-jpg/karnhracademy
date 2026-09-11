@@ -13,8 +13,8 @@ const MOTIFS: Motif[] = ["rings", "grid", "diagonals", "dots", "waves", "hex", "
 const hash = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 
 const MotifLayer = ({ motif, id }: { motif: Motif; id: string }) => {
-  const stroke = "rgba(255,255,255,0.09)";
-  const fill = "rgba(255,255,255,0.06)";
+  const stroke = "rgba(23,24,28,0.10)";
+  const fill = "rgba(23,24,28,0.07)";
   switch (motif) {
     case "rings":
       return <g fill="none" stroke={stroke} strokeWidth="1.2">{[28, 52, 76, 100, 124].map(r => <circle key={r} cx="300" cy="-4" r={r} />)}</g>;
@@ -30,7 +30,7 @@ const MotifLayer = ({ motif, id }: { motif: Motif; id: string }) => {
     case "dots":
       return (
         <>
-          <defs><pattern id={`${id}-d`} width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" fill="rgba(255,255,255,0.14)" /></pattern></defs>
+          <defs><pattern id={`${id}-d`} width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.6" fill="rgba(23,24,28,0.16)" /></pattern></defs>
           <rect x="200" y="0" width="160" height="202" fill={`url(#${id}-d)`} />
         </>
       );
@@ -61,7 +61,7 @@ export const SubjectCover = ({
   const uid = `cover-${id}`;
   const Art = SUBJECT_ART[id];
   return (
-    <div className={`relative w-full overflow-hidden ${className}`} style={{ aspectRatio: "16/9", background: BRAND.navy }}>
+    <div className={`relative w-full overflow-hidden ${className}`} style={{ aspectRatio: "16/9", background: BRAND.cream }}>
       {image ? (
         <>
           <img src={image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -73,11 +73,11 @@ export const SubjectCover = ({
       <svg viewBox="0 0 360 202" className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#2A2C33" />
-            <stop offset="1" stopColor={BRAND.navyDeep} />
+            <stop offset="0" stopColor={BRAND.cream} />
+            <stop offset="1" stopColor={BRAND.mist} />
           </linearGradient>
           <radialGradient id={`${uid}-glow`} cx="0.92" cy="0.08" r="0.55">
-            <stop offset="0" stopColor={accent} stopOpacity="0.22" />
+            <stop offset="0" stopColor={accent} stopOpacity="0.16" />
             <stop offset="1" stopColor={accent} stopOpacity="0" />
           </radialGradient>
         </defs>
@@ -87,7 +87,7 @@ export const SubjectCover = ({
           <>
             <MotifLayer motif={motif} id={uid} />
             {/* Big short-code watermark, bottom-right — the "picture" of the subject */}
-            <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill="rgba(255,255,255,0.11)" letterSpacing="-3">{code}</text>
+            <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill="rgba(23,24,28,0.08)" letterSpacing="-3">{code}</text>
           </>
         )}
         {/* Vermillion bracket bar — the logo's mark */}
@@ -100,7 +100,7 @@ export const SubjectCover = ({
           <Icon className="h-7 w-7 text-white" strokeWidth={2} />
         </span>
         {caption && (
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/75">{caption}</p>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.18em] ${image ? "text-white/80" : "text-slate-600"}`}>{caption}</p>
         )}
       </div>
     </div>

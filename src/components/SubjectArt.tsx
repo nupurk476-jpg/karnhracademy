@@ -5,11 +5,12 @@ import { BRAND } from "@/lib/brand";
 // paper-white line work) sized to the 360×202 cover viewBox. A subject
 // without an entry here falls back to the geometric motif cover.
 
-const INK = BRAND.navyDeep;
+// Line-work is ink on the site's light ground (cream → mist), so the covers
+// sit in the same palette as the rest of the page rather than as dark tiles.
 const RED = BRAND.gold;
-const PAPER = "rgba(255,255,255,0.88)";
-const PAPER_SOFT = "rgba(255,255,255,0.55)";
-const PAPER_FAINT = "rgba(255,255,255,0.22)";
+const PAPER = "rgba(23,24,28,0.82)";
+const PAPER_SOFT = "rgba(23,24,28,0.5)";
+const PAPER_FAINT = "rgba(23,24,28,0.2)";
 
 const Gear = ({ cx, cy, r, teeth = 8, color = PAPER, width = 2.4 }: { cx: number; cy: number; r: number; teeth?: number; color?: string; width?: number }) => {
   const pts: string[] = [];
@@ -95,4 +96,3 @@ export const SUBJECT_ART: Record<string, () => JSX.Element> = {
   hrm: HRMArt,
 };
 
-export const ART_GROUND = `linear-gradient(135deg, #2A2C33 0%, ${INK} 100%)`;
