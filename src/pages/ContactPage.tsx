@@ -84,37 +84,41 @@ const ContactPage = () => {
               const Icon = CHANNEL_ICONS[c.key];
               const color = CHANNEL_COLORS[c.key];
               return (
-                <div key={c.key} className="flex items-center gap-4 rounded-lg border border-border bg-white p-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white" style={{ background: color }}>
-                    <Icon width={20} height={20} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-foreground">{c.label}</p>
-                    {c.handle && <p className="truncate text-xs text-muted-foreground">{c.handle}</p>}
-                    <a
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
-                      style={{ color }}
-                    >
-                      {c.cta} <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
+                <div key={c.key} className="flex flex-col rounded-lg border border-border bg-white">
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${c.cta} on ${c.label}`}
+                    className="group flex items-center gap-4 p-4 transition-colors hover:bg-slate-50"
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white" style={{ background: color }}>
+                      <Icon width={20} height={20} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold text-foreground">{c.label}</span>
+                      {c.handle && <span className="block truncate text-xs text-muted-foreground">{c.handle}</span>}
+                      <span className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold group-hover:underline" style={{ color }}>
+                        {c.cta} <ExternalLink className="h-3 w-3" />
+                      </span>
+                    </span>
+                    <span className="shrink-0 rounded-md border border-border p-1 transition-colors group-hover:border-accent/60">
+                      <img src={`/qr/${c.key}.svg`} alt={`${c.label} QR code`} width={64} height={64} className="block" />
+                    </span>
+                  </a>
                   <a
                     href={`/qr/${c.key}.svg`}
                     download={`karnhr-${c.key}-qr.svg`}
-                    title={`Download ${c.label} QR code`}
-                    className="shrink-0 rounded-md border border-border p-1 transition-colors hover:border-accent/60"
+                    className="inline-flex items-center gap-1 self-end px-4 pb-2.5 text-[11px] text-muted-foreground hover:text-accent-deep"
                   >
-                    <img src={`/qr/${c.key}.svg`} alt={`${c.label} QR code`} width={64} height={64} className="block" />
+                    <QrCode className="h-3 w-3" /> Download QR
                   </a>
                 </div>
               );
             })}
           </div>
-          <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <QrCode className="h-3.5 w-3.5" /> Click any QR code to download it for posters, PDFs and handouts.
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Click a card to open the channel. Scan or download a QR code to use on posters, PDFs and handouts.
           </p>
         </section>
 
