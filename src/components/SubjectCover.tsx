@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import { SUBJECT_ART } from "@/components/SubjectArt";
 
 // Code-drawn 16:9 cover for a subject card. No image files: every subject —
 // including ones added later — gets a cover automatically, in the brand
@@ -58,6 +59,7 @@ export const SubjectCover = ({
 }: { id: string; code: string; caption?: string; icon: LucideIcon; image?: string; accent?: string; className?: string }) => {
   const motif = MOTIFS[hash(id) % MOTIFS.length];
   const uid = `cover-${id}`;
+  const Art = SUBJECT_ART[id];
   return (
     <div className={`relative w-full overflow-hidden ${className}`} style={{ aspectRatio: "16/9", background: BRAND.navy }}>
       {image ? (
@@ -81,9 +83,13 @@ export const SubjectCover = ({
         </defs>
         <rect width="360" height="202" fill={`url(#${uid}-bg)`} />
         <rect width="360" height="202" fill={`url(#${uid}-glow)`} />
-        <MotifLayer motif={motif} id={uid} />
-        {/* Big short-code watermark, bottom-right — the "picture" of the subject */}
-        <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill="rgba(255,255,255,0.11)" letterSpacing="-3">{code}</text>
+        {Art ? <Art /> : (
+          <>
+            <MotifLayer motif={motif} id={uid} />
+            {/* Big short-code watermark, bottom-right — the "picture" of the subject */}
+            <text x="348" y="182" textAnchor="end" fontFamily="'Playfair Display', Georgia, serif" fontWeight="800" fontSize="86" fill="rgba(255,255,255,0.11)" letterSpacing="-3">{code}</text>
+          </>
+        )}
         {/* Vermillion bracket bar — the logo's mark */}
         <rect x="16" y="24" width="5" height="48" rx="2.5" fill={accent} />
       </svg>
