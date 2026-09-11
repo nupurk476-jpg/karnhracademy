@@ -1,5 +1,12 @@
 import { Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SocialIconRow } from "@/components/SocialIcons";
+import { LIVE_CHANNELS, CONTACT_EMAIL } from "@/lib/socialLinks";
+
+const FOOTER_SOCIALS = [
+  ...LIVE_CHANNELS.map(c => ({ key: c.key, label: c.label, url: c.url })),
+  { key: "email", label: "Email", url: `mailto:${CONTACT_EMAIL}` },
+];
 
 const Footer = () => {
   return (
@@ -61,6 +68,13 @@ const Footer = () => {
               Academic resource hub for HR & Management — structured notes, video lectures,
               MCQs and research content for MBA, BBA & UGC NET/JRF aspirants.
             </p>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+              Follow Us
+            </h4>
+            <SocialIconRow items={FOOTER_SOCIALS} onDark size={38} />
+            <Link to="/connect" className="mt-3 inline-block text-xs text-primary-foreground/50 hover:text-accent transition-colors">
+              All channels &amp; QR codes →
+            </Link>
           </div>
 
           {/* Col 2: Quick Links */}

@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import { Mail, CheckCircle2 } from "lucide-react";
+import { Mail, CheckCircle2, ExternalLink, QrCode } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { CHANNEL_ICONS, CHANNEL_COLORS } from "@/components/SocialIcons";
+import { LIVE_CHANNELS, CONTACT_EMAIL } from "@/lib/socialLinks";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,7 +49,7 @@ const ContactPage = () => {
         path="/contact"
       />
       <Header />
-      <main id="main-content" className="mx-auto max-w-xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="mb-4 text-4xl font-bold text-foreground">Contact Us</h1>
         <p className="mb-8 text-muted-foreground">
           Have questions, feedback, or want to collaborate? Send us a message and we'll get back to you.
@@ -55,10 +57,58 @@ const ContactPage = () => {
 
         <div className="mb-8 flex items-center gap-3">
           <Mail className="h-5 w-5 text-accent-deep" />
-          <a href="mailto:nupur@karnhracademy.com" className="text-foreground hover:text-accent-deep transition-colors">
-            nupur@karnhracademy.com
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground hover:text-accent-deep transition-colors">
+            {CONTACT_EMAIL}
           </a>
         </div>
+
+        {/* ── Connect with us ─────────────────────────────────────────── */}
+        <section className="mb-12" aria-labelledby="connect-heading">
+          <h2 id="connect-heading" className="mb-1 text-lg font-bold text-foreground">Connect with us</h2>
+          <p className="mb-4 text-xs text-muted-foreground">
+            Follow for new notes, MCQs and lecture drops. Scan a QR code to open the channel on your phone —
+            or <Link to="/connect" className="text-accent-deep hover:underline">get all channels on one page</Link>.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {LIVE_CHANNELS.map(c => {
+              const Icon = CHANNEL_ICONS[c.key];
+              const color = CHANNEL_COLORS[c.key];
+              return (
+                <div key={c.key} className="flex items-center gap-4 rounded-lg border border-border bg-white p-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white" style={{ background: color }}>
+                    <Icon width={20} height={20} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-foreground">{c.label}</p>
+                    {c.handle && <p className="truncate text-xs text-muted-foreground">{c.handle}</p>}
+                    <a
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                      style={{ color }}
+                    >
+                      {c.cta} <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  <a
+                    href={`/qr/${c.key}.svg`}
+                    download={`karnhr-${c.key}-qr.svg`}
+                    title={`Download ${c.label} QR code`}
+                    className="shrink-0 rounded-md border border-border p-1 transition-colors hover:border-accent/60"
+                  >
+                    <img src={`/qr/${c.key}.svg`} alt={`${c.label} QR code`} width={64} height={64} className="block" />
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <QrCode className="h-3.5 w-3.5" /> Click any QR code to download it for posters, PDFs and handouts.
+          </p>
+        </section>
+
+        <h2 className="mb-4 text-lg font-bold text-foreground">Send a message</h2>
 
         {sent ? (
           <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-800">

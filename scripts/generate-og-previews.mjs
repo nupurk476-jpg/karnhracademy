@@ -455,6 +455,7 @@ const STATIC_ROUTES = [
   { path: "/newspaper", title: "Newspaper Highlights", description: "Daily newspaper highlights across business, international, sports, general, and editorial for HR aspirants." },
   { path: "/about", title: "About", description: "About the educator behind Karn HR Academy — PhD scholar specialising in Ethical HRM and Quiet Quitting." },
   { path: "/contact", title: "Contact", description: "Have questions or want to collaborate? Reach out to the Karn HR Academy team." },
+  { path: "/connect", title: "Connect with Karn HR Academy", description: "All Karn HR Academy channels in one place — YouTube, Facebook, LinkedIn, Instagram, Telegram, WhatsApp and email." },
   { path: "/privacy-policy", title: "Privacy Policy", description: "How Karn HR Academy collects, uses, and protects your personal information." },
   { path: "/terms", title: "Terms of Use", description: "The terms and conditions for using Karn HR Academy's notes, quizzes, lectures, and other resources." },
   { path: "/blogs", title: "Blog — HR & Management Insights", description: "In-depth articles on Human Resource Management, Organisational Behaviour, Strategic HRM, and academic research for MBA, BBA, and UGC NET/JRF aspirants." },
