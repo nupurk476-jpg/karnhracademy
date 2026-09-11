@@ -57,13 +57,13 @@ const MBAEconomicsPage = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="MBA Managerial Economics — Unit-wise Notes, MCQs & Video Lectures"
-        description="Free unit-wise study resources for MBA Managerial Economics — demand analysis, production & cost, market structures, macroeconomics, Indian economy and international trade. Notes, MCQ practice sets and video lectures."
+        description="Free unit-wise study resources for MBA / PGDM Managerial Economics — introduction, demand analysis, production & cost, market structure & pricing, macroeconomic environment and capital budgeting. Notes, MCQ practice sets and video lectures."
         path="/mba-economics"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Course",
           name: "MBA Managerial Economics Study Hub",
-          description: "Free notes, MCQ practice and video lectures across 5 units of MBA Managerial Economics.",
+          description: "Free notes, MCQ practice and video lectures across 6 units of MBA Managerial Economics.",
           provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
           isAccessibleForFree: true,
           inLanguage: "en",
@@ -87,8 +87,9 @@ const MBAEconomicsPage = () => {
               MBA Managerial Economics Hub
             </h1>
             <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Five units covering demand analysis, production &amp; cost, market structures, macroeconomics
-              and Indian economy — with study notes, topic-wise MCQ practice and video lectures, all free.
+              Six units following the standard PGDM core syllabus — fundamentals, demand analysis, production &amp; cost,
+              market structure &amp; pricing, the macroeconomic environment and capital budgeting — with study notes,
+              topic-wise MCQ practice and video lectures, all free.
             </p>
 
             <div className="flex flex-wrap gap-4 text-sm">

@@ -1,66 +1,72 @@
 export type EcoTopic = { label: string; slug: string };
 export type EcoUnit = { number: number; title: string; topics: EcoTopic[] };
 
-// MBA Managerial Economics — 5 units (standard Indian university syllabus)
+// MBA / PGDM Managerial Economics — 6 units, following the standard
+// AICTE-approved PGDM core-course structure (IIMs, XLRI, MDI, IMT, SPJIMR).
 export const MBA_ECO_UNITS: EcoUnit[] = [
   {
     number: 1,
-    title: "Introduction to Managerial Economics & Demand Analysis",
+    title: "Introduction to Managerial Economics",
     topics: [
-      { label: "Nature & Scope of Managerial Economics", slug: "u1-nature-scope-managerial-economics" },
-      { label: "Basic Economic Concepts & Tools", slug: "u1-basic-economic-concepts-tools" },
-      { label: "Demand: Concept, Determinants & Types", slug: "u1-demand-concept-determinants-types" },
-      { label: "Law of Demand & Demand Curve", slug: "u1-law-of-demand-curve" },
-      { label: "Elasticity of Demand", slug: "u1-elasticity-of-demand" },
-      { label: "Demand Forecasting Techniques", slug: "u1-demand-forecasting-techniques" },
+      { label: "Nature, Scope & Significance of Managerial Economics", slug: "u1-nature-scope-significance" },
+      { label: "Relationship with Economics, Statistics & Decision Sciences", slug: "u1-relationship-economics-statistics-decision-sciences" },
+      { label: "Fundamental Concepts: Opportunity Cost, Incremental, Time Perspective, Discounting & Equi-marginal", slug: "u1-fundamental-economic-concepts" },
+      { label: "Role of the Managerial Economist in Decision-Making", slug: "u1-role-of-managerial-economist" },
     ],
   },
   {
     number: 2,
-    title: "Production & Cost Analysis",
+    title: "Demand Analysis",
     topics: [
-      { label: "Production Function & Laws of Production", slug: "u2-production-function-laws" },
-      { label: "Returns to Scale & Isoquants", slug: "u2-returns-to-scale-isoquants" },
-      { label: "Cost Concepts & Classification", slug: "u2-cost-concepts-classification" },
-      { label: "Short-Run & Long-Run Cost Curves", slug: "u2-short-run-long-run-cost-curves" },
-      { label: "Economies & Diseconomies of Scale", slug: "u2-economies-diseconomies-of-scale" },
-      { label: "Revenue Concepts & Break-Even Analysis", slug: "u2-revenue-break-even-analysis" },
+      { label: "Law of Demand & Determinants of Demand", slug: "u2-law-and-determinants-of-demand" },
+      { label: "Elasticity of Demand: Price, Income, Cross & Promotional", slug: "u2-elasticity-of-demand" },
+      { label: "Demand Forecasting: Qualitative & Quantitative Methods", slug: "u2-demand-forecasting" },
+      { label: "Consumer Behaviour: Utility & Indifference Curve Analysis", slug: "u2-consumer-behaviour-utility-indifference" },
     ],
   },
   {
     number: 3,
-    title: "Market Structures & Pricing",
+    title: "Production & Cost Analysis",
     topics: [
-      { label: "Perfect Competition: Features & Equilibrium", slug: "u3-perfect-competition" },
-      { label: "Monopoly: Price & Output Determination", slug: "u3-monopoly-pricing" },
-      { label: "Monopolistic Competition", slug: "u3-monopolistic-competition" },
-      { label: "Oligopoly: Features, Models & Kinked Demand", slug: "u3-oligopoly-models" },
-      { label: "Pricing Strategies & Methods", slug: "u3-pricing-strategies-methods" },
-      { label: "Price Discrimination & Transfer Pricing", slug: "u3-price-discrimination-transfer" },
+      { label: "Production Function: Short-Run & Long-Run", slug: "u3-production-function" },
+      { label: "Law of Variable Proportions & Returns to Scale", slug: "u3-variable-proportions-returns-to-scale" },
+      { label: "Cost Concepts: Opportunity, Explicit & Implicit Cost", slug: "u3-cost-concepts" },
+      { label: "Short-Run & Long-Run Cost Curves", slug: "u3-short-run-long-run-cost-curves" },
+      { label: "Economies & Diseconomies of Scale", slug: "u3-economies-diseconomies-of-scale" },
+      { label: "Break-Even Analysis (Cost-Volume-Profit)", slug: "u3-break-even-cvp-analysis" },
     ],
   },
   {
     number: 4,
-    title: "Macroeconomics & Business Environment",
+    title: "Market Structure & Pricing",
     topics: [
-      { label: "National Income: Concepts & Measurement", slug: "u4-national-income-concepts" },
-      { label: "Business Cycles: Phases & Theories", slug: "u4-business-cycles" },
-      { label: "Money, Banking & Monetary Policy", slug: "u4-money-banking-monetary-policy" },
-      { label: "Fiscal Policy & Government Expenditure", slug: "u4-fiscal-policy" },
-      { label: "Inflation: Types, Causes & Control", slug: "u4-inflation-types-causes-control" },
-      { label: "Economic Environment & Business Decisions", slug: "u4-economic-environment-business" },
+      { label: "Perfect Competition", slug: "u4-perfect-competition" },
+      { label: "Monopoly", slug: "u4-monopoly" },
+      { label: "Monopolistic Competition", slug: "u4-monopolistic-competition" },
+      { label: "Oligopoly", slug: "u4-oligopoly" },
+      { label: "Price-Output Determination under Each Market Structure", slug: "u4-price-output-determination" },
+      { label: "Pricing Strategies: Discrimination, Skimming, Penetration & Transfer Pricing", slug: "u4-pricing-strategies" },
+      { label: "Game Theory Basics: Nash Equilibrium & Prisoner's Dilemma", slug: "u4-game-theory-basics" },
     ],
   },
   {
     number: 5,
-    title: "Indian Economy & International Trade",
+    title: "Macroeconomic Environment for Business",
     topics: [
-      { label: "Structure & Features of Indian Economy", slug: "u5-structure-indian-economy" },
-      { label: "Economic Reforms: LPG & New Economic Policy", slug: "u5-economic-reforms-lpg" },
-      { label: "International Trade: Theories & Policy", slug: "u5-international-trade-theories" },
-      { label: "Balance of Payments & Exchange Rates", slug: "u5-bop-exchange-rates" },
-      { label: "WTO, FDI & Globalisation", slug: "u5-wto-fdi-globalisation" },
-      { label: "Recent Economic Trends in India", slug: "u5-recent-economic-trends-india" },
+      { label: "National Income Concepts: GDP, GNP & NNP", slug: "u5-national-income-concepts" },
+      { label: "Business Cycles", slug: "u5-business-cycles" },
+      { label: "Inflation, Unemployment & Monetary/Fiscal Policy", slug: "u5-inflation-unemployment-monetary-fiscal-policy" },
+      { label: "Balance of Payments & Exchange Rate Basics", slug: "u5-balance-of-payments-exchange-rates" },
+      { label: "Impact of Macroeconomic Policy on Business Decisions", slug: "u5-macro-policy-impact-on-business" },
+    ],
+  },
+  {
+    number: 6,
+    title: "Capital Budgeting & Investment Decisions",
+    topics: [
+      { label: "Cost of Capital", slug: "u6-cost-of-capital" },
+      { label: "Investment Appraisal: NPV, IRR & Payback Period", slug: "u6-investment-appraisal-npv-irr-payback" },
+      { label: "Risk & Uncertainty in Decision-Making", slug: "u6-risk-and-uncertainty" },
     ],
   },
 ];
@@ -148,7 +154,7 @@ export function getBBAEcoUnitByNumber(n: number): EcoUnit | undefined {
   return BBA_ECO_UNITS.find(u => u.number === n);
 }
 
-const ROMAN = ["I", "II", "III", "IV", "V"];
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
 export function unitRoman(n: number): string {
   return ROMAN[n - 1] ?? String(n);
 }

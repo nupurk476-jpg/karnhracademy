@@ -64,7 +64,7 @@ const MBAEconomicsUnitPage = () => {
         <main id="main-content" className="mx-auto max-w-3xl px-6 py-24 text-center">
           <h1 className="mb-3 text-2xl font-bold text-foreground">Unit not found</h1>
           <p className="mb-6 text-sm text-muted-foreground">
-            MBA Managerial Economics only has Units I through V. Check the unit number in the URL, or browse the full hub.
+            MBA Managerial Economics only has Units I through VI. Check the unit number in the URL, or browse the full hub.
           </p>
           <Link to="/mba-economics" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110">
             <ArrowLeft className="h-4 w-4" /> Back to MBA Economics
@@ -110,7 +110,7 @@ const MBAEconomicsUnitPage = () => {
               { label: `Unit ${roman}` },
             ]} />
 
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">MBA Managerial Economics · Unit {roman} of V</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-accent-deep">MBA Managerial Economics · Unit {roman} of VI</p>
             <h1 className="mb-3 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
               Unit {roman}: {unit.title}
             </h1>

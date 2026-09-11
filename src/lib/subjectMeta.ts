@@ -16,7 +16,7 @@ const META: Record<string, SubjectMeta> = {
   bc:        { exams: ["MBA", "BBA", "B.Com"],   hub: "/bc",   code: "BC" },
   odcm:      { exams: ["MBA", "UGC NET"],        hub: "/odcm", code: "OD" },
   ghr:       { exams: ["MBA", "UGC NET"],        hub: "/ghr",  code: "IHRM" },
-  "mba-eco": { exams: ["MBA", "PGDM"],           hub: "/mba-economics",      code: "ECO", units: 5 },
+  "mba-eco": { exams: ["MBA", "PGDM"],           hub: "/mba-economics",      code: "ECO", units: 6 },
   "bba-eco": { exams: ["BBA", "B.Com"],          hub: "/bba-economics",      code: "ECO", units: 5 },
   lw:        { exams: ["UGC NET", "JRF"],        hub: "/ugc-net-labour-welfare", code: "LW", units: 10 },
 };

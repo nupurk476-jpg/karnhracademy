@@ -6,6 +6,7 @@ import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
 import { extractYouTubeId, fetchYouTubeMetadata } from "@/lib/youtube";
 import { compressImage } from "@/lib/compressImage";
 import { useConfirm } from "@/hooks/use-confirm";
+import UnitTopicPicker from "@/components/admin/UnitTopicPicker";
 
 const AdminLectures = () => {
   const [lectures, setLectures] = useState<any[]>([]);
@@ -167,35 +168,14 @@ const AdminLectures = () => {
           </div>
         </div>
 
-        {/* Topic chips from disciplines.ts */}
-        {topics.length > 0 && (
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Topic (optional)</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setTopicSlug("")}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  topicSlug === "" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                All Topics
-              </button>
-              {topics.map(t => (
-                <button
-                  key={t.slug}
-                  type="button"
-                  onClick={() => setTopicSlug(t.slug)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Topic chips — grouped by unit for unit-based subjects */}
+        <UnitTopicPicker
+          subject={subject}
+          topics={topics}
+          value={topicSlug}
+          onChange={setTopicSlug}
+          hubLabel={activeDiscipline?.short}
+        />
 
         <input
           type="number"
