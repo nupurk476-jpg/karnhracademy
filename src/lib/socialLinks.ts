@@ -26,7 +26,7 @@ export const PHONE_DISPLAY = PHONE_NUMBER
 
 export const SOCIAL_CHANNELS: SocialChannel[] = [
   { key: "youtube",   label: "YouTube",   handle: "@KarnHRAcademy",  url: "https://www.youtube.com/@KarnHRAcademy", cta: "Subscribe" },
-  { key: "instagram", label: "Instagram", handle: "",                 url: "", cta: "Follow" },
+  { key: "instagram", label: "Instagram", handle: "@karn.hracademy",  url: "https://www.instagram.com/karn.hracademy/", cta: "Follow" },
   { key: "facebook",  label: "Facebook",  handle: "Karn HR Academy",  url: "https://www.facebook.com/profile.php?id=61594424482330", cta: "Follow" },
   { key: "linkedin",  label: "LinkedIn",  handle: "Karn HR Academy",  url: "https://www.linkedin.com/company/136804079/", cta: "Follow" },
   { key: "telegram",  label: "Telegram",  handle: PHONE_DISPLAY,      url: PHONE_NUMBER ? `https://t.me/+${PHONE_NUMBER}` : "", cta: "Message" },
