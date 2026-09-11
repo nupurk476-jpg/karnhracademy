@@ -3,8 +3,10 @@
 // its hub lives (unit-based subjects have their own pages; the rest open
 // the notes browser pre-filtered).
 
-// `code` is the short watermark drawn on the subject cover.
-export type SubjectMeta = { exams: string[]; hub: string; code: string; units?: number };
+// `code` is the short watermark drawn on the subject cover. `image` (a path
+// under /public, e.g. "/subjects/hrm.jpg") replaces the generated cover art
+// with a photo — only use images the academy holds a licence for.
+export type SubjectMeta = { exams: string[]; hub: string; code: string; units?: number; image?: string };
 
 const META: Record<string, SubjectMeta> = {
   hrm:       { exams: ["MBA", "BBA", "UGC NET"], hub: "/notes?subject=hrm",  code: "HRM" },

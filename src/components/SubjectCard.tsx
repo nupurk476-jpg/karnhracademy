@@ -30,7 +30,7 @@ const SubjectCard = ({ discipline: d, notes, quizzes, lectures, minNotes = 3 }: 
   const body = (
     <>
       <div className="relative">
-        <SubjectCover id={d.value} code={meta.code} caption={meta.exams.join(" · ")} icon={d.icon} className="rounded-t-2xl" />
+        <SubjectCover id={d.value} code={meta.code} caption={meta.exams.join(" · ")} icon={d.icon} image={meta.image} className="rounded-t-2xl" />
         <span
           className="absolute left-3 top-3 rounded-md px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider"
           style={comingSoon ? { background: "rgba(255,255,255,0.9)", color: BRAND.steelDeep } : { background: "#FFFFFF", color: BRAND.goldText }}

@@ -54,12 +54,20 @@ const MotifLayer = ({ motif, id }: { motif: Motif; id: string }) => {
 };
 
 export const SubjectCover = ({
-  id, code, caption, icon: Icon, accent = BRAND.gold, className = "",
-}: { id: string; code: string; caption?: string; icon: LucideIcon; accent?: string; className?: string }) => {
+  id, code, caption, icon: Icon, image, accent = BRAND.gold, className = "",
+}: { id: string; code: string; caption?: string; icon: LucideIcon; image?: string; accent?: string; className?: string }) => {
   const motif = MOTIFS[hash(id) % MOTIFS.length];
   const uid = `cover-${id}`;
   return (
     <div className={`relative w-full overflow-hidden ${className}`} style={{ aspectRatio: "16/9", background: BRAND.navy }}>
+      {image ? (
+        <>
+          <img src={image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          {/* Ink scrim so the icon, caption and badge stay legible on any photo */}
+          <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(11,12,14,0.25) 0%, rgba(11,12,14,0.15) 45%, rgba(11,12,14,0.78) 100%)` }} />
+          <div className="absolute left-0 top-0 h-full w-1.5" style={{ background: accent }} />
+        </>
+      ) : (
       <svg viewBox="0 0 360 202" className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
@@ -79,8 +87,9 @@ export const SubjectCover = ({
         {/* Vermillion bracket bar — the logo's mark */}
         <rect x="16" y="24" width="5" height="48" rx="2.5" fill={accent} />
       </svg>
+      )}
 
-      <div className="absolute inset-0 flex flex-col justify-between p-5 pl-10">
+      <div className={`absolute inset-0 flex flex-col justify-between p-5 ${image ? "pl-6" : "pl-10"}`}>
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg" style={{ background: accent }}>
           <Icon className="h-7 w-7 text-white" strokeWidth={2} />
         </span>
