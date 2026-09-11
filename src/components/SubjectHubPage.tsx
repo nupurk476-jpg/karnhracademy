@@ -89,16 +89,16 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
                 <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{hub.intro}</p>
                 <div className="flex flex-wrap gap-3 text-sm">
                   {[
-                    { icon: Layers,     v: hub.topics.length, l: "Topics" },
-                    { icon: FileText,   v: loading ? "…" : notes.length, l: "Notes" },
-                    { icon: HelpCircle, v: loading ? "…" : quizzes.length, l: "MCQ Sets" },
-                    { icon: PlayCircle, v: loading ? "…" : lectures.length, l: "Video Lectures" },
+                    { icon: Layers,     v: hub.topics.length, l: "Topics", to: "#topics" },
+                    { icon: FileText,   v: loading ? "…" : notes.length, l: "Notes", to: "#notes" },
+                    { icon: HelpCircle, v: loading ? "…" : quizzes.length, l: "MCQ Sets", to: "#mcqs" },
+                    { icon: PlayCircle, v: loading ? "…" : lectures.length, l: "Video Lectures", to: lectures.length > 0 ? "#lectures" : "/lectures" },
                   ].map(c => {
                     const I = c.icon;
                     return (
-                      <span key={c.l} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5">
+                      <a key={c.l} href={c.to} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5 transition-colors hover:border-accent/60 hover:bg-white hover:text-accent-deep">
                         <I className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{c.v}</strong>&nbsp;{c.l}
-                      </span>
+                      </a>
                     );
                   })}
                   <span className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white" style={{ background: BRAND.gold }}>Free</span>
@@ -110,7 +110,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
         </section>
 
         {/* ── Topics ──────────────────────────────────────────────────── */}
-        <section className="border-b border-border bg-slate-50 py-10" aria-labelledby="topics-heading">
+        <section id="topics" className="scroll-mt-24 border-b border-border bg-slate-50 py-10" aria-labelledby="topics-heading">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
@@ -158,7 +158,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
         ) : (
           <div className="mx-auto max-w-6xl px-6 py-10 space-y-14">
             {/* ── Latest notes ───────────────────────────────────────── */}
-            <section id="notes">
+            <section id="notes" className="scroll-mt-24">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-accent-deep" />
@@ -180,7 +180,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
             </section>
 
             {/* ── MCQs ───────────────────────────────────────────────── */}
-            <section id="mcqs">
+            <section id="mcqs" className="scroll-mt-24">
               <div className="mb-4 flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">MCQ Practice Sets</h2>
@@ -198,7 +198,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
 
             {/* ── Lectures ───────────────────────────────────────────── */}
             {lectures.length > 0 && (
-              <section id="lectures">
+              <section id="lectures" className="scroll-mt-24">
                 <div className="mb-4 flex items-center gap-2">
                   <PlayCircle className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Video Lectures</h2>
