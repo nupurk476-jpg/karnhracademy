@@ -5,8 +5,8 @@ import { track, EVENTS } from "@/lib/analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
-import { DISCIPLINES } from "@/lib/disciplines";
+import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { tidyTitle, timeAgo } from "@/lib/format";
 import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useSubjectCounts } from "@/hooks/use-subject-counts";
@@ -674,71 +674,73 @@ const Testimonials = () => {
   );
 };
 
-// ─────────────── Section: Featured Notes (live from DB) ──────────────────────
-const FeaturedNotes = () => {
-  const [notes, setNotes] = useState<any[]>([]);
+// ─────────────── Section: Recently Added (live from DB) ──────────────────────
+// A compact freshness strip — notes, MCQ sets and lectures merged by upload
+// date — rather than three oversized "featured" cards showing whatever was
+// uploaded last. Proves the site is updated weekly without competing with
+// the subject grid for attention.
+type RecentItem = { id: string; kind: "PDF" | "PPT" | "NOTE" | "MCQ" | "VIDEO"; title: string; subject: string; created_at: string; to: string };
+
+const RecentlyAdded = () => {
+  const [items, setItems] = useState<RecentItem[] | null>(null);
+
   useEffect(() => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setNotes(data));
+    Promise.all([
+      supabase.from("notes").select("id, title, subject, file_url, created_at").order("created_at", { ascending: false }).limit(6),
+      (supabase.from("quizzes") as any).select("id, title, subject, published, created_at").eq("published", true).order("created_at", { ascending: false }).limit(4),
+      (supabase.from("lectures" as any) as any).select("id, title, subject, created_at").order("created_at", { ascending: false }).limit(3),
+    ]).then(([n, q, l]) => {
+      const notes: RecentItem[] = (n.data ?? []).map((x: any) => ({
+        id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at,
+        kind: /\.pptx?(\?|$)/i.test(x.file_url ?? "") ? "PPT" : /\.pdf(\?|$)/i.test(x.file_url ?? "") ? "PDF" : "NOTE",
+        to: /\.pdf(\?|$)/i.test(x.file_url ?? "") ? `/notes/view/${x.id}` : `/notes?subject=${x.subject || "hrm"}`,
+      }));
+      const quizzes: RecentItem[] = (q.data ?? []).map((x: any) => ({ id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at, kind: "MCQ", to: `/quizzes/${x.id}` }));
+      const lectures: RecentItem[] = (l.data ?? []).map((x: any) => ({ id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at, kind: "VIDEO", to: "/lectures" }));
+      setItems([...notes, ...quizzes, ...lectures].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 6));
+    });
   }, []);
 
-  const subjectLabel: Record<string, { label: string; color: string }> = {
-    hrm:    { label: "HRM",       color: NAVY },
-    ob:     { label: "OB",        color: STEEL_DARK },
-    sm:     { label: "SM",        color: GOLD_TEXT },
-    pom:    { label: "POM",       color: NAVY_DARK },
-    bc:     { label: "BC",        color: STEEL_DARK },
-    odcm:   { label: "OD & CM",   color: GOLD_TEXT },
-    ghr:    { label: "International HRM", color: NAVY_DARK },
+  if (!items || items.length === 0) return null;
+
+  const KIND_STYLE: Record<RecentItem["kind"], { bg: string; fg: string }> = {
+    PDF:   { bg: "#FDF4F2", fg: GOLD_TEXT },
+    PPT:   { bg: "#FDF4F2", fg: GOLD_TEXT },
+    NOTE:  { bg: "#FDF4F2", fg: GOLD_TEXT },
+    MCQ:   { bg: "#EFEDE9", fg: NAVY },
+    VIDEO: { bg: "#E8E6E2", fg: NAVY_DARK },
   };
 
   return (
-    <section className="py-20 md:py-24 bg-white">
+    <section className="py-12 md:py-14 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        <div className="flex items-end justify-between gap-4 mb-5">
           <div>
-            <GoldLabel text="Study Notes" />
-            <SectionHeading title="Featured Study Notes" sub="Exam-aligned, topic-wise notes for every major HR subject." />
+            <GoldLabel text="Recently Added" />
+            <p className="text-sm text-slate-500">New notes, MCQ sets and lectures — updated every week.</p>
           </div>
           <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             Browse all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-
-        {notes.length === 0 ? (
-          <p className="text-sm text-slate-500">New notes are added regularly — check back soon.</p>
-        ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {notes.map((note: any, i: number) => {
-            const sub = subjectLabel[note.subject] || { label: "HRM", color: NAVY };
+        <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+          {items.map((it, i) => {
+            const d = getDiscipline(it.subject);
+            const ks = KIND_STYLE[it.kind];
             return (
-              <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                {/* Cover page — real PDF page 1 when available, icon fallback otherwise */}
-                <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} subject={note.subject} topicSlug={note.topic_slug} size="lg" className="relative h-44 w-full overflow-hidden border-b border-slate-100">
-                  <div className="flex h-full w-full items-center justify-center" style={{ background: `${sub.color}0d` }}>
-                    <FileText className="h-10 w-10" style={{ color: `${sub.color}80` }} />
-                  </div>
-                </NoteCoverThumbnail>
-                <div className="h-1.5 w-full" style={{ background: sub.color }} />
-                <div className="flex flex-col flex-1 p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
-                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-brand-mist text-brand-navy">New</span>}
-                  </div>
-                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-brand-navy transition-colors">
-                    {note.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
-                    {note.description || "Comprehensive study material covering key concepts, definitions, and exam-focused explanations."}
-                  </p>
-                  <Link to="/notes" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold transition-colors hover:gap-2.5" style={{ color: sub.color }}>
-                    Download Notes <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
+              <li key={`${it.kind}-${it.id}`}>
+                <Link to={it.to} className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 sm:gap-4 sm:px-5">
+                  <span className="w-12 shrink-0 rounded-md py-0.5 text-center text-[10px] font-extrabold tracking-wider" style={{ background: ks.bg, color: ks.fg }}>{it.kind}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800 group-hover:text-brand-navy">{tidyTitle(it.title)}</span>
+                  {i === 0 && <span className="hidden rounded-full px-2 py-0.5 text-[10px] font-bold sm:inline" style={{ background: GOLD, color: "#fff" }}>NEW</span>}
+                  <span className="hidden w-28 shrink-0 truncate text-xs font-semibold text-slate-500 sm:block">{d?.short ?? it.subject.toUpperCase()}</span>
+                  <span className="w-20 shrink-0 text-right text-xs tabular-nums text-slate-400 sm:w-24">{timeAgo(it.created_at)}</span>
+                  <ChevronRight className="hidden h-4 w-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500 sm:block" />
+                </Link>
+              </li>
             );
           })}
-        </div>
-        )}
+        </ul>
       </div>
     </section>
   );
@@ -1170,7 +1172,7 @@ const Index = () => (
       <CompactHowItWorks />
       <Subjects />
       <Testimonials />
-      <FeaturedNotes />
+      <RecentlyAdded />
       <VideoLectures />
       <BooksSection />
       <PopularTopics />
