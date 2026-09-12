@@ -14,6 +14,7 @@ const EMAIL_KEY = "khr_subscriber_email";
 // — see src/lib/signedFileUrl.ts, which both callers use.
 export function useDownloadGate() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
@@ -22,11 +23,27 @@ export function useDownloadGate() {
   // funnel through here, so a download that skips the gate cannot also be
   // counted as a view.
   const doOpen = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
-    const win = window.open("", "_blank"); // synchronous within the click — popup-safe
+    // Must be called synchronously within the click handler to have any
+    // chance of not being blocked — this is that attempt. It returns null
+    // in embedded/in-app browsers (Instagram, WhatsApp, etc.) that block
+    // popups outright, which a real share of this audience's traffic
+    // arrives through via links shared in study-group chats.
+    const win = window.open("", "_blank");
     resolveUrl().then((url) => {
       if (!url) { win?.close(); return; }
       onOpened();
-      if (win) win.location.href = url; else window.open(url, "_blank");
+      if (win) {
+        win.location.href = url;
+      } else {
+        // The old fallback here was window.open(url, "_blank") — but by
+        // this point the await above has already broken the
+        // synchronous-with-the-click chain that let the first attempt
+        // through, so a second window.open() is blocked by the identical
+        // rule and fails identically: no tab, no error, nothing the
+        // visitor could act on. Same-tab navigation is never subject to
+        // popup blocking, so it's the one path guaranteed to deliver.
+        window.location.href = url;
+      }
     });
   };
 
@@ -63,7 +80,10 @@ export function useDownloadGate() {
     const { resolveUrl, onOpened } = pending.current;
     const win = window.open("", "_blank");
     setSubmitting(true);
-    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
+    // Name is optional: the gate already asks for something in exchange
+    // for a download, and making it two required fields costs conversions
+    // on the most-used capture point on the site.
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim(), _name: name.trim() || null });
     setSubmitting(false);
     localStorage.setItem(EMAIL_KEY, email.trim());
     // The address goes to email_subscribers and nowhere else; this records
@@ -73,9 +93,23 @@ export function useDownloadGate() {
     track(EVENTS.GATE_SUBMITTED);
     setGateOpen(false);
     setEmail("");
+    setName("");
     track(EVENTS.CONTENT_OPEN, { mode: "download" });
-    const url = win ? await resolveUrl() : null;
-    if (url && win) { onOpened(); win.location.href = url; } else win?.close();
+    // Resolve regardless of whether `win` exists. The previous
+    // `win ? await resolveUrl() : null` meant a blocked popup skipped
+    // fetching the signed URL entirely — the file was never even
+    // requested, only the email got saved, and the visitor who just
+    // provided it got nothing in return with no indication why.
+    const url = await resolveUrl();
+    if (!url) { win?.close(); return; }
+    onOpened();
+    if (win) {
+      win.location.href = url;
+    } else {
+      // See doOpen's identical fallback for why this has to be a
+      // same-tab navigation rather than a second window.open() attempt.
+      window.location.href = url;
+    }
   };
 
   /**
@@ -94,13 +128,20 @@ export function useDownloadGate() {
     <Dialog open={gateOpen} onOpenChange={(open) => { if (!open) dismissGate(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Enter your email to continue</DialogTitle>
+          <DialogTitle>Almost there</DialogTitle>
           <DialogDescription>One-time step — we'll remember you on this device and send occasional updates about new study materials.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
           <input
-            type="email" required autoFocus placeholder="your@email.com"
+            type="text" autoFocus placeholder="First name (optional)"
+            value={name} onChange={e => setName(e.target.value)}
+            maxLength={80} aria-label="First name (optional)"
+            className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <input
+            type="email" required placeholder="your@email.com"
             value={email} onChange={e => setEmail(e.target.value)}
+            aria-label="Email address"
             className="w-full rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <div className="flex gap-3">

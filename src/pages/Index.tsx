@@ -886,6 +886,7 @@ const AboutAuthor = () => {
 // ─────────────── Section: Newsletter ─────────────────────────────────────────
 const Newsletter = () => {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
   const { isBot, honeypotFieldProps } = useHoneypot();
@@ -893,13 +894,16 @@ const Newsletter = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    if (isBot()) { setDone(true); setEmail(""); return; }
+    if (isBot()) { setDone(true); setEmail(""); setName(""); return; }
     setLoading(true);
-    await (supabase.rpc as any)("subscribe_email", { _email: email.trim() });
+    // Name is optional; the RPC stores NULL for a blank one and the
+    // welcome email falls back to a generic greeting.
+    await (supabase.rpc as any)("subscribe_email", { _email: email.trim(), _name: name.trim() || null });
     track(EVENTS.NEWSLETTER_SUBSCRIBE, { where: "home" });
     setLoading(false);
     setDone(true);
     setEmail("");
+    setName("");
   };
 
   return (
@@ -927,6 +931,16 @@ const Newsletter = () => {
         ) : (
           <form onSubmit={submit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-5">
             <input type="text" {...honeypotFieldProps} />
+            <input
+              type="text"
+              placeholder="First name (optional)"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              maxLength={80}
+              aria-label="First name (optional)"
+              className="flex-1 rounded-xl px-5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+              style={{ background: "#FFFFFF", border: "1px solid #DCD9D3" }}
+            />
             <input
               type="email" required
               placeholder="your@email.com"
