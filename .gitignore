@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Local secrets. Deployment reads env vars from Vercel's own dashboard
+# config, not from this file, so untracking it has no deploy impact --
+# only local dev needs one, via .env.example below. Never re-add .env:
+# publish-blog.mjs's real secret (SUPABASE_SERVICE_ROLE_KEY) belongs in
+# .env.local instead, which *.local above already covers.
+.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -23,11 +23,27 @@ export function useDownloadGate() {
   // funnel through here, so a download that skips the gate cannot also be
   // counted as a view.
   const doOpen = (resolveUrl: () => Promise<string | null>, onOpened: () => void) => {
-    const win = window.open("", "_blank"); // synchronous within the click — popup-safe
+    // Must be called synchronously within the click handler to have any
+    // chance of not being blocked — this is that attempt. It returns null
+    // in embedded/in-app browsers (Instagram, WhatsApp, etc.) that block
+    // popups outright, which a real share of this audience's traffic
+    // arrives through via links shared in study-group chats.
+    const win = window.open("", "_blank");
     resolveUrl().then((url) => {
       if (!url) { win?.close(); return; }
       onOpened();
-      if (win) win.location.href = url; else window.open(url, "_blank");
+      if (win) {
+        win.location.href = url;
+      } else {
+        // The old fallback here was window.open(url, "_blank") — but by
+        // this point the await above has already broken the
+        // synchronous-with-the-click chain that let the first attempt
+        // through, so a second window.open() is blocked by the identical
+        // rule and fails identically: no tab, no error, nothing the
+        // visitor could act on. Same-tab navigation is never subject to
+        // popup blocking, so it's the one path guaranteed to deliver.
+        window.location.href = url;
+      }
     });
   };
 
@@ -79,8 +95,21 @@ export function useDownloadGate() {
     setEmail("");
     setName("");
     track(EVENTS.CONTENT_OPEN, { mode: "download" });
-    const url = win ? await resolveUrl() : null;
-    if (url && win) { onOpened(); win.location.href = url; } else win?.close();
+    // Resolve regardless of whether `win` exists. The previous
+    // `win ? await resolveUrl() : null` meant a blocked popup skipped
+    // fetching the signed URL entirely — the file was never even
+    // requested, only the email got saved, and the visitor who just
+    // provided it got nothing in return with no indication why.
+    const url = await resolveUrl();
+    if (!url) { win?.close(); return; }
+    onOpened();
+    if (win) {
+      win.location.href = url;
+    } else {
+      // See doOpen's identical fallback for why this has to be a
+      // same-tab navigation rather than a second window.open() attempt.
+      window.location.href = url;
+    }
   };
 
   /**

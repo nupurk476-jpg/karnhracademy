@@ -93,6 +93,10 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
   const containerRef = useRef<HTMLDivElement>(null);
   const renderTaskRef = useRef<any>(null);
   const fitDoneRef = useRef(false);
+  // The scale that fits the page's full width at the last measured
+  // container size. Doubles as the floor for manual zoom-out below — see
+  // where it's set for why MIN_SCALE alone can't be that floor.
+  const fitScaleRef = useRef(MIN_SCALE);
 
   // ── Load the document ────────────────────────────────────────────────────
   useEffect(() => {
@@ -144,7 +148,15 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
       const naturalWidth = page.getViewport({ scale: 1 }).width;
       const available = containerRef.current!.clientWidth - 32;
       if (available > 0 && naturalWidth > 0) {
-        const fit = Math.min(MAX_SCALE, Math.max(MIN_SCALE, available / naturalWidth));
+        // No MIN_SCALE floor here. Flooring the *fit* calculation was the
+        // bug: on a ~280px phone viewport, available/naturalWidth lands
+        // near 0.28, well under the 0.6 floor -- so the floor overrode the
+        // fit and forced the page in at more than twice the width of the
+        // screen on first render, every time, for every phone reader.
+        // MAX_SCALE still applies, so a narrow PDF on a wide desktop
+        // window doesn't blow up past a sane size.
+        const fit = Math.min(MAX_SCALE, available / naturalWidth);
+        fitScaleRef.current = fit;
         setScale(Math.round(fit * 20) / 20);
       }
     })();
@@ -262,7 +274,12 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
 
   const goToPage = (n: number) => setPageNum(Math.min(Math.max(1, n), numPages));
   const zoomIn = () => setScale(s => Math.min(MAX_SCALE, Math.round((s + SCALE_STEP) * 20) / 20));
-  const zoomOut = () => setScale(s => Math.max(MIN_SCALE, Math.round((s - SCALE_STEP) * 20) / 20));
+  // Floors at whichever is smaller: the nominal minimum, or the scale that
+  // fits the whole page width. A fixed MIN_SCALE floor here would fight the
+  // fit calculation above on a narrow phone (fit-to-width sitting below
+  // MIN_SCALE) by snapping the page BIGGER the moment "zoom out" is
+  // pressed -- the opposite of what the button says it does.
+  const zoomOut = () => setScale(s => Math.max(Math.min(MIN_SCALE, fitScaleRef.current), Math.round((s - SCALE_STEP) * 20) / 20));
 
   const currentMatchPos = matchPages.indexOf(pageNum);
   const jumpMatch = (dir: 1 | -1) => {
