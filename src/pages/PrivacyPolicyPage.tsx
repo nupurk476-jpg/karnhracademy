@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 
 const PrivacyPolicyPage = () => {
-  const lastUpdated = "5 July 2026";
+  const lastUpdated = "14 September 2026";
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,16 +28,23 @@ const PrivacyPolicyPage = () => {
               basic usage data collected automatically by our hosting and analytics providers
               (e.g. pages visited, browser type).
             </p>
+            <p className="mt-3">
+              If you choose <strong className="text-foreground">Continue with Google</strong> to
+              sign in, Google shares your name, email address and profile picture with us so we can
+              create your account. We do not receive your Google password, and we do not get access
+              to anything else in your Google account. You can sign up with an email address and
+              password instead if you would rather not use Google.
+            </p>
           </section>
 
           <section>
             <h2 className="mb-2 text-lg font-semibold text-foreground">2. How we use it</h2>
             <p>
               We use your information to: give you access to notes, quizzes, and lectures; send you
-              new-content updates if you subscribe; track your quiz attempts and ratings so we can
-              show your own history and leaderboard position; moderate and display blog comments;
-              and respond to messages you send us. We do not sell your personal information to
-              anyone.
+              a one-off welcome email when you create an account; send you new-content updates if
+              you subscribe; track your quiz attempts and ratings so we can show your own history
+              and leaderboard position; moderate and display blog comments; and respond to messages
+              you send us. We do not sell your personal information to anyone.
             </p>
           </section>
 
@@ -49,6 +56,14 @@ const PrivacyPolicyPage = () => {
               industry-standard security practices; access to your account data is restricted by
               row-level security so that only you (and site administrators, where necessary for
               moderation) can see it.
+            </p>
+            <p className="mt-3">
+              We send email — such as the welcome email after you create an account, and
+              new-content updates if you subscribe — through{" "}
+              <strong className="text-foreground">Brevo</strong>, an email delivery provider. To do
+              that, your email address and first name are shared with Brevo. They process this on
+              our behalf to deliver our email, and we do not permit them to use it for their own
+              marketing.
             </p>
           </section>
 
@@ -62,7 +77,20 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">5. Your choices</h2>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">5. How long we keep it</h2>
+            <p>
+              We keep your account and profile data for as long as your account exists. If you
+              unsubscribe from our emails, we keep a record of your address marked as unsubscribed
+              so that we can honour that choice and not email you again. Messages you send us
+              through the contact form, and comments you post, are kept while they remain useful for
+              support and moderation. Aggregate usage data is not tied to your identity and is kept
+              indefinitely. You can ask us to delete your account and associated data at any time —
+              see the next section.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">6. Your choices</h2>
             <p>
               You can update or delete your profile information at any time from your Profile page.
               You can unsubscribe from newsletter emails using the link in any email, or by
@@ -72,7 +100,7 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">6. Children's privacy</h2>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">7. Children's privacy</h2>
             <p>
               Karn HR Academy is intended for higher-education students and working professionals.
               It is not directed at children under 13, and we do not knowingly collect information
@@ -81,7 +109,7 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">7. Changes to this policy</h2>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">8. Changes to this policy</h2>
             <p>
               We may update this policy as the platform evolves. Material changes will be reflected
               by updating the "Last updated" date above.
@@ -89,7 +117,7 @@ const PrivacyPolicyPage = () => {
           </section>
 
           <section>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">8. Contact us</h2>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">9. Contact us</h2>
             <p>
               Questions about this policy or your data? Email us at{" "}
               <a href="mailto:nupur@karnhracademy.com" className="text-accent-deep hover:underline">

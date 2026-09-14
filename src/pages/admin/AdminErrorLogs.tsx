@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useConfirm } from "@/hooks/use-confirm";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, Clock } from "lucide-react";
+import { formatDateTime, timeAgoPrecise } from "@/lib/format";
 
 const AdminErrorLogs = () => {
   const [logs, setLogs] = useState<any[]>([]);
@@ -83,7 +84,14 @@ const AdminErrorLogs = () => {
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-6 text-xs text-muted-foreground">
-              <span>{new Date(log.created_at).toLocaleString()}</span>
+              {/* Absolute time first (so two errors minutes apart are
+                  distinguishable), then how long ago — which is what
+                  actually answers "is this still happening?". */}
+              <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                <Clock className="h-3 w-3 text-muted-foreground" />
+                {formatDateTime(log.created_at)}
+              </span>
+              <span>{timeAgoPrecise(log.created_at)}</span>
               {log.path && <span className="font-mono">{log.path}</span>}
               {log.context && <span className="rounded-full bg-muted px-2 py-0.5">{log.context}</span>}
             </div>

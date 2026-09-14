@@ -5,6 +5,30 @@
 export const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
+// "14 Sep 2026, 5:32 pm" — date *and* wall-clock time, for admin screens
+// where two entries a few minutes apart have to be told apart. formatDate
+// deliberately omits the time; this is its sibling for when it matters.
+export const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "numeric", minute: "2-digit",
+  });
+
+// "just now" / "12 min ago" / "3 hr ago", handing off to timeAgo past a day.
+// timeAgo collapses everything inside 24 hours to "today", which is no use
+// when you're reading a list of errors to work out whether one is still
+// happening right now or stopped this morning.
+export const timeAgoPrecise = (iso: string) => {
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 0) return "just now";        // clock skew between client and server
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  return timeAgo(iso);
+};
+
 // "3:05" — a countdown-style clock, used where elapsed/remaining time is
 // read at a glance during or right after a timed quiz.
 export const formatClock = (totalSeconds: number) => {
