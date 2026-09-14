@@ -48,7 +48,7 @@ const NotesPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const { data: noteData } = useQuery({
+  const { data: noteData, isPending, isError } = useQuery({
     queryKey: ["notes-all"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
@@ -329,7 +329,25 @@ const NotesPage = () => {
               </div>
             )}
 
-            {filtered.length === 0 ? (
+            {isPending ? (
+              <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
+                <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-accent" />
+                <p className="text-sm text-muted-foreground">Loading notes…</p>
+              </div>
+            ) : isError ? (
+              // Distinct from the empty state on purpose: a failed fetch used to
+              // render "No notes uploaded yet", so an expired API key looked
+              // exactly like an empty library.
+              <div className="rounded-lg border border-dashed border-destructive/40 bg-destructive/5 py-16 text-center">
+                <FileText className="mx-auto mb-3 h-10 w-10 text-destructive/50" />
+                <p className="font-medium text-foreground">Couldn't load the notes library.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  This is a problem on our end, not an empty shelf. Please refresh, or{" "}
+                  <Link to="/contact" className="font-semibold text-accent-deep hover:underline">tell us</Link>{" "}
+                  if it keeps happening.
+                </p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
                 {search.trim() ? (
