@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { useMBAEconomicsContent } from "@/hooks/use-mba-economics-content";
+import ContentLoadError from "@/components/ContentLoadError";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { EmptyState, NoteRow, QuizCard, PYQCard } from "@/components/LabourWelfareShared";
@@ -21,7 +22,7 @@ const MBAEconomicsUnitPage = () => {
   const n = Number(unitNumber);
   const unit = unitNumber ? getMBAEcoUnitByNumber(n) : undefined;
 
-  const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useMBAEconomicsContent();
+  const { notes, quizzes, questionCounts, pyqs, lectures, loading, failed } = useMBAEconomicsContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -128,6 +129,10 @@ const MBAEconomicsUnitPage = () => {
 
         {loading ? (
           <div className="mx-auto max-w-4xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : failed ? (
+          <div className="mx-auto max-w-4xl px-6 py-16">
+            <ContentLoadError what="this unit's material" />
+          </div>
         ) : (
           <div className="mx-auto max-w-4xl px-6 py-10 space-y-14">
 

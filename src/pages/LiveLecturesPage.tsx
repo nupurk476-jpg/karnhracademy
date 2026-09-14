@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { Radio, Calendar, ExternalLink, Video } from "lucide-react";
 
 const LiveLecturesPage = () => {
   const [items, setItems] = useState<any[]>([]);
+  const [failed, setFailed] = useState(false);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     supabase.from("live_lectures" as any).select("*").order("scheduled_at", { ascending: true })
-      .then(({ data }) => data && setItems(data));
+      .then(({ data, error }) => {
+        // A swallowed error here rendered as "No live lectures found."
+        if (error) { console.error("LiveLectures: failed to load", error); setFailed(true); }
+        else setItems(data ?? []);
+      });
   }, []);
 
   const now = Date.now();
@@ -79,9 +85,11 @@ const LiveLecturesPage = () => {
           />
         </div>
 
-        {matches.length === 0 && (
+        {failed ? (
+          <ContentLoadError what="the live lecture schedule" />
+        ) : matches.length === 0 ? (
           <p className="py-12 text-center text-muted-foreground">No live lectures found.</p>
-        )}
+        ) : null}
 
         {live.length > 0 && (
           <section className="mb-12">

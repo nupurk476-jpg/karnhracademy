@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { PlayCircle, Clock } from "lucide-react";
@@ -9,6 +10,7 @@ import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 
 const LecturesPage = () => {
   const [lectures, setLectures] = useState<any[]>([]);
+  const [failed, setFailed] = useState(false);
   const [search, setSearch] = useState("");
   const [activeSubject, setActiveSubject] = useState("hrm");
   const [activeTopic, setActiveTopic] = useState("all");
@@ -21,7 +23,9 @@ const LecturesPage = () => {
       .select("*")
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
-        if (error) { console.error("LecturesPage: failed to load lectures", error); return; }
+        // Returning early left lectures at [], which renders as "No
+        // lectures available yet" — an outage looking like empty shelves.
+        if (error) { console.error("LecturesPage: failed to load lectures", error); setFailed(true); return; }
         if (data) setLectures(data);
       });
   }, []);
@@ -197,7 +201,9 @@ const LecturesPage = () => {
         )}
 
         {/* Lecture grid */}
-        {filtered.length === 0 ? (
+        {failed ? (
+          <ContentLoadError what="the video lectures" />
+        ) : filtered.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
             <PlayCircle className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
             <p className="text-muted-foreground font-medium">No lectures available yet for this discipline.</p>

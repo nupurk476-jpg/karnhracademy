@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -34,12 +35,16 @@ const QuizList = () => {
   const [touched, setTouched] = useState(false);
   const [sort, setSort] = useState<(typeof SORTS)[number]["value"]>("latest");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [failed, setFailed] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     (async () => {
       const { data: quizData, error } = await supabase.from("quizzes").select("*").order("created_at", { ascending: false });
-      if (error) { console.error("QuizList: failed to load quizzes", error); return; }
+      // Bailing out here used to leave `quizzes` at [], which renders as
+      // "No MCQs uploaded yet" — a failed request telling students the
+      // practice bank is empty. Flag it so the page can say otherwise.
+      if (error) { console.error("QuizList: failed to load quizzes", error); setFailed(true); return; }
       // Drafts stay admin-only; rows predating the "published" column count as published.
       const published = (quizData ?? []).filter((q: any) => q.published !== false);
       setQuizzes(published);
@@ -287,7 +292,9 @@ const QuizList = () => {
               </div>
             )}
 
-            {filtered.length === 0 ? (
+            {failed ? (
+              <ContentLoadError what="the MCQ library" />
+            ) : filtered.length === 0 ? (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 py-16 text-center">
                 <HelpCircle className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
                 {search.trim() ? (

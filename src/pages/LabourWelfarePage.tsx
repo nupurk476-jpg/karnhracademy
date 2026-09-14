@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { useLabourWelfareContent } from "@/hooks/use-labour-welfare-content";
+import ContentLoadError from "@/components/ContentLoadError";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 import {
   ChevronRight, FileText, HelpCircle, ScrollText, Search, BookOpenCheck,
@@ -22,7 +23,7 @@ import ExamInfoSection from "@/components/ExamInfoSection";
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const LabourWelfarePage = () => {
-  const { notes, quizzes, questionCounts, pyqs, loading } = useLabourWelfareContent();
+  const { notes, quizzes, questionCounts, pyqs, loading, failed } = useLabourWelfareContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -284,6 +285,10 @@ const LabourWelfarePage = () => {
 
         {loading ? (
           <div className="mx-auto max-w-6xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : failed ? (
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <ContentLoadError what="the Labour Welfare library" />
+          </div>
         ) : (
           <>
             {/* ── Unit-wise Notes ──────────────────────────────────────── */}

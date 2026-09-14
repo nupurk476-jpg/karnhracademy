@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
+import ContentLoadError from "@/components/ContentLoadError";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
@@ -23,7 +24,7 @@ const NotesViewerPage = () => {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [urlFailed, setUrlFailed] = useState(false);
 
-  const { data: note, isPending } = useQuery({
+  const { data: note, isPending, isError } = useQuery({
     queryKey: ["note", id],
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
@@ -59,6 +60,21 @@ const NotesViewerPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="flex items-center justify-center py-32 text-muted-foreground">Loading…</div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Checked before the not-found branch below: a failed request is not a
+  // deleted note, and telling a student their note "may have been removed"
+  // because the API was unreachable is the worse of the two errors.
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="mx-auto max-w-3xl px-6 py-24">
+          <ContentLoadError what="this note" />
+        </main>
         <Footer />
       </div>
     );

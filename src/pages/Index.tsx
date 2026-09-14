@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { track, EVENTS } from "@/lib/analytics";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
@@ -710,8 +711,14 @@ const Testimonials = () => {
 // ─────────────── Section: Featured Notes (live from DB) ──────────────────────
 const FeaturedNotes = () => {
   const [notes, setNotes] = useState<any[]>([]);
+  const [notesFailed, setNotesFailed] = useState(false);
   useEffect(() => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setNotes(data));
+    supabase.from("notes").select("*").order("created_at", { ascending: false }).limit(3).then(({ data, error }) => {
+      // Swallowing this rendered "added regularly — check back soon",
+      // so an outage made the homepage look like an abandoned site.
+      if (error) { console.error("Index: failed to load notes", error); setNotesFailed(true); }
+      else setNotes(data ?? []);
+    });
   }, []);
 
   const subjectLabel: Record<string, { label: string; color: string }> = {
@@ -737,7 +744,9 @@ const FeaturedNotes = () => {
           </Link>
         </div>
 
-        {notes.length === 0 ? (
+        {notesFailed ? (
+          <ContentLoadError what="recent notes" compact />
+        ) : notes.length === 0 ? (
           <p className="text-sm text-slate-500">New notes are added regularly — check back soon.</p>
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -780,9 +789,15 @@ const FeaturedNotes = () => {
 // ─────────────── Section: Video Lectures ─────────────────────────────────────
 const VideoLectures = () => {
   const [lectures, setLectures] = useState<any[]>([]);
+  const [lecturesFailed, setLecturesFailed] = useState(false);
   const [playing, setPlaying] = useState<any | null>(null);
   useEffect(() => {
-    supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setLectures(data));
+    supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data, error }) => {
+      // Swallowing this rendered "added regularly — check back soon",
+      // so an outage made the homepage look like an abandoned site.
+      if (error) { console.error("Index: failed to load lectures", error); setLecturesFailed(true); }
+      else setLectures(data ?? []);
+    });
   }, []);
 
   return (
@@ -798,7 +813,9 @@ const VideoLectures = () => {
           </Link>
         </div>
 
-        {lectures.length === 0 ? (
+        {lecturesFailed ? (
+          <ContentLoadError what="recent lectures" compact />
+        ) : lectures.length === 0 ? (
           <p className="text-sm text-slate-500">New lectures are added regularly — check back soon.</p>
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -910,8 +927,14 @@ const VideoLectures = () => {
 // ─────────────── Section: Books ───────────────────────────────────────────────
 const BooksSection = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [booksFailed, setBooksFailed] = useState(false);
   useEffect(() => {
-    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data }) => data && setBooks(data));
+    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data, error }) => {
+      // Swallowing this rendered "added regularly — check back soon",
+      // so an outage made the homepage look like an abandoned site.
+      if (error) { console.error("Index: failed to load book_recommendations", error); setBooksFailed(true); }
+      else setBooks(data ?? []);
+    });
   }, []);
 
   const bookColors = [NAVY, STEEL_DARK, NAVY_DARK, GOLD];
@@ -928,7 +951,9 @@ const BooksSection = () => {
             View all books <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        {books.length === 0 ? (
+        {booksFailed ? (
+          <ContentLoadError what="book recommendations" compact />
+        ) : books.length === 0 ? (
           <p className="text-sm text-slate-500">Book recommendations are added regularly — check back soon.</p>
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -63,7 +64,7 @@ const SearchPage = () => {
   const [input, setInput] = useState(q);
   useEffect(() => { setInput(q); }, [q]);
 
-  const { data: index, isPending: loading } = useQuery({
+  const { data: index, isPending: loading, isError } = useQuery({
     queryKey: ["search-index"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
@@ -74,6 +75,10 @@ const SearchPage = () => {
         (supabase.from("pyq_papers" as any) as any).select("id, title, year, subject, answer_key_url"),
         (supabase.from("lectures" as any) as any).select("id, title, subject, topic_slug"),
       ]);
+      // Search spans every content type at once, so swallowing these made a
+      // sitewide outage look like "nothing on this site matches your query".
+      const failed = [n, qz, b, p, l].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
       return {
         notes: n.data ?? [],
         quizzes: (qz.data ?? []).filter((x: any) => x.published !== false),
@@ -231,6 +236,8 @@ const SearchPage = () => {
           <p className="text-muted-foreground">Type what you're studying — an act, a theory, a committee, a topic — and we'll find every note, quiz, and article on it.</p>
         ) : loading ? (
           <p className="text-muted-foreground">Searching…</p>
+        ) : isError ? (
+          <ContentLoadError what="search results" />
         ) : results.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 py-14 text-center">
             <Search className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />

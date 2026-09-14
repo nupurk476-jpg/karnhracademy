@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { BookOpen, ExternalLink, FileDown } from "lucide-react";
 
 const BooksPage = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [failed, setFailed] = useState(false);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).then(({ data }) => data && setBooks(data));
+    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).then(({ data, error }) => {
+      // A swallowed error here rendered as "No book recommendations yet."
+      if (error) { console.error("BooksPage: failed to load books", error); setFailed(true); }
+      else setBooks(data ?? []);
+    });
   }, []);
 
   const filtered = books.filter(b =>
@@ -36,7 +42,9 @@ const BooksPage = () => {
           className="mb-8 w-full max-w-md rounded-md border border-input bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
 
-        {filtered.length === 0 ? (
+        {failed ? (
+          <ContentLoadError what="the book recommendations" />
+        ) : filtered.length === 0 ? (
           <p className="text-muted-foreground">No book recommendations yet.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
