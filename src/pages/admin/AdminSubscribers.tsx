@@ -89,8 +89,8 @@ const AdminSubscribers = () => {
         return;
       }
       const csv = toCsv(
-        ["email", "subscribed_on"],
-        scoped.map(s => [s.email, new Date(s.created_at).toISOString().slice(0, 10)]),
+        ["email", "name", "subscribed_on"],
+        scoped.map(s => [s.email, s.name ?? "", new Date(s.created_at).toISOString().slice(0, 10)]),
       );
       const stamp = new Date().toISOString().slice(0, 10);
       downloadCsv(`karn-hr-subscribers-${stamp}.csv`, csv);
@@ -128,9 +128,10 @@ const AdminSubscribers = () => {
         return;
       }
       const csv = toCsv(
-        ["email", "subscribed_on", "unsubscribe_url"],
+        ["email", "name", "subscribed_on", "unsubscribe_url"],
         scoped.map(s => [
           s.email,
+          s.name ?? "",
           new Date(s.created_at).toISOString().slice(0, 10),
           `${window.location.origin}/unsubscribe?token=${s.unsubscribe_token}`,
         ]),
@@ -203,6 +204,7 @@ const AdminSubscribers = () => {
                 <span className={`text-sm font-medium ${s.unsubscribed_at ? "text-muted-foreground line-through" : "text-foreground"}`}>
                   {s.email}
                 </span>
+                {s.name && <span className="ml-2 text-xs text-muted-foreground">({s.name})</span>}
                 <span className="ml-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
                 {s.unsubscribed_at && (
                   <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

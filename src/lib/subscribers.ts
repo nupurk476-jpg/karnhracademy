@@ -3,6 +3,12 @@
 export type Subscriber = {
   id: string;
   email: string;
+  /**
+   * Optional first name, for the greeting line of a campaign. NULL for
+   * every address collected before the field existed, and for anyone who
+   * left it blank -- the email template carries a fallback.
+   */
+  name: string | null;
   created_at: string;
   /** NULL means still subscribed. */
   unsubscribed_at: string | null;

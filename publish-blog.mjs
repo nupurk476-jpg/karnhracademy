@@ -16,9 +16,13 @@
  *   --category "Name"       Override the auto-detected category
  *   --slug "my-slug"        Override the auto-generated slug
  *
- * Required env vars (in .env):
- *   VITE_SUPABASE_URL           Your Supabase project URL
- *   SUPABASE_SERVICE_ROLE_KEY   Service role key (bypasses RLS) — recommended
+ * Required env vars:
+ *   VITE_SUPABASE_URL           Your Supabase project URL (in .env — safe to commit)
+ *   SUPABASE_SERVICE_ROLE_KEY   Service role key (bypasses RLS) — recommended.
+ *                               Put this in .env.local, NEVER .env: this key
+ *                               grants full database access with no RLS, and
+ *                               .env is (or was) git-tracked. .env.local is
+ *                               gitignored via the *.local pattern.
  *                               Falls back to VITE_SUPABASE_PUBLISHABLE_KEY if absent.
  */
 
@@ -27,11 +31,13 @@ import { resolve, basename } from 'path';
 import { JSDOM } from 'jsdom';
 import { createClient } from '@supabase/supabase-js';
 
-// ── Load .env ─────────────────────────────────────────────────────────────────
-function loadEnv() {
-  const envPath = resolve(process.cwd(), '.env');
-  if (!existsSync(envPath)) return;
-  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
+// ── Load .env(.local) ────────────────────────────────────────────────────────
+// .env.local first, same precedence Vite itself uses, so the real secret
+// (SUPABASE_SERVICE_ROLE_KEY) can live in the gitignored file while the
+// public URL/anon-key pair stays in the committed .env.
+function loadEnvFile(path) {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, 'utf-8').split('\n')) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
     const eqIdx = trimmed.indexOf('=');
@@ -40,6 +46,10 @@ function loadEnv() {
     const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
     if (!process.env[key]) process.env[key] = val;
   }
+}
+function loadEnv() {
+  loadEnvFile(resolve(process.cwd(), '.env.local'));
+  loadEnvFile(resolve(process.cwd(), '.env'));
 }
 loadEnv();
 
@@ -309,7 +319,7 @@ if (error) {
   console.error('\n❌  Supabase insert failed:');
   console.error(`    ${error.message}\n`);
   if (error.message.toLowerCase().includes('security') || error.message.toLowerCase().includes('policy')) {
-    console.error('    Tip: Add SUPABASE_SERVICE_ROLE_KEY to your .env to bypass RLS.\n');
+    console.error('    Tip: Add SUPABASE_SERVICE_ROLE_KEY to your .env.local (not .env) to bypass RLS.\n');
   }
   process.exit(1);
 }
