@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,16 +18,20 @@ import { ArrowRight, CalendarDays } from "lucide-react";
  */
 const ProgrammesPage = () => {
   const [programmes, setProgrammes] = useState<Programme[] | null>(null);
+  const [failed, setFailed] = useState(false);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: progs } = await (supabase.from("programmes" as any) as any)
+      const { data: progs, error } = await (supabase.from("programmes" as any) as any)
         .select("*")
         .eq("is_published", true)
         .order("display_order", { ascending: true });
       if (cancelled) return;
+      // Without this a failed request rendered "No programmes are open for
+      // registration right now" — an outage turning away paying students.
+      if (error) { console.error("ProgrammesPage: failed to load programmes", error); setFailed(true); return; }
       const list: Programme[] = progs ?? [];
       setProgrammes(list);
 
@@ -59,7 +64,12 @@ const ProgrammesPage = () => {
           free — these are the sessions we run with you.
         </p>
 
-        {programmes === null ? (
+        {/* `failed` is checked before the null/loading case on purpose: the
+            fetch bails out without ever setting `programmes`, so testing for
+            null first leaves a failed load spinning on "Loading…" forever. */}
+        {failed ? (
+          <ContentLoadError what="the programme list" />
+        ) : programmes === null ? (
           <p className="mt-10 text-sm text-muted-foreground">Loading programmes…</p>
         ) : programmes.length === 0 ? (
           <div className="mt-10 rounded-lg border border-dashed border-border px-6 py-12 text-center">

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,15 +44,19 @@ const ProgrammeDetailPage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [college, setCollege] = useState("");
+  const [failed, setFailed] = useState(false);
   const [course, setCourse] = useState("");
   const [upiReference, setUpiReference] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: prog } = await (supabase.from("programmes" as any) as any)
+      const { data: prog, error } = await (supabase.from("programmes" as any) as any)
         .select("*").eq("slug", slug).eq("is_published", true).maybeSingle();
       if (cancelled) return;
+      // "Programme not found" on a failed request tells a prospective
+      // student the course does not exist, on a page meant to sell it.
+      if (error) { console.error("ProgrammeDetail: failed to load programme", error); setFailed(true); return; }
       if (!prog) { setProgramme("missing"); return; }
       setProgramme(prog);
 
@@ -181,6 +186,20 @@ const ProgrammeDetailPage = () => {
     viewed.current = prog.slug;
     track(EVENTS.PROGRAMME_VIEW, { slug: prog.slug, price: prog.price_paise });
   }, [prog]);
+
+  // Checked before the null/loading case on purpose: the fetch bails out
+  // without ever setting `programme`, so testing for null first leaves a
+  // failed load spinning on "Loading…" forever.
+  if (failed) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main id="main-content" className="mx-auto max-w-3xl px-6 py-20">
+          <ContentLoadError what="this programme" />
+        </main>
+      </div>
+    );
+  }
 
   if (programme === null) {
     return (

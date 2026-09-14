@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -21,7 +22,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
   const hub = getSubjectHub(subject)!;
   const discipline = getDiscipline(subject)!;
   const meta = getSubjectMeta(subject);
-  const { notes, quizzes, questionCounts, lectures, loading } = useSubjectContent(subject);
+  const { notes, quizzes, questionCounts, lectures, loading, failed } = useSubjectContent(subject);
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -155,6 +156,10 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
 
         {loading ? (
           <div className="mx-auto max-w-6xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : failed ? (
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <ContentLoadError what={`${title} material`} />
+          </div>
         ) : (
           <div className="mx-auto max-w-6xl px-6 py-10 space-y-14">
             {/* ── Latest notes ───────────────────────────────────────── */}
