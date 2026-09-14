@@ -5,7 +5,7 @@ const BCTopicPage = () => (
   <DisciplineTopicPage
     subject="bc"
     topics={bcTopics}
-    backLink="/notes?subject=bc"
+    backLink="/bc"
     backLabel="All Business Communication Topics"
     routePrefix="bc"
   />

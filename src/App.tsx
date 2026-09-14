@@ -22,6 +22,7 @@ const SMTopicPage = lazy(() => import("./pages/SMTopicPage"));
 const BCTopicPage = lazy(() => import("./pages/BCTopicPage"));
 const ODCMTopicPage = lazy(() => import("./pages/ODCMTopicPage"));
 const GHRTopicPage = lazy(() => import("./pages/GHRTopicPage"));
+const SubjectHubPage = lazy(() => import("./components/SubjectHubPage"));
 const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotesPage = lazy(() => import("./pages/NotesPage"));
@@ -47,6 +48,7 @@ const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const ConnectPage = lazy(() => import("./pages/ConnectPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
@@ -126,11 +128,19 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/connect" element={<ConnectPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
             <Route path="/programmes" element={<ProgrammesPage />} />
             <Route path="/programmes/:slug" element={<ProgrammeDetailPage />} />
+            <Route path="/hr" element={<SubjectHubPage subject="hrm" />} />
+            <Route path="/ob" element={<SubjectHubPage subject="ob" />} />
+            <Route path="/sm" element={<SubjectHubPage subject="sm" />} />
+            <Route path="/pom" element={<SubjectHubPage subject="pom" />} />
+            <Route path="/bc" element={<SubjectHubPage subject="bc" />} />
+            <Route path="/odcm" element={<SubjectHubPage subject="odcm" />} />
+            <Route path="/ghr" element={<SubjectHubPage subject="ghr" />} />
             <Route path="/hr/:slug" element={<HRTopicPage />} />
             <Route path="/pom/:slug" element={<POMTopicPage />} />
             <Route path="/ob/:slug" element={<OBTopicPage />} />

@@ -58,13 +58,13 @@ const MBAEconomicsPage = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="MBA Managerial Economics — Unit-wise Notes, MCQs & Video Lectures"
-        description="Free unit-wise study resources for MBA Managerial Economics — demand analysis, production & cost, market structures, macroeconomics, Indian economy and international trade. Notes, MCQ practice sets and video lectures."
+        description="Free unit-wise study resources for MBA / PGDM Managerial Economics — introduction, demand analysis, production & cost, market structure & pricing, macroeconomic environment and capital budgeting. Notes, MCQ practice sets and video lectures."
         path="/mba-economics"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Course",
           name: "MBA Managerial Economics Study Hub",
-          description: "Free notes, MCQ practice and video lectures across 5 units of MBA Managerial Economics.",
+          description: "Free notes, MCQ practice and video lectures across 6 units of MBA Managerial Economics.",
           provider: { "@type": "EducationalOrganization", name: "Karn HR Academy", url: "https://karnhracademy.com" },
           isAccessibleForFree: true,
           inLanguage: "en",
@@ -88,23 +88,25 @@ const MBAEconomicsPage = () => {
               MBA Managerial Economics Hub
             </h1>
             <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Five units covering demand analysis, production &amp; cost, market structures, macroeconomics
-              and Indian economy — with study notes, topic-wise MCQ practice and video lectures, all free.
+              Six units following the standard PGDM core syllabus — fundamentals, demand analysis, production &amp; cost,
+              market structure &amp; pricing, the macroeconomic environment and capital budgeting — with study notes,
+              topic-wise MCQ practice and video lectures, all free.
             </p>
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5">
-                <GraduationCap className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{MBA_ECO_UNITS.length}</strong>&nbsp;Units
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5">
-                <FileText className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{loading ? "…" : notes.length}</strong>&nbsp;Notes
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5">
-                <HelpCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{loading ? "…" : quizzes.length}</strong>&nbsp;MCQ Sets
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5">
-                <PlayCircle className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{loading ? "…" : lectures.length}</strong>&nbsp;Video Lectures
-              </span>
+              {[
+                { icon: GraduationCap, v: MBA_ECO_UNITS.length, l: "Units", to: "#units" },
+                { icon: FileText, v: loading ? "…" : notes.length, l: "Notes", to: "#notes" },
+                { icon: HelpCircle, v: loading ? "…" : quizzes.length, l: "MCQ Sets", to: "#mcqs" },
+                { icon: PlayCircle, v: loading ? "…" : lectures.length, l: "Video Lectures", to: lectures.length > 0 ? "#lectures" : "/lectures" },
+              ].map(c => {
+                const I = c.icon;
+                return (
+                  <a key={c.l} href={c.to} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-slate-50 px-3 py-1.5 transition-colors hover:border-accent/60 hover:bg-white hover:text-accent-deep">
+                    <I className="h-3.5 w-3.5 text-accent-deep" /><strong className="text-foreground">{c.v}</strong>&nbsp;{c.l}
+                  </a>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -116,7 +118,7 @@ const MBAEconomicsPage = () => {
         )}
 
         {/* ── Browse by Unit ──────────────────────────────────────────── */}
-        <section className="border-b border-border bg-slate-50 py-10" aria-labelledby="units-heading">
+        <section id="units" className="scroll-mt-24 border-b border-border bg-slate-50 py-10" aria-labelledby="units-heading">
           <div className="mx-auto max-w-5xl px-6">
             <h2 id="units-heading" className="mb-4 text-lg font-bold text-foreground">Browse by Unit</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -155,7 +157,7 @@ const MBAEconomicsPage = () => {
           <div className="mx-auto max-w-5xl px-6 py-10 space-y-14">
 
             {/* ── Notes ───────────────────────────────────────────────── */}
-            <section id="notes">
+            <section id="notes" className="scroll-mt-24">
               <div className="mb-4 flex items-center gap-2">
                 <FileText className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">Notes</h2>
@@ -189,7 +191,7 @@ const MBAEconomicsPage = () => {
             </section>
 
             {/* ── MCQs ────────────────────────────────────────────────── */}
-            <section id="mcqs">
+            <section id="mcqs" className="scroll-mt-24">
               <div className="mb-4 flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-accent-deep" />
                 <h2 className="text-xl font-bold text-foreground">MCQ Practice Sets</h2>
@@ -239,7 +241,7 @@ const MBAEconomicsPage = () => {
 
             {/* ── Lectures ────────────────────────────────────────────── */}
             {lectures.length > 0 && (
-              <section id="lectures">
+              <section id="lectures" className="scroll-mt-24">
                 <div className="mb-4 flex items-center gap-2">
                   <PlayCircle className="h-5 w-5 text-accent-deep" />
                   <h2 className="text-xl font-bold text-foreground">Video Lectures</h2>

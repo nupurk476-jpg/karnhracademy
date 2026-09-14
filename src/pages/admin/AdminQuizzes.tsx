@@ -11,6 +11,7 @@ import { resolveLWTopicSlug } from "@/lib/labourWelfareUnits";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useConfirm } from "@/hooks/use-confirm";
 import ImportQuestionsDialog from "@/components/admin/ImportQuestionsDialog";
+import UnitTopicPicker from "@/components/admin/UnitTopicPicker";
 import type { ParsedMcq } from "@/lib/mcq-parser";
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Advanced"];
@@ -377,24 +378,14 @@ const AdminQuizzes = () => {
           </div>
         </div>
 
-        {/* Sub-topic chips */}
-        {(getDiscipline(subject)?.topics.length ?? 0) > 0 && (
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">Sub Topic (optional)</p>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setTopicSlug("")}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${topicSlug === "" ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"}`}>
-                All Topics
-              </button>
-              {getDiscipline(subject)?.topics.map(t => (
-                <button key={t.slug} type="button" onClick={() => setTopicSlug(t.slug)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${topicSlug === t.slug ? "bg-accent text-accent-foreground" : "border border-border bg-card text-muted-foreground hover:bg-muted"}`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Sub-topic chips — grouped by unit for unit-based subjects */}
+        <UnitTopicPicker
+          subject={subject}
+          topics={getDiscipline(subject)?.topics ?? []}
+          value={topicSlug}
+          onChange={setTopicSlug}
+          hubLabel={getDiscipline(subject)?.short}
+        />
 
         <button onClick={saveQuiz} disabled={!title || !topic}
           className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">

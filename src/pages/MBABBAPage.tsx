@@ -9,21 +9,19 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
 import { useDownloadGate } from "@/hooks/use-download-gate";
+import SubjectCard from "@/components/SubjectCard";
 import {
   ArrowRight, FileText, HelpCircle, PlayCircle, BookOpen,
-  GraduationCap, Layers, ChevronRight, Presentation, TrendingUp,
+  GraduationCap, Layers, Presentation, TrendingUp,
 } from "lucide-react";
 
-// Same mapping SearchPage uses — discipline value → topic-page route prefix.
-const TOPIC_ROUTE_PREFIX: Record<string, string> = {
-  hrm: "hr", ob: "ob", sm: "sm", pom: "pom", bc: "bc", odcm: "odcm", ghr: "ghr",
-};
-
 // The core semester-programme disciplines — excludes Labour Welfare (its own
-// UGC NET hub) and Economics tracks (which have their own unit-based hubs).
+// UGC NET hub) and Economics tracks (which have their own unit-based hubs and
+// their own section below).
 const PROGRAMME_DISCIPLINES = DISCIPLINES.filter(
   d => d.value !== "lw" && d.value !== "mba-eco" && d.value !== "bba-eco",
 );
+const ECONOMICS_DISCIPLINES = DISCIPLINES.filter(d => d.value === "mba-eco" || d.value === "bba-eco");
 
 // Curated semester guidance — which subject typically lands in which
 // semester of Indian BBA/MBA programmes. This is the page's unique
@@ -175,54 +173,17 @@ const MBABBAPage = () => {
         <section className="py-10" aria-labelledby="subjects-heading">
           <div className="mx-auto max-w-6xl px-6">
             <h2 id="subjects-heading" className="mb-4 text-lg font-bold text-foreground">Browse by Subject</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {PROGRAMME_DISCIPLINES.map(d => {
-                const Icon = d.icon;
-                const noteCount = counts ? (counts.notes[d.value] || 0) : null;
-                const quizCount = counts ? (counts.quizzes[d.value] || 0) : null;
-                const prefix = TOPIC_ROUTE_PREFIX[d.value];
-                const shownTopics = d.topics.slice(0, 6);
-                return (
-                  <div key={d.value} className="flex flex-col rounded-lg border border-border bg-white p-5">
-                    <div className="mb-2 flex items-center gap-2.5">
-                      <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${d.iconBg}`}>
-                        <Icon className={`h-4.5 w-4.5 ${d.iconColor}`} />
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-bold leading-snug text-foreground">{d.label}</h3>
-                        <p className="text-[11px] text-muted-foreground">
-                          {noteCount === null ? "…" : `${noteCount} note${noteCount !== 1 ? "s" : ""}`} · {quizCount === null ? "…" : `${quizCount} MCQ set${quizCount !== 1 ? "s" : ""}`}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="mb-3 text-xs leading-relaxed text-muted-foreground">{d.description}</p>
-                    <div className="mb-4 flex flex-wrap gap-1.5">
-                      {shownTopics.map(t => (
-                        <Link
-                          key={t.slug}
-                          to={`/${prefix}/${t.slug}`}
-                          className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-accent/60 hover:text-accent-deep"
-                        >
-                          {t.label}
-                        </Link>
-                      ))}
-                      {d.topics.length > shownTopics.length && (
-                        <Link to="/notes" className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-accent-deep hover:underline">
-                          +{d.topics.length - shownTopics.length} more
-                        </Link>
-                      )}
-                    </div>
-                    <div className="mt-auto flex flex-wrap gap-3 text-xs font-semibold">
-                      <Link to="/notes" className="inline-flex items-center gap-1 text-accent-deep hover:underline">
-                        <FileText className="h-3.5 w-3.5" /> Notes <ChevronRight className="h-3 w-3" />
-                      </Link>
-                      <Link to="/quizzes" className="inline-flex items-center gap-1 text-accent-deep hover:underline">
-                        <HelpCircle className="h-3.5 w-3.5" /> Practice MCQs <ChevronRight className="h-3 w-3" />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {PROGRAMME_DISCIPLINES.map(d => (
+                <SubjectCard
+                  key={d.value}
+                  discipline={d}
+                  notes={counts ? (counts.notes[d.value] || 0) : null}
+                  quizzes={counts ? (counts.quizzes[d.value] || 0) : null}
+                  lectures={counts ? (counts.lectures[d.value] || 0) : null}
+                  minNotes={0}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -237,47 +198,17 @@ const MBABBAPage = () => {
             <p className="mb-4 text-xs text-muted-foreground">
               Separate unit-wise hubs for MBA Managerial Economics and BBA Business Economics — different depth, same rigour.
             </p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Link
-                to="/mba-economics"
-                className="group flex flex-col gap-3 rounded-lg border border-border bg-[#F0FDF4] p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#DCFCE7]">
-                    <TrendingUp className="h-4.5 w-4.5 text-[#166534]" />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">MBA Managerial Economics</h3>
-                    <p className="text-[11px] text-muted-foreground">5 units · MBA / PGDM Semester 1</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Demand analysis, production &amp; cost, market structures, macroeconomics, Indian economy &amp; international trade.
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-[#166534] group-hover:underline">
-                  Go to MBA Economics Hub <ChevronRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
-              <Link
-                to="/bba-economics"
-                className="group flex flex-col gap-3 rounded-lg border border-border bg-[#EEF2FF] p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E0E7FF]">
-                    <TrendingUp className="h-4.5 w-4.5 text-[#3730A3]" />
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground">BBA Business Economics</h3>
-                    <p className="text-[11px] text-muted-foreground">5 units · BBA / B.Com Semester 1–2</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Demand &amp; supply, market equilibrium, production &amp; cost, market structures, national income &amp; Indian economy.
-                </p>
-                <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-[#3730A3] group-hover:underline">
-                  Go to BBA Economics Hub <ChevronRight className="h-3.5 w-3.5" />
-                </span>
-              </Link>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {ECONOMICS_DISCIPLINES.map(d => (
+                <SubjectCard
+                  key={d.value}
+                  discipline={d}
+                  notes={counts ? (counts.notes[d.value] || 0) : null}
+                  quizzes={counts ? (counts.quizzes[d.value] || 0) : null}
+                  lectures={counts ? (counts.lectures[d.value] || 0) : null}
+                  minNotes={0}
+                />
+              ))}
             </div>
           </div>
         </section>

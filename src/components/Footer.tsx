@@ -1,5 +1,12 @@
-import { Mail } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SocialIconRow } from "@/components/SocialIcons";
+import { LIVE_CHANNELS, CONTACT_EMAIL, PHONE_NUMBER, PHONE_DISPLAY } from "@/lib/socialLinks";
+
+const FOOTER_SOCIALS = [
+  ...LIVE_CHANNELS.map(c => ({ key: c.key, label: c.label, url: c.url })),
+  { key: "email", label: "Email", url: `mailto:${CONTACT_EMAIL}` },
+];
 
 const Footer = () => {
   return (
@@ -61,6 +68,13 @@ const Footer = () => {
               Academic resource hub for HR & Management — structured notes, video lectures,
               MCQs and research content for MBA, BBA & UGC NET/JRF aspirants.
             </p>
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary-foreground/50">
+              Follow Us
+            </h4>
+            <SocialIconRow items={FOOTER_SOCIALS} onDark size={31} className="gap-1.5" />
+            <Link to="/connect" className="mt-3 inline-block text-xs text-primary-foreground/50 hover:text-accent transition-colors">
+              All channels &amp; QR codes →
+            </Link>
           </div>
 
           {/* Col 2: Quick Links */}
@@ -100,12 +114,14 @@ const Footer = () => {
             </h4>
             <div className="space-y-2.5">
               {[
-                { label: "Human Resource Management", to: "/notes?subject=hrm" },
-                { label: "Organisational Behaviour", to: "/notes?subject=ob" },
-                { label: "Strategic Management", to: "/notes?subject=sm" },
-                { label: "International HRM", to: "/notes?subject=ghr" },
-                { label: "HR Analytics", to: "/hr/hr-analytics" },
-                { label: "Performance Management", to: "/hr/performance-management" },
+                { label: "Human Resource Management", to: "/hr" },
+                { label: "Organisational Behaviour", to: "/ob" },
+                { label: "Principles of Management", to: "/pom" },
+                { label: "Strategic Management", to: "/sm" },
+                { label: "Business Communication", to: "/bc" },
+                { label: "Economics (MBA / BBA)", to: "/mba-economics" },
+                { label: "International HRM", to: "/ghr" },
+                { label: "OD & Change Management", to: "/odcm" },
               ].map((link) => (
                 <Link
                   key={link.label}
@@ -127,12 +143,21 @@ const Footer = () => {
               Have a question or suggestion? We'd love to hear from you.
             </p>
             <a
-              href="mailto:nupur@karnhracademy.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
             >
               <Mail className="h-4 w-4 shrink-0" style={{ color: "hsl(var(--accent))" }} />
-              nupur@karnhracademy.com
+              {CONTACT_EMAIL}
             </a>
+            {PHONE_NUMBER && (
+              <a
+                href={`tel:+${PHONE_NUMBER}`}
+                className="mt-2 flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors"
+              >
+                <Phone className="h-4 w-4 shrink-0" style={{ color: "hsl(var(--accent))" }} />
+                {PHONE_DISPLAY}
+              </a>
+            )}
           </div>
         </div>
 

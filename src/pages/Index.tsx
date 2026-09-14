@@ -6,10 +6,14 @@ import Header from "@/components/Header";
 import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
-import NoteCoverThumbnail from "@/components/NoteCoverThumbnail";
-import { DISCIPLINES } from "@/lib/disciplines";
+import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
+import { tidyTitle, timeAgo } from "@/lib/format";
+import { SocialIconRow } from "@/components/SocialIcons";
+import { LIVE_CHANNELS, CONTACT_EMAIL } from "@/lib/socialLinks";
 import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
+import { useSubjectCounts } from "@/hooks/use-subject-counts";
+import SubjectCard from "@/components/SubjectCard";
 import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
@@ -45,6 +49,8 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   bc:      { color: STEEL_DARK, bg: "#F2F1EF" },
   odcm:    { color: GOLD_TEXT,  bg: "#F7F4EF" },
   ghr:     { color: NAVY_DARK,  bg: "#E8E6E2" },
+  "mba-eco": { color: NAVY,     bg: "#E8E6E2" },
+  "bba-eco": { color: STEEL_DARK, bg: "#F2F1EF" },
   lw:      { color: NAVY_DARK,  bg: "#EFEDE9" },
 };
 
@@ -62,31 +68,6 @@ const ROADMAP = [
   { step: "03", icon: PlayCircle,    title: "Watch Lectures",    desc: "Reinforce concepts with expert video lectures." },
   { step: "04", icon: HelpCircle,    title: "Practice MCQs",     desc: "Test yourself with topic-wise quizzes." },
   { step: "05", icon: Award,         title: "Master the Topic",  desc: "Achieve exam readiness and subject mastery." },
-];
-
-// Each chip goes to its real topic page — a chip that promises
-// "Motivation Theories" and lands on a generic list breaks trust on the
-// first click. Destinations mix discipline topic pages and UGC NET
-// high-scoring topic pages, whichever fits the phrase best.
-const TOPICS: { label: string; to: string }[] = [
-  { label: "Recruitment & Selection",  to: "/hr/recruitment-and-selection" },
-  { label: "Performance Appraisal",    to: "/ugc-net-labour-welfare/topic/performance-appraisal" },
-  { label: "Motivation Theories",      to: "/ob/motivation" },
-  { label: "Leadership Styles",        to: "/ob/leadership" },
-  { label: "Job Analysis",             to: "/ugc-net-labour-welfare/topic/job-analysis" },
-  { label: "HR Planning",              to: "/hr/human-resource-planning" },
-  { label: "HR Analytics",             to: "/hr/hr-analytics" },
-  { label: "Compensation & Benefits",  to: "/hr/compensation-and-benefits" },
-  { label: "Training & Development",   to: "/hr/training-and-development" },
-  { label: "OD & Change",              to: "/odcm/introduction-to-od" },
-  { label: "Talent Management",        to: "/hr/talent-management" },
-  { label: "Industrial Relations",     to: "/hr/industrial-relations" },
-  { label: "Business Ethics",          to: "/pom/business-ethics" },
-  { label: "Strategic HRM",            to: "/ugc-net-labour-welfare/topic/strategic-hrm" },
-  { label: "Organisational Culture",   to: "/ob/organizational-culture" },
-  { label: "Employee Relations",       to: "/hr/employee-relations" },
-  { label: "HR Metrics",               to: "/hr/hr-analytics" },
-  { label: "Collective Bargaining",    to: "/ugc-net-labour-welfare/topic/collective-bargaining" },
 ];
 
 // ─────────────── Tiny reusable pieces ────────────────────────────────────────
@@ -110,30 +91,13 @@ const SectionHeading = ({ title, sub, center = false }: { title: string; sub?: s
 // hero sidebar widget and the discipline grid's badges both read from, so
 // the two can never show different numbers for the same subject.
 function useSubjectNoteCounts() {
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [totalNotes, setTotalNotes] = useState<number | null>(null);
-
-  useEffect(() => {
-    supabase.from("notes").select("subject").then(({ data }) => {
-      if (!data) return;
-      setTotalNotes(data.length);
-      const map: Record<string, number> = {};
-      data.forEach((n: any) => {
-        const key = n.subject || "hrm";
-        map[key] = (map[key] || 0) + 1;
-      });
-      setCounts(map);
-    });
-  }, []);
-
-  return { counts, totalNotes };
+  const { counts } = useSubjectCounts();
+  return { counts: counts?.notes ?? {}, totalNotes: counts?.totalNotes ?? null };
 }
 
 // ─────────────── Section: Hero ────────────────────────────────────────────────
-const HERO_SUBJECTS = SUBJECTS.map(s => ({ label: s.label, value: s.value, color: s.color }));
-
 const Hero = () => {
-  const { counts, totalNotes } = useSubjectNoteCounts();
+  const { totalNotes } = useSubjectNoteCounts();
   // The card used to show only note counts, which read as "this is just a
   // notes site" — this row makes the full range of formats (MCQs, PYQs,
   // lectures) visible at a glance, not just the one format that happens to
@@ -225,17 +189,14 @@ const Hero = () => {
             </Link>
           </div>
 
-          {/* Trust badges — each with its own academic icon */}
+          {/* Trust badges — four, not eight: each one a claim a student can
+              verify on the site, not a slogan. */}
           <ul className="flex flex-wrap gap-2 mb-10 max-w-xl" aria-label="Why learners trust Karn HR Academy">
             {[
               { icon: BadgeCheck,    label: "Latest UGC NET/JRF Syllabus" },
-              { icon: BookOpen,      label: "Research-Based Content" },
-              { icon: GraduationCap, label: "University-Oriented Learning" },
-              { icon: Network,       label: "Diagram-Rich Visual Notes" },
-              { icon: RefreshCw,     label: "Regularly Updated" },
-              { icon: Smartphone,    label: "Mobile & Print Friendly" },
-              { icon: FileText,      label: "Case Studies & Research Support" },
-              { icon: Award,         label: "Designed by Academic Experts" },
+              { icon: BookOpen,      label: "Syllabus-Ordered, Unit-wise" },
+              { icon: RefreshCw,     label: "Updated Every Week" },
+              { icon: Award,         label: "By a UGC NET Qualified Educator" },
             ].map(({ icon: Icon, label }) => (
               <li key={label} className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium" style={{ background: "#FFFFFF", color: STEEL_DARK, border: "1px solid #DCD9D3" }}>
                 <Icon aria-hidden="true" className="h-3 w-3 flex-shrink-0" style={{ color: GOLD_TEXT }} />{label}
@@ -259,56 +220,29 @@ const Hero = () => {
                 </div>
               </div>
 
-              {/* Format breakdown — makes clear this is more than a notes
-                  site before the subject-by-subject list below. */}
-              <div className="grid grid-cols-3 gap-2 px-6 pt-4">
+              {/* What's in the library, by format. The per-subject breakdown
+                  lives in the subject grid below — repeating it here made the
+                  card and the grid say the same thing twice. */}
+              <div className="grid grid-cols-2 gap-3 px-6 pt-5 pb-3">
                 {[
-                  { label: "MCQ Sets", value: quizCount },
-                  { label: "PYQ Papers", value: pyqCount },
-                  { label: "Lectures", value: lecturesCount },
-                ].map(f => (
-                  <div key={f.label} className="rounded-lg px-2 py-2 text-center" style={{ background: LIGHT }}>
-                    <p className="font-display text-sm font-extrabold" style={{ color: NAVY }}>{f.value !== null ? f.value : "…"}</p>
-                    <p className="text-[10px] font-semibold" style={{ color: "#8A8580" }}>{f.label}</p>
-                  </div>
-                ))}
+                  { icon: FileText,   label: "Study Notes",   value: totalNotes,    to: "/notes" },
+                  { icon: HelpCircle, label: "MCQ Sets",      value: quizCount,     to: "/quizzes" },
+                  { icon: ScrollText, label: "PYQ Papers",    value: pyqCount,      to: "/pyqs" },
+                  { icon: PlayCircle, label: "Video Lectures", value: lecturesCount, to: "/lectures" },
+                ].map(f => {
+                  const I = f.icon;
+                  return (
+                    <Link key={f.label} to={f.to} className="group rounded-xl px-4 py-3 transition-colors hover:bg-white" style={{ background: LIGHT, border: "1px solid #E8E6E2" }}>
+                      <I className="mb-1.5 h-4 w-4" style={{ color: GOLD_TEXT }} />
+                      <p className="font-display text-2xl font-extrabold leading-none tabular-nums" style={{ color: NAVY }}>{f.value !== null ? f.value : "…"}</p>
+                      <p className="mt-1 text-[11px] font-semibold" style={{ color: "#8A8580" }}>{f.label}</p>
+                    </Link>
+                  );
+                })}
               </div>
-
-              {/* Subject rows — only subjects with real content, so this card
-                  never reads as "mostly empty". Repeating a "Coming Soon"
-                  badge across every not-yet-populated subject undermined
-                  trust more than just not mentioning them here at all. */}
-              <div className="px-6 pb-1 pt-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#8A8580" }}>Notes by subject</p>
-              </div>
-              <div className="px-6 pb-4 space-y-2.5">
-                {(() => {
-                  const withContent = HERO_SUBJECTS.filter(s => (counts[s.value] || 0) > 0);
-                  if (withContent.length === 0) {
-                    return (
-                      <p className="text-xs" style={{ color: "#918C86" }}>
-                        New content added every week — check back soon.
-                      </p>
-                    );
-                  }
-                  return withContent.map(s => (
-                    <div key={s.value} className="flex items-center justify-between gap-3">
-                      {/* Color dot */}
-                      <span className="h-2 w-2 flex-shrink-0 rounded-full" style={{ background: s.color }} />
-                      <span className="flex-1 text-xs font-medium" style={{ color: "#3A3835" }}>{s.label}</span>
-                      <span className="text-xs font-semibold tabular-nums" style={{ color: s.color }}>
-                        {counts[s.value]} {counts[s.value] === 1 ? "note" : "notes"}
-                      </span>
-                    </div>
-                  ));
-                })()}
-              </div>
-
-              {/* Total badge — inside the card at the bottom, no absolute overlap */}
-              <div className="mx-6 mb-5 mt-1 flex items-center justify-between rounded-xl px-4 py-3" style={{ background: LIGHT, border: "1px solid #E8E6E2" }}>
-                <p className="text-xs" style={{ color: "#6E6963" }}>Study notes in library</p>
-                <p className="font-display text-xl font-extrabold" style={{ color: NAVY }}>
-                  {totalNotes !== null ? `${totalNotes}` : "…"}
+              <div className="px-6 pb-5">
+                <p className="text-[11px]" style={{ color: "#8A8580" }}>
+                  Across <strong style={{ color: NAVY }}>{DISCIPLINES.length} subjects</strong> · all free · new uploads every week
                 </p>
               </div>
             </div>
@@ -320,73 +254,7 @@ const Hero = () => {
   );
 };
 
-// ─────────────── Section: Founder Strip ──────────────────────────────────────
-// A compact credibility band right after the hero, so a first-time visitor
-// sees who's behind the platform before scrolling — the full detailed
-// founder card (id="founder", further down the page) is where "Read full
-// profile" lands via a smooth scroll.
-const FOUNDER_CREDENTIALS = [
-  "UGC NET Qualified (Code 55)",
-  "PhD Scholar (Management)",
-  "Assistant Professor",
-  "10+ Years Teaching",
-];
-
-const FounderStrip = () => {
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const { data } = supabase.storage.from("educator").getPublicUrl("profile.jpg");
-    fetch(data.publicUrl, { method: "HEAD" }).then(res => {
-      if (res.ok) setPhotoUrl(data.publicUrl);
-    }).catch(() => {});
-  }, []);
-
-  const scrollToFounder = (e: React.MouseEvent) => {
-    e.preventDefault();
-    document.getElementById("founder")?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  return (
-    <section className="border-b border-slate-100" style={{ background: LIGHT }} aria-label="Founder credibility">
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:max-h-[110px]">
-        <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-center sm:gap-4 sm:text-left">
-          {/* Avatar */}
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-md" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
-            {photoUrl ? (
-              <img src={photoUrl} alt="Ms. Nupur Karn, founder of Karn HR Academy" className="h-full w-full object-cover" />
-            ) : (
-              <span className="font-display text-lg font-extrabold text-white">NK</span>
-            )}
-          </div>
-
-          {/* Name + credentials */}
-          <div className="flex-1 min-w-0">
-            <p className="text-base font-medium text-slate-900">Ms. Nupur Karn — Founder, Karn HR Academy</p>
-            <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[13px] text-slate-500 sm:flex sm:flex-wrap sm:justify-start sm:gap-x-0">
-              {FOUNDER_CREDENTIALS.map(c => (
-                <li key={c} className="sm:before:content-['·'] sm:before:mx-1.5 sm:before:text-slate-400 sm:first:before:content-none">{c}</li>
-              ))}
-            </ul>
-          </div>
-
-          {/* CTA */}
-          <a
-            href="#founder"
-            onClick={scrollToFounder}
-            className="flex-shrink-0 text-sm font-semibold hover:underline"
-            style={{ color: GOLD_TEXT }}
-          >
-            Read full profile →
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Real content counts, shared by StatsBar and AboutAuthor — replaces the
-// fabricated static numbers both sections used to show independently.
+// Real content counts, shared by the hero card and the audience cards.
 function useContentCounts() {
   const [notesCount, setNotesCount] = useState<number | null>(null);
   const [quizCount, setQuizCount] = useState<number | null>(null);
@@ -404,50 +272,6 @@ function useContentCounts() {
 
   return { notesCount, quizCount, lecturesCount, booksCount, pyqCount };
 }
-
-// ─────────────── Section: Quick Access ───────────────────────────────────────
-// Pure resource-format directory — Labour Welfare and MBA/BBA routing now
-// live one section up in the Learning Paths pathway cards, so this row
-// doesn't repeat that choice; it's purely "which format do I want."
-const QUICK_ACCESS = [
-  { icon: FileText,   label: "Notes",                      desc: "Exam-aligned notes across every discipline",  to: "/notes",    color: NAVY,       bg: "#E8E6E2" },
-  { icon: HelpCircle, label: "MCQs",                        desc: "Topic-wise quizzes with instant feedback",    to: "/quizzes",  color: STEEL_DARK, bg: "#F2F1EF" },
-  { icon: ScrollText, label: "Previous Year Questions",     desc: "Real exam papers by subject and year",        to: "/pyqs",     color: GOLD_TEXT,  bg: "#F7F4EF" },
-  { icon: PlayCircle, label: "Video Lectures",               desc: "Concept-clarity lectures from HR educators", to: "/lectures", color: STEEL,      bg: "#F2F1EF" },
-];
-
-const QuickAccess = () => (
-  <section className="py-14 md:py-16 bg-white border-b border-slate-100" aria-label="Quick access">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <GoldLabel text="Resource Types" />
-        <SectionHeading center title="Notes, MCQs, PYQs & Lectures" />
-      </div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {QUICK_ACCESS.map(item => {
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.label}
-              to={item.to}
-              className="group flex flex-col rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-              style={{ background: item.bg, borderColor: `${item.color}20` }}
-            >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: item.color }}>
-                <Icon className="h-5 w-5 text-white" />
-              </div>
-              <p className="font-display mb-1 text-sm font-bold leading-snug text-slate-800">{item.label}</p>
-              <p className="flex-1 text-xs leading-relaxed text-slate-500">{item.desc}</p>
-              <div className="mt-3 flex items-center gap-1 text-xs font-semibold opacity-0 transition-opacity group-hover:opacity-100" style={{ color: item.color }}>
-                Open <ChevronRight className="h-3.5 w-3.5" />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
 
 // ─────────────── Section: Compact "How It Works" strip ──────────────────────
 // Replaces the old raw stats grid (132 notes / 50 quizzes / ...) right below
@@ -481,60 +305,38 @@ const CompactHowItWorks = () => (
 // ─────────────── Section: Subjects ───────────────────────────────────────────
 const MIN_NOTES_TO_LINK = 3;
 
-const SUBJECT_LINK: Record<string, string> = { lw: "/ugc-net-labour-welfare" };
-
 const Subjects = () => {
-  const { counts, totalNotes } = useSubjectNoteCounts();
-  // Derived from the same per-subject counts query as the hero sidebar
-  // widget — a subject only counts as "live" once it has a published note —
-  // so this number can never drift out of sync with what's actually shown.
-  const disciplineCount = SUBJECTS.filter(s => (counts[s.value] ?? 0) > 0).length;
-  const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"][disciplineCount] || String(disciplineCount);
+  const { counts } = useSubjectCounts();
+  const totalNotes = counts?.totalNotes ?? null;
+  // A subject only counts as "live" once it has enough published notes to
+  // link — the same threshold the cards use — so this number can never drift
+  // out of sync with what's actually shown.
+  const disciplineCount = counts ? DISCIPLINES.filter(d => (counts.notes[d.value] ?? 0) >= MIN_NOTES_TO_LINK).length : 0;
+  const disciplineWord = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][disciplineCount] || String(disciplineCount);
 
   return (
     <section id="subjects" className="py-16 md:py-20" style={{ background: LIGHT }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
-            <GoldLabel text="Browse by Discipline" />
-            <SectionHeading title="HR & Management. One Platform." sub={`${disciplineWord} disciplines, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly.`} />
+            <GoldLabel text="Browse by Subject" />
+            <SectionHeading title="HR & Management. One Platform." sub={`${counts ? disciplineWord : "…"} subjects live, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly — all free.`} />
           </div>
           <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             View all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {SUBJECTS.map(s => {
-            const Icon = s.icon;
-            const noteCount = counts[s.value] ?? 0;
-            const isComingSoon = noteCount < MIN_NOTES_TO_LINK;
-            const Wrapper = isComingSoon ? "div" : Link;
-            const wrapperProps = isComingSoon ? { "aria-disabled": true } : { to: SUBJECT_LINK[s.value] ?? "/notes" };
-            return (
-              <Wrapper
-                key={s.label}
-                {...(wrapperProps as any)}
-                className={`group flex h-full flex-col rounded-2xl border p-5 transition-all duration-200 ${isComingSoon ? "opacity-50 cursor-not-allowed" : "hover:-translate-y-1 hover:shadow-md"}`}
-                style={{ background: s.bg, borderColor: `${s.color}20` }}
-              >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: s.color }}>
-                  <Icon className="h-5 w-5 text-white" />
-                </div>
-                <p className="text-sm font-bold leading-snug text-slate-800 flex-1">{s.label}</p>
-                <div className="mt-3 flex items-center justify-between gap-1 pt-3" style={{ borderTop: `1px solid ${s.color}20` }}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: s.color }}>{s.short}</span>
-                  <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums" style={{ background: "#FFFFFF", color: s.color, border: `1px solid ${s.color}30` }}>
-                    {isComingSoon ? "Coming soon" : `${noteCount} ${noteCount === 1 ? "note" : "notes"}`}
-                  </span>
-                </div>
-                {!isComingSoon && (
-                  <div className="mt-2 flex items-center gap-1 text-xs font-semibold transition-transform group-hover:translate-x-0.5" style={{ color: s.color }}>
-                    Explore <ChevronRight className="h-3.5 w-3.5" />
-                  </div>
-                )}
-              </Wrapper>
-            );
-          })}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {DISCIPLINES.map(d => (
+            <SubjectCard
+              key={d.value}
+              discipline={d}
+              notes={counts ? (counts.notes[d.value] ?? 0) : null}
+              quizzes={counts ? (counts.quizzes[d.value] ?? 0) : null}
+              lectures={counts ? (counts.lectures[d.value] ?? 0) : null}
+              minNotes={MIN_NOTES_TO_LINK}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -637,9 +439,9 @@ const AudienceSplit = () => {
             eyebrow="MBA · BBA · PGDM · B.Com"
             icon={GraduationCap}
             title="Studying HR & Management this semester?"
-            body="Seven core subjects with semester-wise guidance — Principles of Management through OD & Change and International HRM."
+            body="Nine core subjects with semester-wise guidance — Principles of Management and Economics through OD & Change and International HRM."
             stats={[
-              { label: "Subjects", value: "7" },
+              { label: "Subjects", value: String(DISCIPLINES.length - 1) },
               { label: "Notes", value: n(mba.notes) },
               { label: "MCQ Sets", value: n(mba.quizzes) },
               { label: "Lectures", value: n(mba.lectures) },
@@ -656,10 +458,10 @@ const AudienceSplit = () => {
             body="A curated reference library and research-based notes to support academic work and applied HR practice, alongside the founder's own publications."
             stats={[
               { label: "Books Curated", value: n(booksCount) },
-              { label: "Disciplines", value: "8" },
+              { label: "Subjects", value: String(DISCIPLINES.length) },
             ]}
-            to="/notes"
-            cta="Explore Reference Resources"
+            to="/books"
+            cta="Explore the Book Library"
           />
         </div>
       </div>
@@ -708,79 +510,89 @@ const Testimonials = () => {
   );
 };
 
-// ─────────────── Section: Featured Notes (live from DB) ──────────────────────
-const FeaturedNotes = () => {
-  const [notes, setNotes] = useState<any[]>([]);
-  const [notesFailed, setNotesFailed] = useState(false);
+// ─────────────── Section: Recently Added (live from DB) ──────────────────────
+// A compact freshness strip — notes, MCQ sets and lectures merged by upload
+// date — rather than three oversized "featured" cards showing whatever was
+// uploaded last. Proves the site is updated weekly without competing with
+// the subject grid for attention.
+type RecentItem = { id: string; kind: "PDF" | "PPT" | "NOTE" | "MCQ" | "VIDEO"; title: string; subject: string; created_at: string; to: string };
+
+const RecentlyAdded = () => {
+  const [items, setItems] = useState<RecentItem[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
   useEffect(() => {
-    supabase.from("notes").select("*").order("created_at", { ascending: false }).limit(3).then(({ data, error }) => {
-      // Swallowing this rendered "added regularly — check back soon",
-      // so an outage made the homepage look like an abandoned site.
-      if (error) { console.error("Index: failed to load notes", error); setNotesFailed(true); }
-      else setNotes(data ?? []);
+    Promise.all([
+      supabase.from("notes").select("id, title, subject, file_url, created_at").order("created_at", { ascending: false }).limit(6),
+      (supabase.from("quizzes") as any).select("id, title, subject, published, created_at").eq("published", true).order("created_at", { ascending: false }).limit(4),
+      (supabase.from("lectures" as any) as any).select("id, title, subject, created_at").order("created_at", { ascending: false }).limit(3),
+    ]).then(([n, q, l]) => {
+      // Without this the strip simply vanishes when a request fails, which is
+      // how the homepage quietly emptied itself once the API key stopped
+      // being accepted — no content, and nothing saying why.
+      const failure = [n, q, l].find((r: any) => r.error);
+      if (failure?.error) { console.error("Index: failed to load recent items", failure.error); setFailed(true); return; }
+      const notes: RecentItem[] = (n.data ?? []).map((x: any) => ({
+        id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at,
+        kind: /\.pptx?(\?|$)/i.test(x.file_url ?? "") ? "PPT" : /\.pdf(\?|$)/i.test(x.file_url ?? "") ? "PDF" : "NOTE",
+        to: /\.pdf(\?|$)/i.test(x.file_url ?? "") ? `/notes/view/${x.id}` : `/notes?subject=${x.subject || "hrm"}`,
+      }));
+      const quizzes: RecentItem[] = (q.data ?? []).map((x: any) => ({ id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at, kind: "MCQ", to: `/quizzes/${x.id}` }));
+      const lectures: RecentItem[] = (l.data ?? []).map((x: any) => ({ id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at, kind: "VIDEO", to: "/lectures" }));
+      setItems([...notes, ...quizzes, ...lectures].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 6));
     });
   }, []);
 
-  const subjectLabel: Record<string, { label: string; color: string }> = {
-    hrm:    { label: "HRM",       color: NAVY },
-    ob:     { label: "OB",        color: STEEL_DARK },
-    sm:     { label: "SM",        color: GOLD_TEXT },
-    pom:    { label: "POM",       color: NAVY_DARK },
-    bc:     { label: "BC",        color: STEEL_DARK },
-    odcm:   { label: "OD & CM",   color: GOLD_TEXT },
-    ghr:    { label: "International HRM", color: NAVY_DARK },
+  if (failed) {
+    return (
+      <section className="py-12 md:py-14 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ContentLoadError what="recently added material" compact />
+        </div>
+      </section>
+    );
+  }
+
+  if (!items || items.length === 0) return null;
+
+  const KIND_STYLE: Record<RecentItem["kind"], { bg: string; fg: string }> = {
+    PDF:   { bg: "#FDF4F2", fg: GOLD_TEXT },
+    PPT:   { bg: "#FDF4F2", fg: GOLD_TEXT },
+    NOTE:  { bg: "#FDF4F2", fg: GOLD_TEXT },
+    MCQ:   { bg: "#EFEDE9", fg: NAVY },
+    VIDEO: { bg: "#E8E6E2", fg: NAVY_DARK },
   };
 
   return (
-    <section className="py-20 md:py-24 bg-white">
+    <section className="py-12 md:py-14 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        <div className="flex items-end justify-between gap-4 mb-5">
           <div>
-            <GoldLabel text="Study Notes" />
-            <SectionHeading title="Featured Study Notes" sub="Exam-aligned, topic-wise notes for every major HR subject." />
+            <GoldLabel text="Recently Added" />
+            <p className="text-sm text-slate-500">New notes, MCQ sets and lectures — updated every week.</p>
           </div>
           <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
             Browse all notes <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-
-        {notesFailed ? (
-          <ContentLoadError what="recent notes" compact />
-        ) : notes.length === 0 ? (
-          <p className="text-sm text-slate-500">New notes are added regularly — check back soon.</p>
-        ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {notes.map((note: any, i: number) => {
-            const sub = subjectLabel[note.subject] || { label: "HRM", color: NAVY };
+        <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+          {items.map((it, i) => {
+            const d = getDiscipline(it.subject);
+            const ks = KIND_STYLE[it.kind];
             return (
-              <div key={note.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                {/* Cover page — real PDF page 1 when available, icon fallback otherwise */}
-                <NoteCoverThumbnail fileUrl={note.file_url} title={note.title} subject={note.subject} topicSlug={note.topic_slug} size="lg" className="relative h-44 w-full overflow-hidden border-b border-slate-100">
-                  <div className="flex h-full w-full items-center justify-center" style={{ background: `${sub.color}0d` }}>
-                    <FileText className="h-10 w-10" style={{ color: `${sub.color}80` }} />
-                  </div>
-                </NoteCoverThumbnail>
-                <div className="h-1.5 w-full" style={{ background: sub.color }} />
-                <div className="flex flex-col flex-1 p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="rounded-full px-3 py-0.5 text-xs font-bold" style={{ background: `${sub.color}15`, color: sub.color }}>{sub.label}</span>
-                    {i === 0 && <span className="rounded-full px-3 py-0.5 text-xs font-bold bg-brand-mist text-brand-navy">New</span>}
-                  </div>
-                  <h3 className="text-base font-bold text-slate-800 leading-snug mb-4 group-hover:text-brand-navy transition-colors">
-                    {note.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-5">
-                    {note.description || "Comprehensive study material covering key concepts, definitions, and exam-focused explanations."}
-                  </p>
-                  <Link to="/notes" className="-mx-2 inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-bold transition-colors hover:gap-2.5" style={{ color: sub.color }}>
-                    Download Notes <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
+              <li key={`${it.kind}-${it.id}`}>
+                <Link to={it.to} className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50 sm:gap-4 sm:px-5">
+                  <span className="w-12 shrink-0 rounded-md py-0.5 text-center text-[10px] font-extrabold tracking-wider" style={{ background: ks.bg, color: ks.fg }}>{it.kind}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800 group-hover:text-brand-navy">{tidyTitle(it.title)}</span>
+                  {i === 0 && <span className="hidden rounded-full px-2 py-0.5 text-[10px] font-bold sm:inline" style={{ background: GOLD, color: "#fff" }}>NEW</span>}
+                  <span className="hidden w-28 shrink-0 truncate text-xs font-semibold text-slate-500 sm:block">{d?.short ?? it.subject.toUpperCase()}</span>
+                  <span className="w-20 shrink-0 text-right text-xs tabular-nums text-slate-400 sm:w-24">{timeAgo(it.created_at)}</span>
+                  <ChevronRight className="hidden h-4 w-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-slate-500 sm:block" />
+                </Link>
+              </li>
             );
           })}
-        </div>
-        )}
+        </ul>
       </div>
     </section>
   );
@@ -995,30 +807,8 @@ const BooksSection = () => {
   );
 };
 
-// ─────────────── Section: Popular Topics ─────────────────────────────────────
-const PopularTopics = () => (
-  <section className="py-16 bg-white border-y border-slate-100">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-        <p className="text-sm font-bold text-slate-500 flex-shrink-0">Popular Topics:</p>
-        <div className="flex flex-wrap gap-2">
-          {TOPICS.map(t => (
-            <Link key={t.label} to={t.to} className="rounded-full border px-3.5 py-2 text-xs font-medium text-slate-600 transition-all hover:border-brand-gold hover:text-brand-gold-text hover:bg-brand-cream" style={{ borderColor: "#E8E6E2" }}>
-              {t.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-
 // ─────────────── Section: Meet the Founder ───────────────────────────────────
-// Set this to the founder's exact LinkedIn profile URL when available; the
-// default is a safe public search for her name, so the button always works.
-const FOUNDER_LINKEDIN = "https://www.linkedin.com/search/results/people/?keywords=Nupur%20Karn";
-const FOUNDER_EMAIL = "nupur@karnhracademy.com";
+const FOUNDER_LINKEDIN = LIVE_CHANNELS.find(c => c.key === "linkedin")?.url ?? "/connect";
 
 const FOUNDER_QUALIFICATIONS = [
   "UGC NET Qualified (Code 55)",
@@ -1030,7 +820,6 @@ const FOUNDER_QUALIFICATIONS = [
 ];
 
 const AboutAuthor = () => {
-  const { notesCount, quizCount, lecturesCount, booksCount } = useContentCounts();
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   // Same photo source the About page uses — a real photo uploaded to the
@@ -1042,20 +831,12 @@ const AboutAuthor = () => {
     }).catch(() => {});
   }, []);
 
-  const achievements = [
-    { icon: BookOpen,   value: String(DISCIPLINES.length),                          label: "Subjects Covered", color: NAVY,       bg: "#E8E6E2" },
-    { icon: FileText,   value: notesCount    !== null ? String(notesCount)    : "…", label: "Notes Published",  color: STEEL_DARK, bg: "#F2F1EF" },
-    { icon: HelpCircle, value: quizCount     !== null ? String(quizCount)     : "…", label: "MCQs Created",     color: NAVY_DARK,  bg: "#EBE9E4" },
-    { icon: BookMarked, value: booksCount    !== null ? String(booksCount)    : "…", label: "Books Curated",    color: GOLD_DARK,  bg: "#F7F4EF" },
-    { icon: Video,      value: lecturesCount !== null ? String(lecturesCount) : "…", label: "Video Lectures",   color: STEEL,      bg: "#F2F1EF" },
-    { icon: Award,      value: "10+",                                              label: "Years Teaching",   color: GOLD,       bg: "#F7F4EF" },
-  ];
   return (
-  <section id="founder" className="py-20 md:py-24 bg-white" aria-labelledby="founder-heading" style={{ scrollMarginTop: "80px" }}>
+  <section id="founder" className="py-16 md:py-20" style={{ background: LIGHT, scrollMarginTop: "80px" }} aria-labelledby="founder-heading">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="grid lg:grid-cols-[1fr_minmax(0,380px)] gap-10 items-center">
         {/* Left: Founder card */}
-        <div className="rounded-3xl border p-7 sm:p-9" style={{ borderColor: "#E8E6E2", background: "#fafafa" }}>
+        <div className="rounded-3xl border bg-white p-7 sm:p-9" style={{ borderColor: "#E8E6E2" }}>
           <div className="mb-6 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <div className="relative flex-shrink-0">
               <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-2xl shadow-xl" style={{ background: `linear-gradient(135deg, ${NAVY}, ${STEEL})` }}>
@@ -1100,36 +881,34 @@ const AboutAuthor = () => {
               <Linkedin aria-hidden="true" className="h-4 w-4" /> LinkedIn
             </a>
             <a
-              href={`mailto:${FOUNDER_EMAIL}`}
+              href={`mailto:${CONTACT_EMAIL}`}
               className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
               style={{ borderColor: "#DCD9D3", color: NAVY, background: "#FFFFFF" }}
             >
               <Mail aria-hidden="true" className="h-4 w-4" /> Email
             </a>
             <Link
-              to="/blogs"
+              to="/about"
               className="font-display inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-bold transition-all hover:-translate-y-0.5"
               style={{ borderColor: "#DCD9D3", color: NAVY, background: "#FFFFFF" }}
             >
-              <ScrollText aria-hidden="true" className="h-4 w-4" /> Publications
+              Full profile <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
           </div>
         </div>
 
-        {/* Right: Achievements */}
-        <div className="grid grid-cols-2 gap-4">
-          {achievements.map(item => {
-            const Icon = item.icon;
-            return (
-              <div key={item.label} className="rounded-2xl border p-5" style={{ background: item.bg, borderColor: `${item.color}18` }}>
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: item.color }}>
-                  <Icon className="h-5 w-5 text-white" />
-                </div>
-                <p className="font-display text-2xl font-extrabold leading-none mb-1" style={{ color: item.color }}>{item.value}</p>
-                <p className="text-xs font-semibold text-slate-500">{item.label}</p>
-              </div>
-            );
-          })}
+        {/* Right: follow the academy — the library numbers already sit in
+            the hero card, so this side carries the channels instead of
+            repeating them. */}
+        <div className="rounded-3xl border bg-white p-7" style={{ borderColor: "#E8E6E2" }}>
+          <GoldLabel text="Follow Karn HR Academy" />
+          <p className="mb-5 text-sm leading-relaxed text-slate-600">
+            New lectures on YouTube, daily MCQs on Instagram and Telegram, and exam updates on LinkedIn — pick the channel you actually open.
+          </p>
+          <SocialIconRow items={[...LIVE_CHANNELS.map(c => ({ key: c.key, label: c.label, url: c.url })), { key: "email", label: "Email", url: `mailto:${CONTACT_EMAIL}` }]} size={42} />
+          <Link to="/connect" className="mt-5 inline-flex items-center gap-1 text-sm font-semibold hover:underline" style={{ color: GOLD_TEXT }}>
+            All channels &amp; QR codes <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </div>
     </div>
@@ -1235,17 +1014,18 @@ const Index = () => (
     />
     <Header />
     <main id="main-content">
+      {/* Order is the visitor's journey: pick a track → pick a subject →
+          see it's alive → watch → trust the person → subscribe. Anything
+          that repeated an earlier section (founder strip, resource-type
+          tiles, popular-topic chips) has been cut. */}
       <Hero />
-      <FounderStrip />
       <AudienceSplit />
-      <QuickAccess />
       <CompactHowItWorks />
       <Subjects />
-      <Testimonials />
-      <FeaturedNotes />
+      <RecentlyAdded />
       <VideoLectures />
+      <Testimonials />
       <BooksSection />
-      <PopularTopics />
       <AboutAuthor />
       <Newsletter />
     </main>
