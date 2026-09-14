@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ContentLoadError from "@/components/ContentLoadError";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -44,20 +45,30 @@ const TINTS = [
 // notification, cut-offs, eligibility etc. Cards come from the admin-managed
 // exam_info_cards table; the whole section disappears when none exist.
 const ExamInfoSection = () => {
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["exam-info-cards"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data: rows } = await (supabase.from("exam_info_cards" as any) as any)
+      const { data: rows, error } = await (supabase.from("exam_info_cards" as any) as any)
         .select("*")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
+      // The section hides itself when empty, so a swallowed error made it
+      // vanish exactly like "no cards configured" — breakage as absence.
+      if (error) throw error;
       return (rows ?? []) as ExamInfoCard[];
     },
   });
   const cards = data ?? [];
 
   const visible = cards.filter(c => c.link_url || c.file_url);
+  if (isError) {
+    return (
+      <section className="mx-auto max-w-6xl px-6 py-8">
+        <ContentLoadError what="exam information" compact />
+      </section>
+    );
+  }
   if (visible.length === 0) return null;
 
   const cardClass =

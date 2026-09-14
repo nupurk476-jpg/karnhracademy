@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchQuizQuestions } from "@/lib/quizQuestions";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -25,6 +26,7 @@ const QuizTake = () => {
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<any>(null);
   const [quizNotFound, setQuizNotFound] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [flagged, setFlagged] = useState<Record<string, boolean>>({});
@@ -56,13 +58,24 @@ const QuizTake = () => {
   useEffect(() => {
     if (!id) return;
     supabase.from("quizzes").select("*").eq("id", id).single().then(({ data, error }) => {
-      if (error || !data) { setQuizNotFound(true); return; }
+      // A failed request is not a deleted quiz. Telling a student the quiz
+      // "may have been removed" because the API was unreachable sends them
+      // away from content that is still there.
+      if (error) { console.error("QuizTake: failed to load quiz", error); setFailed(true); return; }
+      if (!data) { setQuizNotFound(true); return; }
       setQuiz(data);
     });
     (async () => {
-      const data = await fetchQuizQuestions(id);
-      setQuestions(data);
-      setTimeLeft(data.length * SECONDS_PER_QUESTION);
+      try {
+        const data = await fetchQuizQuestions(id);
+        setQuestions(data);
+        setTimeLeft(data.length * SECONDS_PER_QUESTION);
+      } catch (e) {
+        // fetchQuizQuestions throws; unhandled, that left questions at []
+        // and rendered "No questions in this quiz yet" on a full quiz.
+        console.error("QuizTake: failed to load questions", e);
+        setFailed(true);
+      }
     })();
   }, [id]);
 
@@ -168,6 +181,15 @@ const QuizTake = () => {
     if (isAnswered) return base + "bg-emerald-100 text-emerald-800 border border-emerald-300";
     return base + "bg-muted text-muted-foreground border border-border hover:bg-slate-200";
   };
+
+  if (failed) return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="mx-auto max-w-3xl px-6 py-20">
+        <ContentLoadError what="this quiz" />
+      </main>
+    </div>
+  );
 
   if (quizNotFound) return (
     <div className="min-h-screen bg-background">

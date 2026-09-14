@@ -21,15 +21,22 @@ const tally = (rows: any[] | null, keep?: (r: any) => boolean) => {
 // One query, cached app-wide, so the hero widget, the card grid and the hub
 // can never disagree about how many notes a subject has.
 export function useSubjectCounts() {
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["subject-counts"],
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<SubjectCounts> => {
-      const [{ data: notes }, { data: quizzes }, { data: lectures }] = await Promise.all([
+      const [notesRes, quizRes, lectureRes] = await Promise.all([
         supabase.from("notes").select("subject"),
         (supabase.from("quizzes") as any).select("subject, published"),
         (supabase.from("lectures" as any) as any).select("subject"),
       ]);
+      // Swallowing these reported every subject as having zero of
+      // everything, which is indistinguishable from a site with no content.
+      const failed = [notesRes, quizRes, lectureRes].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
+      const notes = notesRes.data;
+      const quizzes = quizRes.data;
+      const lectures = lectureRes.data;
       return {
         notes: tally(notes),
         quizzes: tally(quizzes, (q: any) => q.published !== false),
@@ -38,5 +45,7 @@ export function useSubjectCounts() {
       };
     },
   });
-  return { counts: data ?? null, loading: !data };
+  // `loading: !data` on its own left a failed fetch stuck as "loading"
+  // forever — spinners and "…" placeholders that never resolve.
+  return { counts: data ?? null, loading: !data && !isError, failed: isError };
 }

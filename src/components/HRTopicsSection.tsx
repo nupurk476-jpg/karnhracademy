@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ContentLoadError from "@/components/ContentLoadError";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedFileUrl } from "@/lib/signedFileUrl";
@@ -22,10 +23,13 @@ const hrTopics = [
 
 const HRTopicsSection = () => {
   const [notesByTopic, setNotesByTopic] = useState<Record<string, any[]>>({});
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     supabase.from("notes").select("*").not("topic_slug", "is", null).order("created_at", { ascending: false }).then(({ data, error }) => {
-      if (error) { console.error("HRTopicsSection: failed to load notes", error); return; }
+      // Returning early left every topic card silently note-less: the
+      // section still rendered, just without any of its content.
+      if (error) { console.error("HRTopicsSection: failed to load notes", error); setFailed(true); return; }
       if (data) {
         const grouped: Record<string, any[]> = {};
         data.forEach((note: any) => {
@@ -55,6 +59,12 @@ const HRTopicsSection = () => {
             Dive into the key areas of HR — from foundational concepts to modern analytics and strategic frameworks.
           </p>
         </div>
+
+        {failed && (
+          <div className="mb-6">
+            <ContentLoadError what="the notes for these topics" compact />
+          </div>
+        )}
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {hrTopics.map((topic) => {

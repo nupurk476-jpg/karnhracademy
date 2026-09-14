@@ -8,11 +8,11 @@ const STALE_MS = 5 * 60 * 1000;
 // subject hub and its topic cards need. Cached per subject so hub → topic
 // → hub navigation doesn't refetch.
 export function useSubjectContent(subject: string) {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["subject-content", subject],
     staleTime: STALE_MS,
     queryFn: async () => {
-      const [{ data: noteData }, { data: quizData }, { data: lectureData }] = await Promise.all([
+      const [notesRes, quizRes, lectureRes] = await Promise.all([
         // Legacy HRM notes were saved before the subject column existed.
         subject === "hrm"
           ? supabase.from("notes").select("*").or("subject.is.null,subject.eq.hrm").order("created_at", { ascending: false })
@@ -20,6 +20,13 @@ export function useSubjectContent(subject: string) {
         (supabase.from("quizzes") as any).select("*").eq("subject", subject).order("created_at", { ascending: false }),
         (supabase.from("lectures" as any) as any).select("*").eq("subject", subject).order("created_at", { ascending: false }),
       ]);
+      // Consumers render an empty result as "nothing uploaded yet", so a
+      // swallowed error here reads to a student as deleted content.
+      const failed = [notesRes, quizRes, lectureRes].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
+      const noteData = notesRes.data;
+      const quizData = quizRes.data;
+      const lectureData = lectureRes.data;
       const quizzes = (quizData ?? []).filter((q: any) => q.published !== false);
 
       const questionCounts: Record<string, number> = {};
@@ -46,5 +53,6 @@ export function useSubjectContent(subject: string) {
     questionCounts: data?.questionCounts ?? {},
     lectures: data?.lectures ?? [],
     loading: isPending,
+    failed: isError,
   };
 }

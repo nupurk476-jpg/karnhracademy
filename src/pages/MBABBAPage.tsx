@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -50,15 +51,22 @@ const isPpt = (url: string | null) => !!url && /\.pptx?$/i.test(url.split("?")[0
 const MBABBAPage = () => {
   const { request, GateDialog } = useDownloadGate();
 
-  const { data: bundle } = useQuery({
+  const { data: bundle, isError } = useQuery({
     queryKey: ["mba-content"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const [{ data: noteRows }, { data: quizRows }, { data: lectureRows }] = await Promise.all([
+      const [notesRes, quizRes, lectureRes] = await Promise.all([
         supabase.from("notes").select("id, title, description, file_url, subject, created_at"),
         (supabase.from("quizzes") as any).select("subject, published"),
         (supabase.from("lectures" as any) as any).select("subject"),
       ]);
+      // Swallowed, this left every subject card with blank counts and an
+      // empty deck list, with nothing saying the request had failed.
+      const failed = [notesRes, quizRes, lectureRes].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
+      const noteRows = notesRes.data;
+      const quizRows = quizRes.data;
+      const lectureRows = lectureRes.data;
       const tally = (rows: any[] | null, filter?: (r: any) => boolean) => {
         const out: Record<string, number> = {};
         (rows ?? []).filter(r => !filter || filter(r)).forEach((r: any) => {
@@ -168,6 +176,12 @@ const MBABBAPage = () => {
             </div>
           </div>
         </section>
+
+        {isError && (
+          <div className="mx-auto max-w-6xl px-6 pt-8">
+            <ContentLoadError what="the subject inventory" compact />
+          </div>
+        )}
 
         {/* ── Subject cards ────────────────────────────────────────────── */}
         <section className="py-10" aria-labelledby="subjects-heading">

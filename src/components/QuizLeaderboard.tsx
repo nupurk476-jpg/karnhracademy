@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ContentLoadError from "@/components/ContentLoadError";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Medal, Clock } from "lucide-react";
 import { formatClock as formatTime } from "@/lib/format";
@@ -21,6 +22,7 @@ const rankIcons = [
 
 const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [failed, setFailed] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,12 +30,19 @@ const QuizLeaderboard = ({ quizId }: { quizId: string }) => {
 
     const fetchLeaderboard = async () => {
       // Server-side aggregated leaderboard (SECURITY DEFINER RPC).
-      const { data } = await supabase.rpc("get_quiz_leaderboard", { _quiz_id: quizId });
+      const { data, error } = await supabase.rpc("get_quiz_leaderboard", { _quiz_id: quizId });
+      // Discarding this rendered "No attempts yet. Be the first!" on a
+      // board that may well be full.
+      if (error) { console.error("QuizLeaderboard: failed to load", error); setFailed(true); return; }
       setEntries(((data as LeaderboardEntry[]) || []));
     };
 
     fetchLeaderboard();
   }, [quizId]);
+
+  if (failed) {
+    return <div className="mt-8"><ContentLoadError what="the leaderboard" compact /></div>;
+  }
 
   if (entries.length === 0) {
     return (
