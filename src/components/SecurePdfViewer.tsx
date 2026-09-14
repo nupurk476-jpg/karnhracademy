@@ -146,7 +146,12 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
     (async () => {
       const page = await pdfDocRef.current.getPage(1);
       const naturalWidth = page.getViewport({ scale: 1 }).width;
-      const available = containerRef.current!.clientWidth - 32;
+      // Measured rather than hardcoded: the surface's padding is responsive
+      // (tighter on phones to buy back reading width), so a fixed constant
+      // here would silently disagree with it and mis-fit the page.
+      const cs = getComputedStyle(containerRef.current!);
+      const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const available = containerRef.current!.clientWidth - pad;
       if (available > 0 && naturalWidth > 0) {
         // No MIN_SCALE floor here. Flooring the *fit* calculation was the
         // bug: on a ~280px phone viewport, available/naturalWidth lands
@@ -406,10 +411,10 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
       <div
         ref={containerRef}
         onContextMenu={e => e.preventDefault()}
-        className="relative flex min-h-[420px] justify-center overflow-auto bg-slate-100 p-4 select-none"
+        className="relative min-h-[420px] overflow-auto bg-slate-100 p-2 select-none sm:p-4"
       >
         {status === "loading" && (
-          <div className="flex w-full max-w-md flex-col items-center gap-3 py-16">
+          <div className="mx-auto flex w-full max-w-md flex-col items-center gap-3 py-16">
             <div className="aspect-[1/1.414] w-full animate-pulse rounded-md bg-slate-200" />
             <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading secure viewer…
@@ -417,17 +422,27 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
           </div>
         )}
         {status === "ready" && (
-          <div className="relative">
-            <canvas
-              ref={canvasRef}
-              onDragStart={e => e.preventDefault()}
-              className="rounded-sm bg-white shadow-md"
-            />
-            {pageRendering && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/40">
-                <Loader2 className="h-6 w-6 animate-spin text-accent-deep" />
-              </div>
-            )}
+          // min-w-fit is load-bearing. The surface used to be the flex
+          // container itself (flex + justify-center + overflow-auto), which
+          // centres by splitting the overflow across both sides -- and
+          // scrollLeft can't go below 0, so once a reader zoomed past the
+          // container width the left edge of the page became unreachable.
+          // Centring an inner row that is at least as wide as its content
+          // keeps the page centred when it fits and scrollable to both
+          // edges when it doesn't.
+          <div className="flex min-w-fit justify-center">
+            <div className="relative">
+              <canvas
+                ref={canvasRef}
+                onDragStart={e => e.preventDefault()}
+                className="rounded-sm bg-white shadow-md"
+              />
+              {pageRendering && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/40">
+                  <Loader2 className="h-6 w-6 animate-spin text-accent-deep" />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
