@@ -38,6 +38,8 @@ const QuizTake = () => {
   const [timeTakenFinal, setTimeTakenFinal] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [attemptSaved, setAttemptSaved] = useState(false);
+  const [graded, setGraded] = useState<any | null>(null);
+  const [gradeError, setGradeError] = useState<string | null>(null);
   const [leaderboardKey, setLeaderboardKey] = useState(0);
   const [userRating, setUserRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
@@ -106,14 +108,35 @@ const QuizTake = () => {
     else { setRatingSaved(true); loadRatings(); toast({ title: "Thanks for rating!" }); }
   };
 
-  const saveAttempt = useCallback(async (finalScore: number, totalQ: number, timeTaken: number) => {
-    if (!user || !id || attemptSaved) return;
-    const { error } = await supabase.from("quiz_attempts").insert({
-      quiz_id: id, user_id: user.id, score: finalScore, total_questions: totalQ, time_taken_seconds: timeTaken,
+  // Grading moved into the database (submit_quiz_attempt). The browser no
+  // longer holds the answer key, and the score it reports is no longer
+  // taken on trust — previously any signed-in user could POST a perfect
+  // score without opening a question. The key comes back only now, with
+  // the attempt already recorded, and is merged into `questions` so the
+  // review screen below renders exactly as it did.
+  const gradeAttempt = useCallback(async (timeTaken: number) => {
+    if (!user || !id) return;
+    setGradeError(null);
+    const { data, error } = await (supabase.rpc as any)("submit_quiz_attempt", {
+      _quiz_id: id, _answers: answers, _time_taken_seconds: timeTaken,
     });
-    if (error) toast({ title: "Could not save score", description: error.message, variant: "destructive" });
-    else { setAttemptSaved(true); setLeaderboardKey(k => k + 1); }
-  }, [user, id, attemptSaved]);
+    if (error || !data) {
+      setGradeError(error?.message ?? "Grading failed");
+      return;
+    }
+    const key = new Map<string, any>((data.review ?? []).map((r: any) => [r.id, r]));
+    setQuestions(qs => qs.map(q => ({
+      ...q,
+      correct_answer: key.get(q.id)?.correct_answer,
+      explanation: key.get(q.id)?.explanation,
+    })));
+    setGraded(data);
+    setAttemptSaved(true);
+    setLeaderboardKey(k => k + 1);
+    track(EVENTS.QUIZ_COMPLETE, {
+      quiz: id, score: data.score, total: data.total_questions, seconds: timeTaken,
+    });
+  }, [user, id, answers]);
 
   const handleSubmit = useCallback(() => {
     setSubmitted(true);
@@ -121,13 +144,9 @@ const QuizTake = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     const timeTaken = Math.round((Date.now() - startTimeRef.current) / 1000);
     setTimeTakenFinal(timeTaken);
-    const finalScore = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
-    saveAttempt(finalScore, questions.length, timeTaken);
-    track(EVENTS.QUIZ_COMPLETE, {
-      quiz: id, score: finalScore, total: questions.length, seconds: timeTaken,
-    });
+    void gradeAttempt(timeTaken);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [questions, answers, saveAttempt, id]);
+  }, [gradeAttempt]);
 
   useEffect(() => {
     if (!started || submitted || questions.length === 0) return;
@@ -144,14 +163,17 @@ const QuizTake = () => {
   const progressPercent = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
   const answeredCount = Object.keys(answers).length;
   const flaggedCount = Object.values(flagged).filter(Boolean).length;
-  const score = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? 1 : 0), 0);
-  const totalMarks = questions.reduce((acc, q) => acc + (q.marks ?? 1), 0);
-  const marksObtained = questions.reduce((acc, q) => acc + (answers[q.id] === q.correct_answer ? (q.marks ?? 1) : 0), 0);
-  const percent = questions.length ? Math.round((score / questions.length) * 100) : 0;
+  // All four come from the server's grading now; the browser has no answer
+  // key to recompute them from, which is the whole point.
+  const score = graded?.score ?? 0;
+  const totalMarks = graded?.total_marks ?? questions.reduce((acc, q) => acc + (q.marks ?? 1), 0);
+  const marksObtained = graded?.marks_obtained ?? 0;
+  const percent = graded?.total_questions ? Math.round((graded.score / graded.total_questions) * 100) : 0;
 
   const handleRetake = () => {
     setAnswers({}); setFlagged({}); setCurrent(0);
     setSubmitted(false); setStarted(false); setAttemptSaved(false);
+    setGraded(null); setGradeError(null);
     setTimeLeft(questions.length * SECONDS_PER_QUESTION);
   };
 
@@ -377,6 +399,30 @@ const QuizTake = () => {
                 </button>
               </div>
             </aside>
+          </div>
+        ) : !graded ? (
+          /* Grading is a server round-trip now, so it has two states the
+             old client-side scoring never had: in-flight, and failed. */
+          <div className="rounded-xl border border-border bg-card p-8 text-center">
+            {gradeError ? (
+              <>
+                <p className="font-medium text-foreground">Couldn't grade this attempt.</p>
+                <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                  Your answers haven't been lost — this is a problem on our end. Retry and they'll be marked.
+                </p>
+                <button
+                  onClick={() => gradeAttempt(timeTakenFinal)}
+                  className="mt-4 rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110"
+                >
+                  Retry
+                </button>
+              </>
+            ) : (
+              <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-muted border-t-accent" />
+                Marking your answers…
+              </p>
+            )}
           </div>
         ) : (
           /* ── Results + review ─────────────────────────────────────────── */
