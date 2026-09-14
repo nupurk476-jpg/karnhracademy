@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -24,7 +25,7 @@ const PYQsPage = () => {
   const [progress, setProgress] = useState<any[]>([]);
 
   // Cached sitewide — the same list backs search and the paper pages.
-  const { data: pyqData, isPending: loading } = useQuery({
+  const { data: pyqData, isPending: loading, isError } = useQuery({
     queryKey: ["pyq-papers-all"],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
@@ -173,7 +174,9 @@ const PYQsPage = () => {
               </div>
             </div>
 
-            {filtered.length === 0 ? (
+            {isError ? (
+              <ContentLoadError what="the question papers" />
+            ) : filtered.length === 0 ? (
               search.trim() ? (
                 <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center">
                   <p className="text-sm font-medium text-muted-foreground">No papers here match "{search}".</p>

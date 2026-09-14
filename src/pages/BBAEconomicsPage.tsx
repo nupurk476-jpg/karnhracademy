@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useBBAEconomicsContent } from "@/hooks/use-bba-economics-content";
+import ContentLoadError from "@/components/ContentLoadError";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 
 const BBAEconomicsPage = () => {
-  const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useBBAEconomicsContent();
+  const { notes, quizzes, questionCounts, pyqs, lectures, loading, failed } = useBBAEconomicsContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -108,6 +109,12 @@ const BBAEconomicsPage = () => {
             </div>
           </div>
         </section>
+
+        {failed && (
+          <div className="mx-auto max-w-5xl px-6 pt-6">
+            <ContentLoadError what="BBA Business Economics material" compact />
+          </div>
+        )}
 
         {/* ── Browse by Unit ──────────────────────────────────────────── */}
         <section id="units" className="scroll-mt-24 border-b border-border bg-slate-50 py-10" aria-labelledby="units-heading">

@@ -7,6 +7,7 @@ import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { useLabourWelfareContent } from "@/hooks/use-labour-welfare-content";
+import ContentLoadError from "@/components/ContentLoadError";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
@@ -19,7 +20,7 @@ const LabourWelfareTopicPage = () => {
   const { topicSlug } = useParams();
   const topic = getHighScoringTopicBySlug(topicSlug);
 
-  const { notes, quizzes, questionCounts, pyqs, lectures, loading } = useLabourWelfareContent();
+  const { notes, quizzes, questionCounts, pyqs, lectures, loading, failed } = useLabourWelfareContent();
   const { request, openFree, GateDialog } = useDownloadGate();
   const { isBookmarked, toggle } = useBookmarks();
   const { toast } = useToast();
@@ -169,6 +170,10 @@ const LabourWelfareTopicPage = () => {
 
         {loading ? (
           <div className="mx-auto max-w-4xl px-6 py-16 text-center text-sm text-muted-foreground">Loading…</div>
+        ) : failed ? (
+          <div className="mx-auto max-w-4xl px-6 py-16">
+            <ContentLoadError what="this topic's material" />
+          </div>
         ) : (
           <div className="mx-auto max-w-4xl px-6 py-10 space-y-14">
             {/* ── Notes ─────────────────────────────────────────────────── */}

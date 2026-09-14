@@ -6,16 +6,24 @@ const SUBJECT = "mba-eco";
 const STALE_MS = 5 * 60 * 1000;
 
 export function useMBAEconomicsContent() {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["mba-eco-content"],
     staleTime: STALE_MS,
     queryFn: async () => {
-      const [{ data: noteData }, { data: quizData }, { data: pyqData }, { data: lectureData }] = await Promise.all([
+      const [notesRes, quizRes, pyqRes, lectureRes] = await Promise.all([
         supabase.from("notes").select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
         (supabase.from("quizzes") as any).select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
         (supabase.from("pyq_papers" as any) as any).select("*").eq("subject", SUBJECT).order("year", { ascending: false }),
         (supabase.from("lectures" as any) as any).select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
       ]);
+      // See use-labour-welfare-content: an empty result renders as "nothing
+      // uploaded yet", so a swallowed error would read as deleted content.
+      const failed = [notesRes, quizRes, pyqRes, lectureRes].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
+      const noteData = notesRes.data;
+      const quizData = quizRes.data;
+      const pyqData = pyqRes.data;
+      const lectureData = lectureRes.data;
       const publishedQuizzes = (quizData ?? []).filter((q: any) => q.published !== false);
 
       const questionCounts: Record<string, number> = {};
@@ -49,5 +57,6 @@ export function useMBAEconomicsContent() {
     pyqs: data?.pyqs ?? [],
     lectures: data?.lectures ?? [],
     loading: isPending,
+    failed: isError,
   };
 }

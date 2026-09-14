@@ -14,16 +14,25 @@ const STALE_MS = 5 * 60 * 1000;
 // instead of re-downloading everything on every hop (the provider was
 // mounted app-wide for months with zero consumers).
 export function useLabourWelfareContent() {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ["lw-content"],
     staleTime: STALE_MS,
     queryFn: async () => {
-      const [{ data: noteData }, { data: quizData }, { data: pyqData }, { data: lectureData }] = await Promise.all([
+      const [notesRes, quizRes, pyqRes, lectureRes] = await Promise.all([
         supabase.from("notes").select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
         (supabase.from("quizzes") as any).select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
         (supabase.from("pyq_papers" as any) as any).select("*").eq("subject", SUBJECT).order("year", { ascending: false }),
         (supabase.from("lectures" as any) as any).select("*").eq("subject", SUBJECT).order("created_at", { ascending: false }),
       ]);
+      // Every consumer renders "no notes uploaded yet for Unit N" when these
+      // come back empty, so a swallowed error here reads to a student as
+      // deleted content. Fail loudly and let the page say so instead.
+      const failed = [notesRes, quizRes, pyqRes, lectureRes].find((r: any) => r.error);
+      if (failed?.error) throw failed.error;
+      const noteData = notesRes.data;
+      const quizData = quizRes.data;
+      const pyqData = pyqRes.data;
+      const lectureData = lectureRes.data;
       const publishedQuizzes = (quizData ?? []).filter((q: any) => q.published !== false);
 
       // Question counts — grouped server-side (one small result set instead
@@ -60,5 +69,6 @@ export function useLabourWelfareContent() {
     pyqs: data?.pyqs ?? [],
     lectures: data?.lectures ?? [],
     loading: isPending,
+    failed: isError,
   };
 }

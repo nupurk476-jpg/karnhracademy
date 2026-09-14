@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -41,6 +42,7 @@ const DisciplineTopicPage = ({
   const navigate = useNavigate();
   const topic = topics.find((t) => t.slug === slug);
   const [notes, setNotes] = useState<any[]>([]);
+  const [failed, setFailed] = useState(false);
   const { request, openFree, GateDialog } = useDownloadGate();
 
   // Same free-view / gated-download split as the main Notes page: PDFs open
@@ -67,7 +69,9 @@ const DisciplineTopicPage = ({
       .eq("topic_slug", slug)
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
-        if (error) { console.error("DisciplineTopicPage: failed to load notes", error); return; }
+        // Returning early left notes at [], rendering "No resources
+        // uploaded for <topic> yet" on what was really a failed request.
+        if (error) { console.error("DisciplineTopicPage: failed to load notes", error); setFailed(true); return; }
         if (!data) return;
         // Legacy HRM notes were saved with subject = null before the "subject" column existed.
         const scoped = subject === "hrm" ? data.filter((n) => !n.subject || n.subject === "hrm") : data.filter((n) => n.subject === subject);
@@ -127,7 +131,9 @@ const DisciplineTopicPage = ({
           </div>
         </div>
 
-        {notes.length === 0 ? (
+        {failed ? (
+          <ContentLoadError what={`notes for ${topic.label}`} />
+        ) : notes.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-muted-foreground">
             <p>
               No resources uploaded for <strong className="text-foreground">{topic.label}</strong> yet. Check back later.

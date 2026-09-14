@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { track, EVENTS } from "@/lib/analytics";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { DISCIPLINES, getDiscipline } from "@/lib/disciplines";
@@ -518,6 +519,7 @@ type RecentItem = { id: string; kind: "PDF" | "PPT" | "NOTE" | "MCQ" | "VIDEO"; 
 
 const RecentlyAdded = () => {
   const [items, setItems] = useState<RecentItem[] | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -525,6 +527,11 @@ const RecentlyAdded = () => {
       (supabase.from("quizzes") as any).select("id, title, subject, published, created_at").eq("published", true).order("created_at", { ascending: false }).limit(4),
       (supabase.from("lectures" as any) as any).select("id, title, subject, created_at").order("created_at", { ascending: false }).limit(3),
     ]).then(([n, q, l]) => {
+      // Without this the strip simply vanishes when a request fails, which is
+      // how the homepage quietly emptied itself once the API key stopped
+      // being accepted — no content, and nothing saying why.
+      const failure = [n, q, l].find((r: any) => r.error);
+      if (failure?.error) { console.error("Index: failed to load recent items", failure.error); setFailed(true); return; }
       const notes: RecentItem[] = (n.data ?? []).map((x: any) => ({
         id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at,
         kind: /\.pptx?(\?|$)/i.test(x.file_url ?? "") ? "PPT" : /\.pdf(\?|$)/i.test(x.file_url ?? "") ? "PDF" : "NOTE",
@@ -535,6 +542,16 @@ const RecentlyAdded = () => {
       setItems([...notes, ...quizzes, ...lectures].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 6));
     });
   }, []);
+
+  if (failed) {
+    return (
+      <section className="py-12 md:py-14 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ContentLoadError what="recently added material" compact />
+        </div>
+      </section>
+    );
+  }
 
   if (!items || items.length === 0) return null;
 
@@ -584,9 +601,15 @@ const RecentlyAdded = () => {
 // ─────────────── Section: Video Lectures ─────────────────────────────────────
 const VideoLectures = () => {
   const [lectures, setLectures] = useState<any[]>([]);
+  const [lecturesFailed, setLecturesFailed] = useState(false);
   const [playing, setPlaying] = useState<any | null>(null);
   useEffect(() => {
-    supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data }) => data && setLectures(data));
+    supabase.from("lectures").select("*").order("created_at", { ascending: false }).limit(3).then(({ data, error }) => {
+      // Swallowing this rendered "added regularly — check back soon",
+      // so an outage made the homepage look like an abandoned site.
+      if (error) { console.error("Index: failed to load lectures", error); setLecturesFailed(true); }
+      else setLectures(data ?? []);
+    });
   }, []);
 
   return (
@@ -602,7 +625,9 @@ const VideoLectures = () => {
           </Link>
         </div>
 
-        {lectures.length === 0 ? (
+        {lecturesFailed ? (
+          <ContentLoadError what="recent lectures" compact />
+        ) : lectures.length === 0 ? (
           <p className="text-sm text-slate-500">New lectures are added regularly — check back soon.</p>
         ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -714,8 +739,14 @@ const VideoLectures = () => {
 // ─────────────── Section: Books ───────────────────────────────────────────────
 const BooksSection = () => {
   const [books, setBooks] = useState<any[]>([]);
+  const [booksFailed, setBooksFailed] = useState(false);
   useEffect(() => {
-    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data }) => data && setBooks(data));
+    supabase.from("book_recommendations").select("*").order("created_at", { ascending: false }).limit(4).then(({ data, error }) => {
+      // Swallowing this rendered "added regularly — check back soon",
+      // so an outage made the homepage look like an abandoned site.
+      if (error) { console.error("Index: failed to load book_recommendations", error); setBooksFailed(true); }
+      else setBooks(data ?? []);
+    });
   }, []);
 
   const bookColors = [NAVY, STEEL_DARK, NAVY_DARK, GOLD];
@@ -732,7 +763,9 @@ const BooksSection = () => {
             View all books <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        {books.length === 0 ? (
+        {booksFailed ? (
+          <ContentLoadError what="book recommendations" compact />
+        ) : books.length === 0 ? (
           <p className="text-sm text-slate-500">Book recommendations are added regularly — check back soon.</p>
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

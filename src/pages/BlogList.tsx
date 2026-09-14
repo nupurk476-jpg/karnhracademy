@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { track, EVENTS } from "@/lib/analytics";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import ContentLoadError from "@/components/ContentLoadError";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import {
@@ -284,6 +285,7 @@ const BlogList = () => {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -292,8 +294,11 @@ const BlogList = () => {
       .select("*")
       .eq("published", true)
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        data && setPosts(data);
+      .then(({ data, error }) => {
+        // `data && setPosts(data)` alone left posts at [] on failure, which
+        // renders as "No articles found" — an outage reading as an empty blog.
+        if (error) { console.error("BlogList: failed to load posts", error); setFailed(true); }
+        else setPosts(data ?? []);
         setLoading(false);
       });
   }, []);
@@ -441,6 +446,8 @@ const BlogList = () => {
                   {[1,2,3,4].map(i => <div key={i} className="h-72 animate-pulse rounded-xl bg-slate-200" />)}
                 </div>
               </div>
+            ) : failed ? (
+              <ContentLoadError what="the articles" />
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-white py-20 text-center">
                 <BookOpen className="mb-3 h-10 w-10 text-slate-300" />
