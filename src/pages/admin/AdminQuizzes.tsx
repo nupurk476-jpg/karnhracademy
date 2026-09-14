@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchQuizQuestions } from "@/lib/quizQuestions";
+import { fetchQuizQuestionsAdmin } from "@/lib/quizQuestions";
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, Trash2, Pencil, X, Copy, Eye, EyeOff, ChevronDown, ChevronRight,
@@ -58,7 +58,7 @@ const AdminQuizzes = () => {
 
   const loadQuestions = async (quizId: string) => {
     try {
-      setQuestions(await fetchQuizQuestions(quizId));
+      setQuestions(await fetchQuizQuestionsAdmin(quizId));
     } catch (err: any) {
       toast({ title: "Failed to load questions", description: err.message, variant: "destructive" });
     }
@@ -145,7 +145,7 @@ const AdminQuizzes = () => {
     if (error || !newQuiz) { toast({ title: "Failed to duplicate quiz", description: error?.message, variant: "destructive" }); return; }
     let qs: any[] = [];
     try {
-      qs = await fetchQuizQuestions(q.id);
+      qs = await fetchQuizQuestionsAdmin(q.id);
     } catch (err: any) {
       toast({ title: "Quiz duplicated but questions failed to load", description: err.message, variant: "destructive" });
     }
@@ -540,7 +540,7 @@ const QuizPreviewBody = ({ quizId }: { quizId?: string }) => {
     if (!quizId) { setQs([]); return; }
     (async () => {
       try {
-        setQs(await fetchQuizQuestions(quizId));
+        setQs(await fetchQuizQuestionsAdmin(quizId));
       } catch {
         setQs([]);
       }
