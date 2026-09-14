@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -20,6 +19,11 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
+  // Header has separate Sign In and Sign Up buttons that both land here.
+  // Defaulting to the login form regardless meant "Sign Up" showed a
+  // sign-in form and the visitor had to spot the toggle to do the thing
+  // they had just clicked — friction on the one path that feeds signups.
+  const [isLogin, setIsLogin] = useState(params.get("mode") !== "signup");
   // Gated flows pass the page they came from; a direct header sign-in goes
   // home rather than to an arbitrary section. An OAuth round trip loses
   // router state, so the destination comes back as ?next= instead — always
