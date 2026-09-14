@@ -205,7 +205,7 @@ const Header = () => {
                   </Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/auth">
+                  <Link to="/auth?mode=signup">
                     <UserPlus className="h-4 w-4 mr-1" />
                     Sign Up
                   </Link>
@@ -293,7 +293,7 @@ const Header = () => {
                   </Link>
                 </Button>
                 <Button size="sm" asChild className="w-full justify-start">
-                  <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                  <Link to="/auth?mode=signup" onClick={() => setMobileOpen(false)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Sign Up
                   </Link>
