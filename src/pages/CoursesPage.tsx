@@ -10,7 +10,7 @@ import CourseCardTile, { CourseCardSkeleton } from "@/components/CourseCard";
 import CourseFilters from "@/components/CourseFilters";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
-  SORTS, filterCourses, sortCourses, filtersFromParams, paramsFromFilters,
+  SORTS, filterCourses, sortCourses, filtersFromParams, paramsFromFilters, isMissingTableError,
   type CourseCard, type CourseCategory, type Filters, type SortValue,
 } from "@/lib/courses";
 import { SlidersHorizontal, Search } from "lucide-react";
@@ -62,8 +62,12 @@ const CoursesPage = () => {
       if (cancelled) return;
       // A failed request must not render as "no courses yet" — that tells
       // a student the catalog is empty when it is only unreachable.
-      if (error || catError) {
-        console.error("CoursesPage: failed to load catalog", error ?? catError);
+      const problem = error ?? catError;
+      if (problem) {
+        console.error("CoursesPage: failed to load catalog", problem);
+        // Migrations not applied yet — the feature is deployed but not set
+        // up. That reads as an empty catalog to a visitor, not as a fault.
+        if (isMissingTableError(problem)) { setCourses([]); setCategories([]); return; }
         setFailed(true);
         return;
       }

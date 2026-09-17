@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   filtersFromParams, paramsFromFilters, toggle, filterCourses, sortCourses,
-  categoryCounts, typeCounts, describeContents, EMPTY_FILTERS,
+  categoryCounts, typeCounts, describeContents, isMissingTableError, EMPTY_FILTERS,
   type CourseCard,
 } from "./courses";
 
@@ -112,5 +112,25 @@ describe("card wording", () => {
     expect(describeContents(CATALOG[1])).toBe("2 notes · 1 lecture · 1 MCQ set");
     expect(describeContents(CATALOG[2])).toBe("1 note · 1 MCQ set");
     expect(describeContents(card({}))).toBe("");
+  });
+});
+
+describe("telling 'not set up yet' from 'broken'", () => {
+  /**
+   * The catalog can deploy before its migrations are run. In that window a
+   * visitor following the Courses nav link should see an empty catalog, not
+   * a red "problem on our end" box.
+   */
+  it("recognises PostgREST's unknown-table error", () => {
+    expect(isMissingTableError({ code: "PGRST205", message: "Could not find the table 'public.course_cards' in the schema cache" })).toBe(true);
+    expect(isMissingTableError({ message: "Could not find the table in the schema cache" })).toBe(true);
+  });
+
+  it("does not swallow a real failure as an empty shelf", () => {
+    expect(isMissingTableError({ code: "500", message: "Internal Server Error" })).toBe(false);
+    expect(isMissingTableError({ code: "42501", message: "permission denied for table courses" })).toBe(false);
+    expect(isMissingTableError({ message: "NetworkError when attempting to fetch resource" })).toBe(false);
+    expect(isMissingTableError(null)).toBe(false);
+    expect(isMissingTableError(undefined)).toBe(false);
   });
 });

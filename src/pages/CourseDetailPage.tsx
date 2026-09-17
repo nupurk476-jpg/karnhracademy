@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { categoryStyle } from "@/lib/courseCategoryStyle";
 import { iconForTopic } from "@/lib/topicIcons";
-import { describeContents, type CourseCard, type CourseItemKind } from "@/lib/courses";
+import { describeContents, isMissingTableError, type CourseCard, type CourseItemKind } from "@/lib/courses";
 import { FileText, HelpCircle, PlayCircle, Download, ArrowRight, Layers } from "lucide-react";
 
 /**
@@ -60,7 +60,13 @@ const CourseDetailPage = () => {
       const { data: rows, error } = await (supabase.from("course_cards" as any) as any)
         .select("*").eq("slug", slug).eq("is_published", true).limit(1);
       if (cancelled) return;
-      if (error) { console.error("CourseDetailPage: failed to load course", error); setFailed(true); setLoading(false); return; }
+      if (error) {
+        console.error("CourseDetailPage: failed to load course", error);
+        // Same deploy-before-migrate window as the catalog: a bookmarked
+        // course URL reads as "not found", which is what it is.
+        if (isMissingTableError(error)) { setNotFound(true); setLoading(false); return; }
+        setFailed(true); setLoading(false); return;
+      }
       const found: CourseCard | undefined = (rows ?? [])[0];
       if (!found) { setNotFound(true); setLoading(false); return; }
       setCourse(found);

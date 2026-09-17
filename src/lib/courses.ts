@@ -10,6 +10,28 @@ import type { DisciplineValue } from "@/lib/disciplines";
 
 export type CourseItemKind = "note" | "quiz" | "lecture";
 
+/**
+ * Is this error "the courses tables aren't there yet" rather than "the
+ * request failed"?
+ *
+ * The catalog ships in the same deploy as the migrations that back it, and
+ * a deploy can land before someone runs the SQL. In that window the nav
+ * carries a Courses link, and without this the visitor who follows it gets
+ * "this is a problem on our end" in a red box — alarming, and not really
+ * true: the catalog simply isn't set up yet. PostgREST answers PGRST205
+ * for an unknown table, so that specific case reads as the ordinary "no
+ * courses yet" empty state instead.
+ *
+ * Narrow on purpose. A genuine outage — a 500, a dropped connection, RLS
+ * refusing the read — still surfaces as the error it is, because hiding
+ * one of those behind "nothing here yet" is exactly the failure this
+ * codebase already goes out of its way to avoid elsewhere.
+ */
+export function isMissingTableError(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  return error.code === "PGRST205" || /schema cache/i.test(error.message ?? "");
+}
+
 /** A row of the course_cards view — everything one card needs. */
 export type CourseCard = {
   id: string;
