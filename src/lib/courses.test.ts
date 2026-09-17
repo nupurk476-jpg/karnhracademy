@@ -11,7 +11,7 @@ const card = (over: Partial<CourseCard>): CourseCard => ({
   category_order: 0, topic_slug: "t", title: "Course", summary: null, cover_url: null,
   level: null, is_free: true, price_paise: 0, is_published: true, display_order: 0,
   created_at: "2026-01-01T00:00:00Z", lesson_count: 0, note_count: 0, quiz_count: 0,
-  lecture_count: 0, module_count: 0, ...over,
+  lecture_count: 0, module_count: 0, topic_count: 0, ...over,
 });
 
 const CATALOG = [
@@ -137,6 +137,10 @@ describe("telling 'not set up yet' from 'broken'", () => {
 });
 
 describe("a subject-level course's shape", () => {
+  it("takes the module noun from the caller, so a syllabus reads in units", () => {
+    expect(describeShape(card({ module_count: 10, lesson_count: 161 }), "unit")).toBe("10 units · 161 lessons");
+  });
+
   it("leads with modules, and says nothing about a single one", () => {
     expect(describeShape(card({ module_count: 12, lesson_count: 47 }))).toBe("12 modules · 47 lessons");
     // "1 module" describes a topic, not a course — better left unsaid.
@@ -181,5 +185,44 @@ describe("grouping lessons into modules", () => {
     );
     expect(modules).toHaveLength(1);
     expect(modules[0].items).toHaveLength(1);
+  });
+});
+
+describe("grouping a unit-based syllabus", () => {
+  /**
+   * Labour Welfare has ten units holding 55 topics between them. Grouped by
+   * topic it reported "55 modules", which is a syllabus dump; grouped by
+   * unit it is a course. The unit is recoverable from the slug prefix.
+   */
+  const unitOf = (slug: string | null) => slug?.match(/^u(\d+)/)?.[1];
+  const items = [
+    { topic_slug: "u3-industrial-disputes", position: 4 },
+    { topic_slug: "u1-organising", position: 2 },
+    { topic_slug: "u1-staffing", position: 3 },
+    { topic_slug: "u10-social-security", position: 6 },
+    { topic_slug: "u1-development-of-management-thought", position: 1 },
+  ];
+  const ORDER = ["u1", "u3", "u10"];
+  const group = () => groupIntoModules(
+    items, ORDER, key => `Unit ${key}`,
+    item => (unitOf(item.topic_slug) ? `u${unitOf(item.topic_slug)}` : item.topic_slug ?? ""),
+  );
+
+  it("collapses many topics into their units", () => {
+    expect(group().map(m => m.slug)).toEqual(["u1", "u3", "u10"]);
+  });
+
+  it("puts all three unit-1 topics in one module, in order", () => {
+    expect(group()[0].items.map(i => i.position)).toEqual([1, 2, 3]);
+  });
+
+  it("does not mistake u10 for u1", () => {
+    // A naive prefix match would fold Unit X into Unit I.
+    expect(group().find(m => m.slug === "u10")!.items).toHaveLength(1);
+    expect(group().find(m => m.slug === "u1")!.items).toHaveLength(3);
+  });
+
+  it("orders units by the syllabus, so Unit X comes after Unit III", () => {
+    expect(group().map(m => m.slug)).toEqual(["u1", "u3", "u10"]);
   });
 });

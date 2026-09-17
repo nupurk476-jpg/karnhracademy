@@ -54,6 +54,9 @@ export type CourseCard = {
   quiz_count: number;
   lecture_count: number;
   module_count: number;
+  /** Distinct topics covered. Differs from module_count on unit-based
+      subjects, where a module is a unit holding several topics. */
+  topic_count: number;
 };
 
 export type CourseCategory = {
@@ -215,9 +218,9 @@ export function describeContents(course: CourseCard): string {
  * The module part is dropped when there is only one, because "1 module"
  * describes a topic, not a course, and is better left unsaid.
  */
-export function describeShape(course: CourseCard): string {
+export function describeShape(course: CourseCard, moduleNoun = "module"): string {
   const lessons = `${course.lesson_count} ${course.lesson_count === 1 ? "lesson" : "lessons"}`;
-  if (course.module_count > 1) return `${course.module_count} modules · ${lessons}`;
+  if (course.module_count > 1) return `${course.module_count} ${moduleNoun}s · ${lessons}`;
   return lessons;
 }
 
@@ -237,11 +240,19 @@ export function groupIntoModules<T extends { topic_slug: string | null; position
   items: T[],
   topicOrder: string[],
   labelFor: (slug: string) => string,
+  /**
+   * What makes two lessons the same module. Defaults to the topic, which is
+   * right for the seven subjects whose topics are flat. Labour Welfare and
+   * the two Economics subjects have a unit above the topic — ten units
+   * rather than 55 topics is the difference between a course and a
+   * syllabus — so those pass a key that resolves to the unit.
+   */
+  keyOf: (item: T) => string = item => item.topic_slug ?? "",
 ): { slug: string; label: string; items: T[] }[] {
   const rank = new Map(topicOrder.map((slug, i) => [slug, i]));
   const groups = new Map<string, T[]>();
   for (const item of items) {
-    const key = item.topic_slug ?? "";
+    const key = keyOf(item);
     const list = groups.get(key);
     if (list) list.push(item);
     else groups.set(key, [item]);

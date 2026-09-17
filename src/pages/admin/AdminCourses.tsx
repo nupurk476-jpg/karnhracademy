@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DISCIPLINES } from "@/lib/disciplines";
 import { hasCustomStyle } from "@/lib/courseCategoryStyle";
 import { describeContents, describeShape, type CourseCard } from "@/lib/courses";
+import { isUnitBasedSubject } from "@/lib/subjectUnits";
 import { RefreshCw, Eye, EyeOff, ExternalLink, Palette } from "lucide-react";
 
 /**
@@ -174,6 +175,7 @@ const AdminCourses = () => {
                 <th className="px-3 py-2 text-left font-medium">Course</th>
                 <th className="px-3 py-2 text-left font-medium">Category</th>
                 <th className="px-3 py-2 text-right font-medium">Modules</th>
+                <th className="px-3 py-2 text-right font-medium">Topics</th>
                 <th className="px-3 py-2 text-right font-medium">Lessons</th>
                 <th className="px-3 py-2 text-right font-medium">Status</th>
               </tr>
@@ -184,7 +186,8 @@ const AdminCourses = () => {
                   <td className="px-3 py-2">
                     <p className="font-medium text-foreground">{course.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {describeShape(course)}{describeContents(course) && ` · ${describeContents(course)}`}
+                      {describeShape(course, isUnitBasedSubject(course.category_slug) ? "unit" : "module")}
+                      {describeContents(course) && ` · ${describeContents(course)}`}
                     </p>
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">
@@ -199,6 +202,7 @@ const AdminCourses = () => {
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.module_count}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.topic_count}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.lesson_count}</td>
                   <td className="px-3 py-2 text-right">
                     <button

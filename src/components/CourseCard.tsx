@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { topicGradient } from "@/lib/subjectGradients";
 import { iconForTopic } from "@/lib/topicIcons";
 import { describeContents, describeShape, type CourseCard as Course } from "@/lib/courses";
+import { isUnitBasedSubject } from "@/lib/subjectUnits";
 import { Layers } from "lucide-react";
 
 /**
@@ -65,7 +66,7 @@ const CourseCardTile = ({ course }: { course: Course }) => {
           {/* Modules first: a course now covers a whole subject, so how it
               is organised says more than a bare lesson tally. */}
           <span>
-            {describeShape(course)}
+            {describeShape(course, isUnitBasedSubject(course.category_slug) ? "unit" : "module")}
             {contents && <span className="text-muted-foreground/70"> · {contents}</span>}
           </span>
         </div>

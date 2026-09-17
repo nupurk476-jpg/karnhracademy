@@ -17,6 +17,7 @@ import {
   type CourseCard, type CourseItemKind,
 } from "@/lib/courses";
 import { getDiscipline, getTopicLabel } from "@/lib/disciplines";
+import { getUnitsForSubject, getUnitForSubjectSlug, unitRoman } from "@/lib/subjectUnits";
 import { FileText, HelpCircle, PlayCircle, Download, ArrowRight, Layers } from "lucide-react";
 
 /**
@@ -124,11 +125,34 @@ const CourseDetailPage = () => {
    * database cannot know, so the sync orders items alphabetically by topic
    * and this is where that becomes the sequence a student studies in.
    */
+  const subject = course?.category_slug ?? "";
+  const units = getUnitsForSubject(subject);
+
   const modules = useMemo(() => {
-    const topicOrder = getDiscipline(course?.category_slug ?? "")?.topics.map(t => t.slug) ?? [];
+    // Unit-based subjects (Labour Welfare, the two Economics papers) group by
+    // UNIT: ten units read as a course, where the 55 topics underneath them
+    // read as a syllabus dump. Everything else groups by topic, which is all
+    // the depth those subjects have.
+    if (units) {
+      return groupIntoModules(
+        items,
+        units.map(u => `u${u.number}`),
+        key => {
+          const found = units.find(u => `u${u.number}` === key);
+          return found ? `Unit ${unitRoman(found.number)} — ${found.title}` : "Other material";
+        },
+        item => {
+          const unit = getUnitForSubjectSlug(subject, item.topic_slug);
+          // A topic whose unit can't be resolved keeps its own key rather
+          // than being swept into whichever unit happens to sort first.
+          return unit ? `u${unit.number}` : (item.topic_slug ?? "");
+        },
+      );
+    }
+    const topicOrder = getDiscipline(subject)?.topics.map(t => t.slug) ?? [];
     return groupIntoModules(items, topicOrder, slugValue =>
       slugValue ? getTopicLabel(slugValue) : "Other material");
-  }, [items, course?.category_slug]);
+  }, [items, subject, units]);
 
   const openNote = (item: Resolved, mode: "view" | "download") => {
     if (!item.file_url) { toast({ title: "No file attached to this note." }); return; }
@@ -242,7 +266,7 @@ const CourseDetailPage = () => {
                 <Badge variant="success" size="sm">{course.is_free ? "Free" : "Paid"}</Badge>
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Layers className="h-4 w-4" />
-                  {describeShape(course)}
+                  {describeShape(course, units ? "unit" : "module")}
                 </span>
               </div>
 
@@ -258,7 +282,10 @@ const CourseDetailPage = () => {
                 {modules.map((module, moduleIndex) => (
                   <section key={module.slug || "other"}>
                     <h2 className="mb-1 text-lg font-bold text-foreground">
-                      <span className="text-muted-foreground">Module {moduleIndex + 1} · </span>
+                      {/* A unit label already carries its own number
+                          ("Unit III — ..."), so prefixing "Module 2 ·"
+                          would number the same thing twice, differently. */}
+                      {!units && <span className="text-muted-foreground">Module {moduleIndex + 1} · </span>}
                       {module.label}
                     </h2>
                     <p className="mb-3 text-xs text-muted-foreground">
@@ -275,6 +302,17 @@ const CourseDetailPage = () => {
                             <Icon className="h-4 w-4 shrink-0 text-accent-deep" aria-label={label} />
                             <div className="min-w-0 flex-1">
                               <p className="font-medium text-foreground">{item.title}</p>
+                              {/* Only for unit-based subjects: a unit spans
+                                  several topics, so the lesson title alone
+                                  doesn't say where in the syllabus it sits.
+                                  On a flat subject the module heading IS the
+                                  topic, and repeating it on every row is
+                                  noise. Suppressed too when a note's title
+                                  already IS its topic's name, which happens
+                                  often and reads as a rendering bug. */}
+                              {units && item.topic_slug && getTopicLabel(item.topic_slug) !== item.title && (
+                                <p className="text-[11px] font-medium text-accent-deep">{getTopicLabel(item.topic_slug)}</p>
+                              )}
                               {item.description && (
                                 <p className="line-clamp-1 text-xs text-muted-foreground">{item.description}</p>
                               )}
