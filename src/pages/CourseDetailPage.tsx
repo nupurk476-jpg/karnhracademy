@@ -153,6 +153,24 @@ const CourseDetailPage = () => {
           title={course.title}
           description={course.summary ?? `${course.title} — ${course.lesson_count} free lessons covering notes, lectures and MCQ practice from Karn HR Academy.`}
           path={`/courses/${course.slug}`}
+          // Deliberately out of the index, and this is the whole reason the
+          // catalog is safe to add: a course is the same material as the
+          // subject and topic pages that already rank (/hr, /hr/:slug and
+          // friends). Indexed, the two would compete for the same queries
+          // and split what the topic pages have already earned — a site
+          // cannibalising its own rankings is the usual way a catalog like
+          // this quietly costs traffic instead of adding it.
+          //
+          // `follow` keeps the lessons crawlable, so this still feeds
+          // internal links to the notes and MCQs. No cross-page canonical
+          // to go with it: noindex plus a canonical pointing somewhere else
+          // is a contradiction, and Google is explicit about not mixing
+          // them. The topic page stays canonical for itself.
+          //
+          // The catalog page at /courses IS indexed — it is a real landing
+          // page with content of its own, and it is in public/sitemap.xml.
+          noindex
+          follow
           jsonLd={{
             "@context": "https://schema.org",
             "@type": "Course",
