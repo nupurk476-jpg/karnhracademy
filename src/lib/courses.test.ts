@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   filtersFromParams, paramsFromFilters, toggle, filterCourses, sortCourses,
-  categoryCounts, typeCounts, describeContents, isMissingTableError, EMPTY_FILTERS,
+  categoryCounts, typeCounts, describeContents, describeShape, groupIntoModules,
+  isMissingTableError, EMPTY_FILTERS,
   type CourseCard,
 } from "./courses";
 
@@ -10,7 +11,7 @@ const card = (over: Partial<CourseCard>): CourseCard => ({
   category_order: 0, topic_slug: "t", title: "Course", summary: null, cover_url: null,
   level: null, is_free: true, price_paise: 0, is_published: true, display_order: 0,
   created_at: "2026-01-01T00:00:00Z", lesson_count: 0, note_count: 0, quiz_count: 0,
-  lecture_count: 0, ...over,
+  lecture_count: 0, module_count: 0, ...over,
 });
 
 const CATALOG = [
@@ -132,5 +133,53 @@ describe("telling 'not set up yet' from 'broken'", () => {
     expect(isMissingTableError({ message: "NetworkError when attempting to fetch resource" })).toBe(false);
     expect(isMissingTableError(null)).toBe(false);
     expect(isMissingTableError(undefined)).toBe(false);
+  });
+});
+
+describe("a subject-level course's shape", () => {
+  it("leads with modules, and says nothing about a single one", () => {
+    expect(describeShape(card({ module_count: 12, lesson_count: 47 }))).toBe("12 modules · 47 lessons");
+    // "1 module" describes a topic, not a course — better left unsaid.
+    expect(describeShape(card({ module_count: 1, lesson_count: 3 }))).toBe("3 lessons");
+    expect(describeShape(card({ module_count: 1, lesson_count: 1 }))).toBe("1 lesson");
+  });
+});
+
+describe("grouping lessons into modules", () => {
+  const items = [
+    { topic_slug: "strategy-formulation", position: 5 },
+    { topic_slug: "nature-and-scope-of-sm", position: 2 },
+    { topic_slug: "nature-and-scope-of-sm", position: 1 },
+    { topic_slug: "an-unlisted-topic", position: 9 },
+    { topic_slug: "strategic-analysis", position: 3 },
+  ];
+  // Syllabus order, as disciplines.ts lists it — not alphabetical.
+  const ORDER = ["nature-and-scope-of-sm", "strategic-analysis", "strategy-formulation"];
+  const label = (slug: string) => slug.replace(/-/g, " ");
+
+  it("orders modules by the syllabus, not the alphabet", () => {
+    const modules = groupIntoModules(items, ORDER, label);
+    expect(modules.map(m => m.slug)).toEqual([
+      "nature-and-scope-of-sm", "strategic-analysis", "strategy-formulation",
+      "an-unlisted-topic",  // not in disciplines.ts yet: last, never dropped
+    ]);
+  });
+
+  it("orders lessons within a module by their position", () => {
+    const modules = groupIntoModules(items, ORDER, label);
+    expect(modules[0].items.map(i => i.position)).toEqual([1, 2]);
+  });
+
+  it("never loses a lesson, whatever its topic", () => {
+    const modules = groupIntoModules(items, ORDER, label);
+    expect(modules.flatMap(m => m.items)).toHaveLength(items.length);
+  });
+
+  it("copes with an item that has no topic at all", () => {
+    const modules = groupIntoModules(
+      [{ topic_slug: null, position: 1 }], ORDER, () => "Other",
+    );
+    expect(modules).toHaveLength(1);
+    expect(modules[0].items).toHaveLength(1);
   });
 });
