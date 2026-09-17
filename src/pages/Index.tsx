@@ -14,6 +14,8 @@ import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useSubjectCounts } from "@/hooks/use-subject-counts";
 import SubjectCard from "@/components/SubjectCard";
+import CourseCardTile, { CourseCardSkeleton } from "@/components/CourseCard";
+import { sortCourses, isMissingTableError, type CourseCard as Course } from "@/lib/courses";
 import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
@@ -302,6 +304,90 @@ const CompactHowItWorks = () => (
   </section>
 );
 
+// ─────────────── Section: Courses ────────────────────────────────────────────
+/**
+ * The three fullest courses, above Browse by Subject.
+ *
+ * Courses are the one thing here that puts the scattered material in an
+ * order, which is the whole reason a student would want them — so they lead,
+ * and the subject grid below is the library to browse when you already know
+ * what you are looking for. The two sections carry the same nine subjects,
+ * so each has to say plainly which job it does or they read as a repeat:
+ * this one is the path, that one is everything by subject.
+ *
+ * Renders nothing at all when nothing is published. Not an empty state, not
+ * a "coming soon": the homepage is the first thing every visitor sees, and a
+ * placeholder there is worse than one less section. It appears by itself the
+ * moment the first course goes live.
+ */
+const FeaturedCourses = () => {
+  const [courses, setCourses] = useState<Course[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (supabase.from("course_cards" as any) as any)
+      .select("*").eq("is_published", true)
+      .then(({ data, error }: any) => {
+        if (cancelled) return;
+        // A missing table means the migrations have not run yet; either way
+        // the section simply does not render, so nothing is reported here
+        // beyond a console note for whoever is deploying.
+        if (error) {
+          if (!isMissingTableError(error)) console.error("Index: failed to load courses", error);
+          setCourses([]);
+          return;
+        }
+        setCourses(data ?? []);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Still loading: hold the space with skeletons rather than popping the
+  // section in and shoving the rest of the page down.
+  if (courses === null) {
+    return (
+      <section className="py-16 md:py-20 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <GoldLabel text="Courses" />
+          <SectionHeading title="Study it in order, not at random." />
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} />)}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (courses.length === 0) return null;
+
+  // Fullest first: a course with 40 lessons makes the case for the section
+  // better than whichever happens to sort first alphabetically.
+  const featured = sortCourses(courses, "lessons").slice(0, 3);
+  const totalLessons = courses.reduce((sum, c) => sum + c.lesson_count, 0);
+
+  return (
+    <section className="py-16 md:py-20 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div>
+            <GoldLabel text="Courses" />
+            <SectionHeading
+              title="Study it in order, not at random."
+              sub={`${courses.length} ${courses.length === 1 ? "course" : "courses"}, ${totalLessons} lessons — every topic of a subject in syllabus order, with the notes, lectures and MCQs for each. Free.`}
+            />
+          </div>
+          <Link to="/courses" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
+            Browse all courses <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.map(course => <CourseCardTile key={course.id} course={course} />)}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ─────────────── Section: Subjects ───────────────────────────────────────────
 const MIN_NOTES_TO_LINK = 3;
 
@@ -320,19 +406,14 @@ const Subjects = () => {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
             <GoldLabel text="Browse by Subject" />
-            <SectionHeading title="HR & Management. One Platform." sub={`${counts ? disciplineWord : "…"} subjects live, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly — all free. Browse a subject, or follow it as a course in syllabus order.`} />
+            <SectionHeading title="Or browse a subject directly." sub={`${counts ? disciplineWord : "…"} subjects live, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly — all free. Every note, MCQ set and paper, when you already know what you're after.`} />
           </div>
-          {/* Two ways into the same material, so neither section has to
-              repeat the other: a card opens the subject hub to browse,
-              this opens the course that puts it in syllabus order. */}
-          <div className="flex flex-shrink-0 flex-col gap-1.5 sm:items-end">
-            <Link to="/courses" className="inline-flex items-center gap-1.5 text-sm font-bold hover:underline" style={{ color: GOLD_TEXT }}>
-              Take these as courses <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link to="/notes" className="inline-flex items-center gap-1.5 text-sm font-bold hover:underline" style={{ color: GOLD_TEXT }}>
-              View all notes <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          {/* Just the notes link here: the Courses section above already
+              owns that route, and two links to /courses on one screen is
+              the repetition this layout is trying to avoid. */}
+          <Link to="/notes" className="inline-flex flex-shrink-0 items-center gap-1.5 text-sm font-bold hover:underline" style={{ color: GOLD_TEXT }}>
+            View all notes <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {DISCIPLINES.map(d => (
@@ -1022,16 +1103,15 @@ const Index = () => (
     />
     <Header />
     <main id="main-content">
-      {/* Order is the visitor's journey: pick a track → pick a subject →
-          see it's alive → watch → trust the person → subscribe. Anything
-          that repeated an earlier section (founder strip, resource-type
-          tiles, popular-topic chips) has been cut — including, briefly, a
-          separate Courses section: a course covers one subject, so it
-          said the same nine things over again. Courses are reached from
-          this section's header instead. */}
+      {/* Order is the visitor's journey: pick a track → take a course →
+          browse the subject it came from → see it's alive → watch → trust
+          the person → subscribe. Courses and Subjects cover the same nine
+          subjects, so each names its own job — a path through one, versus
+          everything in it — rather than repeating the other. */}
       <Hero />
       <AudienceSplit />
       <CompactHowItWorks />
+      <FeaturedCourses />
       <Subjects />
       <RecentlyAdded />
       <VideoLectures />
