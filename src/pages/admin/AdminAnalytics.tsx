@@ -22,6 +22,13 @@ type Summary = {
   top_searches: { q: string; n: number }[];
   top_content: { path: string; n: number }[];
   signup_sources: { from: string; n: number }[];
+  gate: {
+    shown: number; email_given: number; walked_away: number; unresolved: number;
+    via_beacon: number; via_click: number;
+  };
+  quiz_funnel: {
+    attempts: number; started: number; finished: number; wall_hit: number; signed_up: number;
+  };
   programme_funnel: {
     slug: string; views: number; details: number; payment: number; submitted: number;
   }[];
@@ -98,6 +105,27 @@ const AdminAnalytics = () => {
 
   const totalEvents = Object.values(t).reduce((a, b) => a + b, 0);
 
+  // Empty-state defaults so the page renders before the new tables have
+  // anything in them.
+  const gate = data?.gate ?? {
+    shown: 0, email_given: 0, walked_away: 0, unresolved: 0, via_beacon: 0, via_click: 0,
+  };
+  const quiz = data?.quiz_funnel ?? {
+    attempts: 0, started: 0, finished: 0, wall_hit: 0, signed_up: 0,
+  };
+  // Same idea as the gate identity: the funnel's shape is a guarantee of
+  // how it is computed, so the page checks it rather than trusting it.
+  const funnelMonotone =
+    quiz.started <= quiz.attempts &&
+    quiz.finished <= quiz.started &&
+    quiz.signed_up <= quiz.wall_hit &&
+    quiz.wall_hit <= quiz.attempts;
+  // The identity the gate rebuild exists to guarantee. Shown rather than
+  // assumed: if it ever breaks, the dashboard should say so instead of
+  // quietly presenting three numbers that don't add up.
+  const gateReconciles =
+    gate.email_given + gate.walked_away + gate.unresolved === gate.shown;
+
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
@@ -134,11 +162,19 @@ const AdminAnalytics = () => {
 
       {!loading && data && totalEvents > 0 && (
         <>
-          <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Stat label="Visitors" value={data.visitors} hint={`distinct browsers, ${data.days}d`} />
             <Stat label="Events" value={totalEvents} />
-            <Stat label="Quizzes completed" value={n("quiz_complete")} />
+            <Stat label="Quizzes completed" value={quiz.finished} hint="distinct attempts" />
             <Stat label="Registrations" value={n("reg_submitted")} hint="submitted with a UPI reference" />
+            {/* Its own tile on purpose. Gate views we never saw the end of
+                are a real bucket, and folding them into "walked away" is
+                what made the three gate numbers disagree. */}
+            <Stat
+              label="Gate unresolved"
+              value={gate.unresolved}
+              hint={`of ${gate.shown} gate views, ${data.days}d`}
+            />
           </div>
 
           <Section
@@ -196,25 +232,65 @@ const AdminAnalytics = () => {
           <Section
             title="Gates"
             icon={Users}
-            blurb="What the two things standing between a visitor and the material actually cost. A sign-in wall that turns away far more people than it converts is buying leads at a price worth knowing."
+            blurb="What the two things standing between a visitor and the material actually cost. A sign-in wall that turns away far more people than it converts is buying leads at a price worth knowing. Both sides now count one row per attempt or per gate view, so every step is a subset of the step above it."
           >
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-lg border border-border bg-card px-4">
-                <FunnelRow label="Hit the quiz sign-in wall" count={n("quiz_signin_required")} />
-                <FunnelRow label="Started a quiz" count={n("quiz_start")} />
-                <FunnelRow label="Finished a quiz" count={n("quiz_complete")} prev={n("quiz_start")} />
+                {/* Counted per quiz *attempt*, by furthest step reached, so
+                    a step can never be larger than the one above it — the
+                    old version counted four unrelated events and could show
+                    "signed up" at 120% of "finished". */}
                 <FunnelRow
-                  label="Signed up"
-                  count={n("auth_signup")}
-                  prev={n("quiz_signin_required")}
-                  note="all signups vs. people the quiz wall turned away"
+                  label="Quiz attempts"
+                  count={quiz.attempts}
+                  note="one per attempt, not per page load"
                 />
+                <FunnelRow label="Started a quiz" count={quiz.started} prev={quiz.attempts} />
+                <FunnelRow label="Finished a quiz" count={quiz.finished} prev={quiz.started} />
+                {/* The wall is a detour off that line, not a step on it —
+                    an attempt by someone already signed in never sees it —
+                    so these two are counted exactly and read against each
+                    other, not against the rows above. */}
+                <FunnelRow
+                  label="Hit the sign-in wall"
+                  count={quiz.wall_hit}
+                  prev={quiz.attempts}
+                  note="attempts by someone not signed in yet"
+                />
+                <FunnelRow
+                  label="Signed up at the wall"
+                  count={quiz.signed_up}
+                  prev={quiz.wall_hit}
+                  note="of the attempts above — what the wall actually converts"
+                />
+                {!funnelMonotone && (
+                  <p className="py-2 text-xs text-destructive">
+                    A step is larger than the step above it. That is impossible for a
+                    per-attempt funnel — treat these numbers as broken, not as a finding.
+                  </p>
+                )}
               </div>
               <div className="rounded-lg border border-border bg-card px-4">
-                <FunnelRow label="Download email gate shown" count={n("gate_shown")} />
-                <FunnelRow label="Gave an email" count={n("gate_submitted")} prev={n("gate_shown")} />
-                <FunnelRow label="Walked away" count={n("gate_dismissed")} prev={n("gate_shown")} />
+                <FunnelRow label="Download email gate shown" count={gate.shown} />
+                <FunnelRow label="Gave an email" count={gate.email_given} prev={gate.shown} />
+                <FunnelRow
+                  label="Walked away"
+                  count={gate.walked_away}
+                  prev={gate.shown}
+                  note="closed it, or left the tab/app without answering"
+                />
+                <FunnelRow
+                  label="Still unresolved"
+                  count={gate.unresolved}
+                  prev={gate.shown}
+                  note="we never saw how these ended — shown, not hidden in the total"
+                />
                 <FunnelRow label="Newsletter sign-ups" count={n("newsletter_subscribe")} />
+                <p className={`py-2 text-xs ${gateReconciles ? "text-muted-foreground" : "text-destructive"}`}>
+                  {gateReconciles
+                    ? `Reconciles: ${gate.email_given} + ${gate.walked_away} + ${gate.unresolved} = ${gate.shown} shown.`
+                    : `Does not reconcile: ${gate.email_given} + ${gate.walked_away} + ${gate.unresolved} ≠ ${gate.shown}. This is a bug — every gate view is one row in one status.`}
+                </p>
               </div>
             </div>
           </Section>
