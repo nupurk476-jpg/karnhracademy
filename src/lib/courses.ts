@@ -53,6 +53,7 @@ export type CourseCard = {
   note_count: number;
   quiz_count: number;
   lecture_count: number;
+  module_count: number;
 };
 
 export type CourseCategory = {
@@ -197,13 +198,63 @@ export function typeCounts(courses: CourseCard[], filters: Filters): Record<Cour
   };
 }
 
-/** "12 lessons · 3 MCQ sets" — only the parts that are actually there. */
+/** "4 notes · 1 lecture · 1 MCQ set" — only the parts that are there. */
 export function describeContents(course: CourseCard): string {
   const parts: string[] = [];
   if (course.note_count) parts.push(`${course.note_count} ${course.note_count === 1 ? "note" : "notes"}`);
   if (course.lecture_count) parts.push(`${course.lecture_count} ${course.lecture_count === 1 ? "lecture" : "lectures"}`);
   if (course.quiz_count) parts.push(`${course.quiz_count} MCQ ${course.quiz_count === 1 ? "set" : "sets"}`);
   return parts.join(" · ");
+}
+
+/**
+ * "12 modules · 47 lessons" — the headline for a subject-level course.
+ *
+ * A course now spans a whole subject, so the module count is what conveys
+ * its shape; a bare lesson count says nothing about how it is organised.
+ * The module part is dropped when there is only one, because "1 module"
+ * describes a topic, not a course, and is better left unsaid.
+ */
+export function describeShape(course: CourseCard): string {
+  const lessons = `${course.lesson_count} ${course.lesson_count === 1 ? "lesson" : "lessons"}`;
+  if (course.module_count > 1) return `${course.module_count} modules · ${lessons}`;
+  return lessons;
+}
+
+/**
+ * Lessons grouped into the modules a course page renders, in syllabus
+ * order.
+ *
+ * The order comes from `topicOrder` — the caller passes the subject's
+ * topic slugs as disciplines.ts lists them, which is the syllabus sequence
+ * a student studies in. Postgres has no view of that file, so the sync can
+ * only order items alphabetically by topic; this is where that becomes
+ * Unit 1 before Unit 2. Any topic not in the list (content filed under a
+ * topic added to the data but not yet to disciplines.ts) sorts last rather
+ * than disappearing.
+ */
+export function groupIntoModules<T extends { topic_slug: string | null; position: number }>(
+  items: T[],
+  topicOrder: string[],
+  labelFor: (slug: string) => string,
+): { slug: string; label: string; items: T[] }[] {
+  const rank = new Map(topicOrder.map((slug, i) => [slug, i]));
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const key = item.topic_slug ?? "";
+    const list = groups.get(key);
+    if (list) list.push(item);
+    else groups.set(key, [item]);
+  }
+  return [...groups.entries()]
+    .map(([slug, group]) => ({
+      slug,
+      label: labelFor(slug),
+      items: [...group].sort((a, b) => a.position - b.position),
+    }))
+    .sort((a, b) =>
+      (rank.get(a.slug) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.slug) ?? Number.MAX_SAFE_INTEGER) ||
+      a.label.localeCompare(b.label));
 }
 
 export type { DisciplineValue };

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { topicGradient } from "@/lib/subjectGradients";
 import { iconForTopic } from "@/lib/topicIcons";
-import { describeContents, type CourseCard as Course } from "@/lib/courses";
+import { describeContents, describeShape, type CourseCard as Course } from "@/lib/courses";
 import { Layers } from "lucide-react";
 
 /**
@@ -62,8 +62,10 @@ const CourseCardTile = ({ course }: { course: Course }) => {
 
         <div className="mt-auto flex items-center gap-1.5 pt-2 text-xs text-muted-foreground">
           <Layers className="h-3.5 w-3.5" />
+          {/* Modules first: a course now covers a whole subject, so how it
+              is organised says more than a bare lesson tally. */}
           <span>
-            {course.lesson_count} {course.lesson_count === 1 ? "lesson" : "lessons"}
+            {describeShape(course)}
             {contents && <span className="text-muted-foreground/70"> · {contents}</span>}
           </span>
         </div>

@@ -12,7 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { categoryStyle } from "@/lib/courseCategoryStyle";
 import { iconForTopic } from "@/lib/topicIcons";
-import { describeContents, isMissingTableError, type CourseCard, type CourseItemKind } from "@/lib/courses";
+import {
+  describeShape, groupIntoModules, isMissingTableError,
+  type CourseCard, type CourseItemKind,
+} from "@/lib/courses";
+import { getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { FileText, HelpCircle, PlayCircle, Download, ArrowRight, Layers } from "lucide-react";
 
 /**
@@ -30,6 +34,8 @@ type Item = {
   kind: CourseItemKind;
   ref_id: string;
   position: number;
+  /** The topic this lesson belongs to — what groups it into a module. */
+  topic_slug: string | null;
 };
 
 type Resolved = Item & { title: string; description: string | null; file_url?: string | null; video_url?: string | null };
@@ -72,7 +78,7 @@ const CourseDetailPage = () => {
       setCourse(found);
 
       const { data: itemRows, error: itemError } = await (supabase.from("course_items" as any) as any)
-        .select("id, kind, ref_id, position").eq("course_id", found.id).order("position", { ascending: true });
+        .select("id, kind, ref_id, position, topic_slug").eq("course_id", found.id).order("position", { ascending: true });
       if (cancelled) return;
       if (itemError) { console.error("CourseDetailPage: failed to load lessons", itemError); setFailed(true); setLoading(false); return; }
 
@@ -110,11 +116,19 @@ const CourseDetailPage = () => {
 
   const style = categoryStyle(course?.category_slug);
   const TopicIcon = iconForTopic(course?.title);
-  const grouped = useMemo(() => ({
-    note: items.filter(i => i.kind === "note"),
-    lecture: items.filter(i => i.kind === "lecture"),
-    quiz: items.filter(i => i.kind === "quiz"),
-  }), [items]);
+  /**
+   * The course's modules, in syllabus order.
+   *
+   * A course now spans a whole subject, so its topics are its modules. The
+   * order comes from disciplines.ts — Unit 1 before Unit 2 — which the
+   * database cannot know, so the sync orders items alphabetically by topic
+   * and this is where that becomes the sequence a student studies in.
+   */
+  const modules = useMemo(() => {
+    const topicOrder = getDiscipline(course?.category_slug ?? "")?.topics.map(t => t.slug) ?? [];
+    return groupIntoModules(items, topicOrder, slugValue =>
+      slugValue ? getTopicLabel(slugValue) : "Other material");
+  }, [items, course?.category_slug]);
 
   const openNote = (item: Resolved, mode: "view" | "download") => {
     if (!item.file_url) { toast({ title: "No file attached to this note." }); return; }
@@ -190,10 +204,16 @@ const CourseDetailPage = () => {
       <Header />
 
       <main id="main-content" className="mx-auto max-w-4xl px-6 py-10">
+        {/* The category crumb is dropped when it repeats the title, which
+            it now usually does: a subject-level course IS its category, and
+            "Courses › Strategic Management › Strategic Management" reads
+            like a bug. It still earns its place for a topic-level course. */}
         <Breadcrumbs
           items={[
             { label: "Courses", to: "/courses" },
-            ...(course ? [{ label: course.category_label, to: `/courses?category=${course.category_slug}` }] : []),
+            ...(course && course.category_label !== course.title
+              ? [{ label: course.category_label, to: `/courses?category=${course.category_slug}` }]
+              : []),
             { label: course?.title ?? "Course" },
           ]}
         />
@@ -222,8 +242,7 @@ const CourseDetailPage = () => {
                 <Badge variant="success" size="sm">{course.is_free ? "Free" : "Paid"}</Badge>
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Layers className="h-4 w-4" />
-                  {course.lesson_count} {course.lesson_count === 1 ? "lesson" : "lessons"}
-                  {describeContents(course) && ` · ${describeContents(course)}`}
+                  {describeShape(course)}
                 </span>
               </div>
 
@@ -236,23 +255,24 @@ const CourseDetailPage = () => {
               </p>
             ) : (
               <div className="mt-10 space-y-8">
-                {(["note", "lecture", "quiz"] as CourseItemKind[]).map(kind => {
-                  const group = grouped[kind];
-                  if (group.length === 0) return null;
-                  const { icon: Icon, label } = KIND_META[kind];
-                  return (
-                    <section key={kind}>
-                      <h2 className="mb-3 flex items-center gap-2 text-lg font-bold text-foreground">
-                        <Icon className="h-4 w-4 text-accent-deep" />
-                        {kind === "note" ? "Read" : kind === "lecture" ? "Watch" : "Test yourself"}
-                        <span className="text-sm font-normal text-muted-foreground">({group.length})</span>
-                      </h2>
-                      <ol className="divide-y divide-border rounded-lg border border-border bg-card">
-                        {group.map((item, index) => (
+                {modules.map((module, moduleIndex) => (
+                  <section key={module.slug || "other"}>
+                    <h2 className="mb-1 text-lg font-bold text-foreground">
+                      <span className="text-muted-foreground">Module {moduleIndex + 1} · </span>
+                      {module.label}
+                    </h2>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      {module.items.length} {module.items.length === 1 ? "lesson" : "lessons"}
+                    </p>
+                    <ol className="divide-y divide-border rounded-lg border border-border bg-card">
+                      {module.items.map((item, index) => {
+                        const { icon: Icon, label } = KIND_META[item.kind];
+                        return (
                           <li key={item.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                             <span className="w-6 shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
                               {index + 1}
                             </span>
+                            <Icon className="h-4 w-4 shrink-0 text-accent-deep" aria-label={label} />
                             <div className="min-w-0 flex-1">
                               <p className="font-medium text-foreground">{item.title}</p>
                               {item.description && (
@@ -260,7 +280,7 @@ const CourseDetailPage = () => {
                               )}
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
-                              {kind === "note" && (
+                              {item.kind === "note" && (
                                 <>
                                   <button
                                     type="button"
@@ -279,7 +299,7 @@ const CourseDetailPage = () => {
                                   </button>
                                 </>
                               )}
-                              {kind === "lecture" && item.video_url && (
+                              {item.kind === "lecture" && item.video_url && (
                                 <a
                                   href={item.video_url}
                                   target="_blank"
@@ -289,7 +309,7 @@ const CourseDetailPage = () => {
                                   Watch
                                 </a>
                               )}
-                              {kind === "quiz" && (
+                              {item.kind === "quiz" && (
                                 <Link
                                   to={`/quizzes/${item.ref_id}`}
                                   className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:brightness-110"
@@ -299,11 +319,11 @@ const CourseDetailPage = () => {
                               )}
                             </div>
                           </li>
-                        ))}
-                      </ol>
-                    </section>
-                  );
-                })}
+                        );
+                      })}
+                    </ol>
+                  </section>
+                ))}
               </div>
             )}
 

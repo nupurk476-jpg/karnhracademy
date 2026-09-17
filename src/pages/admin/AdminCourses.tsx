@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { DISCIPLINES } from "@/lib/disciplines";
 import { hasCustomStyle } from "@/lib/courseCategoryStyle";
-import { describeContents, type CourseCard } from "@/lib/courses";
+import { describeContents, describeShape, type CourseCard } from "@/lib/courses";
 import { RefreshCw, Eye, EyeOff, ExternalLink, Palette } from "lucide-react";
 
 /**
@@ -32,6 +32,8 @@ const TOPIC_PAYLOAD = Object.fromEntries(
 type SyncResult = {
   categories_added: number; courses_added: number;
   items_added: number; items_removed: number;
+  /** Per-topic courses from the first cut, removed in favour of subject-level ones. */
+  topic_courses_retired?: number;
   courses_total: number; courses_published: number;
 };
 
@@ -72,7 +74,8 @@ const AdminCourses = () => {
     setLastSync(data as SyncResult);
     toast({
       title: "Catalog synced",
-      description: `${data.courses_added} new course(s), ${data.items_added} lesson(s) added, ${data.items_removed} removed.`,
+      description: `${data.courses_added} new course(s), ${data.items_added} lesson(s) added, ${data.items_removed} removed.`
+        + (data.topic_courses_retired ? ` ${data.topic_courses_retired} old per-topic course(s) retired.` : ""),
     });
     load();
   };
@@ -119,7 +122,7 @@ const AdminCourses = () => {
 
       <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
         Courses are assembled from the notes, lectures and MCQs already on the site — one course per
-        subject and topic that has content. Sync after adding material; new courses arrive as drafts
+        subject, with its topics as modules. Sync after adding material; new courses arrive as drafts
         and appear to students only once you publish them. Editing a course's title or summary is
         safe: a later sync never overwrites it.
       </p>
@@ -132,6 +135,7 @@ const AdminCourses = () => {
             {lastSync.courses_added} new course{lastSync.courses_added === 1 ? "" : "s"} ·{" "}
             {lastSync.items_added} lesson{lastSync.items_added === 1 ? "" : "s"} added ·{" "}
             {lastSync.items_removed} removed
+            {!!lastSync.topic_courses_retired && ` · ${lastSync.topic_courses_retired} old per-topic course(s) retired`}
           </p>
         </div>
       )}
@@ -169,6 +173,7 @@ const AdminCourses = () => {
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Course</th>
                 <th className="px-3 py-2 text-left font-medium">Category</th>
+                <th className="px-3 py-2 text-right font-medium">Modules</th>
                 <th className="px-3 py-2 text-right font-medium">Lessons</th>
                 <th className="px-3 py-2 text-right font-medium">Status</th>
               </tr>
@@ -178,7 +183,9 @@ const AdminCourses = () => {
                 <tr key={course.id} className="border-t border-border">
                   <td className="px-3 py-2">
                     <p className="font-medium text-foreground">{course.title}</p>
-                    <p className="text-xs text-muted-foreground">{describeContents(course) || "no content"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {describeShape(course)}{describeContents(course) && ` · ${describeContents(course)}`}
+                    </p>
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">
                     <span className="flex items-center gap-1.5">
@@ -191,6 +198,7 @@ const AdminCourses = () => {
                       )}
                     </span>
                   </td>
+                  <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.module_count}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.lesson_count}</td>
                   <td className="px-3 py-2 text-right">
                     <button
