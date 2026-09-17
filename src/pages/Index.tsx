@@ -20,7 +20,7 @@ import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
   CheckCircle2, ChevronRight, Clock, Award,
-  PlayCircle, BookMarked, Search,
+  PlayCircle, BookMarked,
   Mail, HandHeart, ScrollText, Linkedin,
   BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap, History,
 } from "lucide-react";
@@ -63,14 +63,6 @@ const SUBJECTS = DISCIPLINES.map(d => ({
   value: d.value,
   ...SUBJECT_HEX[d.value],
 }));
-
-const ROADMAP = [
-  { step: "01", icon: Search,        title: "Choose a Subject",  desc: "Pick an HR & Management discipline — HRM and OB have full content now; more are being added." },
-  { step: "02", icon: FileText,      title: "Study the Notes",   desc: "Read structured, exam-aligned study notes." },
-  { step: "03", icon: PlayCircle,    title: "Watch Lectures",    desc: "Reinforce concepts with expert video lectures." },
-  { step: "04", icon: HelpCircle,    title: "Practice MCQs",     desc: "Test yourself with topic-wise quizzes." },
-  { step: "05", icon: Award,         title: "Master the Topic",  desc: "Achieve exam readiness and subject mastery." },
-];
 
 // ─────────────── Tiny reusable pieces ────────────────────────────────────────
 const GoldLabel = ({ text }: { text: string }) => (
@@ -174,9 +166,13 @@ const Hero = () => {
           </p>
 
           {/* CTAs — one primary (self-select a track below), one secondary
-              (browse everything). Neither CTA singles out Labour Welfare —
+              (start a course). Neither CTA singles out Labour Welfare —
               that used to read as if it were the whole site's focus; the
-              three pathway cards below the hero now carry that routing. */}
+              pathway cards below the hero now carry that routing.
+              The secondary used to be "Browse All Resources" → /notes,
+              which was the same destination as the Study Notes tile a few
+              lines down; the tile keeps it (it is one of four showing live
+              inventory) and this points at the courses instead. */}
           <div className="flex flex-wrap gap-3 mb-8">
             <a
               href="#pathways"
@@ -186,8 +182,8 @@ const Hero = () => {
             >
               Find Your Study Path <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </a>
-            <Link to="/notes" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #DCD9D3`, color: NAVY, background: "#FFFFFF" }}>
-              <FileText className="h-4 w-4" /> Browse All Resources
+            <Link to="/courses" className="font-display inline-flex items-center gap-2 rounded-lg px-7 py-3 text-sm font-bold transition-all hover:-translate-y-0.5" style={{ border: `1.5px solid #DCD9D3`, color: NAVY, background: "#FFFFFF" }}>
+              <BookOpen className="h-4 w-4" /> Browse the Courses
             </Link>
           </div>
 
@@ -281,29 +277,6 @@ function useContentCounts() {
 // than helping a first-time visitor understand what to do next. This is the
 // only "how it works" section on the page — the full illustrated version
 // used to duplicate it further down and was removed as dead weight.
-const CompactHowItWorks = () => (
-  <section style={{ background: "#F7F4EF", borderTop: "1px solid #F0C8C1", borderBottom: "1px solid #F0C8C1" }}>
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-      <div className="flex items-center gap-2 overflow-x-auto sm:flex-wrap sm:justify-center sm:overflow-visible">
-        {ROADMAP.map((r, i) => {
-          const Icon = r.icon;
-          return (
-            <div key={r.step} className="flex flex-shrink-0 items-center gap-2">
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full" style={{ background: GOLD, color: NAVY }}>
-                  <Icon className="h-3.5 w-3.5" />
-                </span>
-                <span className="font-display text-xs font-semibold" style={{ color: NAVY }}>{r.title}</span>
-              </div>
-              {i < ROADMAP.length - 1 && <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" style={{ color: GOLD_DARK }} />}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  </section>
-);
-
 // ─────────────── Section: Courses ────────────────────────────────────────────
 /**
  * The three fullest courses, above Browse by Subject.
@@ -403,17 +376,14 @@ const Subjects = () => {
   return (
     <section id="subjects" className="py-16 md:py-20" style={{ background: LIGHT }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        {/* No header link: this section's cards go to the subject hubs, and
+            /notes was already reachable from the hero's primary CTA and from
+            Recently Added below, which is a list of notes. */}
+        <div className="mb-12">
           <div>
             <GoldLabel text="Browse by Subject" />
             <SectionHeading title="Or browse a subject directly." sub={`${counts ? disciplineWord : "…"} subjects live, ${totalNotes !== null ? totalNotes : "…"} notes, updated weekly — all free. Every note, MCQ set and paper, when you already know what you're after.`} />
           </div>
-          {/* Just the notes link here: the Courses section above already
-              owns that route, and two links to /courses on one screen is
-              the repetition this layout is trying to avoid. */}
-          <Link to="/notes" className="inline-flex flex-shrink-0 items-center gap-1.5 text-sm font-bold hover:underline" style={{ color: GOLD_TEXT }}>
-            View all notes <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {DISCIPLINES.map(d => (
@@ -440,7 +410,6 @@ const Subjects = () => {
 const AudienceSplit = () => {
   const [lw, setLw] = useState<{ notes: number | null; quizzes: number | null; pyqs: number | null }>({ notes: null, quizzes: null, pyqs: null });
   const [mba, setMba] = useState<{ notes: number | null; quizzes: number | null; lectures: number | null }>({ notes: null, quizzes: null, lectures: null });
-  const { booksCount } = useContentCounts();
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("subject", "lw")
@@ -505,7 +474,11 @@ const AudienceSplit = () => {
           <GoldLabel text="Learning Paths" />
           <SectionHeading center title="What are you studying for?" sub="Pick the track that matches your goal — everything on it is free." />
         </div>
-        <div className="grid gap-6 lg:grid-cols-3">
+        {/* Two cards, two real study tracks. A third one used to sit here
+            offering the book library to researchers — but the section asks
+            what you are studying FOR, and the Curated Book Library section
+            below makes that offer properly, with the actual titles. */}
+        <div className="grid gap-6 lg:grid-cols-2">
           <AudienceCard
             accent={NAVY_DARK}
             eyebrowColor={NAVY_DARK}
@@ -537,20 +510,6 @@ const AudienceSplit = () => {
             ]}
             to="/mba-bba"
             cta="Explore the MBA/BBA Hub"
-          />
-          <AudienceCard
-            accent={STEEL_DARK}
-            eyebrowColor={STEEL_DARK}
-            eyebrow="PhD · Faculty · HR Practitioners"
-            icon={BookMarked}
-            title="Doing research or working in HR?"
-            body="A curated reference library and research-based notes to support academic work and applied HR practice, alongside the founder's own publications."
-            stats={[
-              { label: "Books Curated", value: n(booksCount) },
-              { label: "Subjects", value: String(DISCIPLINES.length) },
-            ]}
-            to="/books"
-            cta="Explore the Book Library"
           />
         </div>
       </div>
@@ -859,7 +818,12 @@ const BooksSection = () => {
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {books.map((book: any, i: number) => (
-            <div key={book.id || i} className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+            <Link
+              key={book.id || i}
+              to="/books"
+              aria-label={`${book.title} — open the book library`}
+              className="group flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
               {/* Cover area: real image if available, styled fallback otherwise */}
               <div className="relative flex items-center justify-center pt-6 pb-5 px-6 overflow-hidden" style={{ background: `linear-gradient(160deg, ${bookColors[i % 4]}18, ${bookColors[i % 4]}06)`, minHeight: "10rem" }}>
                 {book.cover_image ? (
@@ -882,12 +846,9 @@ const BooksSection = () => {
               <div className="flex flex-col flex-1 p-5">
                 <h3 className="text-sm font-bold text-slate-800 mb-1 line-clamp-2 leading-snug">{book.title}</h3>
                 <p className="text-xs font-medium mb-3" style={{ color: bookColors[i % 4] }}>{book.author}</p>
-                <p className="text-xs leading-relaxed text-slate-500 flex-1 line-clamp-3 mb-4">{book.description}</p>
-                <Link to="/books" className="inline-flex items-center gap-1 text-xs font-bold hover:underline" style={{ color: bookColors[i % 4] }}>
-                  View Details <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
+                <p className="text-xs leading-relaxed text-slate-500 flex-1 line-clamp-3">{book.description}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
         )}
@@ -1110,7 +1071,6 @@ const Index = () => (
           everything in it — rather than repeating the other. */}
       <Hero />
       <AudienceSplit />
-      <CompactHowItWorks />
       <FeaturedCourses />
       <Subjects />
       <RecentlyAdded />

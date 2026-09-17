@@ -113,7 +113,12 @@ describe("gate views", () => {
     expect(sendBeacon).toHaveBeenCalledTimes(1);
     const [url] = sendBeacon.mock.calls[0] as unknown as [string];
     expect(url).toContain("/rest/v1/rpc/resolve_gate_view");
-    expect(url).toContain("apikey=test-anon-key");
+    // Asserted against whatever key the environment actually supplies, not
+    // a hardcoded one: a .env.local in the working tree overrides the value
+    // src/test/setup.ts falls back to, and the point of the assertion is
+    // that the key is on the query string at all — sendBeacon cannot send
+    // it as a header.
+    expect(url).toContain(`apikey=${encodeURIComponent(process.env.VITE_SUPABASE_PUBLISHABLE_KEY!)}`);
     // The beacon carried the write, so no duplicate through the RPC.
     expect(rpc).not.toHaveBeenCalled();
   });
