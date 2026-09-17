@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { track, EVENTS } from "@/lib/analytics";
+import { openGateView, resolveGateView } from "@/lib/gateAnalytics";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -18,6 +19,10 @@ export function useDownloadGate() {
   const [submitting, setSubmitting] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const pending = useRef<{ resolveUrl: () => Promise<string | null>; onOpened: () => void } | null>(null);
+  // The gate_views row this dialog opened. The row -- not this ref -- is
+  // what gets resolved: gateAnalytics keeps its own module-scope copy, so
+  // an exit that unmounts this hook is still recorded.
+  const viewId = useRef<string | null>(null);
 
   // The actual open, with no tracking of its own. Both entry points below
   // funnel through here, so a download that skips the gate cannot also be
@@ -68,7 +73,7 @@ export function useDownloadGate() {
       return;
     }
     pending.current = { resolveUrl, onOpened };
-    track(EVENTS.GATE_SHOWN);
+    viewId.current = openGateView();
     setGateOpen(true);
   };
 
@@ -87,7 +92,8 @@ export function useDownloadGate() {
     // only that the gate converted. Clearing `pending` first is what stops
     // dismissGate from also counting this as an abandon.
     pending.current = null;
-    track(EVENTS.GATE_SUBMITTED);
+    resolveGateView(viewId.current, "email_given");
+    viewId.current = null;
     setGateOpen(false);
     setEmail("");
     setName("");
@@ -100,13 +106,20 @@ export function useDownloadGate() {
   };
 
   /**
-   * One exit path for every way out of the dialog (Cancel, the X, Esc,
-   * clicking away). Guarded on `pending`, which a successful submit has
-   * already cleared, so an abandon is only ever counted when the visitor
-   * really did leave without giving an address -- and only once.
+   * The *deliberate* ways out of the dialog (Cancel, the X, Esc, clicking
+   * away). Guarded on `pending`, which a successful submit has already
+   * cleared, so an abandon is only ever counted when the visitor really
+   * did leave without giving an address.
+   *
+   * The ways out this cannot see -- closing the tab, switching apps,
+   * swiping back -- are handled by the visibilitychange/pagehide beacon in
+   * gateAnalytics, which is what used to make "shown" bigger than its two
+   * outcomes put together. Resolving twice is harmless: the RPC only ever
+   * touches a row still in 'shown'.
    */
   const dismissGate = () => {
-    if (pending.current) track(EVENTS.GATE_DISMISSED);
+    if (pending.current) resolveGateView(viewId.current, "walked_away");
+    viewId.current = null;
     setGateOpen(false);
     pending.current = null;
   };

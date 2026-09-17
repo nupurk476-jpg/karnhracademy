@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { track, EVENTS } from "@/lib/analytics";
+import { beginAttempt, endAttempt, logFunnelStep, FUNNEL_STEPS } from "@/lib/quizFunnel";
 import QuizLeaderboard from "@/components/QuizLeaderboard";
 import {
   ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, XCircle, Clock, LogIn, Star,
@@ -136,6 +137,7 @@ const QuizTake = () => {
     track(EVENTS.QUIZ_COMPLETE, {
       quiz: id, score: data.score, total: data.total_questions, seconds: timeTaken,
     });
+    logFunnelStep(FUNNEL_STEPS.FINISHED, { quizId: id });
   }, [user, id, answers]);
 
   const handleSubmit = useCallback(() => {
@@ -171,6 +173,9 @@ const QuizTake = () => {
   const percent = graded?.total_questions ? Math.round((graded.score / graded.total_questions) * 100) : 0;
 
   const handleRetake = () => {
+    // A retake is a new attempt, not a continuation -- otherwise its
+    // 'started' would collide with the finished attempt's and be dropped.
+    endAttempt();
     setAnswers({}); setFlagged({}); setCurrent(0);
     setSubmitted(false); setStarted(false); setAttemptSaved(false);
     setGraded(null); setGradeError(null);
@@ -182,12 +187,22 @@ const QuizTake = () => {
     // sign-in before the first question, and the size of that wall's cost
     // has never been measured. A high signin_required-to-start ratio means
     // the gate is turning away engagement, not capturing leads.
+    //
+    // Both branches run against one attempt id, minted here and kept
+    // across the /auth round trip, so the wall and the quiz the visitor
+    // comes back to are the same attempt rather than two unrelated counts.
+    const attemptId = beginAttempt(id!);
     if (!user) {
       track(EVENTS.QUIZ_SIGNIN_REQUIRED, { quiz: id });
+      logFunnelStep(FUNNEL_STEPS.WALL_HIT, { attemptId, quizId: id });
       navigate("/auth", { state: { from: `/quizzes/${id}` } });
       return;
     }
     track(EVENTS.QUIZ_START, { quiz: id });
+    // A reload re-runs this against the same attempt; the unique
+    // (attempt_id, step) drops the repeat, which is what stops a refresh
+    // from adding a "started" with no "wall hit" above it.
+    logFunnelStep(FUNNEL_STEPS.STARTED, { attemptId, quizId: id });
     setStarted(true);
     startTimeRef.current = Date.now();
   };

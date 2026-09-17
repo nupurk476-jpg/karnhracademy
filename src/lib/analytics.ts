@@ -89,6 +89,19 @@ function safeStorage(store: Storage, key: string): string {
 }
 
 /**
+ * The two ids every first-party table keys on, shared so gate_views and
+ * funnel_events tie back to the same visitor and visit as analytics_events
+ * — a separate id scheme per table would make them impossible to join.
+ */
+export function visitorId(): string {
+  return safeStorage(localStorage, VISITOR_KEY);
+}
+
+export function sessionId(): string {
+  return safeStorage(sessionStorage, SESSION_KEY);
+}
+
+/**
  * Where this visitor originally came from, captured once per visit and
  * replayed onto every later event — otherwise a campaign only ever gets
  * credit for the landing page, never for the registration it produced.
@@ -121,7 +134,7 @@ function firstTouch(): FirstTouch {
  * Headless browsers and crawlers would otherwise dominate the funnel and
  * make every conversion rate look worse than it is.
  */
-function isBot(): boolean {
+export function isBot(): boolean {
   if (typeof navigator === "undefined") return true;
   if (navigator.webdriver) return true;
   return /bot|crawler|spider|crawling|headless|lighthouse/i.test(navigator.userAgent);
@@ -153,8 +166,8 @@ export function track(event: EventName, props: Props = {}): void {
       .insert({
         event,
         path: window.location.pathname.slice(0, 500),
-        visitor_id: safeStorage(localStorage, VISITOR_KEY),
-        session_id: safeStorage(sessionStorage, SESSION_KEY),
+        visitor_id: visitorId(),
+        session_id: sessionId(),
         user_id: data.session?.user?.id ?? null,
         props: stripPII(props),
         referrer: touch.referrer ?? null,

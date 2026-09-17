@@ -14,9 +14,18 @@ interface SEOProps {
   /** Set on utility pages (auth, profile, search results, 404, admin) that
       should never appear in search engines. */
   noindex?: boolean;
+  /**
+   * Keep links followable while noindexed. Two different jobs share the
+   * `noindex` flag: a dead end like /auth, where nofollow is right, and a
+   * page that is a second view of content indexed elsewhere but is still a
+   * real route to it — a course, whose lessons are the notes and MCQs we
+   * very much do want crawled. nofollow on the latter would wall those off
+   * from this path and waste the internal linking.
+   */
+  follow?: boolean;
 }
 
-const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd, noindex = false }: SEOProps) => {
+const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE, jsonLd, noindex = false, follow = false }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
   // Truncate the page's own title, not the combined string — otherwise a
   // long page title can eat into (or fully drop) the "— Karn HR Academy"
@@ -38,7 +47,7 @@ const SEO = ({ title, description, path, type = "website", image = DEFAULT_IMAGE
     <Helmet>
       <title>{trimmedTitle}</title>
       <meta name="description" content={trimmedDesc} />
-      <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+      <meta name="robots" content={noindex ? (follow ? "noindex, follow" : "noindex, nofollow") : "index, follow"} />
       <link rel="canonical" href={url} />
       <meta property="og:title" content={trimmedTitle} />
       <meta property="og:description" content={trimmedDesc} />

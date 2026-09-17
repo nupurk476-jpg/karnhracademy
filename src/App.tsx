@@ -53,6 +53,8 @@ const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const RefundPolicyPage = lazy(() => import("./pages/RefundPolicyPage"));
 const ProgrammesPage = lazy(() => import("./pages/ProgrammesPage"));
+const CoursesPage = lazy(() => import("./pages/CoursesPage"));
+const CourseDetailPage = lazy(() => import("./pages/CourseDetailPage"));
 const ProgrammeDetailPage = lazy(() => import("./pages/ProgrammeDetailPage"));
 const NewspaperPage = lazy(() => import("./pages/NewspaperPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
@@ -71,6 +73,7 @@ const AdminComments = lazy(() => import("./pages/admin/AdminComments"));
 const AdminSubscribers = lazy(() => import("./pages/admin/AdminSubscribers"));
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"));
 const AdminProgrammes = lazy(() => import("./pages/admin/AdminProgrammes"));
+const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 const AdminRegistrations = lazy(() => import("./pages/admin/AdminRegistrations"));
 const AdminPaymentSettings = lazy(() => import("./pages/admin/AdminPaymentSettings"));
 const AdminNewspaperHighlights = lazy(() => import("./pages/admin/AdminNewspaperHighlights"));
@@ -132,6 +135,12 @@ const App = () => (
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            {/* One route for every course, whatever subject it belongs to.
+                Adding a subject is a course_categories row — never a new
+                route and never a new page component, which is what the
+                seven near-identical *TopicPage files above cost. */}
+            <Route path="/courses/:slug" element={<CourseDetailPage />} />
             <Route path="/programmes" element={<ProgrammesPage />} />
             <Route path="/programmes/:slug" element={<ProgrammeDetailPage />} />
             <Route path="/hr" element={<SubjectHubPage subject="hrm" />} />
@@ -159,6 +168,7 @@ const App = () => (
               <Route path="comments" element={<AdminComments />} />
               <Route path="subscribers" element={<AdminSubscribers />} />
               <Route path="contact-messages" element={<AdminContactMessages />} />
+              <Route path="courses" element={<AdminCourses />} />
               <Route path="programmes" element={<AdminProgrammes />} />
               <Route path="registrations" element={<AdminRegistrations />} />
               <Route path="payment-settings" element={<AdminPaymentSettings />} />

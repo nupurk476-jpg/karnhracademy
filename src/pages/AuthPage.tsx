@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { track, EVENTS } from "@/lib/analytics";
+import { currentAttemptId, logFunnelStep, FUNNEL_STEPS } from "@/lib/quizFunnel";
 import { safeInternalPath } from "@/lib/safePath";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -45,7 +46,13 @@ const AuthPage = () => {
       // was just made, which is accurate enough to keep signup_sources
       // honest without inventing a second source of truth.
       const isNew = Date.now() - new Date(user.created_at).getTime() < 60_000;
-      if (isNew) track(EVENTS.AUTH_SIGNUP, { from: redirectTo, method: "google" });
+      if (isNew) {
+        track(EVENTS.AUTH_SIGNUP, { from: redirectTo, method: "google" });
+        // Only against a live quiz attempt: a header sign-up has none, and
+        // counting those against the quiz wall is what put "signed up"
+        // above the step it is supposed to be a subset of.
+        logFunnelStep(FUNNEL_STEPS.SIGNED_UP, { attemptId: currentAttemptId() });
+      }
       navigate(redirectTo, { replace: true });
     });
     return () => { cancelled = true; };
@@ -126,6 +133,9 @@ const AuthPage = () => {
         // the quiz sign-in wall and the PYQ viewer are the two gates that
         // push people here, and this is what shows whether they convert.
         track(EVENTS.AUTH_SIGNUP, { from: redirectTo });
+        // See the Google branch: attributed to the quiz attempt that sent
+        // them here, and to nothing at all if no attempt is in progress.
+        logFunnelStep(FUNNEL_STEPS.SIGNED_UP, { attemptId: currentAttemptId() });
         if (data.session) {
           // Email confirmation is disabled — the user is signed in already.
           toast({ title: "Account created — welcome!" });
