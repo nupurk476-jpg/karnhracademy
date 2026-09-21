@@ -2,14 +2,14 @@ import { describe, it, expect } from "vitest";
 import {
   filtersFromParams, paramsFromFilters, toggle, filterCourses, sortCourses,
   categoryCounts, typeCounts, describeContents, describeShape, groupIntoModules,
-  isMissingTableError, EMPTY_FILTERS,
+  isMissingTableError, isSchemaNotReadyError, featuredCourses, EMPTY_FILTERS,
   type CourseCard,
 } from "./courses";
 
 const card = (over: Partial<CourseCard>): CourseCard => ({
   id: over.slug ?? "id", slug: "c", category_slug: "hrm", category_label: "HRM",
   category_order: 0, topic_slug: "t", title: "Course", summary: null, cover_url: null,
-  level: null, is_free: true, price_paise: 0, is_published: true, display_order: 0,
+  level: null, is_free: true, price_paise: 0, is_published: true, is_featured: false, display_order: 0,
   created_at: "2026-01-01T00:00:00Z", lesson_count: 0, note_count: 0, quiz_count: 0,
   lecture_count: 0, module_count: 0, topic_count: 0, ...over,
 });
@@ -224,5 +224,54 @@ describe("grouping a unit-based syllabus", () => {
 
   it("orders units by the syllabus, so Unit X comes after Unit III", () => {
     expect(group().map(m => m.slug)).toEqual(["u1", "u3", "u10"]);
+  });
+});
+
+describe("what the home page leads with", () => {
+  const FEATURED = [
+    card({ slug: "hr-planning", title: "HR Planning", is_featured: true, display_order: 0 }),
+    card({ slug: "ob", title: "Organisational Behaviour", is_featured: true, display_order: 1 }),
+    card({ slug: "sm", title: "Strategic Management", is_featured: false, display_order: 2 }),
+    card({ slug: "draft", title: "Draft course", is_featured: true, is_published: false, display_order: 0 }),
+  ];
+
+  it("takes only the published, featured courses", () => {
+    expect(featuredCourses(FEATURED).map(c => c.slug)).toEqual(["hr-planning", "ob"]);
+  });
+
+  it("keeps the order the admin set", () => {
+    const reordered = [
+      card({ slug: "b", title: "B", is_featured: true, display_order: 5 }),
+      card({ slug: "a", title: "A", is_featured: true, display_order: 1 }),
+    ];
+    expect(featuredCourses(reordered).map(c => c.slug)).toEqual(["a", "b"]);
+  });
+
+  it("falls back to the title so the strip never reshuffles between loads", () => {
+    const tied = [
+      card({ slug: "z", title: "Zebra", is_featured: true }),
+      card({ slug: "a", title: "Apple", is_featured: true }),
+    ];
+    expect(featuredCourses(tied).map(c => c.slug)).toEqual(["a", "z"]);
+  });
+
+  it("caps the strip", () => {
+    const many = Array.from({ length: 6 }, (_, i) =>
+      card({ slug: `c${i}`, title: `Course ${i}`, is_featured: true, display_order: i }));
+    expect(featuredCourses(many)).toHaveLength(3);
+    expect(featuredCourses(many, 1).map(c => c.slug)).toEqual(["c0"]);
+  });
+});
+
+describe("a database that isn't set up yet", () => {
+  it("reads a missing column as 'nothing to show', like a missing table", () => {
+    expect(isSchemaNotReadyError({ code: "42703", message: 'column "is_featured" does not exist' })).toBe(true);
+    expect(isSchemaNotReadyError({ code: "PGRST204" })).toBe(true);
+    expect(isSchemaNotReadyError({ code: "PGRST205" })).toBe(true);
+  });
+
+  it("still reports a real failure as one", () => {
+    expect(isSchemaNotReadyError({ code: "500", message: "upstream connect error" })).toBe(false);
+    expect(isSchemaNotReadyError(null)).toBe(false);
   });
 });

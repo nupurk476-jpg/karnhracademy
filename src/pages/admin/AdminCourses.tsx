@@ -6,15 +6,17 @@ import { DISCIPLINES } from "@/lib/disciplines";
 import { hasCustomStyle } from "@/lib/courseCategoryStyle";
 import { describeContents, describeShape, type CourseCard } from "@/lib/courses";
 import { isUnitBasedSubject } from "@/lib/subjectUnits";
-import { RefreshCw, Eye, EyeOff, ExternalLink, Palette } from "lucide-react";
+import { RefreshCw, Eye, EyeOff, ExternalLink, Palette, Star } from "lucide-react";
 
 /**
  * Where the catalog is built and published.
  *
  * Courses are not typed in here. sync_courses_from_content() assembles them
  * from the notes, lectures and MCQs that already exist — one course per
- * (subject, topic) that has content — and this screen is where that is
- * triggered and where the results are reviewed before students see them.
+ * subject that has content — and this screen is where that is triggered and
+ * where the results are reviewed before students see them. A topic-level
+ * course (HR Planning) is made by hand in the database and then kept filled
+ * by the same machinery; the sync leaves everything editorial alone.
  *
  * The labels come from DISCIPLINES, which is the site's single source of
  * truth for what a subject and a topic are called. They are sent to the
@@ -85,11 +87,30 @@ const AdminCourses = () => {
     const next = !course.is_published;
     // Optimistic: the toggle is the whole interaction, and waiting on a
     // round trip to move a switch feels broken.
-    setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_published: next } : c)));
+    // Unpublishing un-features too: a home page leading with a course
+    // students can't open is worse than one course short.
+    const featured = next && course.is_featured;
+    setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_published: next, is_featured: featured } : c)));
     const { error } = await (supabase.from("courses" as any) as any)
-      .update({ is_published: next }).eq("id", course.id);
+      .update({ is_published: next, is_featured: featured }).eq("id", course.id);
     if (error) {
-      setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_published: !next } : c)));
+      setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_published: !next, is_featured: course.is_featured } : c)));
+      toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
+    }
+  };
+
+  /**
+   * Featured courses lead the home page. Publishing is a precondition —
+   * featuring a draft would point the home page at a course students
+   * cannot open — so unpublishing also un-features, in the same write.
+   */
+  const toggleFeatured = async (course: CourseCard) => {
+    const next = !course.is_featured;
+    setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_featured: next } : c)));
+    const { error } = await (supabase.from("courses" as any) as any)
+      .update({ is_featured: next }).eq("id", course.id);
+    if (error) {
+      setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_featured: !next } : c)));
       toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
     }
   };
@@ -123,9 +144,11 @@ const AdminCourses = () => {
 
       <p className="mb-6 max-w-3xl text-sm text-muted-foreground">
         Courses are assembled from the notes, lectures and MCQs already on the site — one course per
-        subject, with its topics as modules. Sync after adding material; new courses arrive as drafts
-        and appear to students only once you publish them. Editing a course's title or summary is
-        safe: a later sync never overwrites it.
+        subject, with its topics as modules, plus any topic course built by hand (HR Planning). New
+        material attaches itself to every course that covers its topic as soon as you save it; sync
+        only when something looks out of date. New courses arrive as drafts and appear to students
+        only once you publish them. Editing a course's title or summary is safe: a later sync never
+        overwrites it. “Feature” puts a published course on the home page.
       </p>
 
       {lastSync && (
@@ -177,6 +200,7 @@ const AdminCourses = () => {
                 <th className="px-3 py-2 text-right font-medium">Modules</th>
                 <th className="px-3 py-2 text-right font-medium">Topics</th>
                 <th className="px-3 py-2 text-right font-medium">Lessons</th>
+                <th className="px-3 py-2 text-right font-medium">Home page</th>
                 <th className="px-3 py-2 text-right font-medium">Status</th>
               </tr>
             </thead>
@@ -204,6 +228,25 @@ const AdminCourses = () => {
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.module_count}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.topic_count}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.lesson_count}</td>
+                  <td className="px-3 py-2 text-right">
+                    <button
+                      type="button"
+                      onClick={() => toggleFeatured(course)}
+                      disabled={!course.is_published}
+                      title={course.is_published
+                        ? (course.is_featured ? "Shown on the home page — click to remove" : "Show this course on the home page")
+                        : "Publish the course first"}
+                      aria-pressed={course.is_featured}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                        course.is_featured
+                          ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                          : "bg-muted text-muted-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      <Star className={`h-3.5 w-3.5 ${course.is_featured ? "fill-current" : ""}`} />
+                      {course.is_featured ? "Featured" : "Feature"}
+                    </button>
+                  </td>
                   <td className="px-3 py-2 text-right">
                     <button
                       type="button"

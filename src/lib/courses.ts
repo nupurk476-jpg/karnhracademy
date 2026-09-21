@@ -32,6 +32,34 @@ export function isMissingTableError(error: { code?: string; message?: string } |
   return error.code === "PGRST205" || /schema cache/i.test(error.message ?? "");
 }
 
+/**
+ * The same window one step finer: the tables are there, but a column added
+ * by a later migration is not. Selecting on it answers 42703 (Postgres) or
+ * PGRST204 (PostgREST's cached schema), and a caller asking for something
+ * optional — the home page's featured strip — should read that as "nothing
+ * to show yet" rather than as an outage, exactly as it reads a missing
+ * table. A caller that cannot work at all without the column still treats
+ * it as the error it is.
+ */
+export function isSchemaNotReadyError(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  return isMissingTableError(error) || error.code === "42703" || error.code === "PGRST204";
+}
+
+/**
+ * The courses the home page leads with, in the order the admin set.
+ *
+ * Kept here rather than left to the query so the rule is testable and lives
+ * beside the rest of the catalog's logic — and so the page cannot quietly
+ * start showing an unpublished draft it happened to receive.
+ */
+export function featuredCourses(courses: CourseCard[], limit = 3): CourseCard[] {
+  return courses
+    .filter(c => c.is_featured && c.is_published)
+    .sort((a, b) => a.display_order - b.display_order || a.title.localeCompare(b.title))
+    .slice(0, limit);
+}
+
 /** A row of the course_cards view — everything one card needs. */
 export type CourseCard = {
   id: string;
@@ -47,6 +75,8 @@ export type CourseCard = {
   is_free: boolean;
   price_paise: number;
   is_published: boolean;
+  /** Leads the home page's course strip. Set per course in the admin screen. */
+  is_featured: boolean;
   display_order: number;
   created_at: string;
   lesson_count: number;

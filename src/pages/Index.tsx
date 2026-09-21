@@ -14,6 +14,13 @@ import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useSubjectCounts } from "@/hooks/use-subject-counts";
 import SubjectCard from "@/components/SubjectCard";
+import CourseCardTile from "@/components/CourseCard";
+import { iconForTopic } from "@/lib/topicIcons";
+import { topicGradient } from "@/lib/subjectGradients";
+import {
+  featuredCourses, describeContents, describeShape, isSchemaNotReadyError,
+  type CourseCard as CourseCardRow,
+} from "@/lib/courses";
 import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
@@ -348,6 +355,126 @@ const Subjects = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+// ─────────────── Section: Featured Courses ──────────────────────────────────
+// A short strip of the courses worth leading with — HR Planning first —
+// rather than the whole catalog, which would only repeat the subject grid
+// above it (the reason the old Courses section was cut). Which courses
+// appear is a flag on the row, set in Admin → Courses, so promoting a new
+// one is a toggle rather than a deploy.
+//
+// Renders nothing at all when there is nothing to show: no featured course
+// yet, or a database whose migrations haven't been applied. A genuine
+// failure still says so, because a section that vanishes on error is how a
+// homepage quietly empties itself.
+const FeaturedCourses = () => {
+  const [courses, setCourses] = useState<CourseCardRow[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase.from("course_cards" as any) as any)
+        .select("*").eq("is_published", true).eq("is_featured", true)
+        .order("display_order", { ascending: true }).limit(3);
+      if (cancelled) return;
+      if (error) {
+        console.error("Index: failed to load featured courses", error);
+        if (isSchemaNotReadyError(error)) { setCourses([]); return; }
+        setFailed(true);
+        return;
+      }
+      setCourses(featuredCourses(data ?? []));
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (failed) {
+    return (
+      <section className="py-12 md:py-14 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ContentLoadError what="featured courses" compact />
+        </div>
+      </section>
+    );
+  }
+
+  if (!courses || courses.length === 0) return null;
+
+  return (
+    <section className="py-14 md:py-16 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <GoldLabel text="Courses" />
+            <SectionHeading
+              title="Start with a course"
+              sub="Notes, slide decks, lectures and MCQs on one topic, in the order you'd study them."
+            />
+          </div>
+          <Link to="/courses" className="inline-flex items-center gap-1.5 text-sm font-bold flex-shrink-0 hover:underline" style={{ color: GOLD_TEXT }}>
+            All courses <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {/* One course gets the full width — a lone card in a three-column
+            grid reads as two that failed to load. */}
+        {courses.length === 1 ? (
+          <FeaturedCourseBanner course={courses[0]} />
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map(course => <CourseCardTile key={course.id} course={course} />)}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
+const FeaturedCourseBanner = ({ course }: { course: CourseCardRow }) => {
+  const TopicIcon = iconForTopic(course.title);
+  const contents = describeContents(course);
+  // The same drawn cover the catalog cards and PPT thumbnails use, keyed the
+  // same way — so the course a visitor meets here and the card they meet on
+  // /courses are recognisably the same course.
+  const [from, to] = topicGradient(course.category_slug, course.slug);
+
+  return (
+    <Link
+      to={`/courses/${course.slug}`}
+      className="group grid overflow-hidden rounded-2xl border transition-shadow hover:shadow-lg sm:grid-cols-[minmax(0,14rem)_1fr]"
+      style={{ borderColor: "#E8E6E2", background: "#fff" }}
+    >
+      <div
+        className="flex items-center justify-center py-10 sm:py-0"
+        style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
+      >
+        <TopicIcon className="h-14 w-14 text-white/90 transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+      </div>
+      <div className="flex flex-col gap-2 p-6 sm:p-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide" style={{ background: "#EFEDE9", color: NAVY }}>
+            {course.category_label}
+          </span>
+          {course.is_free && (
+            <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide" style={{ background: GOLD, color: "#fff" }}>
+              Free
+            </span>
+          )}
+        </div>
+        <h3 className="font-display text-2xl font-extrabold text-slate-900 group-hover:text-brand-navy">{course.title}</h3>
+        {course.summary && <p className="max-w-2xl text-sm leading-relaxed text-slate-600">{course.summary}</p>}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
+          <span className="flex items-center gap-1.5"><BookMarked className="h-3.5 w-3.5" /> {describeShape(course)}</span>
+          {contents && <span>{contents}</span>}
+        </div>
+        <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: GOLD_TEXT }}>
+          Open the course <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </div>
+    </Link>
   );
 };
 
@@ -1025,14 +1152,17 @@ const Index = () => (
       {/* Order is the visitor's journey: pick a track → pick a subject →
           see it's alive → watch → trust the person → subscribe. Anything
           that repeated an earlier section (founder strip, resource-type
-          tiles, popular-topic chips) has been cut — including, briefly, a
-          separate Courses section: a course covers one subject, so it
-          said the same nine things over again. Courses are reached from
-          this section's header instead. */}
+          tiles, popular-topic chips) has been cut — including, once, a
+          Courses section listing the whole catalog: a course covered one
+          subject, so it said the same nine things the grid above it had
+          just said. What follows the grid now is the opposite of that —
+          the one or two courses worth leading with, and the rest reached
+          from the link in its header. */}
       <Hero />
       <AudienceSplit />
       <CompactHowItWorks />
       <Subjects />
+      <FeaturedCourses />
       <RecentlyAdded />
       <VideoLectures />
       <Testimonials />
