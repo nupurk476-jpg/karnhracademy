@@ -14,6 +14,7 @@ export const SUBJECT_GRADIENT: Record<string, [string, string]> = {
   bc:      ["#6B6B70", "#17181C"],
   odcm:    ["#E34234", "#B23223"],
   ghr:     ["#0B0C0E", "#4A4A4F"],
+  "micro-eco": ["#B23223", "#17181C"],
 };
 
 export function subjectGradient(subjectValue?: string | null): [string, string] {

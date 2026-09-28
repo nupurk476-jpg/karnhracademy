@@ -22,6 +22,7 @@ const SMTopicPage = lazy(() => import("./pages/SMTopicPage"));
 const BCTopicPage = lazy(() => import("./pages/BCTopicPage"));
 const ODCMTopicPage = lazy(() => import("./pages/ODCMTopicPage"));
 const GHRTopicPage = lazy(() => import("./pages/GHRTopicPage"));
+const MicroEconomicsTopicPage = lazy(() => import("./pages/MicroEconomicsTopicPage"));
 const SubjectHubPage = lazy(() => import("./components/SubjectHubPage"));
 const BlogList = lazy(() => import("./pages/BlogList"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -150,6 +151,7 @@ const App = () => (
             <Route path="/bc" element={<SubjectHubPage subject="bc" />} />
             <Route path="/odcm" element={<SubjectHubPage subject="odcm" />} />
             <Route path="/ghr" element={<SubjectHubPage subject="ghr" />} />
+            <Route path="/micro-economics" element={<SubjectHubPage subject="micro-eco" />} />
             <Route path="/hr/:slug" element={<HRTopicPage />} />
             <Route path="/pom/:slug" element={<POMTopicPage />} />
             <Route path="/ob/:slug" element={<OBTopicPage />} />
@@ -157,6 +159,7 @@ const App = () => (
             <Route path="/bc/:slug" element={<BCTopicPage />} />
             <Route path="/odcm/:slug" element={<ODCMTopicPage />} />
             <Route path="/ghr/:slug" element={<GHRTopicPage />} />
+            <Route path="/micro-economics/:slug" element={<MicroEconomicsTopicPage />} />
             <Route path="/admin" element={<ProtectedAdminRoute><AdminLayout /></ProtectedAdminRoute>}>
               <Route index element={<AdminDashboard />} />
               <Route path="blogs" element={<AdminBlogs />} />

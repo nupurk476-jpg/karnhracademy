@@ -6,6 +6,7 @@ import { pomTopics } from "@/components/PrinciplesOfManagementSection";
 import { bcTopics } from "@/components/BusinessCommunicationSection";
 import { odcmTopics } from "@/components/OrgDevChangeMgmtSection";
 import { ghrTopics } from "@/components/GlobalHRPracticesSection";
+import { microTopics } from "@/lib/microEconomicsTopics";
 
 // One hub per topic-based subject (unit-based subjects — Labour Welfare and
 // the two Economics tracks — have their own dedicated hub pages). Topic
@@ -61,6 +62,12 @@ export const SUBJECT_HUBS: Record<string, SubjectHub> = {
     strap: "MBA HR specialisation · UGC NET/JRF",
     intro: "Managing people across borders — international staffing, expatriate management, cross-cultural management, global compensation and HR practices in multinational companies.",
     topics: ghrTopics,
+  },
+  "micro-eco": {
+    subject: "micro-eco", prefix: "micro-economics",
+    strap: "BBA · B.Com · BA Economics · Semester 1–2",
+    intro: "How individual consumers, firms and markets make decisions — demand and supply, elasticity, utility and indifference curves, production and cost, market structures and factor pricing.",
+    topics: microTopics,
   },
 };
 

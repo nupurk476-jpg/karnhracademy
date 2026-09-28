@@ -20,6 +20,7 @@
   <url><loc>https://karnhracademy.com/ghr</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://karnhracademy.com/mba-economics</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://karnhracademy.com/bba-economics</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://karnhracademy.com/ugc-net-labour-welfare</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://karnhracademy.com/ugc-net-labour-welfare/unit-1</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://karnhracademy.com/ugc-net-labour-welfare/unit-2</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
@@ -204,4 +205,16 @@
   <url><loc>https://karnhracademy.com/ghr/international-labour-standards</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://karnhracademy.com/ghr/mncs-hr-practices</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://karnhracademy.com/ghr/global-workforce-diversity</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-introduction</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-demand-and-supply</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-elasticity</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-utility-analysis</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-indifference-curves</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-theory-of-production</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-cost-and-revenue</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-perfect-competition</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-monopoly</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-imperfect-competition</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-factor-pricing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://karnhracademy.com/micro-economics/micro-welfare-economics</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

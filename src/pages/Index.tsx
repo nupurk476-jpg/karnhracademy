@@ -51,6 +51,7 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   ghr:     { color: NAVY_DARK,  bg: "#E8E6E2" },
   "mba-eco": { color: NAVY,     bg: "#E8E6E2" },
   "bba-eco": { color: STEEL_DARK, bg: "#F2F1EF" },
+  "micro-eco": { color: GOLD_TEXT, bg: "#F7F4EF" },
   lw:      { color: NAVY_DARK,  bg: "#EFEDE9" },
 };
 

@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { LW_TOPICS, resolveLWTopicSlug } from "./labourWelfareUnits";
 import { MBA_ECO_TOPICS, BBA_ECO_TOPICS } from "./economicsUnits";
+import { microTopics } from "./microEconomicsTopics";
 
 export const DISCIPLINES = [
   {
@@ -193,6 +194,18 @@ export const DISCIPLINES = [
     iconColor: "text-[#3730A3]",
     description: "Demand & supply, market equilibrium, production & cost, market structures, national income",
     topics: BBA_ECO_TOPICS,
+  },
+  {
+    value: "micro-eco",
+    label: "Micro Economics",
+    short: "Micro Eco",
+    icon: TrendingUp,
+    color: "bg-[#FFF7ED] border-[#FED7AA] text-[#9A3412]",
+    activeColor: "bg-[#9A3412] border-[#9A3412] text-white",
+    iconBg: "bg-[#FFEDD5]",
+    iconColor: "text-[#9A3412]",
+    description: "Consumer behaviour, utility & indifference curves, production & cost, market structures, factor pricing",
+    topics: microTopics.map(({ label, slug }) => ({ label, slug })),
   },
   {
     value: "lw",
