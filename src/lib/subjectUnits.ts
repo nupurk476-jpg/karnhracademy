@@ -1,5 +1,6 @@
 import { LW_UNITS, resolveLWTopicSlug } from "./labourWelfareUnits";
 import { MBA_ECO_UNITS, BBA_ECO_UNITS } from "./economicsUnits";
+import { MICRO_ECO_UNITS } from "./microEconomicsTopics";
 
 // Unit-based subjects: their syllabus is a list of units, each holding topics.
 // The admin groups the topic picker by unit for these; everything else shows
@@ -10,6 +11,7 @@ const UNITS: Record<string, SubjectUnit[]> = {
   lw: LW_UNITS,
   "mba-eco": MBA_ECO_UNITS,
   "bba-eco": BBA_ECO_UNITS,
+  "micro-eco": MICRO_ECO_UNITS,
 };
 
 export function getUnitsForSubject(subject: string | null | undefined): SubjectUnit[] | undefined {
