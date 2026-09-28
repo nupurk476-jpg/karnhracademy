@@ -18,6 +18,9 @@ export type SubjectHub = {
   strap: string;
   intro: string;
   topics: DisciplineTopic[];
+  // A standalone course sits outside the MBA / BBA hub: its pages don't
+  // link back to it or count it among the MBA / BBA subjects.
+  standalone?: boolean;
 };
 
 export const SUBJECT_HUBS: Record<string, SubjectHub> = {
@@ -65,9 +68,10 @@ export const SUBJECT_HUBS: Record<string, SubjectHub> = {
   },
   "micro-eco": {
     subject: "micro-eco", prefix: "micro-economics",
-    strap: "BBA · B.Com · BA Economics · Semester 1–2",
+    strap: "BA Economics · B.Com · Semester 1–2",
     intro: "How individual consumers, firms and markets make decisions — demand and supply, elasticity, utility and indifference curves, production and cost, market structures and factor pricing.",
     topics: microTopics,
+    standalone: true,
   },
 };
 
