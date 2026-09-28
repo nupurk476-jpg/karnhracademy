@@ -298,6 +298,32 @@ const EcoArt = ({ variant }: { variant: "mba" | "bba" }) => (
 const MBAEcoArt = () => <EcoArt variant="mba" />;
 const BBAEcoArt = () => <EcoArt variant="bba" />;
 
+const MicroEcoArt = () => (
+  <g>
+    {/* Axes */}
+    <path d="M124 160 V56 M124 160 H300" {...S} />
+    <path d="M124 56 l-4 6 M124 56 l4 6 M300 160 l-6 -4 M300 160 l-6 4" {...S} />
+    {/* Indifference curves, one of them tangent to the budget line */}
+    <path d="M146 64 Q166 136 280 148" {...S_SOFT} />
+    <path d="M166 62 Q186 120 290 132" {...S_RED} strokeWidth={2.6} />
+    <path d="M190 58 Q212 104 294 114" {...S_SOFT} strokeDasharray="3 4" />
+    {/* Budget line */}
+    <path d="M136 72 L284 154" {...S} />
+    <circle cx="206" cy="111" r="6" fill={RED} stroke="#fff" strokeWidth="2" />
+    <text x="296" y="136" fontFamily="'Source Sans 3', sans-serif" fontWeight="700" fontSize="10" fill={RED}>IC</text>
+    {/* Shopping basket — the consumer */}
+    <g {...S}>
+      <path d="M306 72 h36 l-5 24 h-26z" />
+      <path d="M314 72 l6 -12 M334 72 l-6 -12" />
+    </g>
+    <circle cx="318" cy="102" r="3" fill={PAPER} />
+    <circle cx="332" cy="102" r="3" fill={PAPER} />
+    <Tag x={26} y={104} text="Utility" />
+    <Tag x={140} y={48} text="Consumer choice" />
+    <Tag x={196} y={186} text="Firms & markets" color={PAPER_SOFT} />
+  </g>
+);
+
 const LWArt = () => (
   <g>
     {/* Scales of justice */}
@@ -333,6 +359,7 @@ export const SUBJECT_ART: Record<string, () => JSX.Element> = {
   ghr: GHRArt,
   "mba-eco": MBAEcoArt,
   "bba-eco": BBAEcoArt,
+  "micro-eco": MicroEcoArt,
   lw: LWArt,
 };
 

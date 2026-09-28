@@ -120,6 +120,7 @@ const Footer = () => {
                 { label: "Strategic Management", to: "/sm" },
                 { label: "Business Communication", to: "/bc" },
                 { label: "Economics (MBA / BBA)", to: "/mba-economics" },
+                { label: "Micro Economics", to: "/micro-economics" },
                 { label: "International HRM", to: "/ghr" },
                 { label: "OD & Change Management", to: "/odcm" },
               ].map((link) => (

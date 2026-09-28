@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 // Route prefix for each discipline's static topic pages (lw has no per-topic
 // pages — its content lives on the unit-wise hub instead).
 const TOPIC_ROUTE_PREFIX: Record<string, string> = {
-  hrm: "hr", ob: "ob", sm: "sm", pom: "pom", bc: "bc", odcm: "odcm", ghr: "ghr",
+  hrm: "hr", ob: "ob", sm: "sm", pom: "pom", bc: "bc", odcm: "odcm", ghr: "ghr", "micro-eco": "micro-economics",
 };
 
 type Result = {
