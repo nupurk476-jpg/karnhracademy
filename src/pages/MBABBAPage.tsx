@@ -16,12 +16,13 @@ import {
   GraduationCap, Layers, Presentation, TrendingUp,
 } from "lucide-react";
 
-// The core semester-programme disciplines — excludes Labour Welfare (its own
-// UGC NET hub) and the Economics subjects (MBA/BBA unit-based tracks and
-// Micro Economics), which get their own section below.
-const ECONOMICS_VALUES: string[] = ["mba-eco", "bba-eco", "micro-eco"];
+// The core semester-programme disciplines — excludes the standalone hubs
+// (Labour Welfare for UGC NET, Micro Economics) and the Economics tracks
+// (which have their own unit-based hubs and their own section below).
+const STANDALONE_VALUES: string[] = ["lw", "micro-eco"];
+const ECONOMICS_VALUES: string[] = ["mba-eco", "bba-eco"];
 const PROGRAMME_DISCIPLINES = DISCIPLINES.filter(
-  d => d.value !== "lw" && !ECONOMICS_VALUES.includes(d.value),
+  d => !STANDALONE_VALUES.includes(d.value) && !ECONOMICS_VALUES.includes(d.value),
 );
 const ECONOMICS_DISCIPLINES = DISCIPLINES.filter(d => ECONOMICS_VALUES.includes(d.value));
 
@@ -32,7 +33,7 @@ const SEMESTER_GUIDE = [
   {
     programme: "BBA / B.Com",
     rows: [
-      { sem: "Sem 1–2", subjects: ["Principles of Management", "Business Communication", "Business Economics", "Micro Economics"] },
+      { sem: "Sem 1–2", subjects: ["Principles of Management", "Business Communication", "Business Economics"] },
       { sem: "Sem 3–4", subjects: ["Organisational Behaviour", "Human Resource Management"] },
       { sem: "Sem 5–6", subjects: ["Strategic Management", "OD & Change Management (elective)"] },
     ],
@@ -211,7 +212,7 @@ const MBABBAPage = () => {
               <h2 id="economics-heading" className="text-lg font-bold text-foreground">Economics</h2>
             </div>
             <p className="mb-4 text-xs text-muted-foreground">
-              Unit-wise hubs for MBA Managerial Economics and BBA Business Economics, plus a topic-wise Micro Economics hub — different depth, same rigour.
+              Separate unit-wise hubs for MBA Managerial Economics and BBA Business Economics — different depth, same rigour.
             </p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {ECONOMICS_DISCIPLINES.map(d => (

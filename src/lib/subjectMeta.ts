@@ -18,7 +18,7 @@ const META: Record<string, SubjectMeta> = {
   ghr:       { exams: ["MBA", "UGC NET"],        hub: "/ghr",  code: "IHRM" },
   "mba-eco": { exams: ["MBA", "PGDM"],           hub: "/mba-economics",      code: "ECO", units: 6 },
   "bba-eco": { exams: ["BBA", "B.Com"],          hub: "/bba-economics",      code: "ECO", units: 5 },
-  "micro-eco": { exams: ["BBA", "B.Com", "BA"],  hub: "/micro-economics",    code: "MICRO" },
+  "micro-eco": { exams: ["BA", "B.Com"],  hub: "/micro-economics",    code: "MICRO" },
   lw:        { exams: ["UGC NET", "JRF"],        hub: "/ugc-net-labour-welfare", code: "LW", units: 10 },
 };
 

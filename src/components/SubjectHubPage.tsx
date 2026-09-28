@@ -80,8 +80,8 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
           <div className="mx-auto max-w-6xl px-6 py-10">
             <Breadcrumbs items={[
               { label: "Home", to: "/" },
-              { label: "MBA / BBA Hub", to: "/mba-bba" },
-              { label: discipline.short },
+              ...(hub.standalone ? [] : [{ label: "MBA / BBA Hub", to: "/mba-bba" }]),
+              { label: hub.standalone ? discipline.label : discipline.short },
             ]} />
             <div className="grid items-center gap-8 lg:grid-cols-[1fr_360px]">
               <div>
@@ -228,13 +228,28 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
         <section className="border-t border-border bg-slate-50 py-10">
           <div className="mx-auto flex max-w-6xl flex-col items-start gap-4 px-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-bold text-foreground">Studying more than one subject?</h2>
-              <p className="text-sm text-muted-foreground">See which subject lands in which semester, and browse all eleven.</p>
+              {hub.standalone ? (
+                <>
+                  <h2 className="text-lg font-bold text-foreground">Keep going with {title}</h2>
+                  <p className="text-sm text-muted-foreground">Test yourself topic by topic, or take it as a course in syllabus order.</p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold text-foreground">Studying more than one subject?</h2>
+                  <p className="text-sm text-muted-foreground">See which subject lands in which semester, and browse all ten.</p>
+                </>
+              )}
             </div>
             <div className="flex flex-wrap gap-2.5">
-              <Link to="/mba-bba" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110">
-                <BookOpen className="h-4 w-4" /> MBA / BBA Hub <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
+              {hub.standalone ? (
+                <Link to="/courses" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110">
+                  <BookOpen className="h-4 w-4" /> Browse courses <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              ) : (
+                <Link to="/mba-bba" className="inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:brightness-110">
+                  <BookOpen className="h-4 w-4" /> MBA / BBA Hub <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
               <Link to={`/quizzes?subject=${subject}`} className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted">
                 <HelpCircle className="h-4 w-4" /> Practice MCQs
               </Link>

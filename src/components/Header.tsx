@@ -17,6 +17,7 @@ const navItems = [
   { label: "Home", to: "/" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
   { label: "MBA/BBA", to: "/mba-bba" },
+  { label: "Micro Economics", to: "/micro-economics" },
   { label: "Programmes", to: "/programmes" },
   { label: "Courses", to: "/courses" },
   { label: "Notes", to: "/notes" },
