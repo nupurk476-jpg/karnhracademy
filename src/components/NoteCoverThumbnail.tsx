@@ -67,16 +67,17 @@ type Props = {
 const NoteCoverThumbnail = ({ fileUrl, title, subject, topicSlug, size = "lg", className, children }: Props) => {
   const isPdf = !!fileUrl && /\.pdf(\?|$)/i.test(fileUrl);
   const isPpt = !!fileUrl && /\.pptx?(\?|$)/i.test(fileUrl);
+  const isDoc = !!fileUrl && /\.docx?(\?|$)/i.test(fileUrl);
 
   return (
     <div className={className}>
-      {isPdf || isPpt ? (
+      {isPdf || isPpt || isDoc ? (
         <GeneratedNoteCover
           subject={subject}
           topicSlug={topicSlug}
           title={title}
           fileUrl={fileUrl}
-          fileTypeLabel={isPdf ? "PDF" : "PPT"}
+          fileTypeLabel={isPdf ? "PDF" : isDoc ? "DOC" : "PPT"}
           size={size}
         />
       ) : (

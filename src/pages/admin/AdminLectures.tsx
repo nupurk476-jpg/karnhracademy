@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, Pencil, X, Video, Image as ImageIcon, Youtube, Loader2 } from "lucide-react";
@@ -184,6 +185,11 @@ const AdminLectures = () => {
           onChange={e => setDuration(e.target.value)}
           className="w-40 rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
+
+        <p className="text-xs text-muted-foreground">
+          This page is for video lectures. To upload PDF, Word or PPT notes, use{" "}
+          <Link to="/admin/notes" className="font-medium text-accent-deep hover:underline">Admin → Notes</Link>.
+        </p>
 
         <div className="rounded-md border border-accent/40 bg-accent/5 p-3">
           <label className="mb-1 block text-sm font-semibold text-foreground">

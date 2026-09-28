@@ -524,7 +524,7 @@ const Testimonials = () => {
 // date — rather than three oversized "featured" cards showing whatever was
 // uploaded last. Proves the site is updated weekly without competing with
 // the subject grid for attention.
-type RecentItem = { id: string; kind: "PDF" | "PPT" | "NOTE" | "MCQ" | "VIDEO"; title: string; subject: string; created_at: string; to: string };
+type RecentItem = { id: string; kind: "PDF" | "PPT" | "DOC" | "NOTE" | "MCQ" | "VIDEO"; title: string; subject: string; created_at: string; to: string };
 
 const RecentlyAdded = () => {
   const [items, setItems] = useState<RecentItem[] | null>(null);
@@ -543,7 +543,7 @@ const RecentlyAdded = () => {
       if (failure?.error) { console.error("Index: failed to load recent items", failure.error); setFailed(true); return; }
       const notes: RecentItem[] = (n.data ?? []).map((x: any) => ({
         id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at,
-        kind: /\.pptx?(\?|$)/i.test(x.file_url ?? "") ? "PPT" : /\.pdf(\?|$)/i.test(x.file_url ?? "") ? "PDF" : "NOTE",
+        kind: /\.pptx?(\?|$)/i.test(x.file_url ?? "") ? "PPT" : /\.docx?(\?|$)/i.test(x.file_url ?? "") ? "DOC" : /\.pdf(\?|$)/i.test(x.file_url ?? "") ? "PDF" : "NOTE",
         to: /\.pdf(\?|$)/i.test(x.file_url ?? "") ? `/notes/view/${x.id}` : `/notes?subject=${x.subject || "hrm"}`,
       }));
       const quizzes: RecentItem[] = (q.data ?? []).map((x: any) => ({ id: x.id, title: x.title, subject: x.subject || "hrm", created_at: x.created_at, kind: "MCQ", to: `/quizzes/${x.id}` }));
@@ -566,6 +566,7 @@ const RecentlyAdded = () => {
 
   const KIND_STYLE: Record<RecentItem["kind"], { bg: string; fg: string }> = {
     PDF:   { bg: "#FDF4F2", fg: GOLD_TEXT },
+    DOC:   { bg: "#FDF4F2", fg: GOLD_TEXT },
     PPT:   { bg: "#FDF4F2", fg: GOLD_TEXT },
     NOTE:  { bg: "#FDF4F2", fg: GOLD_TEXT },
     MCQ:   { bg: "#EFEDE9", fg: NAVY },

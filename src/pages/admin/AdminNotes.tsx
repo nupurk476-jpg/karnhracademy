@@ -177,12 +177,12 @@ const AdminNotes = () => {
           hubLabel={activeDiscipline?.short}
         />
 
-        {/* PDF/PPT attachment */}
+        {/* PDF / Word / PPT attachment */}
         <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
             <Upload className="h-4 w-4" />
-            {file ? file.name : existingFileUrl ? "Replace PDF / PPT" : "Choose PDF / PPT"}
-            <input type="file" accept=".pdf,.ppt,.pptx" onChange={e => setFile(e.target.files?.[0] || null)} className="hidden" />
+            {file ? file.name : existingFileUrl ? "Replace PDF / Word / PPT" : "Choose PDF / Word / PPT"}
+            <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={e => setFile(e.target.files?.[0] || null)} className="hidden" />
           </label>
           {!file && existingFileUrl && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
@@ -267,7 +267,7 @@ const AdminNotes = () => {
                 );
               })()}
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">{getTopicLabel(note.topic_slug)}</span>}
-              {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
+              {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : note.file_url.match(/\.docx?$/i) ? "DOC" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">VIDEO</span>}
               {(note.tags ?? []).map((tag: string) => (
                 <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
