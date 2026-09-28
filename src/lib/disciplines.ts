@@ -204,7 +204,7 @@ export const DISCIPLINES = [
     activeColor: "bg-[#9A3412] border-[#9A3412] text-white",
     iconBg: "bg-[#FFEDD5]",
     iconColor: "text-[#9A3412]",
-    description: "Consumer behaviour, utility & indifference curves, production & cost, market structures, factor pricing",
+    description: "Consumer behaviour, producer behaviour, market structure & equilibrium, distribution theories, welfare economics",
     topics: microTopics.map(({ label, slug }) => ({ label, slug })),
   },
   {

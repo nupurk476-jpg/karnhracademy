@@ -6,7 +6,7 @@ import { pomTopics } from "@/components/PrinciplesOfManagementSection";
 import { bcTopics } from "@/components/BusinessCommunicationSection";
 import { odcmTopics } from "@/components/OrgDevChangeMgmtSection";
 import { ghrTopics } from "@/components/GlobalHRPracticesSection";
-import { microTopics } from "@/lib/microEconomicsTopics";
+import { microTopics, MICRO_UNITS, type MicroUnit } from "@/lib/microEconomicsTopics";
 
 // One hub per topic-based subject (unit-based subjects — Labour Welfare and
 // the two Economics tracks — have their own dedicated hub pages). Topic
@@ -21,6 +21,8 @@ export type SubjectHub = {
   // A standalone course sits outside the MBA / BBA hub: its pages don't
   // link back to it or count it among the MBA / BBA subjects.
   standalone?: boolean;
+  // When set, the hub shows its topics grouped under these unit headings.
+  units?: MicroUnit[];
 };
 
 export const SUBJECT_HUBS: Record<string, SubjectHub> = {
@@ -69,9 +71,10 @@ export const SUBJECT_HUBS: Record<string, SubjectHub> = {
   "micro-eco": {
     subject: "micro-eco", prefix: "micro-economics",
     strap: "BA Economics · B.Com · Semester 1–2",
-    intro: "How individual consumers, firms and markets make decisions — demand and supply, elasticity, utility and indifference curves, production and cost, market structures and factor pricing.",
+    intro: "How individual consumers, firms and markets make decisions — in five parts: consumer behaviour, producer behaviour, market structure and equilibrium, distribution theories, and welfare economics.",
     topics: microTopics,
     standalone: true,
+    units: MICRO_UNITS,
   },
 };
 

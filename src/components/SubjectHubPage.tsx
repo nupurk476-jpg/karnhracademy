@@ -9,6 +9,8 @@ import SubjectCover from "@/components/SubjectCover";
 import { EmptyState, NoteRow, QuizCard } from "@/components/LabourWelfareShared";
 import { getDiscipline } from "@/lib/disciplines";
 import { getSubjectHub } from "@/lib/subjectHubs";
+import { unitRoman } from "@/lib/subjectUnits";
+import type { DisciplineTopic } from "@/components/DisciplineTopicPage";
 import { getSubjectMeta } from "@/lib/subjectMeta";
 import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { useSubjectContent } from "@/hooks/use-subject-content";
@@ -20,6 +22,7 @@ import { FileText, HelpCircle, PlayCircle, Layers, ChevronRight, ArrowRight, Boo
 
 const SubjectHubPage = ({ subject }: { subject: string }) => {
   const hub = getSubjectHub(subject)!;
+  const units = hub.units;
   const discipline = getDiscipline(subject)!;
   const meta = getSubjectMeta(subject);
   const { notes, quizzes, questionCounts, lectures, loading, failed } = useSubjectContent(subject);
@@ -50,6 +53,39 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
     lectures.forEach((l: any) => bump(l.topic_slug, "lectures"));
     return m;
   }, [notes, quizzes, lectures]);
+
+  // Unit-based hubs group their topics under unit headings, in syllabus
+  // order; the rest show one flat grid.
+  const renderTopic = (t: DisciplineTopic, number: string) => {
+    const c = perTopic[t.slug] ?? { notes: 0, quizzes: 0, lectures: 0 };
+    const Icon = t.icon;
+    return (
+      <Link
+        key={t.slug}
+        to={`/${hub.prefix}/${t.slug}`}
+        className="group flex flex-col gap-3 rounded-xl border border-border bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+      >
+        <div className="flex items-center gap-3">
+          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${discipline.iconBg}`}>
+            <Icon className={`h-5 w-5 ${discipline.iconColor}`} />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-accent-deep">{number}</p>
+            <h3 className="text-sm font-bold leading-snug text-foreground">{t.label}</h3>
+          </div>
+        </div>
+        <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{t.desc}</p>
+        <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-muted-foreground">
+          <span className="tabular-nums">
+            {loading ? "…" : `${c.notes} note${c.notes !== 1 ? "s" : ""} · ${c.quizzes} MCQ set${c.quizzes !== 1 ? "s" : ""}${c.lectures ? ` · ${c.lectures} lecture${c.lectures !== 1 ? "s" : ""}` : ""}`}
+          </span>
+          <span className="inline-flex items-center gap-0.5 font-semibold text-accent-deep">
+            Study <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </div>
+      </Link>
+    );
+  };
 
   const latestNotes = notes.slice(0, 6);
   const path = `/${hub.prefix}`;
@@ -90,6 +126,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
                 <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">{hub.intro}</p>
                 <div className="flex flex-wrap gap-3 text-sm">
                   {[
+                    ...(units ? [{ icon: BookOpen, v: units.length, l: "Units", to: "#topics" }] : []),
                     { icon: Layers,     v: hub.topics.length, l: "Topics", to: "#topics" },
                     { icon: FileText,   v: loading ? "…" : notes.length, l: "Notes", to: "#notes" },
                     { icon: HelpCircle, v: loading ? "…" : quizzes.length, l: "MCQ Sets", to: "#mcqs" },
@@ -116,41 +153,30 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <h2 id="topics-heading" className="text-lg font-bold text-foreground">Browse by Topic</h2>
-                <p className="text-xs text-muted-foreground">In syllabus order — start at the top, or jump to what your exam needs.</p>
+                <p className="text-xs text-muted-foreground">
+                  {hub.units ? `${hub.units.length} units, ${hub.topics.length} topics` : "In syllabus order"} — start at the top, or jump to what your exam needs.
+                </p>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {hub.topics.map((t, i) => {
-                const c = perTopic[t.slug] ?? { notes: 0, quizzes: 0, lectures: 0 };
-                const Icon = t.icon;
-                return (
-                  <Link
-                    key={t.slug}
-                    to={`/${hub.prefix}/${t.slug}`}
-                    className="group flex flex-col gap-3 rounded-xl border border-border bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${discipline.iconBg}`}>
-                        <Icon className={`h-5 w-5 ${discipline.iconColor}`} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-accent-deep">Topic {String(i + 1).padStart(2, "0")}</p>
-                        <h3 className="text-sm font-bold leading-snug text-foreground">{t.label}</h3>
-                      </div>
+            {units ? (
+              <div className="space-y-8">
+                {units.map(u => (
+                  <div key={u.number}>
+                    <h3 className="mb-3 flex items-baseline gap-2 text-base font-bold text-foreground">
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-accent-deep">Unit {unitRoman(u.number)}</span>
+                      {u.title}
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {u.topics.map((t, i) => renderTopic(t, `Topic ${u.number}.${i + 1}`))}
                     </div>
-                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{t.desc}</p>
-                    <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] text-muted-foreground">
-                      <span className="tabular-nums">
-                        {loading ? "…" : `${c.notes} note${c.notes !== 1 ? "s" : ""} · ${c.quizzes} MCQ set${c.quizzes !== 1 ? "s" : ""}${c.lectures ? ` · ${c.lectures} lecture${c.lectures !== 1 ? "s" : ""}` : ""}`}
-                      </span>
-                      <span className="inline-flex items-center gap-0.5 font-semibold text-accent-deep">
-                        Study <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {hub.topics.map((t, i) => renderTopic(t, `Topic ${String(i + 1).padStart(2, "0")}`))}
+              </div>
+            )}
           </div>
         </section>
 
