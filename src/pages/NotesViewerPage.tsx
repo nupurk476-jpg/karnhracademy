@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,9 +20,12 @@ import { useDownloadGate } from "@/hooks/use-download-gate";
 // one-time email gate.
 const NotesViewerPage = () => {
   const { id } = useParams<{ id: string }>();
-  const { request, GateDialog } = useDownloadGate();
+  const { request, gateDialog } = useDownloadGate();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [urlFailed, setUrlFailed] = useState(false);
+  // From the reader, for the gate headline ("full N-page PDF").
+  const [pageCount, setPageCount] = useState<number | null>(null);
+  const onPageChange = useCallback((_page: number, total: number) => setPageCount(total), []);
 
   const { data: note, isPending, isError } = useQuery({
     queryKey: ["note", id],
@@ -52,7 +55,12 @@ const NotesViewerPage = () => {
 
   const download = () => {
     if (!note?.file_url) return;
-    request(() => getSignedFileUrl(note.file_url, "notes", true), () => {});
+    // No preview step here: this page already shows the whole PDF.
+    request(() => getSignedFileUrl(note.file_url, "notes", true), () => {}, {
+      title: note.title,
+      isPdf: true,
+      pages: pageCount,
+    });
   };
 
   if (isPending) {
@@ -132,11 +140,11 @@ const NotesViewerPage = () => {
             </p>
           </div>
         ) : (
-          <SecurePdfViewer fileUrl={fileUrl} />
+          <SecurePdfViewer fileUrl={fileUrl} onPageChange={onPageChange} />
         )}
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

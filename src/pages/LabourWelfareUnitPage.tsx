@@ -24,7 +24,7 @@ const LabourWelfareUnitPage = () => {
   const unit = unitNumber ? getUnitByNumber(n) : undefined;
 
   const { notes, quizzes, questionCounts, pyqs, lectures, loading, failed } = useLabourWelfareContent();
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -39,8 +39,8 @@ const LabourWelfareUnitPage = () => {
     // render inline) and downloads use a signed URL — downloads keep the
     // one-time email gate.
     if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    if (mode === "download") { downloadNote(note.file_url, note.title, () => recordNoteView(note)); return; }
+    openFree(() => getSignedFileUrl(note.file_url, "notes", false), () => recordNoteView(note));
   };
 
   const unitNotes = useMemo(
@@ -236,7 +236,7 @@ const LabourWelfareUnitPage = () => {
         )}
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

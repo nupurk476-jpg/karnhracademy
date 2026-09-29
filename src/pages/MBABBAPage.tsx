@@ -51,7 +51,7 @@ const SEMESTER_GUIDE = [
 const isPpt = (url: string | null) => !!url && /\.pptx?$/i.test(url.split("?")[0]);
 
 const MBABBAPage = () => {
-  const { request, GateDialog } = useDownloadGate();
+  const { request, gateDialog } = useDownloadGate();
 
   const { data: bundle, isError } = useQuery({
     queryKey: ["mba-content"],
@@ -102,6 +102,7 @@ const MBABBAPage = () => {
           if (error) console.error("view count failed", error);
         });
       },
+      { title: note.title, isPdf: false },
     );
   };
 
@@ -287,7 +288,7 @@ const MBABBAPage = () => {
         </section>
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

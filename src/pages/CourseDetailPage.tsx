@@ -51,7 +51,7 @@ const CourseDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
 
   const [course, setCourse] = useState<CourseCard | null>(null);
   const [items, setItems] = useState<Resolved[]>([]);
@@ -159,8 +159,8 @@ const CourseDetailPage = () => {
     // PDFs read in the branded in-app viewer; everything else is a signed
     // URL, and downloads keep the shared one-time email gate.
     if (mode === "view" && isPdfFile(item.file_url)) { navigate(`/notes/view/${item.ref_id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(item.file_url!, "notes", mode === "download"), () => {});
+    if (mode === "download") { downloadNote(item.file_url!, item.title, () => {}); return; }
+    openFree(() => getSignedFileUrl(item.file_url!, "notes", false), () => {});
   };
 
   if (failed) {
@@ -374,7 +374,7 @@ const CourseDetailPage = () => {
         )}
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

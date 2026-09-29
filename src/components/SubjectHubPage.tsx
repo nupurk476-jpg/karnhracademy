@@ -26,7 +26,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
   const discipline = getDiscipline(subject)!;
   const meta = getSubjectMeta(subject);
   const { notes, quizzes, questionCounts, lectures, loading, failed } = useSubjectContent(subject);
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -38,8 +38,8 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
     if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    if (mode === "download") { downloadNote(note.file_url, note.title, () => recordNoteView(note)); return; }
+    openFree(() => getSignedFileUrl(note.file_url, "notes", false), () => recordNoteView(note));
   };
 
   const perTopic = useMemo(() => {
@@ -284,7 +284,7 @@ const SubjectHubPage = ({ subject }: { subject: string }) => {
         </section>
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

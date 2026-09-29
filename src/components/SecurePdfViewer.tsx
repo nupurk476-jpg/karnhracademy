@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { openPdf } from "@/lib/pdfjs";
 import {
   ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Search, X,
   ShieldAlert, Loader2,
@@ -29,22 +30,6 @@ const RENDER_WINDOW = 1;
 /** Pages this far outside the viewport still count as "coming up". */
 const PREFETCH_MARGIN_PX = 300;
 
-type PdfjsModule = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
-
-// Lazy-loaded once per app session — pdfjs is heavy, and most visitors never
-// open a PYQ, so this only pays its cost when someone actually does.
-let pdfjsPromise: Promise<PdfjsModule> | null = null;
-function loadPdfjs(): Promise<PdfjsModule> {
-  if (!pdfjsPromise) {
-    pdfjsPromise = (async () => {
-      const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-      const worker = await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url");
-      pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-      return pdfjs;
-    })();
-  }
-  return pdfjsPromise;
-}
 
 // Burns the watermark directly into the rendered page's pixels (not a DOM
 // overlay) so it survives a screenshot the same way the rest of the page
@@ -194,21 +179,9 @@ const SecurePdfViewer = ({ fileUrl, watermarkText = DEFAULT_WATERMARK, initialPa
 
     (async () => {
       try {
-        const pdfjs = await loadPdfjs();
-        // Fetched once into memory here — the resolved URL never lands in an
-        // <a>, an <iframe src>, or the address bar; pdfjs gets raw bytes.
-        const res = await fetch(fileUrl);
-        if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-        const bytes = await res.arrayBuffer();
-        if (cancelled) return;
-        const doc = await pdfjs.getDocument({
-          data: bytes,
-          // Scanned exam papers are frequently JBIG2/JPX-compressed; without
-          // this, pdfjs silently fails to decode those images (and, since
-          // that failure happens mid-render, everything drawn after it on
-          // the same canvas — including our watermark — never lands either).
-          wasmUrl: "/pdfjs-wasm/",
-        }).promise;
+        // Fetched once into memory — see openPdf for why the URL itself
+        // is never handed to the browser.
+        const doc = await openPdf(fileUrl);
         if (cancelled) return;
         pdfDocRef.current = doc;
         setNumPages(doc.numPages);

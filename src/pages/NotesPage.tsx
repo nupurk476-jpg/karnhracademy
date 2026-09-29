@@ -44,7 +44,7 @@ const NotesPage = () => {
   const [sort, setSort] = useState<(typeof SORTS)[number]["value"]>("latest");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -127,8 +127,8 @@ const NotesPage = () => {
     // PDFs read in the branded in-app viewer; PPTs and downloads use a
     // signed URL — downloads keep the one-time email gate.
     if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordView(note));
+    if (mode === "download") { downloadNote(note.file_url, note.title, () => recordView(note)); return; }
+    openFree(() => getSignedFileUrl(note.file_url, "notes", false), () => recordView(note));
   };
 
   // ── Note renderers ───────────────────────────────────────────────────────
@@ -393,7 +393,7 @@ const NotesPage = () => {
         )}
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

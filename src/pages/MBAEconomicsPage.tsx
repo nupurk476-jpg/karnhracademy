@@ -20,7 +20,7 @@ import {
 
 const MBAEconomicsPage = () => {
   const { notes, quizzes, questionCounts, pyqs, lectures, loading, failed } = useMBAEconomicsContent();
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,8 +33,8 @@ const MBAEconomicsPage = () => {
   const openNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) { toast({ title: "No file attached to this note." }); return; }
     if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordNoteView(note));
+    if (mode === "download") { downloadNote(note.file_url, note.title, () => recordNoteView(note)); return; }
+    openFree(() => getSignedFileUrl(note.file_url, "notes", false), () => recordNoteView(note));
   };
 
   const notesForUnit = useMemo(() =>
@@ -287,7 +287,7 @@ const MBAEconomicsPage = () => {
         </section>
       </main>
 
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );

@@ -43,7 +43,7 @@ const DisciplineTopicPage = ({
   const topic = topics.find((t) => t.slug === slug);
   const [notes, setNotes] = useState<any[]>([]);
   const [failed, setFailed] = useState(false);
-  const { request, openFree, GateDialog } = useDownloadGate();
+  const { openFree, downloadNote, gateDialog } = useDownloadGate();
 
   // Same free-view / gated-download split as the main Notes page: PDFs open
   // in the branded in-app reader (/notes/view/:id), everything else opens a
@@ -57,8 +57,8 @@ const DisciplineTopicPage = ({
   const requestNote = (note: any, mode: "view" | "download") => {
     if (!note.file_url) return;
     if (mode === "view" && isPdfFile(note.file_url)) { navigate(`/notes/view/${note.id}`); return; }
-    const open = mode === "download" ? request : openFree;
-    open(() => getSignedFileUrl(note.file_url, "notes", mode === "download"), () => recordView(note));
+    if (mode === "download") { downloadNote(note.file_url, note.title, () => recordView(note)); return; }
+    openFree(() => getSignedFileUrl(note.file_url, "notes", false), () => recordView(note));
   };
 
   useEffect(() => {
@@ -199,7 +199,7 @@ const DisciplineTopicPage = ({
           </div>
         </section>
       </main>
-      <GateDialog />
+      {gateDialog}
       <Footer />
     </div>
   );
