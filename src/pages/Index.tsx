@@ -14,13 +14,14 @@ import { normalizeYouTubeThumbnail } from "@/lib/youtube";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useSubjectCounts } from "@/hooks/use-subject-counts";
 import SubjectCard from "@/components/SubjectCard";
+import { ECONOMICS_VALUES } from "@/lib/economicsTracks";
 import {
   ArrowRight, BookOpen,
   Video, HelpCircle, FileText,
   CheckCircle2, ChevronRight, Clock, Award,
   PlayCircle, BookMarked, Search,
   Mail, HandHeart, ScrollText, Linkedin,
-  BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap, History,
+  BadgeCheck, Network, RefreshCw, Smartphone, GraduationCap, History, TrendingUp,
 } from "lucide-react";
 
 // ─────────────── Brand tokens ────────────────────────────────────────────────
@@ -36,6 +37,9 @@ const GOLD = BRAND.gold;
 const GOLD_DARK = BRAND.goldDeep;
 const GOLD_TEXT = BRAND.goldText;
 const LIGHT = BRAND.light;
+// Economics track accent — the same deep green the Managerial Economics
+// discipline uses, so the card reads as its own track beside navy and gold.
+const ECO_GREEN = "#166534";
 
 // ─────────────── Data ────────────────────────────────────────────────────────
 // Hex colors for this page's custom (non-Tailwind-class) styling, keyed by
@@ -54,6 +58,12 @@ const SUBJECT_HEX: Record<string, { color: string; bg: string }> = {
   "micro-eco": { color: GOLD_TEXT, bg: "#F7F4EF" },
   lw:      { color: NAVY_DARK,  bg: "#EFEDE9" },
 };
+
+// The HR & Management programme subjects: everything except the standalone
+// UGC NET hub and the economics tracks (mirrors the /mba-bba hub).
+const PROGRAMME_VALUES: string[] = DISCIPLINES
+  .map(d => d.value as string)
+  .filter(v => v !== "lw" && !ECONOMICS_VALUES.includes(v));
 
 const SUBJECTS = DISCIPLINES.map(d => ({
   icon: d.icon,
@@ -260,18 +270,16 @@ function useContentCounts() {
   const [notesCount, setNotesCount] = useState<number | null>(null);
   const [quizCount, setQuizCount] = useState<number | null>(null);
   const [lecturesCount, setLecturesCount] = useState<number | null>(null);
-  const [booksCount, setBooksCount] = useState<number | null>(null);
   const [pyqCount, setPyqCount] = useState<number | null>(null);
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).then(({ count }) => setNotesCount(count ?? 0));
     supabase.from("quizzes").select("id", { count: "exact", head: true }).then(({ count }) => setQuizCount(count ?? 0));
     supabase.from("lectures" as any).select("id", { count: "exact", head: true }).then(({ count }) => setLecturesCount(count ?? 0));
-    supabase.from("book_recommendations").select("id", { count: "exact", head: true }).then(({ count }) => setBooksCount(count ?? 0));
     (supabase.from("pyq_papers" as any) as any).select("id", { count: "exact", head: true }).then(({ count }: any) => setPyqCount(count ?? 0));
   }, []);
 
-  return { notesCount, quizCount, lecturesCount, booksCount, pyqCount };
+  return { notesCount, quizCount, lecturesCount, pyqCount };
 }
 
 // ─────────────── Section: Compact "How It Works" strip ──────────────────────
@@ -359,8 +367,12 @@ const Subjects = () => {
 // of scrolling through two screens of promotion.
 const AudienceSplit = () => {
   const [lw, setLw] = useState<{ notes: number | null; quizzes: number | null; pyqs: number | null }>({ notes: null, quizzes: null, pyqs: null });
-  const [mba, setMba] = useState<{ notes: number | null; quizzes: number | null; lectures: number | null }>({ notes: null, quizzes: null, lectures: null });
-  const { booksCount } = useContentCounts();
+  // HR & Management and Economics totals come from the shared per-subject
+  // tally, split by discipline, so a note is counted on exactly one card and
+  // each card matches the hub it links to.
+  const { counts } = useSubjectCounts();
+  const sum = (kind: "notes" | "quizzes" | "lectures", values: string[]) =>
+    counts ? values.reduce((t, v) => t + (counts[kind][v] || 0), 0) : null;
 
   useEffect(() => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("subject", "lw")
@@ -369,15 +381,19 @@ const AudienceSplit = () => {
       .then(({ count }: any) => setLw(v => ({ ...v, quizzes: count ?? 0 })));
     (supabase.from("pyq_papers" as any) as any).select("id", { count: "exact", head: true }).eq("subject", "lw")
       .then(({ count }: any) => setLw(v => ({ ...v, pyqs: count ?? 0 })));
-    supabase.from("notes").select("id", { count: "exact", head: true }).neq("subject", "lw")
-      .then(({ count }) => setMba(v => ({ ...v, notes: count ?? 0 })));
-    (supabase.from("quizzes") as any).select("id", { count: "exact", head: true }).neq("subject", "lw")
-      .then(({ count }: any) => setMba(v => ({ ...v, quizzes: count ?? 0 })));
-    (supabase.from("lectures" as any) as any).select("id", { count: "exact", head: true })
-      .then(({ count }: any) => setMba(v => ({ ...v, lectures: count ?? 0 })));
   }, []);
 
   const n = (v: number | null) => (v !== null ? String(v) : "…");
+  const mba = {
+    notes: sum("notes", PROGRAMME_VALUES),
+    quizzes: sum("quizzes", PROGRAMME_VALUES),
+    lectures: sum("lectures", PROGRAMME_VALUES),
+  };
+  const eco = {
+    notes: sum("notes", ECONOMICS_VALUES),
+    quizzes: sum("quizzes", ECONOMICS_VALUES),
+    lectures: sum("lectures", ECONOMICS_VALUES),
+  };
 
   const AudienceCard = ({
     accent, eyebrowColor, eyebrow, icon: Icon, title, body, stats, to, cta,
@@ -448,9 +464,9 @@ const AudienceSplit = () => {
             eyebrow="MBA · BBA · PGDM · B.Com"
             icon={GraduationCap}
             title="Studying HR & Management this semester?"
-            body="Nine core subjects with semester-wise guidance — Principles of Management and Economics through OD & Change and International HRM."
+            body="Seven core subjects with semester-wise guidance — Principles of Management and Business Communication through OD & Change and International HRM."
             stats={[
-              { label: "Subjects", value: String(DISCIPLINES.length - 1) },
+              { label: "Subjects", value: String(PROGRAMME_VALUES.length) },
               { label: "Notes", value: n(mba.notes) },
               { label: "MCQ Sets", value: n(mba.quizzes) },
               { label: "Lectures", value: n(mba.lectures) },
@@ -459,18 +475,20 @@ const AudienceSplit = () => {
             cta="Explore the MBA/BBA Hub"
           />
           <AudienceCard
-            accent={STEEL_DARK}
-            eyebrowColor={STEEL_DARK}
-            eyebrow="PhD · Faculty · HR Practitioners"
-            icon={BookMarked}
-            title="Doing research or working in HR?"
-            body="A curated reference library and research-based notes to support academic work and applied HR practice, alongside the founder's own publications."
+            accent={ECO_GREEN}
+            eyebrowColor={ECO_GREEN}
+            eyebrow="BA · B.Com · BBA · MBA · Professionals"
+            icon={TrendingUp}
+            title="Studying or teaching Economics?"
+            body="Micro, Managerial and Business Economics explained topic by topic, with diagrams, solved examples and exam-ready notes, for students, teachers and professionals."
             stats={[
-              { label: "Books Curated", value: n(booksCount) },
-              { label: "Subjects", value: String(DISCIPLINES.length) },
+              { label: "Subjects", value: String(ECONOMICS_VALUES.length) },
+              { label: "Notes", value: n(eco.notes) },
+              { label: "MCQ Sets", value: n(eco.quizzes) },
+              { label: "Lectures", value: n(eco.lectures) },
             ]}
-            to="/books"
-            cta="Explore the Book Library"
+            to="/economics"
+            cta="Explore the Economics Hub"
           />
         </div>
       </div>
