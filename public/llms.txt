@@ -26,6 +26,7 @@
 - Business Communication (BC) — notes at [/notes?subject=bc](/notes?subject=bc), topic pages under /bc/
 - Organisation Development & Change Management (OD & CM) — notes at [/notes?subject=odcm](/notes?subject=odcm), topic pages under /odcm/
 - International HRM — notes at [/notes?subject=ghr](/notes?subject=ghr), topic pages under /ghr/
+- Economics (BA, B.Com, BBA, MBA) — hub at [/economics](/economics), linking Micro, Managerial (MBA) and Business (BBA) Economics
 - Micro Economics — hub at [/micro-economics](/micro-economics), topic pages under /micro-economics/
 - Labour Welfare (UGC NET/JRF) — full unit-wise hub at [/ugc-net-labour-welfare](/ugc-net-labour-welfare)
 

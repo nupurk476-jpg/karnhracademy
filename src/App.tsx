@@ -35,6 +35,7 @@ const LabourWelfareTopicPage = lazy(() => import("./pages/LabourWelfareTopicPage
 const MBAEconomicsPage = lazy(() => import("./pages/MBAEconomicsPage"));
 const MBAEconomicsUnitPage = lazy(() => import("./pages/MBAEconomicsUnitPage"));
 const BBAEconomicsPage = lazy(() => import("./pages/BBAEconomicsPage"));
+const EconomicsPage = lazy(() => import("./pages/EconomicsPage"));
 const BBAEconomicsUnitPage = lazy(() => import("./pages/BBAEconomicsUnitPage"));
 const PYQsPage = lazy(() => import("./pages/PYQsPage"));
 const PYQViewerPage = lazy(() => import("./pages/PYQViewerPage"));
@@ -112,6 +113,7 @@ const App = () => (
                 the "unit-" prefix out itself. URLs stay /unit-2 etc. */}
             <Route path="/ugc-net-labour-welfare/:unitSlug" element={<LabourWelfareUnitPage />} />
             <Route path="/ugc-net-labour-welfare/topic/:topicSlug" element={<LabourWelfareTopicPage />} />
+            <Route path="/economics" element={<EconomicsPage />} />
             <Route path="/mba-economics" element={<MBAEconomicsPage />} />
             <Route path="/mba-economics/:unitSlug" element={<MBAEconomicsUnitPage />} />
             <Route path="/bba-economics" element={<BBAEconomicsPage />} />

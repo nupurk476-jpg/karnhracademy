@@ -17,7 +17,8 @@ const navItems = [
   { label: "Home", to: "/" },
   { label: "Labour Welfare", to: "/ugc-net-labour-welfare" },
   { label: "MBA/BBA", to: "/mba-bba" },
-  { label: "Micro Economics", to: "/micro-economics" },
+  // Economics stays highlighted inside every economics track it links to.
+  { label: "Economics", to: "/economics", also: ["/micro-economics", "/mba-economics", "/bba-economics"] },
   { label: "Programmes", to: "/programmes" },
   { label: "Courses", to: "/courses" },
   { label: "Notes", to: "/notes" },
@@ -63,9 +64,9 @@ const Header = () => {
     navigate("/");
   };
 
-  const isActive = (to: string) => {
+  const isActive = (to: string, also: string[] = []) => {
     if (to === "/") return location.pathname === "/";
-    return location.pathname.startsWith(to);
+    return [to, ...also].some(p => location.pathname.startsWith(p));
   };
 
   return (
@@ -138,7 +139,7 @@ const Header = () => {
               className={`px-2 xl:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 item.wideOnly ? "hidden xl:block " : ""
               }${
-                isActive(item.to)
+                isActive(item.to, (item as { also?: string[] }).also)
                   ? "text-foreground bg-slate-100"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
               }`}
@@ -252,7 +253,7 @@ const Header = () => {
                 key={item.label}
                 to={item.to}
                 className={`block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive(item.to)
+                  isActive(item.to, (item as { also?: string[] }).also)
                     ? "text-foreground bg-slate-100"
                     : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
                 }`}
