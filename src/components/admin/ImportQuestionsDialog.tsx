@@ -141,9 +141,16 @@ const ImportQuestionsDialog = ({ open, onClose, quizTitle, onImport }: Props) =>
         <DialogHeader>
           <DialogTitle>Import Questions</DialogTitle>
           <DialogDescription>
-            Add questions to "{quizTitle}" from a PDF, Word (.docx) document, or pasted text — no retyping needed.
+            Add questions from a PDF, Word (.docx) document, or pasted text — no retyping needed.
           </DialogDescription>
         </DialogHeader>
+        {/* Spelled out, because importing into the wrong quiz is easy to do
+            and hard to notice: the questions just never show up where expected. */}
+        <div className="rounded-md border border-accent/40 bg-accent/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Questions will be added to: </span>
+          <span className="font-semibold text-foreground">{quizTitle || "—"}</span>
+          <p className="mt-0.5 text-xs text-muted-foreground">Wrong quiz? Close this, click the right quiz in the list, then import again.</p>
+        </div>
 
         {!parsed && (
           <div className="space-y-4">

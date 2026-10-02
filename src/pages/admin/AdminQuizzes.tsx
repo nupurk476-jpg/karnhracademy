@@ -46,6 +46,11 @@ const AdminQuizzes = () => {
 
   const [previewQuiz, setPreviewQuiz] = useState<any | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+
+  // Bulk move — for questions that were imported into the wrong quiz.
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [moveTarget, setMoveTarget] = useState("");
+  const [moving, setMoving] = useState(false);
   const { toast } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -65,7 +70,10 @@ const AdminQuizzes = () => {
   };
 
   useEffect(() => { loadQuizzes(); }, []);
-  useEffect(() => { if (selectedQuiz) loadQuestions(selectedQuiz); else setQuestions([]); }, [selectedQuiz]);
+  useEffect(() => {
+    setChecked(new Set()); setMoveTarget("");
+    if (selectedQuiz) loadQuestions(selectedQuiz); else setQuestions([]);
+  }, [selectedQuiz]);
 
   // ── Quiz meta ──────────────────────────────────────────────────────────────
   const resetQuizForm = () => {
@@ -88,16 +96,23 @@ const AdminQuizzes = () => {
     const fullRow = { title, topic, description: description || null, subject, topic_slug: topicSlug || null };
     const legacyRow = { title, topic, subject, topic_slug: topicSlug || null };
     const write = (row: any) => editingQuizId
-      ? supabase.from("quizzes").update(row).eq("id", editingQuizId)
-      : supabase.from("quizzes").insert(row);
-    let { error } = await write(fullRow);
+      ? supabase.from("quizzes").update(row).eq("id", editingQuizId).select("id").maybeSingle()
+      : supabase.from("quizzes").insert(row).select("id").single();
+    let { data: saved, error } = await write(fullRow);
     let compat = false;
     if (error && isMissingColumn(error)) {
       compat = true;
-      ({ error } = await write(legacyRow));
+      ({ data: saved, error } = await write(legacyRow));
     }
     if (error) { toast({ title: "Failed to save quiz", description: error.message, variant: "destructive" }); return; }
-    toast({ title: editingQuizId ? "Quiz updated" : "Quiz created", description: compat ? COMPAT_HINT : undefined });
+    toast({
+      title: editingQuizId ? "Quiz updated" : "Quiz created",
+      description: compat ? COMPAT_HINT : editingQuizId ? undefined : `"${title}" is now selected — use Import PDF to add its questions.`,
+    });
+    // A new quiz has to become the selected one. Before, the editor kept
+    // pointing at whichever quiz was open last, so "Import PDF" right after
+    // creating a quiz silently filled the previous quiz instead.
+    if (!editingQuizId && saved?.id) setSelectedQuiz(saved.id);
     resetQuizForm();
     loadQuizzes();
   };
@@ -261,6 +276,58 @@ const AdminQuizzes = () => {
     toast({ title: `${qs.length} question${qs.length === 1 ? "" : "s"} added to "${activeQuizObj?.title}"`, description: compat ? COMPAT_HINT : undefined });
     loadQuestions(selectedQuiz);
     return true;
+  };
+
+  const toggleChecked = (id: string) =>
+    setChecked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+
+  // Each import is a single insert, so its rows share one created_at.
+  // Grouping on it lets an admin pick out "the 50 questions from that PDF"
+  // in one click instead of ticking them one by one.
+  const importBatches = (() => {
+    const groups = new Map<string, any[]>();
+    for (const q of questions) {
+      const key = q.created_at ?? "";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(q);
+    }
+    return [...groups.values()].filter(g => g.length > 1);
+  })();
+
+  const moveCheckedQuestions = async () => {
+    const target = quizzes.find(q => q.id === moveTarget);
+    if (!selectedQuiz || !target || checked.size === 0) return;
+    const ok = await confirm({
+      title: `Move ${checked.size} question${checked.size === 1 ? "" : "s"}?`,
+      description: `They will be removed from "${activeQuizObj?.title}" and added to the end of "${target.title}".`,
+    });
+    if (!ok) return;
+    setMoving(true);
+    let targetCount = 0;
+    try { targetCount = (await fetchQuizQuestionsAdmin(target.id)).length; } catch { /* positions only */ }
+    const ids = questions.filter(q => checked.has(q.id)).map(q => q.id);
+    const { data, error } = await supabase.from("quiz_questions")
+      .update({ quiz_id: target.id } as any).in("id", ids).select("id");
+    if (!error) {
+      // Renumber so they follow the target quiz's existing questions in
+      // their current order. Best effort: positions are cosmetic.
+      await Promise.all(ids.map((id, i) =>
+        supabase.from("quiz_questions").update({ position: targetCount + i + 1 } as any).eq("id", id)));
+    }
+    setMoving(false);
+    if (error) { toast({ title: "Move failed", description: error.message, variant: "destructive" }); return; }
+    const moved = data?.length ?? 0;
+    if (moved < ids.length) {
+      toast({ title: `Only ${moved} of ${ids.length} moved`, description: "Check you are signed in as an admin and try again.", variant: "destructive" });
+    } else {
+      toast({ title: `${moved} question${moved === 1 ? "" : "s"} moved to "${target.title}"` });
+    }
+    setChecked(new Set()); setMoveTarget("");
+    loadQuestions(selectedQuiz);
   };
 
   const moveQuestion = async (index: number, dir: -1 | 1) => {
@@ -471,6 +538,48 @@ const AdminQuizzes = () => {
               </div>
             )}
 
+            {/* Bulk select + move to another quiz */}
+            {questions.length > 0 && (
+              <div className="mb-3 space-y-2 rounded-md border border-border bg-muted/40 p-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="inline-flex items-center gap-1.5 font-medium text-foreground">
+                    <input type="checkbox"
+                      checked={checked.size === questions.length}
+                      onChange={e => setChecked(e.target.checked ? new Set(questions.map(q => q.id)) : new Set())} />
+                    Select all
+                  </label>
+                  {importBatches.length > 1 && importBatches.map((batch, bi) => {
+                    const first = questions.indexOf(batch[0]) + 1;
+                    const last = questions.indexOf(batch[batch.length - 1]) + 1;
+                    return (
+                      <button key={bi} type="button" title={batch[0].question}
+                        onClick={() => setChecked(new Set(batch.map(q => q.id)))}
+                        className="rounded-full border border-border bg-background px-2 py-0.5 text-muted-foreground hover:border-accent hover:text-accent-deep">
+                        Import {bi + 1}: Q{first}–Q{last} ({batch.length})
+                      </button>
+                    );
+                  })}
+                </div>
+                {checked.size > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold text-foreground">{checked.size} selected — move to</span>
+                    <select value={moveTarget} onChange={e => setMoveTarget(e.target.value)}
+                      aria-label="Quiz to move the selected questions to"
+                      className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-xs">
+                      <option value="">Choose a quiz…</option>
+                      {quizzes.filter(q => q.id !== selectedQuiz).map(q => (
+                        <option key={q.id} value={q.id}>{q.title}</option>
+                      ))}
+                    </select>
+                    <button onClick={moveCheckedQuestions} disabled={!moveTarget || moving}
+                      className="rounded-md bg-accent px-3 py-1.5 font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
+                      {moving ? "Moving…" : "Move"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Collapsible question blocks */}
             <div className="space-y-2">
               {questions.map((q, i) => {
@@ -478,6 +587,8 @@ const AdminQuizzes = () => {
                 return (
                   <div key={q.id} className={`rounded-md border bg-card ${isOpen ? "border-accent" : "border-border"}`}>
                     <div className="flex items-center gap-2 px-3 py-2.5">
+                      <input type="checkbox" checked={checked.has(q.id)} onChange={() => toggleChecked(q.id)}
+                        aria-label={`Select question ${i + 1}`} className="shrink-0" />
                       <button onClick={() => (isOpen ? setExpandedQ(null) : openEditQuestion(q))}
                         className="flex min-w-0 flex-1 items-center gap-2 text-left"
                         aria-expanded={isOpen} aria-label={`Question ${i + 1}: ${isOpen ? "collapse" : "expand"}`}>
