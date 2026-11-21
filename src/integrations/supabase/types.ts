@@ -279,6 +279,9 @@ export type Database = {
           created_at: string
           description: string | null
           file_url: string | null
+          file_path: string | null
+          is_free: boolean
+          price_paise: number
           id: string
           subject: string | null
           title: string
@@ -289,6 +292,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           file_url?: string | null
+          is_free?: boolean
+          price_paise?: number
           id?: string
           subject?: string | null
           title: string
@@ -299,6 +304,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           file_url?: string | null
+          is_free?: boolean
+          price_paise?: number
           id?: string
           subject?: string | null
           title?: string

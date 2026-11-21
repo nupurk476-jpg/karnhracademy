@@ -6,7 +6,9 @@ import { DISCIPLINES } from "@/lib/disciplines";
 import { hasCustomStyle } from "@/lib/courseCategoryStyle";
 import { describeContents, describeShape, type CourseCard } from "@/lib/courses";
 import { isUnitBasedSubject } from "@/lib/subjectUnits";
-import { RefreshCw, Eye, EyeOff, ExternalLink, Palette } from "lucide-react";
+import { RefreshCw, Eye, EyeOff, ExternalLink, Palette, Pencil } from "lucide-react";
+import { formatRupees } from "@/lib/programmes";
+import { useConfirm } from "@/hooks/use-confirm";
 
 /**
  * Where the catalog is built and published.
@@ -44,6 +46,12 @@ const AdminCourses = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<SyncResult | null>(null);
+  const { confirm, ConfirmDialog } = useConfirm();
+  // Inline price editor: one course at a time.
+  const [pricingId, setPricingId] = useState<string | null>(null);
+  const [priceInput, setPriceInput] = useState("");
+  const [lockNotes, setLockNotes] = useState(true);
+  const [savingPrice, setSavingPrice] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -92,6 +100,52 @@ const AdminCourses = () => {
       setCourses(list => list.map(c => (c.id === course.id ? { ...c, is_published: !next } : c)));
       toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
     }
+  };
+
+  const startPricing = (course: CourseCard) => {
+    setPricingId(course.id);
+    setPriceInput(course.is_free ? "" : String(course.price_paise / 100));
+    setLockNotes(true);
+  };
+
+  // Empty or 0 makes the course free again. Making it free does NOT unlock
+  // its notes: a note may also be sold on its own, so that stays a per-note
+  // decision in Admin → Notes.
+  const savePrice = async (course: CourseCard) => {
+    const paise = Math.round((parseFloat(priceInput) || 0) * 100);
+    if (paise > 0 && paise < 100) {
+      toast({ title: "The lowest price you can charge online is ₹1", variant: "destructive" });
+      return;
+    }
+    const paid = paise > 0;
+    if (paid && lockNotes) {
+      const ok = await confirm({
+        title: `Lock the notes in "${course.title}"?`,
+        description: `Its ${course.note_count} note(s) will become paid everywhere on the site, not just inside this course. Students who buy the course (${formatRupees(paise)}) unlock all of them. MCQs and lectures stay free.`,
+      });
+      if (!ok) return;
+    }
+    setSavingPrice(true);
+    const { error } = await (supabase.from("courses" as any) as any)
+      .update({ is_free: !paid, price_paise: paid ? paise : 0 }).eq("id", course.id);
+    let lockError: any = null;
+    if (!error && paid && lockNotes) {
+      const { data: items } = await (supabase.from("course_items" as any) as any)
+        .select("ref_id").eq("course_id", course.id).eq("kind", "note");
+      const ids = (items ?? []).map((i: any) => i.ref_id);
+      if (ids.length) {
+        ({ error: lockError } = await (supabase.from("notes") as any)
+          .update({ is_free: false }).in("id", ids).eq("is_free", true));
+      }
+    }
+    setSavingPrice(false);
+    if (error || lockError) {
+      toast({ title: "Couldn't save the price", description: (error ?? lockError).message, variant: "destructive" });
+      return;
+    }
+    toast({ title: paid ? `Price set to ${formatRupees(paise)}` : "Course is free again" });
+    setPricingId(null);
+    load();
   };
 
   const published = courses.filter(c => c.is_published).length;
@@ -177,6 +231,7 @@ const AdminCourses = () => {
                 <th className="px-3 py-2 text-right font-medium">Modules</th>
                 <th className="px-3 py-2 text-right font-medium">Topics</th>
                 <th className="px-3 py-2 text-right font-medium">Lessons</th>
+                <th className="px-3 py-2 text-right font-medium">Price</th>
                 <th className="px-3 py-2 text-right font-medium">Status</th>
               </tr>
             </thead>
@@ -205,6 +260,40 @@ const AdminCourses = () => {
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.topic_count}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{course.lesson_count}</td>
                   <td className="px-3 py-2 text-right">
+                    {pricingId === course.id ? (
+                      <div className="ml-auto flex w-56 flex-col items-end gap-1.5">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground">₹</span>
+                          <input
+                            type="number" min="0" step="1" autoFocus value={priceInput}
+                            onChange={e => setPriceInput(e.target.value)} placeholder="0 = free"
+                            aria-label={`Price for ${course.title} in rupees`}
+                            className="w-20 rounded-md border border-input bg-background px-2 py-1 text-right text-sm"
+                          />
+                          <button type="button" onClick={() => savePrice(course)} disabled={savingPrice}
+                            className="rounded-md bg-accent px-2 py-1 text-xs font-semibold text-accent-foreground disabled:opacity-50">
+                            Save
+                          </button>
+                          <button type="button" onClick={() => setPricingId(null)} className="px-1 text-xs text-muted-foreground hover:underline">
+                            Cancel
+                          </button>
+                        </div>
+                        {(parseFloat(priceInput) || 0) > 0 && course.note_count > 0 && (
+                          <label className="flex items-center gap-1.5 text-left text-[11px] text-muted-foreground">
+                            <input type="checkbox" checked={lockNotes} onChange={e => setLockNotes(e.target.checked)} />
+                            Also lock its {course.note_count} note(s)
+                          </label>
+                        )}
+                      </div>
+                    ) : (
+                      <button type="button" onClick={() => startPricing(course)}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted">
+                        {course.is_free ? "Free" : formatRupees(course.price_paise)}
+                        <Pencil className="h-3 w-3 text-muted-foreground" />
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-right">
                     <button
                       type="button"
                       onClick={() => togglePublished(course)}
@@ -226,6 +315,7 @@ const AdminCourses = () => {
           </table>
         </div>
       )}
+      <ConfirmDialog />
     </div>
   );
 };

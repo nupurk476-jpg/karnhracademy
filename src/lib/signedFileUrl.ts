@@ -32,6 +32,19 @@ export async function getSignedFileUrl(
     .from(bucket)
     .createSignedUrl(path, SIGNED_URL_TTL_SECONDS, download ? { download: true } : undefined);
   if (error || !data?.signedUrl) {
+    // A paid note the visitor hasn't bought: storage refuses to sign it
+    // (see the razorpay_payments migration). Every listing page funnels
+    // through here, so this is the one place that can send them to the
+    // note's page, which shows the price and a Buy button, instead of a
+    // download that silently does nothing.
+    if (bucket === "notes") {
+      const { data: locked } = await (supabase.from("notes") as any)
+        .select("id").eq("file_path", path).eq("is_free", false).limit(1);
+      if (locked?.[0]?.id) {
+        window.location.assign(`/notes/view/${locked[0].id}`);
+        return null;
+      }
+    }
     console.error("getSignedFileUrl failed, falling back to stored URL", error);
     return fileUrl;
   }

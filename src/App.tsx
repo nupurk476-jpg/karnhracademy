@@ -78,6 +78,7 @@ const AdminProgrammes = lazy(() => import("./pages/admin/AdminProgrammes"));
 const AdminCourses = lazy(() => import("./pages/admin/AdminCourses"));
 const AdminRegistrations = lazy(() => import("./pages/admin/AdminRegistrations"));
 const AdminPaymentSettings = lazy(() => import("./pages/admin/AdminPaymentSettings"));
+const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminNewspaperHighlights = lazy(() => import("./pages/admin/AdminNewspaperHighlights"));
 const AdminLectures = lazy(() => import("./pages/admin/AdminLectures"));
 const AdminLiveLectures = lazy(() => import("./pages/admin/AdminLiveLectures"));
@@ -177,6 +178,7 @@ const App = () => (
               <Route path="programmes" element={<AdminProgrammes />} />
               <Route path="registrations" element={<AdminRegistrations />} />
               <Route path="payment-settings" element={<AdminPaymentSettings />} />
+              <Route path="payments" element={<AdminPayments />} />
               <Route path="newspaper" element={<AdminNewspaperHighlights />} />
               <Route path="lectures" element={<AdminLectures />} />
               <Route path="live-lectures" element={<AdminLiveLectures />} />

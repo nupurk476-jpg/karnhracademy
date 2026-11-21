@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import MyPurchases from "@/components/MyPurchases";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
@@ -301,6 +302,8 @@ const ProfilePage = () => {
             </div>
           )}
         </div>
+
+        <MyPurchases />
 
         {/* Quiz Activity */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8">

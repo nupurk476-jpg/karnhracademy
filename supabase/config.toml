@@ -1,1 +1,13 @@
 project_id = "miynvbkcufwrofgdrtap"
+
+# The Razorpay functions authenticate themselves: checkout/verify accept
+# signed-out programme registrations and check the user token by hand, and
+# the webhook is signed by Razorpay, which cannot send a Supabase JWT.
+[functions.razorpay-checkout]
+verify_jwt = false
+
+[functions.razorpay-verify]
+verify_jwt = false
+
+[functions.razorpay-webhook]
+verify_jwt = false

@@ -20,6 +20,10 @@ const AdminPaymentSettings = () => {
   const [qrUrl, setQrUrl] = useState("");
   const [payee, setPayee] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [onlineEnabled, setOnlineEnabled] = useState(false);
+  // False until the payments migration has added the column; the switch is
+  // hidden and never written before then, so the UPI fields keep saving.
+  const [hasOnlineColumn, setHasOnlineColumn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
@@ -33,6 +37,8 @@ const AdminPaymentSettings = () => {
           setQrUrl(data.upi_qr_url ?? "");
           setPayee(data.payee_label ?? "");
           setInstructions(data.instructions ?? "");
+          setOnlineEnabled(!!data.online_payments_enabled);
+          setHasOnlineColumn("online_payments_enabled" in data);
         }
         setLoading(false);
       });
@@ -47,6 +53,7 @@ const AdminPaymentSettings = () => {
         upi_qr_url: qrUrl.trim() || null,
         payee_label: payee.trim() || null,
         instructions: instructions.trim() || null,
+        ...(hasOnlineColumn ? { online_payments_enabled: onlineEnabled } : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", true);
@@ -76,6 +83,20 @@ const AdminPaymentSettings = () => {
       </div>
 
       <form onSubmit={save} className="space-y-4 rounded-lg border border-border bg-card p-5">
+        {hasOnlineColumn && <div className="rounded-md border border-border bg-muted/40 p-4">
+          <label className="flex items-start gap-3">
+            <input type="checkbox" className="mt-1" checked={onlineEnabled} onChange={e => setOnlineEnabled(e.target.checked)} />
+            <span>
+              <span className="block text-sm font-semibold text-foreground">Accept online payments (Razorpay)</span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Shows "Pay online" on programmes and "Buy" on paid courses and notes. Turn this on only after the
+                Razorpay keys are added in Supabase (see PAYMENTS_SETUP.md in the code). Students pay by UPI, card,
+                netbanking or wallet, and access is granted automatically — no manual checking.
+              </span>
+            </span>
+          </label>
+        </div>}
+
         <div>
           <label className={LABEL} htmlFor="upi-id">UPI ID</label>
           <input id="upi-id" className={FIELD} value={upiId} onChange={e => setUpiId(e.target.value)} placeholder="yourname@okbank" />

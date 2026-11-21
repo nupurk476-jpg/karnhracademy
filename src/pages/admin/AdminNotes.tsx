@@ -25,6 +25,9 @@ const AdminNotes = () => {
   const [existingFileUrl, setExistingFileUrl] = useState<string | null>(null);
   const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // Pricing. Paid with no price = locked, but only sold as part of a course.
+  const [isPaid, setIsPaid] = useState(false);
+  const [priceRupees, setPriceRupees] = useState("");
   const { toast } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
 
@@ -42,6 +45,7 @@ const AdminNotes = () => {
     setTitle(""); setDescription(""); setFile(null); setVideoFile(null);
     setTopicSlug(""); setSubject("hrm"); setTagsInput("");
     setExistingFileUrl(null); setExistingVideoUrl(null);
+    setIsPaid(false); setPriceRupees("");
   };
 
   const startEdit = (note: any) => {
@@ -56,6 +60,8 @@ const AdminNotes = () => {
     setExistingFileUrl(note.file_url ?? null);
     setExistingVideoUrl(note.video_url ?? null);
     setFile(null); setVideoFile(null);
+    setIsPaid(note.is_free === false);
+    setPriceRupees(note.price_paise ? String(note.price_paise / 100) : "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -78,7 +84,12 @@ const AdminNotes = () => {
       if (videoFile) video_url = await uploadFile("note-videos", videoFile);
 
       const tags = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
-      const row: any = { title, description, file_url, video_url, topic_slug: topicSlug || null, subject, tags };
+      const pricePaise = isPaid ? Math.round((parseFloat(priceRupees) || 0) * 100) : 0;
+      if (isPaid && pricePaise > 0 && pricePaise < 100) throw new Error("The lowest price you can charge online is ₹1.");
+      const row: any = {
+        title, description, file_url, video_url, topic_slug: topicSlug || null, subject, tags,
+        is_free: !isPaid, price_paise: pricePaise,
+      };
       if (file) row.file_size = file.size;          // record size for new uploads
       else if (!file_url) row.file_size = null;      // attachment removed
       const write = (r: any) => editingId
@@ -87,7 +98,8 @@ const AdminNotes = () => {
       let { error } = await write(row);
       // file_size/tags don't exist until the pending DB update runs — retry without them.
       if (error && (error.code === "PGRST204" || /schema cache/i.test(error.message || ""))) {
-        const { file_size: _fs, tags: _tags, ...legacy } = row;
+        if (isPaid) throw new Error("Paid notes need the payments database update (razorpay_payments migration) to be run first.");
+        const { file_size: _fs, tags: _tags, is_free: _f, price_paise: _p, ...legacy } = row;
         ({ error } = await write(legacy));
       }
       if (error) throw new Error(error.message);
@@ -222,6 +234,32 @@ const AdminNotes = () => {
           )}
         </div>
 
+        {/* Pricing */}
+        <div className="rounded-md border border-border p-3">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Access</p>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <label className="inline-flex items-center gap-1.5">
+              <input type="radio" name="note-access" checked={!isPaid} onChange={() => setIsPaid(false)} /> Free for everyone
+            </label>
+            <label className="inline-flex items-center gap-1.5">
+              <input type="radio" name="note-access" checked={isPaid} onChange={() => setIsPaid(true)} /> Paid
+            </label>
+            {isPaid && (
+              <label className="inline-flex items-center gap-1.5">
+                Price ₹
+                <input type="number" min="0" step="1" value={priceRupees} onChange={e => setPriceRupees(e.target.value)}
+                  placeholder="49" className="w-24 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+              </label>
+            )}
+          </div>
+          {isPaid && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Students must buy this note, or a paid course that contains it, to read or download it.
+              Leave the price empty to sell it <span className="font-medium">only as part of a course</span>.
+            </p>
+          )}
+        </div>
+
         <button onClick={handleSave} disabled={uploading || !title} className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110 disabled:opacity-50">
           {uploading ? (editingId ? "Saving..." : "Uploading...") : editingId ? "Save Changes" : "Create Note"}
         </button>
@@ -269,6 +307,11 @@ const AdminNotes = () => {
               {note.topic_slug && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">{getTopicLabel(note.topic_slug)}</span>}
               {note.file_url && <span className="ml-2 text-xs text-muted-foreground">{note.file_url.match(/\.pptx?$/i) ? "PPT" : "PDF"}</span>}
               {note.video_url && <span className="ml-2 rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent-deep">VIDEO</span>}
+              {note.is_free === false && (
+                <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                  {note.price_paise > 0 ? `₹${note.price_paise / 100}` : "Course only"}
+                </span>
+              )}
               {(note.tags ?? []).map((tag: string) => (
                 <span key={tag} className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">#{tag}</span>
               ))}

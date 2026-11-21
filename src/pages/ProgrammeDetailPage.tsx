@@ -8,12 +8,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useHoneypot } from "@/hooks/use-honeypot";
 import { useToast } from "@/hooks/use-toast";
 import { track, EVENTS } from "@/lib/analytics";
+import { payWithRazorpay, useOnlinePaymentsEnabled } from "@/lib/razorpay";
 import {
   formatDateRange, formatDate, formatRupees, isCohortOpen, seatsLeft,
   type Cohort, type Programme,
 } from "@/lib/programmes";
 import {
-  CalendarDays, CheckCircle2, Copy, Clock, Users, ArrowLeft, Smartphone,
+  CalendarDays, CheckCircle2, Copy, Clock, Users, ArrowLeft, Smartphone, CreditCard, Loader2,
 } from "lucide-react";
 
 /** Registration is two steps: who you are, then pay and tell us the reference. */
@@ -47,6 +48,12 @@ const ProgrammeDetailPage = () => {
   const [failed, setFailed] = useState(false);
   const [course, setCourse] = useState("");
   const [upiReference, setUpiReference] = useState("");
+  const onlineEnabled = useOnlinePaymentsEnabled();
+  // How the registration ended: paid online (seat already confirmed), paid
+  // online but still processing, or a manual UPI claim awaiting a check.
+  const [doneKind, setDoneKind] = useState<"online" | "processing" | "manual">("manual");
+  const [paying, setPaying] = useState(false);
+  const [showManual, setShowManual] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +146,34 @@ const ProgrammeDetailPage = () => {
     setStep("payment");
   };
 
+  // Gateway path. The registration row is created server-side by
+  // razorpay-checkout (so it can start as pending_payment); nothing is
+  // inserted from here.
+  const payOnline = async () => {
+    if (!selected || !prog) return;
+    if (isBot()) { setStep("done"); return; }
+    setPaying(true);
+    track(EVENTS.REG_PAYMENT, { slug: prog.slug, batch: selected.batch_name, method: "razorpay", price: amountRupees });
+    try {
+      const result = await payWithRazorpay({
+        item_type: "programme",
+        item_id: selected.id,
+        registration: {
+          full_name: fullName.trim(), email: email.trim(), phone: phone.trim(),
+          college: college.trim() || null, course: course.trim() || null,
+        },
+      });
+      if (result === "dismissed") return;
+      track(EVENTS.REG_SUBMITTED, { slug: prog.slug, batch: selected.batch_name, price: amountRupees, method: "razorpay" });
+      setDoneKind(result === "paid" ? "online" : "processing");
+      setStep("done");
+    } catch (err: any) {
+      toast({ title: "Payment didn't go through", description: err?.message, variant: "destructive" });
+    } finally {
+      setPaying(false);
+    }
+  };
+
   const submitRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selected || !prog) return;
@@ -172,6 +207,7 @@ const ProgrammeDetailPage = () => {
       return;
     }
     track(EVENTS.REG_SUBMITTED, { slug: prog?.slug, batch: selected.batch_name, price: amountRupees });
+    setDoneKind("manual");
     setStep("done");
   };
 
@@ -305,7 +341,23 @@ const ProgrammeDetailPage = () => {
           {/* ── Register ─────────────────────────────────────────────── */}
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-              {step === "done" ? (
+              {step === "done" && doneKind !== "manual" ? (
+                <div>
+                  <CheckCircle2 aria-hidden="true" className="h-8 w-8 text-emerald-600" />
+                  <h2 className="mt-3 font-display text-xl font-bold text-foreground">
+                    {doneKind === "online" ? "You're registered!" : "Payment received"}
+                  </h2>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {doneKind === "online"
+                      ? "Your payment went through and your seat is confirmed. "
+                      : "Your payment is being finalised by the bank — your seat is confirmed automatically once it completes, usually within minutes. "}
+                    We'll be in touch at <span className="font-medium text-foreground">{email}</span> with joining details.
+                  </p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Questions? <Link to="/contact" className="font-semibold text-accent-deep hover:underline">Contact us</Link>.
+                  </p>
+                </div>
+              ) : step === "done" ? (
                 <div>
                   <CheckCircle2 aria-hidden="true" className="h-8 w-8 text-emerald-600" />
                   <h2 className="mt-3 font-display text-xl font-bold text-foreground">Registration received</h2>
@@ -424,6 +476,42 @@ const ProgrammeDetailPage = () => {
                     </form>
                   ) : (
                     <form onSubmit={submitRegistration} className="mt-5 space-y-4">
+                      {onlineEnabled && (
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={payOnline}
+                            disabled={paying}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground transition hover:brightness-110 disabled:opacity-60"
+                          >
+                            {paying ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : <CreditCard aria-hidden="true" className="h-4 w-4" />}
+                            {paying ? "Opening payment…" : `Pay ${formatRupees(prog.price_paise)} online`}
+                          </button>
+                          <p className="text-center text-xs text-muted-foreground">
+                            UPI, cards, netbanking or wallets · seat confirmed instantly
+                          </p>
+                          {!showManual && (
+                            <div className="flex gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setStep("details")}
+                                className="rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+                              >
+                                Back
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setShowManual(true)}
+                                className="flex-1 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
+                              >
+                                Already paid by UPI? Enter your reference instead
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {(!onlineEnabled || showManual) && (<>
                       <div className="rounded-lg border border-border bg-muted/50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pay exactly</p>
                         <p className="font-display text-2xl font-bold text-foreground">{formatRupees(prog.price_paise)}</p>
@@ -511,6 +599,7 @@ const ProgrammeDetailPage = () => {
                       <p className="text-center text-xs text-muted-foreground">
                         Step 2 of 2 · seat confirmed after we check the payment
                       </p>
+                      </>)}
                     </form>
                   )}
 

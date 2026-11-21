@@ -18,7 +18,9 @@ import {
 } from "@/lib/courses";
 import { getDiscipline, getTopicLabel } from "@/lib/disciplines";
 import { getUnitsForSubject, getUnitForSubjectSlug, unitRoman } from "@/lib/subjectUnits";
-import { FileText, HelpCircle, PlayCircle, Download, ArrowRight, Layers } from "lucide-react";
+import { FileText, HelpCircle, PlayCircle, Download, ArrowRight, Layers, Lock } from "lucide-react";
+import BuyButton from "@/components/BuyButton";
+import { formatRupees } from "@/lib/programmes";
 
 /**
  * One course: its lessons, in order.
@@ -39,7 +41,11 @@ type Item = {
   topic_slug: string | null;
 };
 
-type Resolved = Item & { title: string; description: string | null; file_url?: string | null; video_url?: string | null };
+type Resolved = Item & {
+  title: string; description: string | null; file_url?: string | null; video_url?: string | null;
+  /** Notes only. false = locked unless the course (or the note) is bought. */
+  is_free?: boolean;
+};
 
 const KIND_META: Record<CourseItemKind, { icon: typeof FileText; label: string }> = {
   note: { icon: FileText, label: "Note" },
@@ -58,6 +64,12 @@ const CourseDetailPage = () => {
   const [notFound, setNotFound] = useState(false);
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Whether the visitor may open this course's paid notes. Always true for a
+  // free course; for a paid one the database decides (purchase or admin).
+  // null while that answer is on its way, so neither "Purchased" nor the
+  // Buy box flashes up wrongly.
+  const [owned, setOwned] = useState<boolean | null>(null);
+  const [accessVersion, setAccessVersion] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -89,7 +101,10 @@ const CourseDetailPage = () => {
       // Three queries for the whole lesson list, not one per lesson.
       const [notes, lectures, quizzes] = await Promise.all([
         idsOf("note").length
-          ? supabase.from("notes").select("id, title, description, file_url, video_url").in("id", idsOf("note"))
+          // "*" rather than naming is_free: the column only exists once the
+          // payments migration has run, and naming it would fail the whole
+          // query (and empty every course) on a database that hasn't.
+          ? supabase.from("notes").select("*").in("id", idsOf("note"))
           : Promise.resolve({ data: [] as any[] }),
         idsOf("lecture").length
           ? supabase.from("lectures").select("id, title, description, video_url").in("id", idsOf("lecture"))
@@ -114,6 +129,18 @@ const CourseDetailPage = () => {
     })();
     return () => { cancelled = true; };
   }, [slug]);
+
+  useEffect(() => {
+    if (!course) return;
+    if (course.is_free) { setOwned(true); return; }
+    let cancelled = false;
+    (supabase.rpc as any)("has_course_access", { _course_id: course.id }).then(({ data }: any) => {
+      if (!cancelled) setOwned(!!data);
+    });
+    return () => { cancelled = true; };
+  }, [course, accessVersion]);
+
+  const isLocked = (item: Resolved) => item.kind === "note" && item.is_free === false && owned === false;
 
   const style = categoryStyle(course?.category_slug);
   const TopicIcon = iconForTopic(course?.title);
@@ -156,6 +183,11 @@ const CourseDetailPage = () => {
 
   const openNote = (item: Resolved, mode: "view" | "download") => {
     if (!item.file_url) { toast({ title: "No file attached to this note." }); return; }
+    if (isLocked(item)) {
+      toast({ title: "This lesson is part of the paid course", description: "Buy the course above to unlock it." });
+      document.getElementById("buy-course")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     // PDFs read in the branded in-app viewer; everything else is a signed
     // URL, and downloads keep the shared one-time email gate.
     if (mode === "view" && isPdfFile(item.file_url)) { navigate(`/notes/view/${item.ref_id}`); return; }
@@ -263,7 +295,9 @@ const CourseDetailPage = () => {
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <Badge variant="success" size="sm">{course.is_free ? "Free" : "Paid"}</Badge>
+                <Badge variant="success" size="sm">
+                  {course.is_free ? "Free" : owned ? "Purchased" : formatRupees(course.price_paise)}
+                </Badge>
                 <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Layers className="h-4 w-4" />
                   {describeShape(course, units ? "unit" : "module")}
@@ -271,6 +305,24 @@ const CourseDetailPage = () => {
               </div>
 
               {course.summary && <p className="mt-4 text-muted-foreground">{course.summary}</p>}
+
+              {!course.is_free && owned === false && (
+                <div id="buy-course" className="mt-6 flex flex-col gap-4 rounded-xl border border-accent/40 bg-accent/5 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-display text-2xl font-bold text-foreground">{formatRupees(course.price_paise)}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      One-time payment · lifetime access to every locked lesson in this course
+                    </p>
+                  </div>
+                  <BuyButton
+                    itemType="course"
+                    itemId={course.id}
+                    pricePaise={course.price_paise}
+                    onPurchased={() => setAccessVersion(v => v + 1)}
+                    className="sm:shrink-0"
+                  />
+                </div>
+              )}
             </header>
 
             {items.length === 0 ? (
@@ -318,7 +370,16 @@ const CourseDetailPage = () => {
                               )}
                             </div>
                             <div className="flex shrink-0 items-center gap-2">
-                              {item.kind === "note" && (
+                              {item.kind === "note" && isLocked(item) && (
+                                <button
+                                  type="button"
+                                  onClick={() => openNote(item, "view")}
+                                  className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
+                                >
+                                  <Lock aria-hidden="true" className="h-3.5 w-3.5" /> Locked
+                                </button>
+                              )}
+                              {item.kind === "note" && !isLocked(item) && (
                                 <>
                                   <button
                                     type="button"

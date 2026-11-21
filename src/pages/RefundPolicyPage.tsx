@@ -63,7 +63,7 @@ const RefundPolicyPage = () => (
           <h2 className="mb-2 text-lg font-bold text-foreground">Duplicate or failed payments</h2>
           <p>
             If you are charged twice, or a payment leaves your account but your seat is not
-            confirmed, write to us with your UPI reference number and we will refund the
+            confirmed, write to us with your payment ID or UPI reference number and we will refund the
             amount in full. Please allow 5–7 working days for the refund to reach your account
             after we approve it.
           </p>
@@ -72,10 +72,12 @@ const RefundPolicyPage = () => (
         <section>
           <h2 className="mb-2 text-lg font-bold text-foreground">Seat confirmation</h2>
           <p>
-            Payments are currently verified manually against our bank records. Submitting a
-            registration reserves your place provisionally; your seat is confirmed only once
-            we have matched the payment, normally within 24 hours. If we cannot match a
-            payment, we will contact you before cancelling the registration.
+            Payments made online through our payment partner, Razorpay (UPI, cards,
+            netbanking or wallets), confirm your seat or unlock your purchase immediately.
+            If you instead pay us directly by UPI and submit the reference number, your place
+            is reserved provisionally and confirmed once we have matched the payment against
+            our bank records, normally within 24 hours. If we cannot match a payment, we will
+            contact you before cancelling the registration.
           </p>
         </section>
 
@@ -95,7 +97,7 @@ const RefundPolicyPage = () => (
             <a href="mailto:nupur@karnhracademy.com" className="font-semibold text-accent-deep hover:underline">
               nupur@karnhracademy.com
             </a>{" "}
-            with your name, the programme and batch, and your UPI reference number. We aim to
+            with your name, what you paid for, and your payment ID or UPI reference number. We aim to
             respond within 2 working days. You can also reach us through the{" "}
             <Link to="/contact" className="font-semibold text-accent-deep hover:underline">contact page</Link>.
           </p>
