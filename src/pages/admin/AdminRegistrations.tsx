@@ -14,10 +14,14 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "pending_verification", label: "Awaiting check" },
   { value: "confirmed", label: "Confirmed" },
   { value: "rejected", label: "Rejected" },
+  // Checkouts that were opened but never paid. Nothing to do with these;
+  // they stop holding a seat after 30 minutes.
+  { value: "pending_payment", label: "Unpaid online" },
   { value: "all", label: "All" },
 ];
 
 const STATUS_CLASS: Record<RegistrationStatus, string> = {
+  pending_payment: "bg-sky-100 text-sky-800",
   pending_verification: "bg-amber-100 text-amber-800",
   confirmed: "bg-emerald-100 text-emerald-800",
   rejected: "bg-red-100 text-red-800",
@@ -229,8 +233,14 @@ const AdminRegistrations = () => {
                   <p className="font-display text-lg font-bold text-foreground">
                     {formatRupees(reg.amount_paise)}
                   </p>
-                  <p className="mt-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">Reference</p>
-                  <code className="select-all text-sm font-semibold text-foreground">{reg.upi_reference}</code>
+                  {reg.payment_method === "razorpay" ? (
+                    <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-sky-700">Paid online · Razorpay</p>
+                  ) : (
+                    <>
+                      <p className="mt-0.5 text-[11px] uppercase tracking-wide text-muted-foreground">Reference</p>
+                      <code className="select-all text-sm font-semibold text-foreground">{reg.upi_reference}</code>
+                    </>
+                  )}
                   <p className="mt-1 text-xs text-muted-foreground">
                     {new Date(reg.created_at).toLocaleString("en-IN")}
                   </p>

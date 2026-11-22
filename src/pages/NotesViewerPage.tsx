@@ -8,9 +8,11 @@ import SEO from "@/components/SEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
 import ContentLoadError from "@/components/ContentLoadError";
-import { getSignedFileUrl } from "@/lib/signedFileUrl";
+import { getSignedFileUrl, isPdfFile } from "@/lib/signedFileUrl";
 import { getDiscipline, getTopicLabel } from "@/lib/disciplines";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Lock } from "lucide-react";
+import BuyButton from "@/components/BuyButton";
+import { formatRupees } from "@/lib/programmes";
 import { useDownloadGate } from "@/hooks/use-download-gate";
 
 // In-app reader for PDF notes — the same branded viewer PYQ papers use
@@ -23,6 +25,9 @@ const NotesViewerPage = () => {
   const { request, GateDialog } = useDownloadGate();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [urlFailed, setUrlFailed] = useState(false);
+  // null while checking. Free notes skip the check entirely.
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [accessVersion, setAccessVersion] = useState(0);
 
   const { data: note, isPending, isError } = useQuery({
     queryKey: ["note", id],
@@ -35,10 +40,33 @@ const NotesViewerPage = () => {
     },
   });
 
+  useEffect(() => {
+    if (!note) return;
+    if (note.is_free !== false) { setHasAccess(true); return; }
+    let cancelled = false;
+    setHasAccess(null);
+    (supabase.rpc as any)("has_note_access", { _note_id: note.id }).then(({ data }: any) => {
+      if (!cancelled) setHasAccess(!!data);
+    });
+    return () => { cancelled = true; };
+  }, [note, accessVersion]);
+
+  // Paid courses that include this note: buying one of those unlocks it too.
+  const { data: viaCourses } = useQuery({
+    queryKey: ["note-courses", id],
+    enabled: !!note && note.is_free === false && hasAccess === false,
+    queryFn: async () => {
+      const { data } = await (supabase.from("course_items" as any) as any)
+        .select("courses(slug, title, price_paise, is_free, is_published)")
+        .eq("kind", "note").eq("ref_id", id!);
+      return ((data ?? []) as any[]).map(r => r.courses).filter((c: any) => c && c.is_published);
+    },
+  });
+
   // Signed URL is short-lived, so it's resolved per visit (not cached) and
   // never rendered as a link — the viewer fetches raw bytes from it.
   useEffect(() => {
-    if (!note?.file_url) return;
+    if (!note?.file_url || !hasAccess || !isPdfFile(note.file_url)) return;
     let cancelled = false;
     getSignedFileUrl(note.file_url, "notes", false).then(url => {
       if (cancelled) return;
@@ -48,7 +76,7 @@ const NotesViewerPage = () => {
       if (error) console.error("view count failed", error);
     });
     return () => { cancelled = true; };
-  }, [note]);
+  }, [note, hasAccess]);
 
   const download = () => {
     if (!note?.file_url) return;
@@ -113,15 +141,62 @@ const NotesViewerPage = () => {
               {subjectShort}{note.topic_slug ? ` · ${getTopicLabel(note.topic_slug)}` : ""}
             </p>
           </div>
-          <button
+          {hasAccess && <button
             onClick={download}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
           >
             <Download className="h-4 w-4" /> Download
-          </button>
+          </button>}
         </div>
 
-        {urlFailed ? (
+        {hasAccess === false ? (
+          <div className="rounded-xl border border-border bg-card px-6 py-14 text-center">
+            <Lock aria-hidden="true" className="mx-auto h-8 w-8 text-accent-deep" />
+            <h2 className="mt-3 font-display text-xl font-bold text-foreground">This is a premium note</h2>
+            {note.price_paise >= 100 ? (
+              <>
+                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                  Buy it once for {formatRupees(note.price_paise)} to read and download it any time.
+                </p>
+                <BuyButton
+                  itemType="note"
+                  itemId={note.id}
+                  pricePaise={note.price_paise}
+                  onPurchased={() => setAccessVersion(v => v + 1)}
+                  className="mt-5"
+                />
+              </>
+            ) : (
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                It's included with the course below.
+              </p>
+            )}
+            {(viaCourses?.length ?? 0) > 0 && (
+              <div className="mx-auto mt-6 max-w-md border-t border-border pt-4 text-sm">
+                <p className="text-muted-foreground">Also unlocked by buying:</p>
+                <ul className="mt-2 space-y-1">
+                  {viaCourses!.map((c: any) => (
+                    <li key={c.slug}>
+                      <Link to={`/courses/${c.slug}`} className="font-semibold text-accent-deep hover:underline">
+                        {c.title}{!c.is_free && ` — ${formatRupees(c.price_paise)}`}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : hasAccess && !isPdfFile(note.file_url) ? (
+          <div className="rounded-xl border border-border bg-card py-16 text-center">
+            <p className="text-sm text-muted-foreground">This file can't be previewed in the browser.</p>
+            <button
+              onClick={download}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground hover:brightness-110"
+            >
+              <Download className="h-4 w-4" /> Download it
+            </button>
+          </div>
+        ) : urlFailed ? (
           <div className="rounded-xl border border-border bg-card py-20 text-center text-sm text-muted-foreground">
             Couldn't open this note right now — please try again in a moment.
           </div>

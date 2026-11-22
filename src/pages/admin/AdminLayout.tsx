@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X, GraduationCap, AlertTriangle, Megaphone, CalendarDays, ClipboardList, Wallet, BarChart3 } from "lucide-react";
+import { BookOpen, FileText, HelpCircle, MessageSquare, Mail, BookMarked, LayoutDashboard, Newspaper, LogOut, Video, Radio, Menu, X, GraduationCap, AlertTriangle, Megaphone, CalendarDays, ClipboardList, Wallet, BarChart3, IndianRupee } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const adminLinks = [
@@ -10,6 +10,7 @@ const adminLinks = [
   // Money first: the registration queue is the one screen that has to be
   // checked every day while payments are verified by hand.
   { label: "Registrations", to: "/admin/registrations", icon: ClipboardList },
+  { label: "Payments", to: "/admin/payments", icon: IndianRupee },
   { label: "Courses", to: "/admin/courses", icon: GraduationCap },
   { label: "Programmes", to: "/admin/programmes", icon: CalendarDays },
   { label: "Payment Settings", to: "/admin/payment-settings", icon: Wallet },

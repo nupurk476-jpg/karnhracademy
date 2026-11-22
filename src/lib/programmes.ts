@@ -4,6 +4,7 @@
 
 export type CohortStatus = "draft" | "open" | "closed" | "completed";
 export type RegistrationStatus =
+  | "pending_payment"
   | "pending_verification"
   | "confirmed"
   | "rejected"
@@ -42,7 +43,9 @@ export interface Registration {
   phone: string;
   college: string | null;
   course: string | null;
-  upi_reference: string;
+  /** NULL for registrations paid online through Razorpay. */
+  upi_reference: string | null;
+  payment_method?: "upi_manual" | "razorpay";
   amount_paise: number;
   status: RegistrationStatus;
   admin_note: string | null;
@@ -104,6 +107,7 @@ export function seatsLeft(cohort: Cohort, taken: number): number | null {
 }
 
 export const REGISTRATION_STATUS_LABEL: Record<RegistrationStatus, string> = {
+  pending_payment: "Started online payment",
   pending_verification: "Awaiting payment check",
   confirmed: "Confirmed",
   rejected: "Rejected",

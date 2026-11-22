@@ -5,6 +5,7 @@ import { iconForTopic } from "@/lib/topicIcons";
 import { describeContents, describeShape, type CourseCard as Course } from "@/lib/courses";
 import { isUnitBasedSubject } from "@/lib/subjectUnits";
 import { Layers } from "lucide-react";
+import { formatRupees } from "@/lib/programmes";
 
 /**
  * One catalog card.
@@ -43,11 +44,9 @@ const CourseCardTile = ({ course }: { course: Course }) => {
         style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
       >
         <TopicIcon className="h-12 w-12 text-white/90 transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
-        {course.is_free && (
-          <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#17181C]">
-            Free
-          </span>
-        )}
+        <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#17181C]">
+          {course.is_free ? "Free" : formatRupees(course.price_paise)}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
